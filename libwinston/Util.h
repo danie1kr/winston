@@ -68,5 +68,24 @@ namespace winston
 	template<typename T> struct is_shared_ptr : std::false_type {};
 	template<typename T> struct is_shared_ptr<std::shared_ptr<T>> : std::true_type {};
 
+	template<typename _First, typename... _Args>
+	std::string build(const _First first, _Args&&... args) {
+		return std::string(first) + build(args);
+	}
+
+	template<typename... _Args>
+	std::string build(const std::string first, _Args&&... args) {
+		return first + build(args);
+	}
+
+	template<typename... _Args>
+	std::string build(const size_t first, _Args&&... args) {
+		return std::to_string(first) + build(args);
+	}
+
+	std::string build() {
+		return std::string("");
+	}
+
 	extern Callback::Shared nop;
 }

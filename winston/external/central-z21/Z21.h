@@ -71,7 +71,7 @@ public:
                        uint32_t functions);                             // See: const in class Z21_Function::BIT_FXX
 
     //void (*onAccessoryInfo)(uint16_t address, uint8_t accessoryState);  // See: const in class Z21_ACCESSORY_STATE_XXX
-    std::function<void(uint16_t address, uint8_t accessoryState)> onAccessoryInfo;
+    //std::function<void(uint16_t address, uint8_t accessoryState)> onAccessoryInfo;
     void (*onLocoMode)     (uint16_t address, uint8_t decoderMode);     // See: const in class Z21_Decoder_Mode
     void (*onAccessoryMode)(uint16_t address, uint8_t decoderMode);     // See: const in class Z21_Decoder_Mode
 

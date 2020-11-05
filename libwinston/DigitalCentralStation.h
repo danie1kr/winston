@@ -26,11 +26,22 @@ namespace winston
 			DigitalCentralStation::Shared station;
 		};
 
-		using TurnoutUpdateCallback = std::function<void(Turnout::Shared turnout, const Turnout::Direction direction)>;
-		
 		struct Callbacks
 		{
+			using TurnoutUpdateCallback = std::function<void(Turnout::Shared turnout, const Turnout::Direction direction)>;
 			TurnoutUpdateCallback turnoutUpdateCallback;
+
+			using SystemInfoCallback = std::function<void(const size_t id, const std::string name, const std::string content)>;
+			SystemInfoCallback systemInfoCallback;
+
+			using TrackPowerStatusCallback = std::function<void(const bool powerOn)>;
+			TrackPowerStatusCallback trackPowerStatusCallback;
+
+			using ProgrammingTrackStatusCallback = std::function<void(const bool programmingOn)>;
+			ProgrammingTrackStatusCallback programmingTrackStatusCallback;
+
+			using ShortCircuitDetectedCallback = std::function<void()>;
+			ShortCircuitDetectedCallback shortCircuitDetectedCallback;
 		};
 
 		DigitalCentralStation(AddressTranslator::Shared& addressTranslator, SignalBox::Shared& signalBox, const Callbacks callbacks);

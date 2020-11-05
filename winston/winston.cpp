@@ -49,6 +49,18 @@ private:
             }
             return true;
         }
+        else if (std::string("turnoutState").compare(msg) == 0)
+        {
+            unsigned int id = 0;
+            JVal_get(value, error, "{d}", "id", &id);
+            if (JErr_isError(error) == false)
+            {
+                auto turnout = std::dynamic_pointer_cast<winston::Turnout>(railway->section(id));
+                this->turnoutSendState(id, turnout->direction());
+                return false;
+            }
+            return true;
+        }
         else if (std::string("getRailway").compare(msg) == 0)
         {
             SendData sd;

@@ -270,7 +270,7 @@
                 container: $railway,
                 layout: {name: 'preset'},
                 style: [
-                    {
+                    /*{
                         selector: 'node.section',
                         style: {
                             'content': 'data(name)'
@@ -281,26 +281,29 @@
                         style: {
                             'target-arrow-shape': 'triangle'
                         }
-                    },
+                    },*/
                     {
                         selector: '.bumper',
                         style: {
                             "width": 20,
-                            "height": 20
+                            "height": 20,
+                            "shape": "rectangle"
                         }
                     },
                     {
                         selector: '.rail',
                         style: {
                             "width": 20,
-                            "height": 20
+                            "height": 20,
+                            "shape": "rectangle"
                         }
                     },
                     {
                         selector: ".turnout",
                         style: {
-                            "width": 40,
-                            "height": 40
+                            "width": 20,
+                            "height": 20,
+                            "shape": "rectangle"
                         }
                     },
                     {
@@ -313,28 +316,34 @@
                     {
                         selector: ".internal",
                         style: {
-                            "line-color": 'black',
-                            "width": 1
+                            "line-color": 'orange',
+                            "width": 3
                         }
                     },
                     {
                         selector: ".trackNode",
                         style: {
-                            "width": 10,
-                            "height": 10
+                            "width": 5,
+                            "height": 5
                         }
                     },
+                    /*{
+                        selector: ".track",
+                        style: {
+                            "curve-style": "taxi",
+                        }  
+                    },*/
                     {
                         selector: ".turnoutConnection",
                         style: {
-                            "width": 10,
-                            "height": 10
+                            "width": 5,
+                            "height": 5
                         }
                     },
                     {
                         selector: ".highlight",
                         style: {
-                            "background-color": "red",
+                            "background-color": "orange",
 
                         }
                     }
@@ -349,7 +358,23 @@
                     verticalDistColor: "green",
                     initPosAlignmentColor: "#0000ff",
                 }
-            });
+            }).nodeHtmlLabel([
+            {
+                query: '.section',
+                valign: "center",
+                halign: "center",
+                valignBox: "center",
+                halignBox: "center",
+                tpl: function(data) {
+                    return '<p>' + data.name + '</p>';
+                }
+            }/*,
+            {
+                query: '.l2',
+                tpl: function(data) {
+                    return '<p class="cy-title__p1">' + data.id + '</p>' + '<p  class="cy-title__p2">' + data.name + '</p>';
+                }
+            }*/]);
         }
 
         function cytoscapePostAdd(cy)
@@ -439,8 +464,10 @@
                 {
                     cy.destroy();
                     cy = cytoscapeCreate();
-                    cy.add(layout);
+                    cy.add(layout.cy);
                     cy = cytoscapePostAdd(cy);
+
+                    cy.viewport({zoom: layout.viewport.zoom, pan: layout.viewport.pan});
                 }
                 else
                 {
@@ -451,16 +478,21 @@
 
         function storeRailwayLayout()
         {
-            send("storeRailwayLayout", JSON.stringify(cy.$().jsons()));
+            let layout = 
+            {
+                viewport: { zoom: cy.zoom(), pan: cy.pan() },
+                cy: cy.$().jsons()
+            }
+            send("storeRailwayLayout", JSON.stringify(layout));
         }
 
         function checkGraphIsomorphism(railway, layout)
         {
-            if(!layout || layout.length === 0)
+            if(!layout || layout.length === 0 || !layout.cy)
                 return false;
 
             let cyLayout = cytoscape();
-            cyLayout.add(layout);
+            cyLayout.add(layout.cy);
             
             let success = true;
             _.each(railway, function(section, i) {
@@ -563,202 +595,6 @@
             cy = cytoscapePostAdd(cy);
 
             send("getRailwayLayout", {});
-            
-            /*
-
-            _.each(data.sections, function(section, i) {
-
-
-                let a = section.a;
-                let b = section.b;
-                let c = section.c;
-
-                let type = 0;
-                if(c)
-                    type = 2;
-                else if(b)
-                    type = 1;
-
-                if(type === 2)
-                {
-                    nodes.push({data: {id: i + "_center", name: i, section: i, direction: 1, relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "sectionNode turnout"});
-                    nodes.push({data: {id: i + "_a", name: i + "_a", section: i, relativePosition: {x: -20, y: 0}}, position: {x: i*100 - 20, y: 0}, classes: "trackNodeConnector"});
-                    nodes.push({data: {id: i + "_b", name: i + "_b", section: i, relativePosition: {x: +20, y: 0}}, position: {x: i*100 + 20, y: 0}, classes: "trackNodeConnector"});
-                    nodes.push({data: {id: i + "_c", name: i + "_c", section: i, relativePosition: {x: +20, y: +20}}, position: {x: i*100 + 20, y: 20}, classes: "trackNodeConnector"});
-
-                    edges.push({data:{id: i + "_center_a", source: i + "_center", target: i + "_a", section: i}, classes: "internal"});
-                    edges.push({data:{id: i + "_center_b", source: i + "_center", target: i + "_b", section: i}, classes: "internal"});
-                    edges.push({data:{id: i + "_center_c", source: i + "_center", target: i + "_c", section: i}, classes: "internal"});
-                }
-                else if(type === 1)
-                {
-                    nodes.push({data: {id: i + "_center", name: i, section: i, relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "sectionNode rail"});
-                    nodes.push({data: {id: i + "_a", name: i + "_a", section: i, relativePosition: {x: -20, y: 0}}, position: {x: i*100 - 20, y: 0}, classes: "trackNodeConnector"});
-                    nodes.push({data: {id: i + "_b", name: i + "_b", section: i, relativePosition: {x: +20, y: 0}}, position: {x: i*100 + 20, y: 0}, classes: "trackNodeConnector"});
-
-                    edges.push({data:{source: i + "_center", target: i + "_a", section: i}, classes: "internal"});
-                    edges.push({data:{source: i + "_center", target: i + "_b", section: i}, classes: "internal"});
-                }
-                else
-                {
-                    nodes.push({data: {id: i + "_center", name: i, section: i, relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "sectionNode bumper"});
-                    nodes.push({data: {id: i + "_a", name: i + "_a", section: i, relativePosition: {x: -20, y: 0}}, position: {x: i*100 - 20, y: 0}, classes: "trackNodeConnector"});
-
-                    edges.push({data:{source: i + "_center", target: i + "_a", section: i}, classes: "internal"});
-                }
-
-                if(a)
-                {
-                    let other = data.sections[a];
-                    if(other.a === i)
-                        edges.push({data:{source: i + "_a", target: a + "_a"}, classes: "track"});
-                    else if(other.b === i)
-                        edges.push({data:{source: i + "_a", target: a + "_b"}, classes: "track"});
-                    else if(other.c === i)
-                        edges.push({data:{source: i + "_a", target: a + "_c"}, classes: "track"});
-
-                    edges.push({data:{source: i + "_center", target: a + "_center"}, classes: "sectionConnector"});
-                }
-                if(b)
-                {
-                    let other = data.sections[b];
-                    if(other.a === i)
-                        edges.push({data:{source: i + "_b", target: b + "_a"}, classes: "track"});
-                    else if(other.b === i)
-                        edges.push({data:{source: i + "_b", target: b + "_b"}, classes: "track"});
-                    else if(other.c === i)
-                        edges.push({data:{source: i + "_b", target: b + "_c"}, classes: "track"});
-                    edges.push({data:{source: i + "_center", target: b + "_center"}, classes: "sectionConnector"});
-                }
-                if(c)
-                {
-                    let other = data.sections[c];
-                    if(other.a === i)
-                        edges.push({data:{source: i + "_c", target: c + "_a"}, classes: "track"});
-                    else if(other.b === i)
-                        edges.push({data:{source: i + "_c", target: c + "_b"}, classes: "track"});
-                    else if(other.c === i)
-                        edges.push({data:{source: i + "_c", target: c + "_c"}, classes: "track"});
-                    edges.push({data:{source: i + "_center", target: c + "_center"}, classes: "sectionConnector"});
-                }
-
-            });
-
-            cy = cytoscape({
-                container: $railway,
-                layout: {name: 'preset'},
-                style: [
-                    {
-                        selector: 'node.sectionNode',
-                        style: {
-                            'content': 'data(name)'
-                        }
-                    },
-                    {
-                        selector: 'edge',
-                        style: {
-                            'target-arrow-shape': 'triangle'
-                        }
-                    },
-                    {
-                        selector: '.bumper',
-                        style: {
-                            "width": 20,
-                            "height": 20
-                        }
-                    },
-                    {
-                        selector: '.rail',
-                        style: {
-                            "width": 20,
-                            "height": 20
-                        }
-                    },
-                    {
-                        selector: ".turnout",
-                        style: {
-                            "width": 40,
-                            "height": 40
-                        }
-                    },
-                    {
-                        selector: ".sectionConnector",
-                        style: {
-                            "line-color": '#F00',
-                            "width": 1
-                        }
-                    },
-                    {
-                        selector: ".internal",
-                        style: {
-                            "line-color": 'black',
-                            "width": 1
-                        }
-                    },
-                    {
-                        selector: ".trackNode",
-                        style: {
-                            "width": 10,
-                            "height": 10
-                        }
-                    },
-                    {
-                        selector: ".trackNodeConnector",
-                        style: {
-                            "width": 10,
-                            "height": 10
-                        }
-                    }
-                ],
-                elements: {
-                    nodes: nodes, 
-                    edges: edges
-                }
-            }).gridGuide({
-                snapToGridOnRelease: true,
-                snapToGridDuringDrag: true,
-                snapToGridCenter: false,
-                guidelinesStyle: {
-                    strokeStyle: "black",
-                    horizontalDistColor: "#ff0000",
-                    verticalDistColor: "green",
-                    initPosAlignmentColor: "#0000ff",
-                }
-            });
-
-            cy.$(".internal").unselectify();
-            cy.$(".sectionConnector").unselectify();
-            cy.$(".trackNodeConnector").unselectify();
-
-            cy.on('click', '.trackNode', function(event) {
-                showContextMenu("menuTrackNode", event);
-            });
-            cy.on('click', '.track', function(event) {
-                showContextMenu("menuTrackEdge", event);
-            });
-            cy.on('click', '.sectionNode', function(event) {
-                showContextMenu("menuSectionNode", event);
-            });
-            cy.on('unselect', '.track, .trackNode, .sectionNode', function() {
-                hideContextMenus();
-            });
-
-            cy.on('position', '.sectionNode', function(event) {
-                let that = event.target;
-                cy.$("node.trackNodeConnector[section=" + that.data("section") + "]").each(function(e) {
-                    e.position({x: that.position().x + e.data("relativePosition").x, y: that.position().y + e.data("relativePosition").y});
-                });
-            });
-
-            cy.on('position', '.trackNodeConnector', function(event) {
-                let that = event.target;
-                let parentPosition = cy.$("node.sectionNode[section=" + that.data("section") + "]").position();
-                that.data("relativePosition", {x: that.position().x - parentPosition.x, y: that.position().y - parentPosition.y});
-            });
-
-            cy.on('click', '.turnout', turnoutToggle);
-            cy.$(".turnout").each(function(turnout) { turnoutUpdate(turnout); });
-            */
         }
 
         function error(data)
@@ -908,6 +744,7 @@
     <script type="text/javascript" src="materialize.min.js"></script>
     <script type="text/javascript" src="cytoscape.min.js"></script>
     <script type="text/javascript" src="cytoscape-grid-guide.js"></script>
+    <script type="text/javascript" src="cytoscape-node-html-label.min.js"></script>
 </body>
 
 </html>

@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>winston</title>
+    <link rel="stylesheet" href="./materialicons.css">
+    <script type="text/javascript" src="lodash.min.js"></script>
+    <script type="text/javascript" src="zepto.min.js"></script>
+
+    <link type="text/css" rel="stylesheet" href="materialize.min.css" media="screen,projection" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="white" />
+    <meta name="description" content="winston model train remote">
+
+    <style>
+        #overlay {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 2;
+            cursor: pointer;
+        }
+
+        #railway {
+            position: absolute;
+            min-height: 100vh;
+            width: calc(100% - 600px);
+            z-index: 3000;
+        }
+
+        .contextMenu {
+            position: absolute;
+            z-index: 5000;
+        }
+
+        #settingsToggle {
+            font-size: larger;
+        }
+
+        #settingsContent {
+            position: fixed;
+            width: 100%;
+            background-color: white;
+            z-index: 10000;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        header, main, footer {
+            padding-left: 300px;
+            padding-right: 300px;
+            width: calc(100% - 300px);
+        }
+
+        main {
+            flex: 1 0 auto;
+        }
+    </style>
+
+
+    <script type="text/template" id="template_turnout">
+    <div class="winston-turnout row" winston-turnout-section="<%= id %>" winston-turnout-direction="<%= direction %>">
+        <div class="id col s1"><%= id %></div><div class="direction col s3"><%= direction %></div>
+
+<div class="col s2"><a class="waves-effect waves-light btn">toggle</a></div>
+        </div>
+    </script>
+
+</head>
+
+<body>
+    <div id="overlay">
+        <div class="row">
+            <div class="div col s8 offset-s2 valign-wrapper">
+                <div class="progress">
+                    <div class="indeterminate">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="menuTrackEdge" class="contextMenu">
+        <button id="splitEdge">split track</button>
+        <button class="cancel">cancel</button>
+    </div>
+
+    <div id="menuTrackNode" class="contextMenu">
+        <button id="deleteTrackNode">delete node</button>
+        <button class="cancel">cancel</button>
+    </div>
+
+    <div id="menuSectionNode" class="contextMenu">
+        <button id="rotateSectionNodeCW">rotate CW</button>
+        <button id="rotateSectionNodeCCW">rotate CCW</button>
+        <button class="cancel">cancel</button>
+    </div>
+
+    <header>
+    <div>
+        winston
+        <label id="settingsToggle">⚙</label>
+        <div id="settingsContent" class="row">
+            <div class="input-field col s2"><input placeholder="IP" id="ip" type="text" class="validate" value="127.0.0.1"><label for="ip">IP</label></div>
+            <div class="switch col s4"><div>Grid <label>hide <input id="grid" type="checkbox"><span class="lever"></span>show</label></div>
+                                       <div>Layout <label>fixed <input id="layout" type="checkbox"><span class="lever"></span>edit</label></div>
+                                       <a id="saveLayout" class="waves-effect waves-light btn-small">Save Layout</a></div>
+        </div>
+        <hr>  
+    </div>
+    <div id="error"></div>
+
+    <ul id="sideLoco" class="sidenav sidenav-fixed">
+    </ul>
+
+    <ul id="sideTurnout" class="sidenav sidenav-fixed">
+        <ul class="collapsible">
+        <li id="turnoutsContainer">
+          <div class="collapsible-header">Turnouts</div>
+          <div class="collapsible-body"></div>
+        </li>
+      </ul>
+    </ul>
+    </header>
+
+
+    <main id="container">
+        <div id="railway"></div>
+
+    </main>
+    <footer class="page-footer">
+        <div class="container">
+            <div id="connection">not connected</div>
+            <div id="message"></div>
+        </div>
+    </footer>
+
+    <script type="text/javascript">
+        let socketOpen = false;
+        let socket = new WebSocket("ws://127.0.0.1");
+
+        let railway, layout, $railway, $saveLayout, cy, uiEditLayout = false, allowLayoutStorage = true;
+
+        const WinstonTypeTurnout = "turnout";
+        const TurnoutState_A_B = 0;
+        const TurnoutState_A_C = 1;
+        const TurnoutState_Changing = 2;
+
+        socket.onmessage = function (event) {
+            parse(JSON.parse(event.data));
+        }
+
+        socket.onopen = function(event) {
+            socketOpen = true;
+            $("#connection").html("connected");
+            $("#overlay").hide();
+        }
+
+        socket.onclose = function(event) {
+            socketOpen = false;
+            $("#connection").html("not connected");
+            $("#overlay").show();
+        }
+
+        function turnoutDirectionLabelFromDirection(direction)
+        {
+            switch(direction)
+            {
+                case 0: return "A-B";
+                case 1: return "A-C";
+                default:
+                return "changing";
+            }
+        }
+
+        function allowLayoutEdit()
+        {
+            return uiEditLayout === true;
+        }
+
+        function allowWinstonSubmit()
+        {
+            return uiEditLayout === false;
+        }
+
+        function winstonGet(type, id)
+        {
+            return $("[winston-type:\"" + type + "\"][winston-id:\"" + id + "\"]");
+        }
+
+        function turnoutGet(id)
+        {
+            return winstonGet(WinstonTypeTurnout, id);
+        }
+
+        function turnoutUpdate(turnout)
+        {
+            let direction = turnout.data("direction");
+            let section = turnout.data("section");
+            switch(direction)
+            {
+                case TurnoutState_A_B:
+                    turnout.neighborhood("[connection=\"b\"]").style("visibility", "visible");
+                    turnout.neighborhood("[connection=\"c\"]").style("visibility", "hidden");
+                    break;
+                case TurnoutState_A_C:
+                    turnout.neighborhood("[connection=\"b\"]").style("visibility", "hidden");
+                    turnout.neighborhood("[connection=\"c\"]").style("visibility", "visible");
+                    break;
+                default:
+                case TurnoutState_Changing:
+                    turnout.neighborhood("[connection=\"b\"]").style("visibility", "hidden");
+                    turnout.neighborhood("[connection=\"c\"]").style("visibility", "hidden");
+                    break;
+            }
+
+            $(".winston-turnout[winston-turnout-section=\"" + section + "\"]>.direction").html(turnoutDirectionLabelFromDirection(direction));
+        }
+
+        function turnoutState(data)
+        {
+            let id = data.id;
+            let direction = data.state;
+
+            let turnout = cy.nodes(".turnout[section=" + id + "]").data("direction", direction);
+            turnoutUpdate(turnout);
+        }
+
+        function turnoutToggle(event)
+        {
+            sendTurnoutToggle(event.target.data("section"), event.target.data("direction"));
+        }
+
+        function sendTurnoutToggle(section, direction)
+        {
+            if(!allowWinstonSubmit())
+                return;
+            if(direction !== TurnoutState_Changing)
+                send("turnoutToggle", {id: parseInt(section)});
+        }
+
+        function hideContextMenus()
+        {
+            $(".contextMenu").hide();
+        }
+        function showContextMenu(menu, event)
+        {
+            if(!allowLayoutEdit())
+                return;
+            hideContextMenus();
+            $("#" + menu)
+                .css("top", event.originalEvent.clientY + 'px')
+                .css("left", (event.originalEvent.clientX + 20) + 'px')
+                .show();
+        }
+
+        function cytoscapeCreate()
+        {
+            return cy = cytoscape({
+                container: $railway,
+                layout: {name: 'preset'},
+                style: [
+                    {
+                        selector: 'node.section',
+                        style: {
+                            'content': 'data(name)'
+                        }
+                    },
+                    {
+                        selector: 'edge',
+                        style: {
+                            'target-arrow-shape': 'triangle'
+                        }
+                    },
+                    {
+                        selector: '.bumper',
+                        style: {
+                            "width": 20,
+                            "height": 20
+                        }
+                    },
+                    {
+                        selector: '.rail',
+                        style: {
+                            "width": 20,
+                            "height": 20
+                        }
+                    },
+                    {
+                        selector: ".turnout",
+                        style: {
+                            "width": 40,
+                            "height": 40
+                        }
+                    },
+                    {
+                        selector: ".sectionConnector",
+                        style: {
+                            "line-color": '#F00',
+                            "width": 1
+                        }
+                    },
+                    {
+                        selector: ".internal",
+                        style: {
+                            "line-color": 'black',
+                            "width": 1
+                        }
+                    },
+                    {
+                        selector: ".trackNode",
+                        style: {
+                            "width": 10,
+                            "height": 10
+                        }
+                    },
+                    {
+                        selector: ".turnoutConnection",
+                        style: {
+                            "width": 10,
+                            "height": 10
+                        }
+                    },
+                    {
+                        selector: ".highlight",
+                        style: {
+                            "background-color": "red",
+
+                        }
+                    }
+                ]
+            }).gridGuide({
+                snapToGridOnRelease: true,
+                snapToGridDuringDrag: true,
+                snapToGridCenter: false,
+                guidelinesStyle: {
+                    strokeStyle: "black",
+                    horizontalDistColor: "#ff0000",
+                    verticalDistColor: "green",
+                    initPosAlignmentColor: "#0000ff",
+                }
+            });
+        }
+
+        function cytoscapePostAdd(cy)
+        {
+            cy.on('click', '.trackNode', function(event) {
+                showContextMenu("menuTrackNode", event);
+            });
+            cy.on('click', '.track', function(event) {
+                showContextMenu("menuTrackEdge", event);
+            });
+            cy.on('click', '.sectionNode', function(event) {
+                showContextMenu("menuSectionNode", event);
+            });
+            cy.on('unselect', '.track, .trackNode, .sectionNode', function() {
+                hideContextMenus();
+            });
+            cy.on('mouseover', '.turnout', function(event) {
+                event.target.neighborhood(".turnoutConnection").addClass("highlight");
+            });
+            cy.on('mouseout', '.turnout', function(event) { 
+                event.target.neighborhood(".turnoutConnection").removeClass("highlight");
+            });
+
+            cy.on('position', '.bumper .rail .trackNode', function() {
+                if(!allowLayoutEdit())
+                    return;
+            });
+
+            cy.on('position', '.turnout', function(event) {
+                if(!allowLayoutEdit())
+                    return;
+                let that = event.target;
+                cy.$("node.turnoutConnection[section=" + that.data("section") + "]").each(function(e) {
+                    e.position({x: that.position().x + e.data("relativePosition").x, y: that.position().y + e.data("relativePosition").y});
+                });
+            });
+
+            cy.on('position', '.turnoutConnection', function(event) {
+                if(!allowLayoutEdit())
+                    return;
+                let that = event.target;
+                let parentPosition = cy.$("node.turnout[section=" + that.data("section") + "]").position();
+                that.data("relativePosition", {x: that.position().x - parentPosition.x, y: that.position().y - parentPosition.y});
+            });
+
+            cy.on('click', '.turnout', turnoutToggle);
+
+            cy.nodes().ungrabify();
+            
+            let $turnoutsContainerBody = $("#turnoutsContainer>div.collapsible-body");
+            $turnoutsContainerBody.empty();
+            cy.$(".turnout").each(function(turnout) {
+            
+                let turnoutTemplate = _.template($("#template_turnout").html());
+                let $turnout = $(turnoutTemplate({id: turnout.data("section"), direction: turnout.data("direction")}));
+                $turnout.on('click', function(event) {
+                    let $target = event.target;
+                    let $closest = $($target.closest(".winston-turnout"));
+                    sendTurnoutToggle($closest.attr("winston-turnout-section"), $closest.attr("winston-turnout-direction")); 
+                });
+                $turnoutsContainerBody.append($turnout);
+                turnoutUpdate(turnout);
+            });
+
+            return cy;
+        }
+
+        let layoutString = "";
+        let layoutStringSizeReceived = 0;
+        function updateRailwayLayout(data)
+        {
+            let offset = data.offset;
+            let fullSize = data.fullSize;
+            let partialLayout = data.layout;
+
+            layoutStringSizeReceived += partialLayout.length;
+
+            if(layoutString.length < fullSize)
+                layoutString = new Array(fullSize + 1).join(" ");
+
+            layoutString = [layoutString.slice(0, offset), partialLayout, layoutString.slice(offset+partialLayout.length)].join('');
+
+            if(layoutStringSizeReceived === fullSize)
+            {
+                layout = JSON.parse(layoutString);
+                if(checkGraphIsomorphism(railway, layout))
+                {
+                    cy.destroy();
+                    cy = cytoscapeCreate();
+                    cy.add(layout);
+                    cy = cytoscapePostAdd(cy);
+                }
+                else
+                {
+                    alert("railway and layout mismatch!");
+                }
+            }
+        }
+
+        function storeRailwayLayout()
+        {
+            send("storeRailwayLayout", JSON.stringify(cy.$().jsons()));
+        }
+
+        function checkGraphIsomorphism(railway, layout)
+        {
+            if(!layout || layout.length === 0)
+                return false;
+
+            let cyLayout = cytoscape();
+            cyLayout.add(layout);
+            
+            let success = true;
+            _.each(railway, function(section, i) {
+
+                let layoutSection = cyLayout.$(".section[name=" + i + "]");
+
+                success &&= layoutSection !== undefined && layoutSection.data("connections").a === section.a &&
+                                                          layoutSection.data("connections").b === section.b &&
+                                                          layoutSection.data("connections").c === section.c;
+
+            });
+
+            return success;
+        }
+
+        function buildRailwayGraph(data)
+        {
+            function classFromType(type)
+            {
+                switch(type)
+                {
+                    case 0: return "bumper";
+                    case 1: return "rail";
+                    case 2: return "turnout";
+                }
+            }
+
+            let nodes = [];
+            let edges = [];
+            railway = data.sections;
+
+            _.each(data.sections, function(section, i) {
+
+                function connect(that, connection, connectionName)
+                {
+                    let other = data.sections[connection];
+
+                    let thatNode = _.find(nodes, function(n) { return n.data.section === that;});
+                    let otherNode = _.find(nodes, function(n) { return n.data.section === connection;});
+
+                    if(thatNode === undefined || otherNode === undefined)
+                        return;
+
+                    let from = that + (thatNode.data.direction !== undefined && connectionName !== "a" ? connectionName : "");
+
+                    function connectToOther(otherConnectionName)
+                    {
+                        if(other[otherConnectionName] === that)
+                        {
+                            let to = connection + (otherNode.data.direction !== undefined && otherConnectionName !== "a" ? otherConnectionName : "");
+                            let id = from + "-" + to;
+                            
+                            edges.push({group: 'edges', data: {id: id, name: id, source: from, target: to}, classes: "track"});
+                        }
+                    }
+
+                    connectToOther("a");
+                    connectToOther("b");
+                    connectToOther("c");
+                }
+
+
+                let a = section.a;
+                let b = section.b;
+                let c = section.c;
+
+                let type = 0;
+                if(c !== undefined)
+                    type = 2;
+                else if(b !== undefined)
+                    type = 1;
+
+                if(type === 2)
+                {
+                    nodes.push({group: 'nodes', data: {id: i, name: i, section: i, connections: {a: a, b: b, c: c}, direction: 1, relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "section turnout"});
+                    nodes.push({group: 'nodes', data: {id: i + "b", name: i + "b", section: i, relativePosition: {x: 20, y: 0}}, position: {x: i*100+20, y: 0}, classes: "turnoutConnection"});
+                    nodes.push({group: 'nodes', data: {id: i + "c", name: i + "c", section: i, relativePosition: {x: 20, y: 20}}, position: {x: i*100+20, y: 20}, classes: "turnoutConnection"});
+                
+                    edges.push({group: 'edges', data: {source: i, target: i+"b", connection: "b"}, classes: "internal"});
+                    edges.push({group: 'edges', data: {source: i, target: i+"c", connection: "c"}, classes: "internal"});
+                }
+                else if(type === 1)
+                {
+                    nodes.push({group: 'nodes', data: {id: i, name: i, section: i, connections: {a: a, b: b, c: c}, relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "section rail"});
+                }
+                else
+                {
+                    nodes.push({group: 'nodes', data: {id: i, name: i, section: i, connections: {a: a, b: b, c: c}, relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "section bumper"});
+                }
+
+                if(a !== undefined) connect(i, a, "a");
+                if(b !== undefined) connect(i, b, "b");
+                if(c !== undefined) connect(i, c, "c");
+            });
+
+            
+            cy = cytoscapeCreate();
+            cy.add(nodes);
+            cy.add(edges);
+            cy = cytoscapePostAdd(cy);
+
+            send("getRailwayLayout", {});
+            
+            /*
+
+            _.each(data.sections, function(section, i) {
+
+
+                let a = section.a;
+                let b = section.b;
+                let c = section.c;
+
+                let type = 0;
+                if(c)
+                    type = 2;
+                else if(b)
+                    type = 1;
+
+                if(type === 2)
+                {
+                    nodes.push({data: {id: i + "_center", name: i, section: i, direction: 1, relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "sectionNode turnout"});
+                    nodes.push({data: {id: i + "_a", name: i + "_a", section: i, relativePosition: {x: -20, y: 0}}, position: {x: i*100 - 20, y: 0}, classes: "trackNodeConnector"});
+                    nodes.push({data: {id: i + "_b", name: i + "_b", section: i, relativePosition: {x: +20, y: 0}}, position: {x: i*100 + 20, y: 0}, classes: "trackNodeConnector"});
+                    nodes.push({data: {id: i + "_c", name: i + "_c", section: i, relativePosition: {x: +20, y: +20}}, position: {x: i*100 + 20, y: 20}, classes: "trackNodeConnector"});
+
+                    edges.push({data:{id: i + "_center_a", source: i + "_center", target: i + "_a", section: i}, classes: "internal"});
+                    edges.push({data:{id: i + "_center_b", source: i + "_center", target: i + "_b", section: i}, classes: "internal"});
+                    edges.push({data:{id: i + "_center_c", source: i + "_center", target: i + "_c", section: i}, classes: "internal"});
+                }
+                else if(type === 1)
+                {
+                    nodes.push({data: {id: i + "_center", name: i, section: i, relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "sectionNode rail"});
+                    nodes.push({data: {id: i + "_a", name: i + "_a", section: i, relativePosition: {x: -20, y: 0}}, position: {x: i*100 - 20, y: 0}, classes: "trackNodeConnector"});
+                    nodes.push({data: {id: i + "_b", name: i + "_b", section: i, relativePosition: {x: +20, y: 0}}, position: {x: i*100 + 20, y: 0}, classes: "trackNodeConnector"});
+
+                    edges.push({data:{source: i + "_center", target: i + "_a", section: i}, classes: "internal"});
+                    edges.push({data:{source: i + "_center", target: i + "_b", section: i}, classes: "internal"});
+                }
+                else
+                {
+                    nodes.push({data: {id: i + "_center", name: i, section: i, relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "sectionNode bumper"});
+                    nodes.push({data: {id: i + "_a", name: i + "_a", section: i, relativePosition: {x: -20, y: 0}}, position: {x: i*100 - 20, y: 0}, classes: "trackNodeConnector"});
+
+                    edges.push({data:{source: i + "_center", target: i + "_a", section: i}, classes: "internal"});
+                }
+
+                if(a)
+                {
+                    let other = data.sections[a];
+                    if(other.a === i)
+                        edges.push({data:{source: i + "_a", target: a + "_a"}, classes: "track"});
+                    else if(other.b === i)
+                        edges.push({data:{source: i + "_a", target: a + "_b"}, classes: "track"});
+                    else if(other.c === i)
+                        edges.push({data:{source: i + "_a", target: a + "_c"}, classes: "track"});
+
+                    edges.push({data:{source: i + "_center", target: a + "_center"}, classes: "sectionConnector"});
+                }
+                if(b)
+                {
+                    let other = data.sections[b];
+                    if(other.a === i)
+                        edges.push({data:{source: i + "_b", target: b + "_a"}, classes: "track"});
+                    else if(other.b === i)
+                        edges.push({data:{source: i + "_b", target: b + "_b"}, classes: "track"});
+                    else if(other.c === i)
+                        edges.push({data:{source: i + "_b", target: b + "_c"}, classes: "track"});
+                    edges.push({data:{source: i + "_center", target: b + "_center"}, classes: "sectionConnector"});
+                }
+                if(c)
+                {
+                    let other = data.sections[c];
+                    if(other.a === i)
+                        edges.push({data:{source: i + "_c", target: c + "_a"}, classes: "track"});
+                    else if(other.b === i)
+                        edges.push({data:{source: i + "_c", target: c + "_b"}, classes: "track"});
+                    else if(other.c === i)
+                        edges.push({data:{source: i + "_c", target: c + "_c"}, classes: "track"});
+                    edges.push({data:{source: i + "_center", target: c + "_center"}, classes: "sectionConnector"});
+                }
+
+            });
+
+            cy = cytoscape({
+                container: $railway,
+                layout: {name: 'preset'},
+                style: [
+                    {
+                        selector: 'node.sectionNode',
+                        style: {
+                            'content': 'data(name)'
+                        }
+                    },
+                    {
+                        selector: 'edge',
+                        style: {
+                            'target-arrow-shape': 'triangle'
+                        }
+                    },
+                    {
+                        selector: '.bumper',
+                        style: {
+                            "width": 20,
+                            "height": 20
+                        }
+                    },
+                    {
+                        selector: '.rail',
+                        style: {
+                            "width": 20,
+                            "height": 20
+                        }
+                    },
+                    {
+                        selector: ".turnout",
+                        style: {
+                            "width": 40,
+                            "height": 40
+                        }
+                    },
+                    {
+                        selector: ".sectionConnector",
+                        style: {
+                            "line-color": '#F00',
+                            "width": 1
+                        }
+                    },
+                    {
+                        selector: ".internal",
+                        style: {
+                            "line-color": 'black',
+                            "width": 1
+                        }
+                    },
+                    {
+                        selector: ".trackNode",
+                        style: {
+                            "width": 10,
+                            "height": 10
+                        }
+                    },
+                    {
+                        selector: ".trackNodeConnector",
+                        style: {
+                            "width": 10,
+                            "height": 10
+                        }
+                    }
+                ],
+                elements: {
+                    nodes: nodes, 
+                    edges: edges
+                }
+            }).gridGuide({
+                snapToGridOnRelease: true,
+                snapToGridDuringDrag: true,
+                snapToGridCenter: false,
+                guidelinesStyle: {
+                    strokeStyle: "black",
+                    horizontalDistColor: "#ff0000",
+                    verticalDistColor: "green",
+                    initPosAlignmentColor: "#0000ff",
+                }
+            });
+
+            cy.$(".internal").unselectify();
+            cy.$(".sectionConnector").unselectify();
+            cy.$(".trackNodeConnector").unselectify();
+
+            cy.on('click', '.trackNode', function(event) {
+                showContextMenu("menuTrackNode", event);
+            });
+            cy.on('click', '.track', function(event) {
+                showContextMenu("menuTrackEdge", event);
+            });
+            cy.on('click', '.sectionNode', function(event) {
+                showContextMenu("menuSectionNode", event);
+            });
+            cy.on('unselect', '.track, .trackNode, .sectionNode', function() {
+                hideContextMenus();
+            });
+
+            cy.on('position', '.sectionNode', function(event) {
+                let that = event.target;
+                cy.$("node.trackNodeConnector[section=" + that.data("section") + "]").each(function(e) {
+                    e.position({x: that.position().x + e.data("relativePosition").x, y: that.position().y + e.data("relativePosition").y});
+                });
+            });
+
+            cy.on('position', '.trackNodeConnector', function(event) {
+                let that = event.target;
+                let parentPosition = cy.$("node.sectionNode[section=" + that.data("section") + "]").position();
+                that.data("relativePosition", {x: that.position().x - parentPosition.x, y: that.position().y - parentPosition.y});
+            });
+
+            cy.on('click', '.turnout', turnoutToggle);
+            cy.$(".turnout").each(function(turnout) { turnoutUpdate(turnout); });
+            */
+        }
+
+        function error(data)
+        {
+            $("#error").append($("<p>").html(data));
+            console.error(data);
+        }
+
+        function message(data)
+        {
+            $("#message").append($("<p>").html(data));
+            console.log(data);
+        }
+
+        function parse(content)
+        {
+            let op = content.op;
+            let data = content.data;
+
+            switch(op)
+            {
+                case "turnoutState": { turnoutState(data); break; }
+                case "railway": { buildRailwayGraph(data); break; }
+                case "layout": { updateRailwayLayout(data); break; }
+                case "storeRailwayLayoutSuccessful": { 
+                    allowLayoutStorage = data;
+                    if(allowLayoutStorage) 
+                        $saveLayout.removeClass("disabled");
+                    message("layout storage successful: " + data); break; }
+                case "error": { error(data); break; }
+                default:
+                {
+                    error("unparsable op:" + op);
+                    break;
+                }
+            }
+        }
+
+        function send(op, data)
+        {
+            if(socketOpen === true)
+                socket.send(JSON.stringify({ op: op, data:data }));
+            else
+                setTimeout(send, 100, op, data);
+        }
+
+        function cySplitEdge(event)
+        {
+            if(!cy || !allowLayoutEdit())
+                return;
+
+            cy.$('edge:selected').each(function(edge)
+            {
+                let nodes = edge.connectedNodes();
+                let id = nodes[0].id() + "|" + nodes[1].id();
+                cy.add([
+                    { group: 'nodes', data: { id: id}, position: {x: (nodes[0].position().x + nodes[1].position().x)/2.0, y: (nodes[0].position().y + nodes[1].position().y)/2.0 }, classes: "trackNode"},
+                    { group: 'edges', data: { id: nodes[0].id() + "-" + id, source: nodes[0].id(), target: id }, classes: "track" },
+                    { group: 'edges', data: { id: id + "-" + nodes[1].id(), source: id, target: nodes[1].id() }, classes: "track" }
+                ]);
+                edge.remove();
+            });
+            hideContextMenus();
+        }
+
+        function cyDeleteTrackNode(event)
+        {
+            if(!cy || !allowLayoutEdit())
+                return;
+
+            cy.$('node.trackNode:selected').each(function(node)
+            {
+                let edges = node.connectedEdges();
+                let neighbors = node.neighborhood("node");
+                let id = neighbors[0].id() + "-" + neighbors[1].id();
+
+                cy.add({group: "edges", data: {id: id, source: neighbors[0].id(), target: neighbors[1].id()}});
+
+                edges.edges();
+                node.remove();
+            });
+            hideContextMenus();
+        }
+
+        $(function() {
+        /*
+            // signal
+            send("turnout_trigger", {id: id});
+
+        */
+            // socket.send(JSON.stringify([msg,data]));
+            // socket.send(JSON.stringify({type: type, room: room, device: device, value: value}));
+
+            $railway = $("#railway");
+            $("#splitEdge").on('click', cySplitEdge);
+            $("#deleteTrackNode").on('click', cyDeleteTrackNode);
+            //$("#rotateSectionNodeCW").on('click', cyRotateNodeCW);
+            //$("#rotateSectionNodeCCW").on('click', cyRotateNodeCCW);
+            $(".cancel").on('click', function(event)
+            {
+                $(".contextMenu").hide();
+                cy.$().unselect();
+            });
+            $("#settingsToggle").on('click', function() { $("#settingsContent").toggle(); });
+            hideContextMenus();
+            $("#settingsContent").hide();
+
+            $saveLayout = $("#saveLayout");
+            $saveLayout.on('click', function() {
+                if(allowLayoutStorage === true)
+                {
+                    allowLayoutStorage = false;
+                    $saveLayout.addClass("disabled");
+                    storeRailwayLayout(); 
+                }
+            });
+            $saveLayout.addClass("disabled");
+
+            $("#layout").on('change', function(event) { 
+                uiEditLayout = $(event.target).prop("checked");
+                if(!allowLayoutEdit())
+                {
+                    cy.nodes().ungrabify();
+                    $saveLayout.addClass("disabled");
+                }
+                else
+                {
+                    cy.nodes().grabify();
+                    if(allowLayoutStorage === true)
+                        $saveLayout.removeClass("disabled");
+                }
+            });
+
+            //$('#sideLoco').sideNav({edge: "left", isFixed: true});
+
+            M.Sidenav.init($('#sideLoco').get(0), {edge: "right"}).open();
+            M.Sidenav.init($('#sideTurnout').get(0), {edge: "left"}).open();
+
+            M.AutoInit();
+
+            //$("#sideLoco").get(0).sidenav();
+
+            send("getRailway", {});
+        });
+
+    </script>
+    <script type="text/javascript" src="materialize.min.js"></script>
+    <script type="text/javascript" src="cytoscape.min.js"></script>
+    <script type="text/javascript" src="cytoscape-grid-guide.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{6d8fde0e-4a98-4052-8d39-9348e0e1ed3a}</ProjectGuid>
+    <RootNamespace>winstonsimulator</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>winston</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v142</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalIncludeDirectories>external;external\network-minnow;external\network-minnow\arch\Windows;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalIncludeDirectories>external;external\network-minnow;external\network-minnow\arch\Windows;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="external\central-z21\Z21.cpp" />
+    <ClCompile Include="external\central-z21\Z21Packet.cpp" />
+    <ClCompile Include="external\network-minnow\AllocatorIntf.c" />
+    <ClCompile Include="external\network-minnow\BaAtoi.c" />
+    <ClCompile Include="external\network-minnow\BufPrint.c" />
+    <ClCompile Include="external\network-minnow\JEncoder.c" />
+    <ClCompile Include="external\network-minnow\JParser.c" />
+    <ClCompile Include="external\network-minnow\JVal.c" />
+    <ClCompile Include="external\network-minnow\MSLib.c" />
+    <ClCompile Include="external\network-minnow\selib.c" />
+    <ClCompile Include="railways.cpp" />
+    <ClCompile Include="winston-minnow.cpp" />
+    <ClCompile Include="winston-hal-stm32.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="winston-hal-x64.cpp" />
+    <ClCompile Include="winston.cpp" />
+    <ClCompile Include="tasks.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\libwinston\libwinston.vcxproj">
+      <Project>{e2afe313-843b-4ee1-b7ac-988d2779b178}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="external\central-z21\Z21.h" />
+    <ClInclude Include="external\central-z21\Z21Const.h" />
+    <ClInclude Include="external\central-z21\Z21Packet.h" />
+    <ClInclude Include="external\network-minnow\AllocatorIntf.h" />
+    <ClInclude Include="external\network-minnow\arch\Windows\selibplat.h" />
+    <ClInclude Include="external\network-minnow\BaAtoi.h" />
+    <ClInclude Include="external\network-minnow\BufPrint.h" />
+    <ClInclude Include="external\network-minnow\JEncoder.h" />
+    <ClInclude Include="external\network-minnow\JParser.h" />
+    <ClInclude Include="external\network-minnow\JVal.h" />
+    <ClInclude Include="external\network-minnow\MSLib.h" />
+    <ClInclude Include="external\network-minnow\selib.h" />
+    <ClInclude Include="external\network-minnow\TargConfig.h" />
+    <ClInclude Include="mio.hpp" />
+    <ClInclude Include="railways.h" />
+    <ClInclude Include="winston-minnow.h" />
+    <ClInclude Include="winston.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="external\central-z21\readme.md" />
+    <None Include="external\network-minnow\readme.md" />
+    <None Include="resources\winston.html" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,15 @@
+#pragma once
+
+#include "WinstonTypes.h"
+#include "DigitalCentralStation.h"
+#include "Event.h"
+#include "Events.h"
+#include "HAL.h"
+#include "ModelRailwaySystem.h"
+#include "Rail.h"
+#include "Railway.h"
+#include "Signal.h"
+#include "SignalBox.h"
+#include "Task.h"
+#include "Tasks.h"
+#include "Util.h"

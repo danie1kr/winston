@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="external">
+      <UniqueIdentifier>{8d43d962-bf6c-42b8-a9de-01c4d58f95e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\ethernet-minnow">
+      <UniqueIdentifier>{ec23a981-e91a-46f7-baa8-3493c0a1a39f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\central-z21">
+      <UniqueIdentifier>{75f486df-1bf9-4e4e-9fc3-954dc94be17e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\ethernet-minnow\arch">
+      <UniqueIdentifier>{31add721-6a8a-46ba-bdf4-b48d850433c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external\ethernet-minnow\arch\windows">
+      <UniqueIdentifier>{66faa1aa-4676-4d9a-ba01-75a8dbed56fb}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="winston-hal-stm32.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="winston-hal-x64.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="winston-minnow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="external\network-minnow\AllocatorIntf.c">
+      <Filter>external\ethernet-minnow</Filter>
+    </ClCompile>
+    <ClCompile Include="external\network-minnow\BaAtoi.c">
+      <Filter>external\ethernet-minnow</Filter>
+    </ClCompile>
+    <ClCompile Include="external\network-minnow\BufPrint.c">
+      <Filter>external\ethernet-minnow</Filter>
+    </ClCompile>
+    <ClCompile Include="external\network-minnow\JEncoder.c">
+      <Filter>external\ethernet-minnow</Filter>
+    </ClCompile>
+    <ClCompile Include="external\network-minnow\JParser.c">
+      <Filter>external\ethernet-minnow</Filter>
+    </ClCompile>
+    <ClCompile Include="external\network-minnow\JVal.c">
+      <Filter>external\ethernet-minnow</Filter>
+    </ClCompile>
+    <ClCompile Include="external\network-minnow\MSLib.c">
+      <Filter>external\ethernet-minnow</Filter>
+    </ClCompile>
+    <ClCompile Include="external\network-minnow\selib.c">
+      <Filter>external\ethernet-minnow</Filter>
+    </ClCompile>
+    <ClCompile Include="external\central-z21\Z21Packet.cpp">
+      <Filter>external\central-z21</Filter>
+    </ClCompile>
+    <ClCompile Include="external\central-z21\Z21.cpp">
+      <Filter>external\central-z21</Filter>
+    </ClCompile>
+    <ClCompile Include="winston.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tasks.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="railways.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="winston-minnow.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="external\network-minnow\AllocatorIntf.h">
+      <Filter>external\ethernet-minnow</Filter>
+    </ClInclude>
+    <ClInclude Include="external\network-minnow\BaAtoi.h">
+      <Filter>external\ethernet-minnow</Filter>
+    </ClInclude>
+    <ClInclude Include="external\network-minnow\BufPrint.h">
+      <Filter>external\ethernet-minnow</Filter>
+    </ClInclude>
+    <ClInclude Include="external\network-minnow\JEncoder.h">
+      <Filter>external\ethernet-minnow</Filter>
+    </ClInclude>
+    <ClInclude Include="external\network-minnow\JParser.h">
+      <Filter>external\ethernet-minnow</Filter>
+    </ClInclude>
+    <ClInclude Include="external\network-minnow\JVal.h">
+      <Filter>external\ethernet-minnow</Filter>
+    </ClInclude>
+    <ClInclude Include="external\network-minnow\MSLib.h">
+      <Filter>external\ethernet-minnow</Filter>
+    </ClInclude>
+    <ClInclude Include="external\network-minnow\selib.h">
+      <Filter>external\ethernet-minnow</Filter>
+    </ClInclude>
+    <ClInclude Include="external\network-minnow\TargConfig.h">
+      <Filter>external\ethernet-minnow</Filter>
+    </ClInclude>
+    <ClInclude Include="external\network-minnow\arch\Windows\selibplat.h">
+      <Filter>external\ethernet-minnow\arch\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="external\central-z21\Z21Const.h">
+      <Filter>external\central-z21</Filter>
+    </ClInclude>
+    <ClInclude Include="external\central-z21\Z21Packet.h">
+      <Filter>external\central-z21</Filter>
+    </ClInclude>
+    <ClInclude Include="external\central-z21\Z21.h">
+      <Filter>external\central-z21</Filter>
+    </ClInclude>
+    <ClInclude Include="winston.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mio.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="railways.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="resources\winston.html">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="external\central-z21\readme.md">
+      <Filter>external\central-z21</Filter>
+    </None>
+    <None Include="external\network-minnow\readme.md">
+      <Filter>external\ethernet-minnow</Filter>
+    </None>
+  </ItemGroup>
+</Project>

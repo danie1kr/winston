@@ -23,7 +23,8 @@
             right: 0;
             bottom: 0;
             background-color: rgba(0,0,0,0.5);
-            z-index: 2;
+            padding-top: 30%;
+            z-index: 500000;
             cursor: pointer;
         }
 
@@ -102,6 +103,11 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="div col s8 offset-s5 valign-wrapper">
+                <a class="waves-effect waves-light btn" id="reconnect">reconnect</a>
+            </div>
+        </div>
     </div>
 
     <div id="menuTrackEdge" class="contextMenu">
@@ -164,8 +170,22 @@
     </footer>
 -->
     <script type="text/javascript">
-        let socketOpen = false;
-        let socket = new WebSocket("ws://127.0.0.1");
+        const SocketClosed = 0;
+        const SocketConnecting = 1;
+        const SocketOpen = 2;
+
+        let socketState = SocketClosed;
+        let socket = null;
+
+        const SocketReconnectTimeout = 10*1000;
+
+        function connect()
+        {
+            socketState = SocketConnecting;
+            socket = new WebSocket("ws://127.0.0.1");
+        }
+
+        connect();
 
         let railway, layout, $railway, $saveLayout, cy, uiEditLayout = false, allowLayoutStorage = true;
 
@@ -179,13 +199,17 @@
         }
 
         socket.onopen = function(event) {
-            socketOpen = true;
+            socketState = SocketOpen;
             $("#connection").html("connected");
             $("#overlay").hide();
         }
 
         socket.onclose = function(event) {
-            socketOpen = false;
+
+            if(socketState === SocketConnecting)
+                _.delay(connect, SocketReconnectTimeout);
+
+            socketState = SocketClosed;
             $("#connection").html("not connected");
             $("#overlay").show();
         }
@@ -660,7 +684,7 @@
 
         function send(op, data)
         {
-            if(socketOpen === true)
+            if(socketState === SocketOpen)
                 socket.send(JSON.stringify({ op: op, data:data }));
             else
                 setTimeout(send, 100, op, data);
@@ -752,6 +776,8 @@
                         $saveLayout.removeClass("disabled");
                 }
             });
+
+            $("#reconnect").on('click', function() { connect(); });
 
             //$('#sideLoco').sideNav({edge: "left", isFixed: true});
 

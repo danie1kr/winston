@@ -67,25 +67,50 @@ namespace winston
 
 	template<typename T> struct is_shared_ptr : std::false_type {};
 	template<typename T> struct is_shared_ptr<std::shared_ptr<T>> : std::true_type {};
+	
+	std::string build(const std::string first);
+	std::string build(const unsigned int first);
+	std::string build(const unsigned char first);
+
+	/*
+	template<typename... _Args>
+	std::string build(_Args&&... args) {
+		return std::string(first) + ((std::string)build(std::forward<_Args>(args)), ...);
+	}
 
 	template<typename _First, typename... _Args>
 	std::string build(const _First first, _Args&&... args) {
-		return std::string(first) + build(args);
+		return std::string(first) + ((std::string)build(std::forward<_Args>(args)), ...);
+	}
+
+#define build_type(__type, __fn) template<typename... _Args> \
+	std::string build(const __type first, _Args&&... args) { \
+		return __fn(first) + ((std::string)build(std::forward<_Args>(args)), ...); \
 	}
 
 	template<typename... _Args>
 	std::string build(const std::string first, _Args&&... args) {
-		return first + build(args);
+		return first + ((std::string)build(std::forward<_Args>(args)), ...);
+	}
+	
+	build_type(size_t, std::to_string)
+
+	template<typename... _Args>
+	std::string build(const unsigned int first, _Args&&... args) {
+		return std::to_string(first) + build<_Args...>(args);
 	}
 
 	template<typename... _Args>
-	std::string build(const size_t first, _Args&&... args) {
-		return std::to_string(first) + build(args);
+	std::string build(const unsigned char first, _Args&&... args) {
+		return std::to_string((const unsigned int)first) + ((std::string)build(std::forward<_Args>(args)), ...);
+	}*/
+	
+	template <typename _First, typename... _Args>
+		std::string build(const _First first, const _Args&&... args)
+	{
+		return build(first) + build(args...);
 	}
 
-	std::string build() {
-		return std::string("");
-	}
 
 	extern Callback::Shared nop;
 }

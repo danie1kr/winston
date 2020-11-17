@@ -8,7 +8,8 @@
 
 #include "mio.hpp"
 
-static const auto winstonStoragePath = "winston.storage";
+static const std::string constWinstonStoragePath = "winston.storage";
+static std::string winstonStoragePath = constWinstonStoragePath;
 static const auto winstonStorageSize = 32 * 1024;
 mio::mmap_sink winstonStorage;
 
@@ -16,6 +17,11 @@ int handle_error(const std::error_code& error)
 {
     winston::error(error.message());
     return error.value();
+}
+
+void setStoragePath(const std::string prefix)
+{
+    winstonStoragePath = std::string(prefix).append(".").append(constWinstonStoragePath);
 }
 
 void ensureStorageFile()
@@ -44,6 +50,11 @@ namespace winston::hal
     void text(const std::string& error)
     {
         std::cout << error << std::endl;
+    }
+
+    void delay(const unsigned int ms)
+    {
+        Sleep(ms);
     }
     
     unsigned long now()
@@ -76,6 +87,11 @@ namespace winston::hal
             handle_error(error);
             return false;
         }
+        return true;
+    }
+
+    bool send(const std::string& ip, const unsigned short& port, std::vector<unsigned char>& data)
+    {
         return true;
     }
 }

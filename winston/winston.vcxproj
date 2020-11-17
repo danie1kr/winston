@@ -132,6 +132,7 @@
   <ItemGroup>
     <None Include="external\central-z21\readme.md" />
     <None Include="external\network-minnow\readme.md" />
+    <None Include="resources\package.json" />
     <None Include="resources\winston.html" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

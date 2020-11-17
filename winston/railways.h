@@ -29,7 +29,7 @@ public:
         return winston::Task::State::Finished;
     };
 
-    const std::string name();
+    static const std::string name();
 
     using winston::Shared_Ptr<MiniRailway>::Shared;
     using winston::Shared_Ptr<MiniRailway>::make;
@@ -68,7 +68,7 @@ public:
     RailwayWithSiding();
     virtual ~RailwayWithSiding() = default;
 
-    const std::string name();
+    static const std::string name();
 
     using winston::Shared_Ptr<RailwayWithSiding>::Shared;
     using winston::Shared_Ptr<RailwayWithSiding>::make;
@@ -82,6 +82,7 @@ public:
     public:
         AddressTranslator(winston::Shared_Ptr<RailwayWithSiding>::Shared railway);
         virtual winston::Turnout::Shared turnout(const unsigned int address);
+        virtual const unsigned int address(winston::Section::Shared section);
 
         using Shared_Ptr<AddressTranslator>::Shared;
         using Shared_Ptr<AddressTranslator>::make;
@@ -133,10 +134,81 @@ public:
         return winston::Task::State::Finished;
     };
 
-    const std::string name();
+    static const std::string name();
 
     using winston::Shared_Ptr<TimeSaverRailway>::Shared;
     using winston::Shared_Ptr<TimeSaverRailway>::make;
+private:
+    winston::Section::Shared define(const Sections section);
+    void connect(std::array < winston::Section::Shared, sectionsCount()>& sections);
+};
+
+enum class Y2020RailwaySections : unsigned int
+{
+    Turnout1,
+    Turnout2,
+    Turnout3,
+    Turnout4,
+    Turnout5,
+    Turnout6,
+    Turnout7,
+    Turnout8,
+    Turnout9,
+    A,
+    B,
+    C,
+    D,
+    E,
+    F,
+    G
+};
+
+class Y2020Railway : public winston::RailwayWithRails<Y2020RailwaySections>, winston::Shared_Ptr<Y2020Railway>
+{
+    /*
+      //==============Turnout5==================\\
+     //                 //                       \\
+     ||             Turnout6====C====|           ||
+     ||               //                         ||
+     ||  |====D====Turnout7                      ||
+     ||              //           /=======F====| ||
+     || |====E====Turnout8====Turnout9====G====| ||
+     ||                                          ||
+     ||                       --                 ||
+     ||                      B                   ||
+     \\                     //                   //
+      \\====Turnout1====Turnout3====Turnout4====//
+                \\                     //
+    |====A====Turnout2==================
+    */
+
+public:
+    Y2020Railway();
+    virtual ~Y2020Railway() = default;
+
+    std::function<winston::Task::State(Sections id, winston::Turnout::Direction direction)> turnoutCallback = [](Sections id, winston::Turnout::Direction aspect) {
+        return winston::Task::State::Finished;
+    };
+
+    static const std::string name();
+
+    using winston::Shared_Ptr<Y2020Railway>::Shared;
+    using winston::Shared_Ptr<Y2020Railway>::make;
+
+public:
+    class AddressTranslator : public winston::DigitalCentralStation::AddressTranslator, winston::Shared_Ptr<AddressTranslator>
+    {
+    public:
+        AddressTranslator(winston::Shared_Ptr<Y2020Railway>::Shared railway);
+        virtual winston::Turnout::Shared turnout(const unsigned int address);
+        virtual const unsigned int address(winston::Section::Shared section);
+
+        using Shared_Ptr<AddressTranslator>::Shared;
+        using Shared_Ptr<AddressTranslator>::make;
+
+    private:
+        winston::Shared_Ptr<Y2020Railway>::Shared railway;
+    };
 private:
     winston::Section::Shared define(const Sections section);
     void connect(std::array < winston::Section::Shared, sectionsCount()>& sections);

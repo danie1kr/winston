@@ -53,7 +53,7 @@ namespace winston
 		virtual winston::Section::Shared define(const Sections section) = 0;
 		virtual void connect(std::array < winston::Section::Shared, sectionsCount()>& sections) = 0;
 
-		virtual const std::string name() = 0;
+		//virtual const std::string name() = 0;
 		
 		template<typename _Section, typename ..._args>
 		Section::Shared& add(Sections section, _args && ...args) {
@@ -70,7 +70,7 @@ namespace winston
 
 		inline Sections sectionEnum(size_t index)
 		{
-			return magic_enum::enum_cast<Sections>(index).value();
+			return magic_enum::enum_cast<Sections>((unsigned int)index).value();
 		}
 
 		inline unsigned int sectionIndex(Sections section)

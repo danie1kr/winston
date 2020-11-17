@@ -13,13 +13,31 @@
 #include "Z21Const.h"
 
 #include "../../libwinston/Winston.h"
+#include "../../libwinston/HAL.h"
 
 #include <memory>
 
-Z21::Z21(winston::DigitalCentralStation::AddressTranslator::Shared& addressTranslator, winston::SignalBox::Shared& signalBox, winston::DigitalCentralStation::Callbacks callbacks)
-    : winston::DigitalCentralStation(addressTranslator, signalBox, callbacks)
+Z21::Z21(const std::string ip, const unsigned short port, winston::DigitalCentralStation::AddressTranslator::Shared& addressTranslator, winston::SignalBox::Shared& signalBox, winston::DigitalCentralStation::Callbacks callbacks)
+    : ip(ip), port(port), winston::DigitalCentralStation(addressTranslator, signalBox, callbacks)
 {
 
+}
+
+void Z21::connect()
+{
+    this->send(this->logoff());
+    winston::hal::delay(100);
+    this->send(this->getStatus());
+    this->send(this->getSerialNumber());
+    this->send(this->getHardwareInfo());
+    this->send(this->getFirmwareVersion());
+    this->send(this->getVersion());
+    this->send(this->setBroadcastFlags(Z21_Broadcast::STATUS_LOCO_TURNOUT));
+}
+
+bool Z21::send(Z21Packet& packet)
+{
+    return this->callbacks.sendMessageCallback(this->ip, this->port, packet.data);
 }
 
 Z21Packet& Z21::getSerialNumber() {
@@ -369,6 +387,12 @@ void Z21::processPacket(uint8_t* data) {
         default:
             break;
     }
+}
+
+void Z21::requestTurnoutInfo(winston::Turnout::Shared turnout)
+{
+    const unsigned int address = this->addressTranslator->address(turnout);
+    this->send(this->getAccessoryInfo((const unsigned short)address));
 }
 
 void Z21::processXPacket(uint8_t* data) {

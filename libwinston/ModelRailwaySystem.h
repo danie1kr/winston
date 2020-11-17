@@ -19,13 +19,24 @@ namespace winston
 			this->systemSetup();
 
 			this->railway->init();
+			this->digitalCentralStation->connect();
+
+			this->systemSetupComplete();
 		};
+
+		static const std::string name()
+		{
+			return _Railway::element_type::name();
+		}
+
 		void loop() {
 			this->systemLoop();
 		};
+		using Railway = _Railway;
 
 	protected:
 		virtual void systemSetup() = 0;
+		virtual void systemSetupComplete() = 0;
 		virtual void systemLoop() = 0;
 
 		// the railway

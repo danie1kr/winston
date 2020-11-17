@@ -28,7 +28,8 @@ namespace winstontests
 
             winston::Section::Shared onto, onto2;
             winston::NullMutex nullMutex;
-            winston::SignalBox::Shared& signalBox = std::make_shared<winston::SignalBox>(std::dynamic_pointer_cast<winston::Railway>(testRailway), nullMutex);
+            auto tr = std::dynamic_pointer_cast<winston::Railway>(testRailway);
+            auto signalBox = winston::SignalBox::make(tr, nullMutex);
 
             auto direction = winston::Turnout::Direction::A_C;
             t1->finalizeChangeTo(direction);
@@ -52,7 +53,8 @@ namespace winstontests
 
             winston::Section::Shared onto, onto2;
             winston::NullMutex nullMutex;
-            winston::SignalBox::Shared& signalBox = std::make_shared<winston::SignalBox>(std::dynamic_pointer_cast<winston::Railway>(testRailway), nullMutex);
+            auto tr = std::dynamic_pointer_cast<winston::Railway>(testRailway);
+            auto signalBox = winston::SignalBox::make(tr, nullMutex);
 
             signalBox->notify(winston::EventTurnoutStartToggle::make(cb, t1));
             signalBox->notify(winston::EventTurnoutStartToggle::make(cb, t2));

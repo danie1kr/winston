@@ -19,7 +19,10 @@ public:
 
 public:
     uint16_t length;
-    uint8_t  data[Z21Packet::MAX_PACKET_SIZE];
+    //uint8_t  data[Z21Packet::MAX_PACKET_SIZE];
+    std::vector<unsigned char> data;
+
+    Z21Packet();
 
     void setHeader(uint16_t length, uint16_t header);
     void setXPacket(uint8_t xHeader);

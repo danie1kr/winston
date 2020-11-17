@@ -9,7 +9,11 @@
 #include "railways.h"
 #include "external/central-z21/Z21.h"
 
-class MRS : public winston::ModelRailwaySystem<RailwayWithSiding::Shared, RailwayWithSiding::AddressTranslator::Shared, Z21::Shared>
+//#define RAILWAY_CLASS RailwayWithSiding
+//#define RAILWAY_CLASS TimeSaverRailway
+#define RAILWAY_CLASS Y2020Railway
+
+class MRS : public winston::ModelRailwaySystem<RAILWAY_CLASS::Shared, RAILWAY_CLASS::AddressTranslator::Shared, Z21::Shared>
 {
 private:
 
@@ -135,7 +139,7 @@ private:
                 (winston::hal::storageRead(address + 3) << 24);
             address = 4;
 
-            const size_t sizePerMessage = size_t(0.8f * WinstonMinnowBufferSize);
+            const size_t sizePerMessage = size_t(0.7f * WinstonMinnowBufferSize);
             size_t remaining = length;
             size_t offset = 0;
 
@@ -199,6 +203,15 @@ private:
         return 1;
     }
 
+    void initNetwork()
+    {
+        // z21
+        int ctx = 0;
+        SOCKET_constructor(&this->z21Socket, ctx);
+
+        // webSocket
+    }
+
     winston::DigitalCentralStation::Callbacks z21Callbacks()
     {
         winston::DigitalCentralStation::Callbacks callbacks;
@@ -210,14 +223,21 @@ private:
             turnoutSendState(id, direction);
         };
 
+        callbacks.sendMessageCallback = [=](const std::string& ip, const unsigned short& port, std::vector<unsigned char>& data) -> bool {
+            auto sz = data.size() * sizeof(std::vector<unsigned char>::value_type);
+            return se_send(&this->z21Socket, data.data(), (unsigned int)sz) == sz;
+        };
+
         return callbacks;
     }
 
     // setup our model railway system
     void systemSetup() { 
+        this->initNetwork();
+
         // the user defined railway and its address translator
-        this->railway = RailwayWithSiding::make();
-        this->addressTranslator = RailwayWithSiding::AddressTranslator::make(railway);
+        this->railway = RAILWAY_CLASS::make();
+        this->addressTranslator = RAILWAY_CLASS::AddressTranslator::make(railway);
 
         // the internal signal box
         winston::Railway::Shared rw = std::dynamic_pointer_cast<winston::Railway>(railway);
@@ -225,12 +245,26 @@ private:
 
         // the system specific digital central station
         auto at = std::dynamic_pointer_cast<winston::DigitalCentralStation::AddressTranslator>(addressTranslator);
-        this->digitalCentralStation = Z21::make(at, this->signalBox, z21Callbacks());
+        this->digitalCentralStation = Z21::make(z21IP, z21Port, at, this->signalBox, z21Callbacks());
 
         // a debug injector
-        this->stationDebugInjector = winston::DigitalCentralStation::DebugInjector::make(this->digitalCentralStation);
+        auto dcs = std::dynamic_pointer_cast<winston::DigitalCentralStation>(this->digitalCentralStation);
+        this->stationDebugInjector = winston::DigitalCentralStation::DebugInjector::make(dcs);
     };
-    
+
+    void systemSetupComplete()
+    {
+        for (size_t i = 0; i < this->railway->sectionsCount(); ++i)
+        {
+            auto section = this->railway->section(magic_enum::enum_value<RAILWAY_CLASS::Sections>(i));
+            if (section->type() == winston::Section::Type::Turnout)
+            {
+                auto turnout = std::dynamic_pointer_cast<winston::Turnout>(section);
+                this->digitalCentralStation->requestTurnoutInfo(turnout);
+            }
+        }
+    }
+
     // accept new requests and loop over what the signal box has to do
     void systemLoop() { 
     
@@ -257,11 +291,22 @@ private:
     ConnData* minnowCD = nullptr;
     RecData* minnowRD = nullptr;
     MS* minnowServer = nullptr;
+
+    SOCKET z21Socket;
+
+    const std::string z21IP = { "192.168.0.100" };
+    const unsigned short z21Port = 5000;
 };
 
 int main()
 {
     winston::hal::text("Hello from Winston!");
+
+    //using Modelleisenbahn = MRS<RailwayWithSiding>;
+    //using Modelleisenbahn = MRS<TimeSaverRailway
+    //using Modelleisenbahn = MRS<Y2020Railway>;
+
+    setStoragePath(MRS::name());
 
     // setup
     MRS mrs;

@@ -22,11 +22,21 @@ using boolean = bool;
 #include "Z21Const.h"
 #include "Z21Packet.h"
 
-class Z21 : public winston::DigitalCentralStation {
+class Z21 : public winston::DigitalCentralStation, winston::Shared_Ptr<Z21> {
 public:
     Z21() = delete;
-    Z21(winston::DigitalCentralStation::AddressTranslator::Shared& addressTranslator, winston::SignalBox::Shared& signalBox, winston::DigitalCentralStation::Callbacks callbacks);
+    Z21(const std::string ip, const unsigned short port, winston::DigitalCentralStation::AddressTranslator::Shared& addressTranslator, winston::SignalBox::Shared& signalBox, winston::DigitalCentralStation::Callbacks callbacks);
     void processPacket(uint8_t *packet);
+
+    void connect();
+
+    void requestTurnoutInfo(winston::Turnout::Shared turnout);
+
+    using winston::Shared_Ptr<Z21>::Shared;
+    using winston::Shared_Ptr<Z21>::make;
+
+private:
+    bool send(Z21Packet &packet);
 
 protected:
     void processXPacket(uint8_t *packet);
@@ -167,6 +177,9 @@ public:
 //Access to packet created
     Z21Packet packet;
 
+private:
+    std::string ip;
+    unsigned short port;
 };
 
 //extern Z21Translator Z21;

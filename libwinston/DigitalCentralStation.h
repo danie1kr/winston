@@ -15,6 +15,7 @@ namespace winston
 		public:
 			AddressTranslator();
 			virtual Turnout::Shared turnout(const unsigned int address) = 0;
+			virtual const unsigned int address(winston::Section::Shared section) = 0;
 		};
 
 		class DebugInjector : public Shared_Ptr<DebugInjector>
@@ -42,11 +43,17 @@ namespace winston
 
 			using ShortCircuitDetectedCallback = std::function<void()>;
 			ShortCircuitDetectedCallback shortCircuitDetectedCallback;
+
+			using SendMessageCallback = std::function<bool(const std::string& ip, const unsigned short& port, std::vector<unsigned char>& data)>;
+			SendMessageCallback sendMessageCallback;
 		};
 
 		DigitalCentralStation(AddressTranslator::Shared& addressTranslator, SignalBox::Shared& signalBox, const Callbacks callbacks);
 		virtual ~DigitalCentralStation() = default;
 
+		virtual void connect() = 0;
+
+		virtual void requestTurnoutInfo(Turnout::Shared turnout) = 0;
 		void turnoutUpdate(Turnout::Shared turnout, const Turnout::Direction direction);
 
 		//void setTurnoutUpdateCallback(TurnoutUpdateCallback callback);

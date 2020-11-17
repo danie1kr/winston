@@ -12,6 +12,10 @@
 #include "Z21.h"
 #include "Z21Const.h"
 
+Z21Packet::Z21Packet() : data(Z21Packet::MAX_PACKET_SIZE)
+{
+}
+
 void Z21Packet::setHeader(uint16_t len, uint16_t header) {
     length = len;
     data[0] = (len & 0xFF);

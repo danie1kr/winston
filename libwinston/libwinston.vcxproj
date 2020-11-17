@@ -104,7 +104,6 @@
     <ClCompile Include="Event.cpp" />
     <ClCompile Include="Events.cpp" />
     <ClCompile Include="Callback.cpp" />
-    <ClCompile Include="ModelRailwaySystem.cpp" />
     <ClCompile Include="Railway.cpp" />
     <ClCompile Include="Signal.cpp" />
     <ClCompile Include="Rail.cpp" />

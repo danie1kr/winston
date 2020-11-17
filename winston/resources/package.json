@@ -1,0 +1,13 @@
+{
+  "name": "winston-resources",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "compile": "inliner winston.html"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "inliner": "^1.13.1"
+  }
+}

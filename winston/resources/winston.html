@@ -38,6 +38,12 @@
         .contextMenu {
             position: absolute;
             z-index: 5000;
+            background-color: white;
+            border-color: #26a69a;
+            border-radius: 2px;
+            border-style: solid;
+            box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
+            padding: 8px;
         }
 
         #settingsToggle {
@@ -70,14 +76,14 @@
         #console {
             position: absolute;
             padding-left: 10px;
-            bottom: 30%;
+            /* bottom: 30%; */
         }
 
         #connection {
             position: absolute;
             padding-left: 10px;
             bottom: 8%;
-            height: 8%;
+            /* height: 8%; */
             overflow: auto;
         }
     </style>
@@ -85,7 +91,7 @@
 
     <script type="text/template" id="template_turnout">
     <div class="winston-turnout row" winston-turnout-section="<%= id %>" winston-turnout-direction="<%= direction %>">
-        <div class="id col s1"><%= id %></div><div class="direction col s3"><%= direction %></div>
+        <div class="name col s1"><%= name %></div><div class="direction col s3"><%= direction %></div>
 
 <div class="col s2"><a class="waves-effect waves-light btn">toggle</a></div>
         </div>
@@ -111,19 +117,23 @@
     </div>
 
     <div id="menuTrackEdge" class="contextMenu">
-        <button id="splitEdge">split track</button>
-        <button class="cancel">cancel</button>
+        <a id="splitEdge" class="waves-effect waves-light btn cancel">split track</a>
+        <a class="waves-effect waves-light btn cancel">cancel</a>
     </div>
 
     <div id="menuTrackNode" class="contextMenu">
-        <button id="deleteTrackNode">delete node</button>
-        <button class="cancel">cancel</button>
+        <a id="deleteTrackNode" class="waves-effect waves-light btn cancel">delete node</a>
+        <a class="waves-effect waves-light btn cancel">cancel</a>
     </div>
 
-    <div id="menuSectionNode" class="contextMenu">
-        <button id="rotateSectionNodeCW">rotate CW</button>
-        <button id="rotateSectionNodeCCW">rotate CCW</button>
-        <button class="cancel">cancel</button>
+    <div id="menuSectionNode" class="contextMenu row">
+        <div class="input-field col">
+            <input placeholder="name" id="sectionNodeName" type="text" class="validate">
+            <label for="sectionNodeName">Name</label>
+        </div>
+        <div class="col">
+            <a class="waves-effect waves-light btn cancel">cancel</a>
+        </div>
     </div>
 
     <header>
@@ -302,12 +312,34 @@
         {
             $(".contextMenu").hide();
         }
+     
         function showContextMenu(menu, event)
         {
             if(!allowLayoutEdit())
                 return;
             hideContextMenus();
-            $("#" + menu)
+
+
+            let $contextMenu = $("#" + menu);
+            if(menu === "menuSectionNode")
+            {
+                let node = event.target;
+                let name = node.data("displayName");
+                $("#sectionNodeName")
+                    .val(name ? name : node.data("name"))
+                    .off('change')
+                    .on('change', function(e) { 
+                        let name = e.target.value;
+                        node.data("displayName", name);
+                        $("#turnoutsContainer>div.collapsible-body")
+                            .find("[winston-turnout-section=\"" + node.data("section") + "\"]")
+                            .find(".name")
+                            .html(name);
+                    });
+                
+            }
+
+            $contextMenu
                 .css("top", event.originalEvent.clientY + 'px')
                 .css("left", (event.originalEvent.clientX + 20) + 'px')
                 .show();
@@ -415,7 +447,7 @@
                 valignBox: "center",
                 halignBox: "center",
                 tpl: function(data) {
-                    return '<p>' + data.name + '</p>';
+                    return '<p>' + (data.displayName ? data.displayName : data.name) + '</p>';
                 }
             }/*,
             {
@@ -434,10 +466,10 @@
             cy.on('click', '.track', function(event) {
                 showContextMenu("menuTrackEdge", event);
             });
-            cy.on('click', '.sectionNode', function(event) {
+            cy.on('click', '.section', function(event) {
                 showContextMenu("menuSectionNode", event);
             });
-            cy.on('unselect', '.track, .trackNode, .sectionNode', function() {
+            cy.on('unselect', '.track, .trackNode, .section', function() {
                 hideContextMenus();
             });
             cy.on('mouseover', '.turnout', function(event) {
@@ -478,7 +510,7 @@
             cy.$(".turnout").each(function(turnout) {
             
                 let turnoutTemplate = _.template($("#template_turnout").html());
-                let $turnout = $(turnoutTemplate({id: turnout.data("section"), direction: turnout.data("direction")}));
+                let $turnout = $(turnoutTemplate({id: turnout.data("section"), name: turnout.data("displayName") ? turnout.data("displayName") : turnout.data("name"), direction: turnout.data("direction")}));
                 $turnout.on('click', function(event) {
                     let $target = event.target;
                     let $closest = $($target.closest(".winston-turnout"));

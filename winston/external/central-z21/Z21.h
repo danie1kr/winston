@@ -17,6 +17,7 @@
 #include <functional>
 using boolean = bool;
 
+#include "../../libwinston/HAL.h"
 #include "../../libwinston/DigitalCentralStation.h"
 
 #include "Z21Const.h"
@@ -25,10 +26,10 @@ using boolean = bool;
 class Z21 : public winston::DigitalCentralStation, winston::Shared_Ptr<Z21> {
 public:
     Z21() = delete;
-    Z21(const std::string ip, const unsigned short port, winston::DigitalCentralStation::AddressTranslator::Shared& addressTranslator, winston::SignalBox::Shared& signalBox, winston::DigitalCentralStation::Callbacks callbacks);
+    Z21(winston::hal::UDPSocket::Shared& socket, winston::DigitalCentralStation::AddressTranslator::Shared& addressTranslator, winston::SignalBox::Shared& signalBox, winston::DigitalCentralStation::Callbacks callbacks);
     void processPacket(uint8_t *packet);
 
-    void connect();
+    const winston::Result connect();
 
     void requestTurnoutInfo(winston::Turnout::Shared turnout);
 
@@ -36,7 +37,7 @@ public:
     using winston::Shared_Ptr<Z21>::make;
 
 private:
-    bool send(Z21Packet &packet);
+    const winston::Result send(Z21Packet &packet);
 
 protected:
     void processXPacket(uint8_t *packet);
@@ -103,21 +104,21 @@ public:
 
 public:
 // Z21 Control
-    Z21Packet& getSerialNumber();
-    Z21Packet& getHardwareInfo();
-    Z21Packet& getVersion();
-    Z21Packet& getFirmwareVersion();
+    const winston::Result getSerialNumber();
+    const winston::Result getHardwareInfo();
+    const winston::Result getVersion();
+    const winston::Result getFirmwareVersion();
 
-    Z21Packet& getStatus();
+    const winston::Result getStatus();
     Z21Packet& getSystemState();
 
     Z21Packet& setTrackPowerOff();
     Z21Packet& setTrackPowerOn();
 
-    Z21Packet& getBroadcastFlags();
-    Z21Packet& setBroadcastFlags(uint32_t flags);                   // See: const in class Z21_Broadcast
+    const winston::Result getBroadcastFlags();
+    const winston::Result setBroadcastFlags(uint32_t flags);                   // See: const in class Z21_Broadcast
 
-    Z21Packet& logoff();
+    const winston::Result logoff();
 
 // Layout Control
     Z21Packet& setStop();
@@ -178,8 +179,7 @@ public:
     Z21Packet packet;
 
 private:
-    std::string ip;
-    unsigned short port;
+    winston::hal::UDPSocket::Shared socket;
 };
 
 //extern Z21Translator Z21;

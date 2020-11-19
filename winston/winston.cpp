@@ -7,6 +7,7 @@
 #include "winston.h"
 #include "winston-minnow.h"
 #include "railways.h"
+#include "winston-hal-x64.h"
 #include "external/central-z21/Z21.h"
 
 //#define RAILWAY_CLASS RailwayWithSiding
@@ -206,10 +207,11 @@ private:
     void initNetwork()
     {
         // z21
-        int ctx = 0;
-        SOCKET_constructor(&this->z21Socket, ctx);
-
+        z21Socket = UDPSocketLWIP::make(z21IP, z21Port);
+        
         // webSocket
+        minnowStart(webSocketListenPtr, webSocketSendPtr, &this->minnowWPH, &this->minnowCD, &this->minnowRD, &this->minnowServer, [this](struct RecData* o, struct ConnData* cd, const char* msg, JErr* e, JVal* v)->int { return this->minnow_manageMessage(o, cd, msg, e, v); }, [this](MST* mst, const char* path, FetchPageSend send)->int {return this->minnow_fetchPage(mst, path, send);  });
+        this->webSocketState = winston::hal::UDPSocket::State::Connecting;
     }
 
     winston::DigitalCentralStation::Callbacks z21Callbacks()
@@ -221,11 +223,6 @@ private:
         {
             auto id = this->railway->sectionIndex(turnout);
             turnoutSendState(id, direction);
-        };
-
-        callbacks.sendMessageCallback = [=](const std::string& ip, const unsigned short& port, std::vector<unsigned char>& data) -> bool {
-            auto sz = data.size() * sizeof(std::vector<unsigned char>::value_type);
-            return se_send(&this->z21Socket, data.data(), (unsigned int)sz) == sz;
         };
 
         return callbacks;
@@ -245,7 +242,8 @@ private:
 
         // the system specific digital central station
         auto at = std::dynamic_pointer_cast<winston::DigitalCentralStation::AddressTranslator>(addressTranslator);
-        this->digitalCentralStation = Z21::make(z21IP, z21Port, at, this->signalBox, z21Callbacks());
+        auto udp = std::dynamic_pointer_cast<winston::hal::UDPSocket>(this->z21Socket);
+        this->digitalCentralStation = Z21::make(udp, at, this->signalBox, z21Callbacks());
 
         // a debug injector
         auto dcs = std::dynamic_pointer_cast<winston::DigitalCentralStation>(this->digitalCentralStation);
@@ -266,24 +264,19 @@ private:
     }
 
     // accept new requests and loop over what the signal box has to do
-    void systemLoop() { 
-    
-        SOCKET listenSock;
-        SOCKET sock;
-        SOCKET* listenSockPtr = &listenSock;
-        SOCKET* sockPtr = &sock;
-        minnowStart(listenSockPtr, sockPtr, &this->minnowWPH, &this->minnowCD, &this->minnowRD, &this->minnowServer, [this](struct RecData* o, struct ConnData* cd, const char* msg, JErr* e, JVal* v)->int { return this->minnow_manageMessage(o, cd, msg, e, v); }, [this](MST* mst, const char* path, FetchPageSend send)->int {return this->minnow_fetchPage(mst, path, send);  });
-        int minnowAccepted = 0;
-        while (true)
-        {
-            if (!minnowAccepted)
-                minnowAccepted = minnowAccept(listenSockPtr, 50, sockPtr, this->minnowServer, this->minnowWPH);
-            if (minnowAccepted == 1 && !minnowLoop(listenSockPtr, sockPtr, this->minnowWPH, this->minnowCD, this->minnowRD, this->minnowServer))
-                break;
-            this->signalBox->work();
-        }
+    void systemLoop() {
+        if(this->webSocketState == winston::hal::UDPSocket::State::Connecting && minnowAccept(webSocketListenPtr, 2, webSocketSendPtr, this->minnowServer, this->minnowWPH) == 1)
+            this->webSocketState = winston::hal::UDPSocket::State::Connected;
+            
+        this->signalBox->work();
 
-        minnowClose(listenSockPtr, sockPtr);
+        if (this->webSocketState == winston::hal::UDPSocket::State::Connected && !minnowLoop(webSocketListenPtr, webSocketSendPtr, this->minnowWPH, this->minnowCD, this->minnowRD, this->minnowServer))
+        {
+            this->webSocketState = winston::hal::UDPSocket::State::Closing;
+            minnowClose(webSocketListenPtr, webSocketSendPtr);
+            minnowStart(webSocketListenPtr, webSocketSendPtr, &this->minnowWPH, &this->minnowCD, &this->minnowRD, &this->minnowServer, [this](struct RecData* o, struct ConnData* cd, const char* msg, JErr* e, JVal* v)->int { return this->minnow_manageMessage(o, cd, msg, e, v); }, [this](MST* mst, const char* path, FetchPageSend send)->int {return this->minnow_fetchPage(mst, path, send);  });
+            this->webSocketState = winston::hal::UDPSocket::State::Connecting;
+        }
     };
 
     // minnow related
@@ -292,7 +285,13 @@ private:
     RecData* minnowRD = nullptr;
     MS* minnowServer = nullptr;
 
-    SOCKET z21Socket;
+    UDPSocketLWIP::Shared z21Socket;
+
+    SOCKET webSocketListen, webSocketSend;
+    SOCKET* webSocketListenPtr = &webSocketListen;
+    SOCKET* webSocketSendPtr = &webSocketSend;
+
+    winston::hal::UDPSocket::State webSocketState = { winston::hal::UDPSocket::State::NotConnected };
 
     const std::string z21IP = { "192.168.0.100" };
     const unsigned short z21Port = 5000;

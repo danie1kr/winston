@@ -15,13 +15,13 @@ namespace winstontests
 		TEST_METHOD(RailInit)
 		{
             testRailway = MiniRailway::make();
-            Assert::IsTrue(testRailway->init() == winston::Result::Ok);
+            Assert::IsTrue(testRailway->init() == winston::Result::OK);
 		}
 
         TEST_METHOD(RailTraverse)
         {
             testRailway = MiniRailway::make();
-            Assert::IsTrue(testRailway->init() == winston::Result::Ok);
+            Assert::IsTrue(testRailway->init() == winston::Result::OK);
 
             auto a = testRailway->section(MiniRailway::Sections::A);
             auto b = testRailway->section(MiniRailway::Sections::B);
@@ -50,7 +50,7 @@ namespace winstontests
         TEST_METHOD(SignalBox_directForcedToggleTurnout)
         {
             testRailway = MiniRailway::make();
-            Assert::IsTrue(testRailway->init() == winston::Result::Ok);
+            Assert::IsTrue(testRailway->init() == winston::Result::OK);
             auto a = testRailway->section(MiniRailway::Sections::A);
             auto b = testRailway->section(MiniRailway::Sections::B);
             auto c = testRailway->section(MiniRailway::Sections::C);
@@ -72,7 +72,7 @@ namespace winstontests
         TEST_METHOD(SignalBox_notifiedForcedToggleTurnout)
         {
             testRailway = MiniRailway::make();
-            Assert::IsTrue(testRailway->init() == winston::Result::Ok);
+            Assert::IsTrue(testRailway->init() == winston::Result::OK);
             auto a = testRailway->section(MiniRailway::Sections::A);
             auto b = testRailway->section(MiniRailway::Sections::B);
             auto c = testRailway->section(MiniRailway::Sections::C);
@@ -97,7 +97,7 @@ namespace winstontests
         TEST_METHOD(SignalBox_notifiedExternallyAcknowledgedToggleTurnout)
         {
             testRailway = MiniRailway::make();
-            Assert::IsTrue(testRailway->init() == winston::Result::Ok);
+            Assert::IsTrue(testRailway->init() == winston::Result::OK);
             auto a = testRailway->section(MiniRailway::Sections::A);
             auto b = testRailway->section(MiniRailway::Sections::B);
             auto c = testRailway->section(MiniRailway::Sections::C);

@@ -17,52 +17,60 @@
 
 #include <memory>
 
-Z21::Z21(const std::string ip, const unsigned short port, winston::DigitalCentralStation::AddressTranslator::Shared& addressTranslator, winston::SignalBox::Shared& signalBox, winston::DigitalCentralStation::Callbacks callbacks)
-    : ip(ip), port(port), winston::DigitalCentralStation(addressTranslator, signalBox, callbacks)
+Z21::Z21(winston::hal::UDPSocket::Shared& socket, winston::DigitalCentralStation::AddressTranslator::Shared& addressTranslator, winston::SignalBox::Shared& signalBox, winston::DigitalCentralStation::Callbacks callbacks)
+    : socket(socket), winston::DigitalCentralStation(addressTranslator, signalBox, callbacks)
 {
 
 }
 
-void Z21::connect()
+const winston::Result Z21::connect()
 {
-    this->send(this->logoff());
+    CaR(this->logoff());
     winston::hal::delay(100);
-    this->send(this->getStatus());
-    this->send(this->getSerialNumber());
-    this->send(this->getHardwareInfo());
-    this->send(this->getFirmwareVersion());
-    this->send(this->getVersion());
-    this->send(this->setBroadcastFlags(Z21_Broadcast::STATUS_LOCO_TURNOUT));
+    CaR(this->getStatus());
+    CaR(this->getSerialNumber());
+    CaR(this->getHardwareInfo());
+    CaR(this->getFirmwareVersion());
+    CaR(this->getVersion());
+    CaR(this->setBroadcastFlags(Z21_Broadcast::STATUS_LOCO_TURNOUT));
+
+    return winston::Result::OK;
 }
 
-bool Z21::send(Z21Packet& packet)
+const winston::Result Z21::send(Z21Packet& packet)
 {
-    return this->callbacks.sendMessageCallback(this->ip, this->port, packet.data);
+    winston::Result result = this->socket->send(packet.data);
+    return result;
 }
 
-Z21Packet& Z21::getSerialNumber() {
+const winston::Result Z21::getSerialNumber() {
+    Z21Packet packet;
     packet.setHeader(4, Z21_LAN::GET_SERIAL_NUMBER);
-    return packet;
+    return this->send(packet);
 }
 
-Z21Packet& Z21::getHardwareInfo() {
+const winston::Result Z21::getHardwareInfo() {
+    Z21Packet packet;
     packet.setHeader(4, Z21_LAN::GET_HWINFO);
-    return packet;
+    return this->send(packet);
 }
 
-Z21Packet& Z21::getVersion() {
+const winston::Result Z21::getVersion() {
+    Z21Packet packet;
     packet.setXPacket(Z21TX_LAN_X::GET_VERSION, Z21TX_DB0::GET_VERSION);
-    return packet;
+    return this->send(packet);
 }
 
-Z21Packet& Z21::getFirmwareVersion() {
+const winston::Result Z21::getFirmwareVersion() {
+    Z21Packet packet;
     packet.setXPacket(Z21TX_LAN_X::GET_FIRMWARE_VERSION, Z21TX_DB0::GET_FIRMWARE_VERSION);
-    return packet;
+    return this->send(packet);
 }
 
-Z21Packet& Z21::getStatus() {
+const winston::Result Z21::getStatus() {
+    Z21Packet packet;
     packet.setXPacket(Z21TX_LAN_X::GET_STATUS, Z21TX_DB0::GET_STATUS);
-    return packet;
+    return this->send(packet);
 }
 
 Z21Packet& Z21::getSystemState() {
@@ -85,20 +93,23 @@ Z21Packet& Z21::setTrackPowerOn() {
     return packet;
 }
 
-Z21Packet& Z21::getBroadcastFlags() {
+const winston::Result Z21::getBroadcastFlags() {
+    Z21Packet packet;
     packet.setHeader(4, Z21_LAN::GET_BROADCASTFLAGS);
-    return packet;
+    return this->send(packet);
 }
 
-Z21Packet& Z21::setBroadcastFlags(uint32_t flags) {
+const winston::Result Z21::setBroadcastFlags(uint32_t flags) {
+    Z21Packet packet;
     packet.setHeader(8, Z21_LAN::SET_BROADCASTFLAGS);
     packet.setLEuint32(4, flags);
-    return packet;
+    return this->send(packet);
 }
 
-Z21Packet& Z21::logoff() {
+const winston::Result Z21::logoff() {
+    Z21Packet packet;
     packet.setHeader(4, Z21_LAN::LOGOFF);
-    return packet;
+    return this->send(packet);
 }
 
 Z21Packet& Z21::setStop() {

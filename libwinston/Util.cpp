@@ -1,3 +1,4 @@
+#include "../libwinston/magic_enum.hpp"
 #include "Util.h"
 #include "HAL.h"
 
@@ -49,8 +50,28 @@ namespace winston
 		return std::to_string(first);
 	}
 
+	std::string build(const int first)
+	{
+		return std::to_string(first);
+	}
+
+	std::string build(const long first)
+	{
+		return std::to_string(first);
+	}
+
 	std::string build(const unsigned char first)
 	{
 		return std::to_string(first);
+	}
+
+	std::string build(const char* first)
+	{
+		return std::string(first);
+	}
+
+	std::string build(const winston::Result first)
+	{
+		return std::string(magic_enum::enum_name(first));
 	}
 }

@@ -17,7 +17,7 @@ namespace winston
 		{
 			foundMe = other.get() == this;
 			if (foundMe == true)
-				return Result::Ok;
+				return Result::OK;
 		}
 
 		return Result::ValidationFailed;
@@ -156,7 +156,7 @@ namespace winston
 
 	const Result Rail::validate()
 	{
-		return this->validateSingle(a) == Result::Ok && this->validateSingle(b) == Result::Ok ? Result::Ok : Result::ValidationFailed;
+		return this->validateSingle(a) == Result::OK && this->validateSingle(b) == Result::OK ? Result::OK : Result::ValidationFailed;
 	}
 
 	const Section::Type Rail::type()
@@ -234,7 +234,7 @@ namespace winston
 
 	const Result Turnout::validate()
 	{
-		return this->validateSingle(a) == Result::Ok && this->validateSingle(b) == Result::Ok && this->validateSingle(c) == Result::Ok ? Result::Ok : Result::ValidationFailed;
+		return this->validateSingle(a) == Result::OK && this->validateSingle(b) == Result::OK && this->validateSingle(c) == Result::OK ? Result::OK : Result::ValidationFailed;
 	}
 
 	const Section::Type Turnout::type()

@@ -129,7 +129,7 @@ namespace winston
 				if (!current)
 					return Result::ValidationFailed;
 
-				passed = current->validate() == Result::Ok;
+				passed = current->validate() == Result::OK;
 			}
 
 			/*std::queue<Section*> rails;
@@ -146,7 +146,7 @@ namespace winston
 					return Result::ValidationFailed;
 			}*/
 
-			return passed ? Result::Ok : Result::InternalError;
+			return passed ? Result::OK : Result::InternalError;
 		}
 		//void leaving(SectionIndex section);
 		//void entering(SectionIndex section);

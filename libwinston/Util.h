@@ -70,40 +70,11 @@ namespace winston
 	
 	std::string build(const std::string first);
 	std::string build(const unsigned int first);
+	std::string build(const int first);
+	std::string build(const long first);
 	std::string build(const unsigned char first);
-
-	/*
-	template<typename... _Args>
-	std::string build(_Args&&... args) {
-		return std::string(first) + ((std::string)build(std::forward<_Args>(args)), ...);
-	}
-
-	template<typename _First, typename... _Args>
-	std::string build(const _First first, _Args&&... args) {
-		return std::string(first) + ((std::string)build(std::forward<_Args>(args)), ...);
-	}
-
-#define build_type(__type, __fn) template<typename... _Args> \
-	std::string build(const __type first, _Args&&... args) { \
-		return __fn(first) + ((std::string)build(std::forward<_Args>(args)), ...); \
-	}
-
-	template<typename... _Args>
-	std::string build(const std::string first, _Args&&... args) {
-		return first + ((std::string)build(std::forward<_Args>(args)), ...);
-	}
-	
-	build_type(size_t, std::to_string)
-
-	template<typename... _Args>
-	std::string build(const unsigned int first, _Args&&... args) {
-		return std::to_string(first) + build<_Args...>(args);
-	}
-
-	template<typename... _Args>
-	std::string build(const unsigned char first, _Args&&... args) {
-		return std::to_string((const unsigned int)first) + ((std::string)build(std::forward<_Args>(args)), ...);
-	}*/
+	std::string build(const char* first);
+	std::string build(const winston::Result first);
 	
 	template <typename _First, typename... _Args>
 		std::string build(const _First first, const _Args&&... args)
@@ -111,6 +82,12 @@ namespace winston
 		return build(first) + build(args...);
 	}
 
+#define STRINGIZE(x) STRINGIZE2(x)
+#define STRINGIZE2(x) #x
+#define LINE STRINGIZE(__LINE__)
+#define CaR(code) { winston::Result r = code; if(r != winston::Result::OK) { winston::error(winston::build(__FILE__ "@" LINE ": " STRINGIZE(code) " -> ", std::string(magic_enum::enum_name(r)))); return r; } }
+
+	//inline const Result checkResultAndComplain(const Result result, std::string message);
 
 	extern Callback::Shared nop;
 }

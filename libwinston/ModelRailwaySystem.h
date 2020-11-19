@@ -14,12 +14,14 @@ namespace winston
 		virtual ~ModelRailwaySystem() { } ;
 
 		void setup() {
+			Result result;
+			
 			winston::hal::init();
 
 			this->systemSetup();
 
 			this->railway->init();
-			this->digitalCentralStation->connect();
+			result = this->digitalCentralStation->connect();
 
 			this->systemSetupComplete();
 		};

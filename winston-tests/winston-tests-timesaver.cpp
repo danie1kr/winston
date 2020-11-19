@@ -15,13 +15,13 @@ namespace winstontests
         TEST_METHOD(RailInit)
         {
             testRailway = std::make_shared<TimeSaverRailway>();
-            Assert::IsTrue(testRailway->init() == winston::Result::Ok);
+            Assert::IsTrue(testRailway->init() == winston::Result::OK);
         }
 
         TEST_METHOD(SignalBox_directForcedToggleTurnout)
         {
             testRailway = std::make_shared<TimeSaverRailway>();
-            Assert::IsTrue(testRailway->init() == winston::Result::Ok);
+            Assert::IsTrue(testRailway->init() == winston::Result::OK);
             auto b = testRailway->section(TimeSaverRailway::Sections::B);
             auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->section(TimeSaverRailway::Sections::Turnout1));
             auto t2 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->section(TimeSaverRailway::Sections::Turnout2));
@@ -47,7 +47,7 @@ namespace winstontests
             });
 
             testRailway = std::make_shared<TimeSaverRailway>();
-            Assert::IsTrue(testRailway->init() == winston::Result::Ok);
+            Assert::IsTrue(testRailway->init() == winston::Result::OK);
             auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->section(TimeSaverRailway::Sections::Turnout1));
             auto t2 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->section(TimeSaverRailway::Sections::Turnout2));
 

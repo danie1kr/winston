@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include "WinstonTypes.h"
 
 namespace winston
 {
@@ -17,5 +18,25 @@ namespace winston
 		extern bool storageCommit();
 
 		extern void init();
+
+		class UDPSocket : public Shared_Ptr<UDPSocket>
+		{
+		public:
+			enum class State
+			{
+				NotConnected,
+				Connecting,
+				Connected,
+				Closing
+			};
+
+			UDPSocket(const std::string ip, const unsigned short port);
+			virtual const Result send(const std::vector<unsigned char> data) = 0;
+
+			const bool isConnected();
+
+		protected:
+			State state;
+		};
 	}
 }

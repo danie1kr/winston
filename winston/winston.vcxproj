@@ -126,6 +126,7 @@
     <ClInclude Include="external\network-minnow\TargConfig.h" />
     <ClInclude Include="mio.hpp" />
     <ClInclude Include="railways.h" />
+    <ClInclude Include="winston-hal-x64.h" />
     <ClInclude Include="winston-minnow.h" />
     <ClInclude Include="winston.h" />
   </ItemGroup>

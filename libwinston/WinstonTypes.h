@@ -20,8 +20,9 @@ namespace winston
 
 	enum class Result
 	{
-		Ok,
+		OK,
 		InternalError,
+		SendFailed,
 		ValidationFailed
 	};
 
@@ -84,4 +85,5 @@ namespace winston
 	class Callback;
 	//using CallbackP = std::shared_ptr<Callback>;
 
+	class UDPSocket;
 }

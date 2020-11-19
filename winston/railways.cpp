@@ -237,13 +237,13 @@ void Y2020Railway::connect(std::array<winston::Section::Shared, sectionsCount()>
 
     t3->connect(winston::Section::Connection::C, b, winston::Section::Connection::A);
 
-    t5->connect(winston::Section::Connection::C, t6, winston::Section::Connection::B)
+    t5->connect(winston::Section::Connection::C, t6, winston::Section::Connection::C)
         ->connect(winston::Section::Connection::A, t7, winston::Section::Connection::A)
-        ->connect(winston::Section::Connection::B, t8, winston::Section::Connection::C)
+        ->connect(winston::Section::Connection::C, t8, winston::Section::Connection::C)
         ->connect(winston::Section::Connection::A, e, winston::Section::Connection::A);
 
-    t6->connect(winston::Section::Connection::C, c, winston::Section::Connection::A);
-    t7->connect(winston::Section::Connection::C, d, winston::Section::Connection::A);
+    t6->connect(winston::Section::Connection::B, c, winston::Section::Connection::A);
+    t7->connect(winston::Section::Connection::B, d, winston::Section::Connection::A);
 
     t8->connect(winston::Section::Connection::B, t9, winston::Section::Connection::A)
         ->connect(winston::Section::Connection::B, g, winston::Section::Connection::A);

@@ -13,3 +13,4 @@
 #include "Task.h"
 #include "Tasks.h"
 #include "Util.h"
+#include "Command.h"

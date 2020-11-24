@@ -2,7 +2,7 @@
 
 namespace winston
 {
-	Signal::Signal(Callback callback)
+	/*Signal::Signal(Callback callback)
 		: callback(callback), aspect(Aspect::Stop)
 	{
 
@@ -18,7 +18,7 @@ namespace winston
 		return this->aspect;
 	}
 
-/*
+/
 	PreSignal::PreSignal(Device& device, const Port stop, const Port go)
 		: Signal(device, stop, go)
 	{

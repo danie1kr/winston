@@ -29,7 +29,7 @@ namespace winston
 			DigitalCentralStation::Shared station;
 		};
 
-		struct Callbacks
+		struct Callbacks : public Railway::Callbacks
 		{
 			using LocomotiveUpdateCallback = std::function<void(Locomotive::Shared loco,
 				bool  busy,
@@ -39,9 +39,6 @@ namespace winston
 				unsigned char  speed,                                  // In 128 speed range
 				uint32_t functions)>;
 			LocomotiveUpdateCallback locomotiveUpdateCallback;
-
-			using TurnoutUpdateCallback = std::function<void(Turnout::Shared turnout, const Turnout::Direction direction)>;
-			TurnoutUpdateCallback turnoutUpdateCallback;
 
 			using SystemInfoCallback = std::function<void(const size_t id, const std::string name, const std::string content)>;
 			SystemInfoCallback systemInfoCallback;

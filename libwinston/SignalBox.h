@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <queue>
-#include "Events.h"
+#include "Command.h"
 #include "Util.h"
 #include "Signal.h"
 #include "WinstonTypes.h"
@@ -10,7 +10,7 @@
 
 namespace winston
 {
-	class SignalBox : public Shared_Ptr<SignalBox>
+	class SignalBox : public Shared_Ptr<SignalBox>, std::enable_shared_from_this<SignalBox>
 	{
 	public:
 
@@ -22,18 +22,18 @@ namespace winston
 
 		SignalBox(Railway::Shared& railway, Mutex& mutex);
 		//static SignalBoxP& create(RailwayP& railway, Mutex& mutex);
-		void notify(Event::Unique event);
-		void assign(Task::Unique task);
+		//void notify(Event::Unique event);
+		//void assign(Task::Unique task);
+		void order(Command::Shared command);
 		void work();
 	private:
+		std::queue<Command::Shared> commands;
+		/*
 		std::queue<Event::Unique> events;
 		std::queue<Task::Unique> tasks;
-
+		*/
 		Mutex& mutex;
 		Railway::Shared railway;
-
-		void work(EventTurnoutStartToggle::Unique event);
-		void work(EventTurnoutFinalizeToggle::Unique event);
 	};
 	//extern SignalBoxP signalBox;
 }

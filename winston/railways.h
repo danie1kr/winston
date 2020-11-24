@@ -22,12 +22,12 @@ class MiniRailway : public winston::RailwayWithRails<MiniRailwaySections>, winst
 
 public:
 
-    MiniRailway();
+    MiniRailway(const Callbacks callbacks);
     virtual ~MiniRailway() = default;
 
-    std::function<winston::Task::State(Sections id, winston::Turnout::Direction direction)> turnoutCallback = [](Sections id, winston::Turnout::Direction aspect) {
-        return winston::Task::State::Finished;
-    };
+    /*std::function<winston::State(Sections id, winston::Turnout::Direction direction)> turnoutCallback = [](Sections id, winston::Turnout::Direction aspect) {
+        return winston::State::Finished;
+    };*/
 
     static const std::string name();
 
@@ -61,11 +61,11 @@ enum class RailwayWithSidingsSections : unsigned int
 
 class RailwayWithSiding : public winston::RailwayWithRails<RailwayWithSidingsSections>, winston::Shared_Ptr<RailwayWithSiding>
 {
-    std::function<winston::Task::State(Sections id, winston::Turnout::Direction direction)> turnoutCallback = [](Sections id, winston::Turnout::Direction aspect) {
-        return winston::Task::State::Finished;
-    };
+    /*std::function<winston::State(Sections id, winston::Turnout::Direction direction)> turnoutCallback = [](Sections id, winston::Turnout::Direction aspect) {
+        return winston::State::Finished;
+    };*/
 public:
-    RailwayWithSiding();
+    RailwayWithSiding(const Callbacks callbacks);
     virtual ~RailwayWithSiding() = default;
 
     static const std::string name();
@@ -128,12 +128,12 @@ class TimeSaverRailway : public winston::RailwayWithRails<TimeSaverRailwaySectio
     */
 
 public:
-    TimeSaverRailway();
+    TimeSaverRailway(const Callbacks callbacks);
     virtual ~TimeSaverRailway() = default;
 
-    std::function<winston::Task::State(Sections id, winston::Turnout::Direction direction)> turnoutCallback = [](Sections id, winston::Turnout::Direction aspect) {
-        return winston::Task::State::Finished;
-    };
+    /*std::function<winston::State(Sections id, winston::Turnout::Direction direction)> turnoutCallback = [](Sections id, winston::Turnout::Direction aspect) {
+        return winston::State::Finished;
+    };*/
 
     static const std::string name();
 
@@ -184,12 +184,13 @@ class Y2020Railway : public winston::RailwayWithRails<Y2020RailwaySections>, win
     */
 
 public:
-    Y2020Railway();
+    Y2020Railway(const Callbacks callbacks);
     virtual ~Y2020Railway() = default;
 
-    std::function<winston::Task::State(Sections id, winston::Turnout::Direction direction)> turnoutCallback = [](Sections id, winston::Turnout::Direction aspect) {
-        return winston::Task::State::Finished;
-    };
+    /*std::function<winston::State(Sections id, winston::Turnout::Direction direction)> turnoutCallback = [](Sections id, winston::Turnout::Direction aspect) {
+        
+        return winston::State::Finished;
+    };*/
 
     static const std::string name();
 

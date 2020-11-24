@@ -33,6 +33,8 @@ private:
         minnowSendSubmit(&sd);
     }
 
+    
+
     // message from websocket received
     int minnow_manageMessage(RecData* o, ConnData* cd, const char* msg, JErr* error, JVal* value)
     {
@@ -49,7 +51,24 @@ private:
                     this->turnoutSendState(id, turnout->direction());
                     this->stationDebugInjector->injectTurnoutUpdate(turnout, injectDir);
                     });
-                signalBox->notify(std::make_unique<winston::EventTurnoutStartToggle>(cb, turnout));
+                //signalBox->notify(std::make_unique<winston::EventTurnoutStartToggle>(cb, turnout));
+                signalBox->order(winston::Command::make([this, id, turnout, injectDir](const unsigned long& created) -> const winston::State
+                {
+                    signalBox->order(winston::Command::make([this, turnout, injectDir](const unsigned long& created) -> const winston::State
+                    {
+                        if (created-winston::hal::now() > 200)
+                        {
+                            this->stationDebugInjector->injectTurnoutUpdate(turnout, injectDir);
+                            return winston::State::Finished;
+                        }
+
+                        return winston::State::Running;
+                        
+                    }));
+
+                    this->turnoutSendState(id, turnout->direction());
+                    return turnout->startToggle();
+                }));
                 return false;
             }
             return true;
@@ -219,10 +238,25 @@ private:
         winston::DigitalCentralStation::Callbacks callbacks;
 
         // what to do when the digital central station updated a turnout
-        callbacks.turnoutUpdateCallback = [=](winston::Turnout::Shared turnout, const winston::Turnout::Direction direction)
+        callbacks.turnoutUpdateCallback = [=](winston::Turnout::Shared turnout, const winston::Turnout::Direction direction) -> const winston::State
         {
             auto id = this->railway->sectionIndex(turnout);
             turnoutSendState(id, direction);
+            return winston::State::Finished;
+        };
+
+        return callbacks;
+    }
+
+    winston::Railway::Callbacks railwayCallbacks()
+    {
+        winston::Railway::Callbacks callbacks;
+
+        callbacks.turnoutUpdateCallback = [=](winston::Turnout::Shared turnout, const winston::Turnout::Direction direction) -> const winston::State
+        {
+            auto id = this->railway->sectionIndex(turnout);
+            turnoutSendState(id, direction);
+            return winston::State::Finished;
         };
 
         return callbacks;
@@ -233,7 +267,7 @@ private:
         this->initNetwork();
 
         // the user defined railway and its address translator
-        this->railway = RAILWAY_CLASS::make();
+        this->railway = RAILWAY_CLASS::make(railwayCallbacks());
         this->addressTranslator = RAILWAY_CLASS::AddressTranslator::make(railway);
 
         // the internal signal box
@@ -295,6 +329,8 @@ private:
 
     const std::string z21IP = { "192.168.0.100" };
     const unsigned short z21Port = 5000;
+
+
 };
 
 int main()

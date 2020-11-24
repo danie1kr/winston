@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <string>
 
-MiniRailway::MiniRailway() : winston::RailwayWithRails<MiniRailwaySections>() {};
+MiniRailway::MiniRailway(const Callbacks callbacks) : winston::RailwayWithRails<MiniRailwaySections>(callbacks) {};
 
 winston::Section::Shared MiniRailway::define(const Sections section)
 {
@@ -12,7 +12,7 @@ winston::Section::Shared MiniRailway::define(const Sections section)
     case Sections::C:
         return winston::Bumper::make();
     case Sections::Turnout1:
-        return winston::Turnout::make([this, section](const winston::Turnout::Direction direction) -> winston::Task::State { return this->turnoutCallback(section, direction); }, false);
+        return winston::Turnout::make([this, section](winston::Section::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Section>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
     }
     throw std::out_of_range(std::string("section ") + std::string(magic_enum::enum_name(section)) + std::string("not in switch"));
 }
@@ -29,7 +29,7 @@ const std::string MiniRailway::name()
     return std::string("MiniRailway");
 }
 
-RailwayWithSiding::RailwayWithSiding() : winston::RailwayWithRails<RailwayWithSidingsSections>() {};
+RailwayWithSiding::RailwayWithSiding(const Callbacks callbacks) : winston::RailwayWithRails<RailwayWithSidingsSections>(callbacks) {};
 RailwayWithSiding::AddressTranslator::AddressTranslator(RailwayWithSiding::Shared railway) : winston::DigitalCentralStation::AddressTranslator(), Shared_Ptr<AddressTranslator>(), railway(railway) { };
 
 winston::Turnout::Shared RailwayWithSiding::AddressTranslator::turnout(const winston::Address address)
@@ -70,7 +70,7 @@ winston::Section::Shared RailwayWithSiding::define(const Sections section)
         return winston::Rail::make();
     case Sections::Turnout1:
     case Sections::Turnout2:
-        return winston::Turnout::make([this, section](const winston::Turnout::Direction direction) -> winston::Task::State { return this->turnoutCallback(section, direction); }, section == Sections::Turnout2);
+        return winston::Turnout::make([this, section](winston::Section::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Section>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, section == Sections::Turnout2);
     }
     throw std::out_of_range(std::string("section ") + std::string(magic_enum::enum_name(section)) + std::string("not in switch"));
 }
@@ -96,7 +96,7 @@ const std::string RailwayWithSiding::name()
     return std::string("RailwayWithSiding");
 }
 
-TimeSaverRailway::TimeSaverRailway() : winston::RailwayWithRails<TimeSaverRailwaySections>() {};
+TimeSaverRailway::TimeSaverRailway(const Callbacks callbacks) : winston::RailwayWithRails<TimeSaverRailwaySections>(callbacks) {};
 winston::Section::Shared TimeSaverRailway::define(const Sections section)
 {
     switch (section)
@@ -110,10 +110,10 @@ winston::Section::Shared TimeSaverRailway::define(const Sections section)
     case Sections::Turnout1:
     case Sections::Turnout3:
     case Sections::Turnout4:
-        return winston::Turnout::make([this, section](winston::Turnout::Direction direction)->winston::Task::State { return this->turnoutCallback(section, direction); }, true);
+        return winston::Turnout::make([this, section](winston::Section::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Section>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, true);
     case Sections::Turnout2:
     case Sections::Turnout5:
-        return winston::Turnout::make([this, section](winston::Turnout::Direction direction)->winston::Task::State { return this->turnoutCallback(section, direction); }, false);
+        return winston::Turnout::make([this, section](winston::Section::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Section>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
     }
     throw std::out_of_range(std::string("section ") + std::string(magic_enum::enum_name(section)) + std::string("not in switch"));
 }
@@ -153,7 +153,7 @@ const std::string TimeSaverRailway::name()
     return std::string("TimeSaverRailway");
 }
 
-Y2020Railway::Y2020Railway() : winston::RailwayWithRails<Y2020RailwaySections>() {};
+Y2020Railway::Y2020Railway(const Callbacks callbacks) : winston::RailwayWithRails<Y2020RailwaySections>(callbacks) {};
 const std::string Y2020Railway::name()
 {
     return std::string("Y2020Railway");
@@ -203,7 +203,7 @@ winston::Section::Shared Y2020Railway::define(const Sections section)
         return winston::Bumper::make();
     case Sections::Turnout1:
     case Sections::Turnout2:
-        return winston::Turnout::make([this, section](winston::Turnout::Direction direction)->winston::Task::State { return this->turnoutCallback(section, direction); }, false);
+        return winston::Turnout::make([this, section](winston::Section::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Section>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
     case Sections::Turnout3:
     case Sections::Turnout4:
     case Sections::Turnout5:
@@ -211,7 +211,7 @@ winston::Section::Shared Y2020Railway::define(const Sections section)
     case Sections::Turnout7:
     case Sections::Turnout8:
     case Sections::Turnout9:
-        return winston::Turnout::make([this, section](winston::Turnout::Direction direction)->winston::Task::State { return this->turnoutCallback(section, direction); }, true);
+        return winston::Turnout::make([this, section](winston::Section::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Section>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, true);
     }
     throw std::out_of_range(std::string("section ") + std::string(magic_enum::enum_name(section)) + std::string("not in switch"));
 

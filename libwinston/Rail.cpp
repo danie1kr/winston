@@ -242,31 +242,31 @@ namespace winston
 		return Type::Turnout;
 	}
 
-	const Task::State Turnout::startChangeTo(const Direction direction)
+	const State Turnout::startChangeTo(const Direction direction)
 	{
 		if (this->dir == direction)
-			return Task::State::Finished;
+			return State::Finished;
 
-		Task::State state = this->callback(direction);
+		State state = this->callback(this->shared_from_this(), direction);
 		this->dir = Direction::Changing;
 
 		return state;
 	}
 
-	const Task::State Turnout::startToggle()
+	const State Turnout::startToggle()
 	{
 		return this->startChangeTo(Turnout::otherDirection(this->dir));
 	}
 
-	const Task::State Turnout::finalizeChangeTo(const Direction direction)
+	const State Turnout::finalizeChangeTo(const Direction direction)
 	{
 		if (this->dir == direction)
-			return Task::State::Finished;
+			return State::Finished;
 
-		Task::State state = this->callback(direction);
+		State state = this->callback(this->shared_from_this(), direction);
 		this->dir = direction;
 
-		return Task::State::Finished;
+		return State::Finished;
 	}
 
 	const Turnout::Direction Turnout::direction()

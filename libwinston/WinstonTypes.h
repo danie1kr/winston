@@ -11,6 +11,14 @@ namespace winston
 	using Id = unsigned int;
 
 	using SectionIndex = size_t;
+
+
+	enum class State
+	{
+		Running,
+		Finished
+	};
+
 	/*
 	struct Locomotive
 	{
@@ -88,4 +96,7 @@ namespace winston
 	class UDPSocket;
 
 	class Locomotive;
+
+	class Command;
+	class Payload;
 }

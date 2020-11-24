@@ -1,5 +1,5 @@
 #pragma once
-
+/*
 #include "Event.h"
 #include "Rail.h"
 #include "WinstonTypes.h"
@@ -33,4 +33,4 @@ namespace winston
 		Turnout::Shared section;
 		const Turnout::Direction dir;
 	};
-}
+}*/

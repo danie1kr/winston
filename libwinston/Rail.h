@@ -118,7 +118,7 @@ namespace winston
 			Changing
 		};
 
-		using Callback = const std::function<Task::State(Direction direction)>;
+		using Callback = const std::function<State(Section::Shared turnout, Direction direction)>;
 
 		Turnout(const Callback callback, const bool leftTurnout = false);
 		//static Section::Shared make(const Callback callback, const bool leftTurnout);
@@ -134,9 +134,9 @@ namespace winston
 		void connections(Section::Shared& onA, Section::Shared& onB, Section::Shared& onC);
 
 		//const Task::State toggle();
-		const Task::State startChangeTo(const Direction direction);
-		const Task::State startToggle();
-		const Task::State finalizeChangeTo(const Direction direction);
+		const State startChangeTo(const Direction direction);
+		const State startToggle();
+		const State finalizeChangeTo(const Direction direction);
 
 		const Direction direction();
 		static Direction otherDirection(const Direction current);

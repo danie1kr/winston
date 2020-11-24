@@ -80,6 +80,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Command.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="DigitalCentralStation.h" />
     <ClInclude Include="Event.h" />
@@ -100,6 +101,7 @@
     <ClInclude Include="WinstonTypes.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Command.cpp" />
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="DigitalCentralStation.cpp" />
     <ClCompile Include="Event.cpp" />

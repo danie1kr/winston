@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WinstonTypes.h"
+/*#include "WinstonTypes.h"
 #include "Task.h"
 #include "Signal.h"
 #include "Rail.h"
@@ -22,7 +22,7 @@ namespace winston
 	public:
 		TaskDrive();
 		const State execute();
-	};*/
+	};*
 
 	class TaskTurnoutStartToggle : public Task, Uniqe_Ptr<TaskTurnoutStartToggle>
 	{
@@ -49,4 +49,4 @@ namespace winston
 		Turnout::Shared turnout;
 		Turnout::Direction direction;
 	};
-}
+}*/

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "WinstonTypes.h"
+/*#include "WinstonTypes.h"
 #include "Event.h"
 
 namespace winston
@@ -8,18 +8,15 @@ namespace winston
 	class Task : public Uniqe_Ptr<Task>
 	{
 	public:
-		enum class State
-		{
-			Running,
-			Finished
-		};
 
-		Task(Event::Unique event);
-		virtual const State execute() = 0;
-		unsigned long age();
-		void finished();
+		Task(Payload::Shared payload, Event::Unique event);
+		inline const State execute();
+		inline Payload::Shared payload();
+		inline unsigned long age();
+		inline void finished();
 	private:
 		unsigned long created;
 		Event::Unique event;
+		Payload::Shared _payload;
 	};
-}
+}*/

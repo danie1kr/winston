@@ -2,7 +2,7 @@
 
 namespace winston
 {
-	Railway::Railway() : Shared_Ptr<Railway>()
+	Railway::Railway(const Callbacks callbacks) : Shared_Ptr<Railway>(), callbacks(callbacks)
 	//	: digitalCentralStation()
 	{
 	}

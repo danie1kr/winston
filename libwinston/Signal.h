@@ -6,6 +6,7 @@
 
 namespace winston
 {
+	/*
 	class Signal
 	{
 	public:
@@ -19,12 +20,12 @@ namespace winston
 		using Callback = std::function<Task::State(Aspect aspect)>;
 		Signal(Callback callback);
 
-		Task::State set(Aspect aspect);
+		State set(Aspect aspect);
 		Aspect state();
 		/*
 		virtual void stop();
 		virtual void slow();
-		virtual void go();*/
+		virtual void go();*
 	protected:
 		Aspect aspect;
 		Callback callback;

@@ -19,10 +19,17 @@ namespace winston
 	class Railway : public Shared_Ptr<Railway>
 	{
 	public:
-		Railway();
+		struct Callbacks
+		{
+			using TurnoutUpdateCallback = std::function<const State(Turnout::Shared turnout, const Turnout::Direction direction)>;
+			TurnoutUpdateCallback turnoutUpdateCallback;
+		};
+
+		Railway(const Callbacks callbacks);
 		virtual ~Railway() = default;
 		///void connect(DigitalCentralStationP<std::shared_ptr<Railway>> digitalCentralStation);
 	protected:
+		const Callbacks callbacks;
 		//DigitalCentralStationP<std::shared_ptr<Railway>> digitalCentralStation;
 	//public:
 		//virtual Section::Shared& section(size_t index) = 0;
@@ -32,7 +39,7 @@ namespace winston
 	class RailwayWithRails : public Railway
 	{
 	public:
-		RailwayWithRails() : Railway(), sections() { };
+		RailwayWithRails(const Callbacks callbacks) : Railway(callbacks), sections() { };
 		virtual ~RailwayWithRails() = default;
 
 		using Sections = typename _SectionsClass;

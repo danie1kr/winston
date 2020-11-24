@@ -116,7 +116,12 @@ namespace winston
 			auto s = std::dynamic_pointer_cast<Section>(section);
 			return this->section(s);
 		}
-
+		/*
+		inline Locomotive::Shared locomotiveFromAddress(DCCAddress address)
+		{
+			auto it = std::find_if(this->locomotives.begin(), this->locomotives->end(), [](const Locomotive::Shared& loco) { return loco->address() == address; });
+		}
+		*/
 	private:
 		Result validate()
 		{
@@ -152,7 +157,7 @@ namespace winston
 		//void entering(SectionIndex section);
 
 	protected:
-		std::vector<Locomotive> locomotives;
+		//std::vector<Locomotive::Shared> locomotives;
 		std::array<Section::Shared, sectionsCount()> sections;
 	};
 }

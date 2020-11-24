@@ -32,7 +32,7 @@ const winston::Result Z21::connect()
     CaR(this->getHardwareInfo());
     CaR(this->getFirmwareVersion());
     CaR(this->getVersion());
-    CaR(this->setBroadcastFlags(Z21_Broadcast::STATUS_LOCO_TURNOUT));
+    CaR(this->setBroadcastFlags(Z21_Broadcast::STATUS_LOCO_TURNOUT | Z21_Broadcast::ALL_LOCO_INFO));
 
     return winston::Result::OK;
 }
@@ -453,7 +453,7 @@ void Z21::processXPacket(uint8_t* data) {
                 onBCStopped();
             break;
         case Z21RX_LAN_X::LOCO_INFO:
-            if (onLocoInfo != NULL)
+            //if (onLocoInfo != NULL)
                 processLocoInfo(data);
             break;
         case Z21RX_LAN_X::GET_FIRMWARE_VERSION:
@@ -497,7 +497,9 @@ void Z21::processLocoInfo(uint8_t* data) {
     functions |= (XDB6 << 13);              //F13 - F20
     functions |= (XDB7 << 21);              //F21 - F28
 
-    onLocoInfo(addr, busy, consist, transpond, forward, speed, functions);
+    //onLocoInfo(addr, busy, consist, transpond, forward, speed, functions);
+
+    this->callbacks.locomotiveUpdateCallback(this->addressTranslator->locomotive(addr), busy, forward, speed, functions);
 }
 
 void Z21::processBCPacket(uint8_t* data) {

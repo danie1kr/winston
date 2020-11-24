@@ -81,8 +81,9 @@ public:
     {
     public:
         AddressTranslator(winston::Shared_Ptr<RailwayWithSiding>::Shared railway);
-        virtual winston::Turnout::Shared turnout(const unsigned int address);
-        virtual const unsigned int address(winston::Section::Shared section);
+        virtual winston::Turnout::Shared turnout(const winston::Address address);
+        virtual winston::Locomotive::Shared locomotive(const winston::Address address);
+        virtual const winston::Address address(winston::Section::Shared section);
 
         using Shared_Ptr<AddressTranslator>::Shared;
         using Shared_Ptr<AddressTranslator>::make;
@@ -200,8 +201,9 @@ public:
     {
     public:
         AddressTranslator(winston::Shared_Ptr<Y2020Railway>::Shared railway);
-        virtual winston::Turnout::Shared turnout(const unsigned int address);
-        virtual const unsigned int address(winston::Section::Shared section);
+        virtual winston::Turnout::Shared turnout(const winston::Address address);
+        virtual winston::Locomotive::Shared locomotive(const winston::Address address);
+        virtual const winston::Address address(winston::Section::Shared section);
 
         using Shared_Ptr<AddressTranslator>::Shared;
         using Shared_Ptr<AddressTranslator>::make;

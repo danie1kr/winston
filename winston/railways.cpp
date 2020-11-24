@@ -32,7 +32,7 @@ const std::string MiniRailway::name()
 RailwayWithSiding::RailwayWithSiding() : winston::RailwayWithRails<RailwayWithSidingsSections>() {};
 RailwayWithSiding::AddressTranslator::AddressTranslator(RailwayWithSiding::Shared railway) : winston::DigitalCentralStation::AddressTranslator(), Shared_Ptr<AddressTranslator>(), railway(railway) { };
 
-winston::Turnout::Shared RailwayWithSiding::AddressTranslator::turnout(const unsigned int address)
+winston::Turnout::Shared RailwayWithSiding::AddressTranslator::turnout(const winston::Address address)
 {
     Sections section;
     switch (address)
@@ -44,7 +44,7 @@ winston::Turnout::Shared RailwayWithSiding::AddressTranslator::turnout(const uns
     return std::dynamic_pointer_cast<winston::Turnout>(railway->section(section));
 }
 
-const unsigned int RailwayWithSiding::AddressTranslator::address(winston::Section::Shared section)
+const winston::Address RailwayWithSiding::AddressTranslator::address(winston::Section::Shared section)
 {
     switch (railway->sectionEnum(section))
     {
@@ -53,6 +53,11 @@ const unsigned int RailwayWithSiding::AddressTranslator::address(winston::Sectio
     case Sections::Turnout2: return 1; break;
     }
     return 0;
+}
+
+winston::Locomotive::Shared RailwayWithSiding::AddressTranslator::locomotive(const winston::Address address)
+{
+    return nullptr;
 }
 
 winston::Section::Shared RailwayWithSiding::define(const Sections section)
@@ -156,7 +161,7 @@ const std::string Y2020Railway::name()
 
 Y2020Railway::AddressTranslator::AddressTranslator(Y2020Railway::Shared railway) : winston::DigitalCentralStation::AddressTranslator(), Shared_Ptr<AddressTranslator>(), railway(railway) { };
 
-winston::Turnout::Shared Y2020Railway::AddressTranslator::turnout(const unsigned int address)
+winston::Turnout::Shared Y2020Railway::AddressTranslator::turnout(const winston::Address address)
 {
     Sections section;
     switch (address)
@@ -168,7 +173,12 @@ winston::Turnout::Shared Y2020Railway::AddressTranslator::turnout(const unsigned
     return std::dynamic_pointer_cast<winston::Turnout>(railway->section(section));
 }
 
-const unsigned int Y2020Railway::AddressTranslator::address(winston::Section::Shared section)
+winston::Locomotive::Shared Y2020Railway::AddressTranslator::locomotive(const winston::Address address)
+{
+    return nullptr;
+}
+
+const winston::Address Y2020Railway::AddressTranslator::address(winston::Section::Shared section)
 {
     switch (railway->sectionEnum(section))
     {

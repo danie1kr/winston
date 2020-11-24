@@ -3,6 +3,7 @@
 #include "Util.h"
 #include "WinstonTypes.h"
 #include "Rail.h"
+#include "Locomotive.h"
 #include "SignalBox.h"
 
 namespace winston
@@ -14,8 +15,9 @@ namespace winston
 		{
 		public:
 			AddressTranslator();
-			virtual Turnout::Shared turnout(const unsigned int address) = 0;
-			virtual const unsigned int address(winston::Section::Shared section) = 0;
+			virtual Turnout::Shared turnout(const Address address) = 0;
+			virtual Locomotive::Shared locomotive(const Address address) = 0;
+			virtual const Address address(winston::Section::Shared section) = 0;
 		};
 
 		class DebugInjector : public Shared_Ptr<DebugInjector>
@@ -29,6 +31,15 @@ namespace winston
 
 		struct Callbacks
 		{
+			using LocomotiveUpdateCallback = std::function<void(Locomotive::Shared loco,
+				bool  busy,
+			//	boolean  doubleTracktion,
+			//	boolean  transpond,
+				bool  forward,
+				unsigned char  speed,                                  // In 128 speed range
+				uint32_t functions)>;
+			LocomotiveUpdateCallback locomotiveUpdateCallback;
+
 			using TurnoutUpdateCallback = std::function<void(Turnout::Shared turnout, const Turnout::Direction direction)>;
 			TurnoutUpdateCallback turnoutUpdateCallback;
 

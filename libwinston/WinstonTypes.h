@@ -6,17 +6,17 @@
 
 namespace winston
 {
-	using DCC_Address = int;
+	using Address = uint16_t;
 
 	using Id = unsigned int;
 
 	using SectionIndex = size_t;
-
+	/*
 	struct Locomotive
 	{
 		DCC_Address dcc;
 		std::string name;
-	};
+	};*/
 
 	enum class Result
 	{
@@ -86,4 +86,6 @@ namespace winston
 	//using CallbackP = std::shared_ptr<Callback>;
 
 	class UDPSocket;
+
+	class Locomotive;
 }

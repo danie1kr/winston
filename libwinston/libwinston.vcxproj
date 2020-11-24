@@ -81,10 +81,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Command.h" />
-    <ClInclude Include="Device.h" />
     <ClInclude Include="DigitalCentralStation.h" />
-    <ClInclude Include="Event.h" />
-    <ClInclude Include="Events.h" />
     <ClInclude Include="Callback.h" />
     <ClInclude Include="HAL.h" />
     <ClInclude Include="Locomotive.h" />
@@ -94,18 +91,13 @@
     <ClInclude Include="Railway.h" />
     <ClInclude Include="Signal.h" />
     <ClInclude Include="SignalBox.h" />
-    <ClInclude Include="Task.h" />
-    <ClInclude Include="Tasks.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="Winston.h" />
     <ClInclude Include="WinstonTypes.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Command.cpp" />
-    <ClCompile Include="Device.cpp" />
     <ClCompile Include="DigitalCentralStation.cpp" />
-    <ClCompile Include="Event.cpp" />
-    <ClCompile Include="Events.cpp" />
     <ClCompile Include="Callback.cpp" />
     <ClCompile Include="HAL.cpp" />
     <ClCompile Include="Locomotive.cpp" />
@@ -113,8 +105,6 @@
     <ClCompile Include="Signal.cpp" />
     <ClCompile Include="Rail.cpp" />
     <ClCompile Include="SignalBox.cpp" />
-    <ClCompile Include="Task.cpp" />
-    <ClCompile Include="Tasks.cpp" />
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="Winston.cpp" />
   </ItemGroup>

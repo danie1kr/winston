@@ -61,12 +61,9 @@ namespace winston
 		virtual void requestTurnoutInfo(Turnout::Shared turnout) = 0;
 		void turnoutUpdate(Turnout::Shared turnout, const Turnout::Direction direction);
 
-		//void setTurnoutUpdateCallback(TurnoutUpdateCallback callback);
-
 	protected:
 		AddressTranslator::Shared addressTranslator;
 		SignalBox::Shared signalBox;
-		//_RailwayP railway;
 		const Callbacks callbacks;
 	};
 }

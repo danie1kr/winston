@@ -21,19 +21,11 @@ namespace winston
 		};
 
 		SignalBox(Railway::Shared& railway, Mutex& mutex);
-		//static SignalBoxP& create(RailwayP& railway, Mutex& mutex);
-		//void notify(Event::Unique event);
-		//void assign(Task::Unique task);
 		void order(Command::Shared command);
 		void work();
 	private:
 		std::queue<Command::Shared> commands;
-		/*
-		std::queue<Event::Unique> events;
-		std::queue<Task::Unique> tasks;
-		*/
 		Mutex& mutex;
 		Railway::Shared railway;
 	};
-	//extern SignalBoxP signalBox;
 }

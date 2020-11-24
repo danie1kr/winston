@@ -1,7 +1,6 @@
 #pragma once
 
 #include "WinstonTypes.h"
-#include "Task.h"
 #include <functional>
 
 namespace winston

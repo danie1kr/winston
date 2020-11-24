@@ -25,10 +25,6 @@ public:
     MiniRailway(const Callbacks callbacks);
     virtual ~MiniRailway() = default;
 
-    /*std::function<winston::State(Sections id, winston::Turnout::Direction direction)> turnoutCallback = [](Sections id, winston::Turnout::Direction aspect) {
-        return winston::State::Finished;
-    };*/
-
     static const std::string name();
 
     using winston::Shared_Ptr<MiniRailway>::Shared;
@@ -61,9 +57,6 @@ enum class RailwayWithSidingsSections : unsigned int
 
 class RailwayWithSiding : public winston::RailwayWithRails<RailwayWithSidingsSections>, winston::Shared_Ptr<RailwayWithSiding>
 {
-    /*std::function<winston::State(Sections id, winston::Turnout::Direction direction)> turnoutCallback = [](Sections id, winston::Turnout::Direction aspect) {
-        return winston::State::Finished;
-    };*/
 public:
     RailwayWithSiding(const Callbacks callbacks);
     virtual ~RailwayWithSiding() = default;
@@ -131,10 +124,6 @@ public:
     TimeSaverRailway(const Callbacks callbacks);
     virtual ~TimeSaverRailway() = default;
 
-    /*std::function<winston::State(Sections id, winston::Turnout::Direction direction)> turnoutCallback = [](Sections id, winston::Turnout::Direction aspect) {
-        return winston::State::Finished;
-    };*/
-
     static const std::string name();
 
     using winston::Shared_Ptr<TimeSaverRailway>::Shared;
@@ -186,11 +175,6 @@ class Y2020Railway : public winston::RailwayWithRails<Y2020RailwaySections>, win
 public:
     Y2020Railway(const Callbacks callbacks);
     virtual ~Y2020Railway() = default;
-
-    /*std::function<winston::State(Sections id, winston::Turnout::Direction direction)> turnoutCallback = [](Sections id, winston::Turnout::Direction aspect) {
-        
-        return winston::State::Finished;
-    };*/
 
     static const std::string name();
 

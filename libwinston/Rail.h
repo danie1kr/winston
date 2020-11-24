@@ -6,7 +6,6 @@
 #include <memory>
 #include <functional>
 #include "WinstonTypes.h"
-#include "Task.h"
 
 namespace winston
 {

@@ -29,11 +29,6 @@ namespace winston
 
 	}
 
-	/*Section::Shared Bumper::make()
-	{
-		return std::make_shared<Bumper>();
-	}*/
-
 	bool Bumper::has(const Connection connection) const
 	{
 		return connection == Connection::A || connection == Connection::DeadEnd;
@@ -107,11 +102,6 @@ namespace winston
 
 	}
 
-	/*Section::Shared Rail::make()
-	{
-		return std::make_shared<Rail>();
-	}*/
-
 	bool Rail::has(const Connection connection) const
 	{
 		return connection == Connection::A || connection == Connection::B;
@@ -175,11 +165,6 @@ namespace winston
 	{
 
 	}
-
-	/*Section::Shared Turnout::make(const Callback callback, const bool leftTurnout)
-	{
-		return std::make_shared<Turnout>(callback, leftTurnout);
-	}*/
 
 	bool Turnout::has(const Connection connection) const
 	{
@@ -273,25 +258,6 @@ namespace winston
 	{
 		return this->dir;
 	}
-
-	/*const Task::State Turnout::toggle()
-	{
-		Direction newDirection = otherDirection(this->direction);
-		Task::State state = this->callback(newDirection);
-		if (state == Task::State::Finished)
-			this->direction = newDirection;
-
-		return state;
-		
-	}
-
-	const Task::State Turnout::toggle(const Direction direction)
-	{
-		if (this->direction != direction)
-			return this->toggle();
-
-		return Task::State::Finished;
-	}*/
 
 	Turnout::Direction Turnout::otherDirection(const Direction current)
 	{

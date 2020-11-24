@@ -3,9 +3,7 @@
 
 #include "SignalBox.h"
 #include "HAL.h"
-#include "Tasks.h"
 #include "Railway.h"
-#include "Events.h"
 
 namespace winston
 {
@@ -13,28 +11,11 @@ namespace winston
 		: railway(railway), mutex(mutex)
 	{
 	}
-	/*
-	SignalBoxP& SignalBox::create(RailwayP& railway, Mutex& mutex)
-	{
-		signalBox = std::make_shared<SignalBox>(railway, mutex);
-		return signalBox;
-	}*/
 
 	void SignalBox::order(Command::Shared command)
 	{
 		this->commands.push(std::move(command));
 	}
-
-	/*
-	void SignalBox::notify(Event::Unique event)
-	{
-		this->events.push(std::move(event));
-	}
-
-	void SignalBox::assign(Task::Unique task)
-	{
-		this->tasks.push(std::move(task));
-	}*/
 
 	void SignalBox::work()
 	{

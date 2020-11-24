@@ -27,12 +27,8 @@ namespace winston
 
 		Railway(const Callbacks callbacks);
 		virtual ~Railway() = default;
-		///void connect(DigitalCentralStationP<std::shared_ptr<Railway>> digitalCentralStation);
 	protected:
 		const Callbacks callbacks;
-		//DigitalCentralStationP<std::shared_ptr<Railway>> digitalCentralStation;
-	//public:
-		//virtual Section::Shared& section(size_t index) = 0;
 	};
 
 	template<typename _SectionsClass>
@@ -43,10 +39,8 @@ namespace winston
 		virtual ~RailwayWithRails() = default;
 
 		using Sections = typename _SectionsClass;
-		//using RailwayDefineCallback = std::function<Section::Shared(const Sections section)>;
-		//using RailConnectCallback = std::function<void(std::array < Section::Shared, sectionsCount()>& sections)>;
 
-		Result init()//RailwayDefineCallback define, RailConnectCallback connect)
+		Result init()
 		{
 			for (size_t section = 0; section < sectionsCount(); ++section)
 				this->sections[section] = define(magic_enum::enum_value<Sections>(section));
@@ -60,15 +54,10 @@ namespace winston
 		virtual winston::Section::Shared define(const Sections section) = 0;
 		virtual void connect(std::array < winston::Section::Shared, sectionsCount()>& sections) = 0;
 
-		//virtual const std::string name() = 0;
-		
 		template<typename _Section, typename ..._args>
 		Section::Shared& add(Sections section, _args && ...args) {
 			return this->sections[static_cast<size_t>(section)] = std::make_shared<_Section>(std::forward<_args>(args)...);
 		}
-
-
-		//void drive(SectionIndex from, SectionIndex& onto) const;
 
 		bool traverse(const Section::Connection from, Section::Shared& on, Section::Shared& onto) const
 		{
@@ -123,16 +112,9 @@ namespace winston
 			auto s = std::dynamic_pointer_cast<Section>(section);
 			return this->section(s);
 		}
-		/*
-		inline Locomotive::Shared locomotiveFromAddress(DCCAddress address)
-		{
-			auto it = std::find_if(this->locomotives.begin(), this->locomotives->end(), [](const Locomotive::Shared& loco) { return loco->address() == address; });
-		}
-		*/
 	private:
 		Result validate()
 		{
-			//std::bitset<_Sections> passed({});
 			bool passed = true;
 
 			for(size_t i = 0; i < sectionsCount() && passed; ++i)
@@ -144,27 +126,10 @@ namespace winston
 				passed = current->validate() == Result::OK;
 			}
 
-			/*std::queue<Section*> rails;
-
-			rails.push(sections[0]);
-			while (rails.size() > 0)
-			{
-				auto current = rails.front();
-				rails.pop();
-
-
-
-				if (current == nullptr)
-					return Result::ValidationFailed;
-			}*/
-
 			return passed ? Result::OK : Result::InternalError;
 		}
-		//void leaving(SectionIndex section);
-		//void entering(SectionIndex section);
 
 	protected:
-		//std::vector<Locomotive::Shared> locomotives;
 		std::array<Section::Shared, sectionsCount()> sections;
 	};
 }

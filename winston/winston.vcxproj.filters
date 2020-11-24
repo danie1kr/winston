@@ -72,9 +72,6 @@
     <ClCompile Include="winston.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tasks.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="railways.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

@@ -103,7 +103,6 @@
     </ClCompile>
     <ClCompile Include="winston-hal-x64.cpp" />
     <ClCompile Include="winston.cpp" />
-    <ClCompile Include="tasks.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\libwinston\libwinston.vcxproj">

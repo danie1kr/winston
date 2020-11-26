@@ -88,13 +88,39 @@
         }
     </style>
 
-
     <script type="text/template" id="template_turnout">
     <div class="winston-turnout row" winston-turnout-section="<%= id %>" winston-turnout-direction="<%= direction %>">
         <div class="name col s1"><%= name %></div><div class="direction col s3"><%= direction %></div>
 
 <div class="col s2"><a class="waves-effect waves-light btn">toggle</a></div>
         </div>
+    </script>
+
+    <script type="text/template" id="template_loco">
+    <div class="winston-locomotive row" winston-loco-address="<%= address %>" winston-type="locomotive" winston-id="<%= address %>">
+        <div class="row">
+            <div class="name col s3"><%= name %></div>
+            <div class="address col s1"><%= address %></div>
+            <div class="switch col s8">
+                <i class="small material-icons">highlight</i>
+                <label>
+                    Off <input type="checkbox" class="light"> <span class="lever"></span> On
+                </label>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col s3">
+            <label class="speedValue"></label>
+            </div>
+            <div class="col s5"></div>
+            <div class="col s4"><a class="waves-effect waves-light btn">stop</a></div>
+        </div>
+        <div class="row">
+            <input class="speed" type="range" min="-100" max="100" />
+        </div>
+        <hr>
+    </div>
     </script>
 
 </head>
@@ -150,6 +176,12 @@
     <div id="error"></div>
 
     <ul id="sideLoco" class="sidenav sidenav-fixed">
+        <ul class="collapsible expandable">
+            <li id="locoShedContainer" class="active">
+                <div class="collapsible-header">Locomotives</div>
+                <div class="collapsible-body"></div>
+            </li>
+        </ul>
     </ul>
 
     <ul id="sideTurnout" class="sidenav sidenav-fixed">
@@ -200,6 +232,7 @@
         let railway, layout, $railway, $saveLayout, cy, uiEditLayout = false, allowLayoutStorage = true;
 
         const WinstonTypeTurnout = "turnout";
+        const WinstonTypeLocomotive = "locomotive";
         const TurnoutState_A_B = 0;
         const TurnoutState_A_C = 1;
         const TurnoutState_Changing = 2;
@@ -247,7 +280,28 @@
 
         function winstonGet(type, id)
         {
-            return $("[winston-type:\"" + type + "\"][winston-id:\"" + id + "\"]");
+            return $("[winston-type=\"" + type + "\"][winston-id=\"" + id + "\"]");
+        }
+
+        function loco(data)
+        {
+            let address = data.address;
+            let $element = winstonGet(WinstonTypeLocomotive, address);
+
+            if($element === undefined || $element.length === 0)
+            {
+                let $locoShedContainerBody = $("#locoShedContainer>div.collapsible-body");
+                let locoTemplate = _.template($("#template_loco").html());
+                $element = $(locoTemplate({address: address, name: data.name }));
+                $element.find(".speed").on('change', function(event) { 
+                    let $loco = $(event.target).closest(".winston-locomotive");
+                    $loco.find(".speedValue").html(event.target.value);
+                });
+                $locoShedContainerBody.append($element);
+            }
+
+            $element.find(".speed").val(data.forward ? data.speed : -data.speed).trigger('change');
+            $element.find(".light").attr("checked", data.light ? "checked" : undefined);
         }
 
         function turnoutGet(id)
@@ -700,6 +754,7 @@
                 case "turnoutState": { turnoutState(data); break; }
                 case "railway": { buildRailwayGraph(data); break; }
                 case "layout": { updateRailwayLayout(data); break; }
+                case "loco": { loco(data); break; }
                 case "storeRailwayLayoutSuccessful": { 
                     allowLayoutStorage = data;
                     if(allowLayoutStorage) 
@@ -821,6 +876,7 @@
             //$("#sideLoco").get(0).sidenav();
 
             send("getRailway", {});
+            send("getLocoShed", {});
         });
 
     </script>

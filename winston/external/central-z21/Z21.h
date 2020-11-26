@@ -32,6 +32,8 @@ public:
     const winston::Result connect();
 
     void requestTurnoutInfo(winston::Turnout::Shared turnout);
+    void locoDrive(winston::Locomotive::Shared locomotive);
+    void locoFunction(winston::Locomotive::Shared locomotive);
 
     using winston::Shared_Ptr<Z21>::Shared;
     using winston::Shared_Ptr<Z21>::make;

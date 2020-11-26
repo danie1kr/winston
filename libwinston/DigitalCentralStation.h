@@ -61,6 +61,9 @@ namespace winston
 		virtual void requestTurnoutInfo(Turnout::Shared turnout) = 0;
 		void turnoutUpdate(Turnout::Shared turnout, const Turnout::Direction direction);
 
+		virtual void locoDrive(Locomotive::Shared locomotive) = 0;
+		virtual void locoFunction(Locomotive::Shared locomotive) = 0;
+
 	protected:
 		AddressTranslator::Shared addressTranslator;
 		SignalBox::Shared signalBox;

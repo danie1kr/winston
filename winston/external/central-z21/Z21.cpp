@@ -406,6 +406,16 @@ void Z21::requestTurnoutInfo(winston::Turnout::Shared turnout)
     this->send(this->getAccessoryInfo((const unsigned short)address));
 }
 
+void Z21::locoDrive(winston::Locomotive::Shared locomotive)
+{
+    this->setLocoDrive(locomotive->address(), locomotive->forward(), Z21_Speed_Range::STEPS_128, locomotive->speed());
+}
+
+void Z21::locoFunction(winston::Locomotive::Shared locomotive)
+{
+    this->setLocoFunction(locomotive->address(), Z21_Function::F0, locomotive->light() ? Z21_Function_Action::ON : Z21_Function_Action::OFF);
+}
+
 void Z21::processXPacket(uint8_t* data) {
     auto header = Z21Packet::getXHeader(data);
     switch (header) {

@@ -11,6 +11,21 @@ namespace winston
 	{
 	}
 
+	bool Locomotive::light()
+	{
+		return this->details.functions & 0b1;
+	}
+	
+	bool Locomotive::forward()
+	{
+		return this->details.forward;
+	}
+	
+	unsigned char Locomotive::speed()
+	{
+		return this->details.speed;
+	}
+
 	void Locomotive::drive(bool forward, unsigned char speed)
 	{
 	}

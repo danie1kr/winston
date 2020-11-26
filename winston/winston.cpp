@@ -33,7 +33,39 @@ private:
         minnowSendSubmit(&sd);
     }
 
-    
+    void locoSend(winston::Locomotive::Shared& loco)
+    {
+        /*{
+            address
+            name
+            light
+            forward
+            speed
+        }*/
+        SendData sd;
+        minnowSendPrepare(this->minnowCD, &sd, "loco");
+        JEncoder_beginObject(&sd.encoder);
+        JEncoder_setName(&sd.encoder, "address");
+        JEncoder_setInt(&sd.encoder, loco->address());
+        JEncoder_setName(&sd.encoder, "name");
+        JEncoder_setString(&sd.encoder, loco->name().c_str());
+        JEncoder_setName(&sd.encoder, "light");
+        JEncoder_setBoolean(&sd.encoder, loco->light());
+        JEncoder_setName(&sd.encoder, "forward");
+        JEncoder_setBoolean(&sd.encoder, loco->forward());
+        JEncoder_setName(&sd.encoder, "speed");
+        JEncoder_setInt(&sd.encoder, loco->speed());
+        JEncoder_endObject(&sd.encoder);
+        minnowSendSubmit(&sd);
+    }
+
+    void locoSend(winston::Address address)
+    {
+        if (auto loco = this->get(address))
+        {
+            locoSend(loco);
+        }
+    }
 
     // message from websocket received
     int minnow_manageMessage(RecData* o, ConnData* cd, const char* msg, JErr* error, JVal* value)
@@ -188,6 +220,33 @@ private:
             }
 
         }
+        else if (std::string("getLocoShed").compare(msg) == 0)
+        {
+            for (auto& loco : this->locomotiveShed)
+                this->locoSend(loco);
+        }
+        else if (std::string("controlLoco").compare(msg) == 0)
+        {
+            /*
+            {
+                address
+                light
+                forward
+                speed
+            }
+            */
+            winston::Address address;
+            bool light, forward;
+            unsigned int speed;
+            JVal_get(value, error, "{dbbd}", "address", &address, "light", &light, "forward", &forward, "speed", &speed);
+
+            if (JErr_isError(error) == false)
+                if (auto loco = this->get(address))
+                {
+                    loco->light(light);
+                    loco->drive(forward, (unsigned char)(speed & 0xFF));
+                }
+        }
         else
         {
             winston::hal::text("Received unknown message: ");
@@ -311,7 +370,14 @@ private:
             minnowStart(webSocketListenPtr, webSocketSendPtr, &this->minnowWPH, &this->minnowCD, &this->minnowRD, &this->minnowServer, [this](struct RecData* o, struct ConnData* cd, const char* msg, JErr* e, JVal* v)->int { return this->minnow_manageMessage(o, cd, msg, e, v); }, [this](MST* mst, const char* path, FetchPageSend send)->int {return this->minnow_fetchPage(mst, path, send);  });
             this->webSocketState = winston::hal::UDPSocket::State::Connecting;
         }
-    };
+    }
+
+    void populateLocomotiveShed()
+    {
+        this->addLocomotive(1, "BR 114");
+        this->addLocomotive(4, "BR 106");
+        this->addLocomotive(5, "BR 64");
+    }
 
     // minnow related
     WssProtocolHandshake* minnowWPH = nullptr;

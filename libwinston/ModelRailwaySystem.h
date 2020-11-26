@@ -23,12 +23,22 @@ namespace winston
 			this->railway->init();
 			result = this->digitalCentralStation->connect();
 
+			this->populateLocomotiveShed();
 			this->systemSetupComplete();
 		};
 
 		static const std::string name()
 		{
 			return _Railway::element_type::name();
+		}
+
+		Locomotive::Shared get(const Address address)
+		{
+			auto it = std::find_if(this->locomotiveShed.begin(), this->locomotiveShed.end(), [address](const auto& loco) { return loco->address() == address; });
+			if (it == this->locomotiveShed.end())
+				return nullptr;
+			else
+				return *it;
 		}
 
 		void loop() {
@@ -40,6 +50,14 @@ namespace winston
 		virtual void systemSetup() = 0;
 		virtual void systemSetupComplete() = 0;
 		virtual void systemLoop() = 0;
+		virtual void populateLocomotiveShed() = 0;
+
+
+		void addLocomotive(Address address, std::string name)
+		{
+			auto loco = Locomotive::make(address, name);
+			this->locomotiveShed.push_back(loco);
+		}
 
 		// the railway
 		_Railway railway;
@@ -50,6 +68,9 @@ namespace winston
 		_DigitalCentralStation digitalCentralStation;
 		_AddressTranslator addressTranslator;
 		DigitalCentralStation::DebugInjector::Shared stationDebugInjector;
+
+		// the locos
+		std::vector<Locomotive::Shared> locomotiveShed;
 	};
 }
 

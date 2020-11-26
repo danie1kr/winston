@@ -10,6 +10,9 @@ namespace winston
 	public:
 		Locomotive(const Address address, const std::string name);
 		void light(bool on);
+		bool light();
+		bool forward();
+		unsigned char speed();
 		void drive(bool forward, unsigned char speed);
 		void stop();
 		void update(bool busy, bool forward, unsigned char speed, uint32_t functions);

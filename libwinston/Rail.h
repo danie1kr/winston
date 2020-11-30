@@ -5,6 +5,7 @@
 #include <set>
 #include <memory>
 #include <functional>
+#include "Signal.h"
 #include "WinstonTypes.h"
 
 namespace winston
@@ -56,6 +57,9 @@ namespace winston
 		virtual void collectAllConnections(std::set<Section::Shared>& sections) const = 0;
 		virtual const Result validate() = 0;
 		virtual const Type type() = 0;
+
+		virtual void attachSignal(Signal::Shared& signal, const Connection facing) = 0;
+
 	protected:
 		Result validateSingle(const Section::Shared section);
 	};
@@ -74,6 +78,8 @@ namespace winston
 		const Result validate();
 		const Type type();
 
+		void attachSignal(Signal::Shared& signal, const Connection facing);
+
 		void connections(Section::Shared& onA);
 
 		using Shared_Ptr<Bumper>::Shared;
@@ -81,6 +87,7 @@ namespace winston
 
 	private:
 		Section::Shared a;
+		std::array<Signal::Shared, 2> signals;
 	};
 
 	// a====b
@@ -97,12 +104,15 @@ namespace winston
 		const Result validate();
 		const Type type();
 
+		void attachSignal(Signal::Shared& signal, const Connection facing);
+
 		void connections(Section::Shared& onA, Section::Shared& onB);
 
 		using Shared_Ptr<Rail>::Shared;
 		using Shared_Ptr<Rail>::make;
 	private:
 		Section::Shared a, b;
+		std::array<Signal::Shared, 2> signals;
 	};
 
 	// a====b
@@ -130,6 +140,8 @@ namespace winston
 		const Result validate();
 		const Type type();
 
+		void attachSignal(Signal::Shared& signal, const Connection facing);
+
 		void connections(Section::Shared& onA, Section::Shared& onB, Section::Shared& onC);
 
 		//const Task::State toggle();
@@ -149,5 +161,7 @@ namespace winston
 
 		Callback callback;
 		Section::Shared a, b, c;
+
+		std::array<Signal::Shared, 3> signals;
 	};
 }

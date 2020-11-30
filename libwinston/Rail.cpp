@@ -89,6 +89,15 @@ namespace winston
 		return Type::Bumper;
 	}
 
+	void Bumper::attachSignal(Signal::Shared& signal, const Connection facing)
+	{
+		switch (facing)
+		{
+		case Connection::A: this->signals[0] = signal; break;
+		case Connection::DeadEnd: this->signals[1] = signal; break;
+		}
+	}
+
 	void Turnout::connections(Section::Shared& onA, Section::Shared& onB, Section::Shared& onC)
 	{
 		onA = a;
@@ -152,6 +161,15 @@ namespace winston
 	const Section::Type Rail::type()
 	{
 		return Type::Rail;
+	}
+
+	void Rail::attachSignal(Signal::Shared& signal, const Connection facing)
+	{
+		switch (facing)
+		{
+		case Connection::A: this->signals[0] = signal; break;
+		case Connection::B: this->signals[1] = signal; break;
+		}
 	}
 
 	void Rail::connections(Section::Shared& onA, Section::Shared& onB)
@@ -227,15 +245,23 @@ namespace winston
 		return Type::Turnout;
 	}
 
+	void Turnout::attachSignal(Signal::Shared& signal, const Connection facing)
+	{
+		switch (facing)
+		{
+		case Connection::A: this->signals[0] = signal; break;
+		case Connection::B: this->signals[1] = signal; break;
+		case Connection::C: this->signals[2] = signal; break;
+		}
+	}
+
 	const State Turnout::startChangeTo(const Direction direction)
 	{
-		if (this->dir == direction)
+		if (this->dir == direction || this->dir == Direction::Changing)
 			return State::Finished;
 
-		State state = this->callback(this->shared_from_this(), direction);
 		this->dir = Direction::Changing;
-
-		return state;
+		return this->callback(this->shared_from_this(), this->dir);
 	}
 
 	const State Turnout::startToggle()

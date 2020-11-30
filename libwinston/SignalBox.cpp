@@ -12,6 +12,13 @@ namespace winston
 	{
 	}
 
+	void SignalBox::setSignalsFor(Turnout::Shared& turnout, const Turnout::Direction& direction)
+	{
+		Section::Connection from = direction == Turnout::Direction::A_B ? Section::Connection::B : Section::Connection::C;
+		Section::Shared onto;
+		turnout->traverse(from, onto);
+	}
+
 	void SignalBox::order(Command::Shared command)
 	{
 		this->commands.push(std::move(command));

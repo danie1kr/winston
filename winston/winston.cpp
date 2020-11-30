@@ -88,7 +88,7 @@ private:
                 {
                     signalBox->order(winston::Command::make([this, turnout, injectDir](const unsigned long& created) -> const winston::State
                     {
-                        if (created-winston::hal::now() > 200)
+                        if (winston::hal::now()-created > 2000)
                         {
                             this->stationDebugInjector->injectTurnoutUpdate(turnout, injectDir);
                             return winston::State::Finished;
@@ -98,7 +98,7 @@ private:
                         
                     }));
 
-                    this->turnoutSendState(id, turnout->direction());
+                    //this->turnoutSendState(id, turnout->direction());
                     return turnout->startToggle();
                 }));
                 return false;
@@ -299,8 +299,9 @@ private:
         // what to do when the digital central station updated a turnout
         callbacks.turnoutUpdateCallback = [=](winston::Turnout::Shared turnout, const winston::Turnout::Direction direction) -> const winston::State
         {
-            auto id = this->railway->sectionIndex(turnout);
-            turnoutSendState(id, direction);
+            //auto id = this->railway->sectionIndex(turnout);
+            //turnoutSendState(id, direction);
+            turnout->finalizeChangeTo(direction);
             return winston::State::Finished;
         };
 

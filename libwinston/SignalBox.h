@@ -21,6 +21,9 @@ namespace winston
 		};
 
 		SignalBox(Railway::Shared& railway, Mutex& mutex);
+
+		void setSignalsFor(Turnout::Shared& turnout, const Turnout::Direction& direction);
+
 		void order(Command::Shared command);
 		void work();
 	private:

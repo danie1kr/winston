@@ -2,51 +2,20 @@
 
 namespace winston
 {
-	/*Signal::Signal(Callback callback)
-		: callback(callback), aspect(Aspect::Stop)
+	Signal::Signal(const Callback callback)
+		: callback(callback), _aspect(Aspect::Stop)
 	{
 
 	}
 
-	Task::State Signal::set(Aspect aspect)
+	const State Signal::set(const Aspect aspect)
 	{
-		return this->callback(aspect);
+		this->_aspect = aspect;
+		return this->callback(this->_aspect);
 	}
 
-	Signal::Aspect Signal::state()
+	const Signal::Aspect Signal::aspect()
 	{
-		return this->aspect;
+		return this->_aspect;
 	}
-
-/
-	PreSignal::PreSignal(Device& device, const Port stop, const Port go)
-		: Signal(device, stop, go)
-	{
-
-	}
-
-	SectionSignal::SectionSignal(Device& device, const Port stop, const Port go)
-		: Signal(device, stop, go)
-	{
-
-	}
-
-	SectionWithPreSignal::SectionWithPreSignal(Device& device, const Port stop, const Port go, PreSignal& preSignal)
-		: SectionSignal(device, stop, go), preSignal(preSignal)
-	{
-
-	}
-
-	void SectionWithPreSignal::stop()
-	{
-		SectionSignal::stop();
-		preSignal.stop();
-	}
-
-	void SectionWithPreSignal::go()
-	{
-		SectionSignal::go();
-		preSignal.go();
-	}
-	*/
 }

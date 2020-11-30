@@ -671,13 +671,13 @@
                     if(thatNode === undefined || otherNode === undefined)
                         return;
 
-                    let from = that + (thatNode.data.direction !== undefined && connectionName !== "a" ? connectionName : "");
+                    let from = that + (thatNode.data.direction !== undefined/* && connectionName !== "a"*/ ? connectionName : "");
 
                     function connectToOther(otherConnectionName)
                     {
                         if(other[otherConnectionName] === that)
                         {
-                            let to = connection + (otherNode.data.direction !== undefined && otherConnectionName !== "a" ? otherConnectionName : "");
+                            let to = connection + (otherNode.data.direction !== undefined /*&& otherConnectionName !== "a"*/ ? otherConnectionName : "");
                             let id = from + "-" + to;
                             
                             edges.push({group: 'edges', data: {id: id, name: id, source: from, target: to}, classes: "track"});
@@ -703,9 +703,11 @@
                 if(type === 2)
                 {
                     nodes.push({group: 'nodes', data: {id: i, name: i, section: i, connections: {a: a, b: b, c: c}, direction: 1, relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "section turnout"});
+                    nodes.push({group: 'nodes', data: {id: i + "a", name: i + "a", section: i, relativePosition: {x: -20, y: 0}}, position: {x: i*100-20, y: 0}, classes: "turnoutConnection"});
                     nodes.push({group: 'nodes', data: {id: i + "b", name: i + "b", section: i, relativePosition: {x: 20, y: 0}}, position: {x: i*100+20, y: 0}, classes: "turnoutConnection"});
                     nodes.push({group: 'nodes', data: {id: i + "c", name: i + "c", section: i, relativePosition: {x: 20, y: 20}}, position: {x: i*100+20, y: 20}, classes: "turnoutConnection"});
                 
+                    edges.push({group: 'edges', data: {source: i, target: i+"a", connection: "a"}, classes: "internal"});
                     edges.push({group: 'edges', data: {source: i, target: i+"b", connection: "b"}, classes: "internal"});
                     edges.push({group: 'edges', data: {source: i, target: i+"c", connection: "c"}, classes: "internal"});
                 }

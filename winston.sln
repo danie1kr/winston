@@ -15,6 +15,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winston-tests", "winston-te
 		{E2AFE313-843B-4EE1-B7AC-988D2779B178} = {E2AFE313-843B-4EE1-B7AC-988D2779B178}
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "winston-stm32", "winston-stm32", "{3A90648F-0CC5-4DBF-B581-C6A8F5451F1C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64

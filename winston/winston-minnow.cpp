@@ -913,8 +913,11 @@ void minnowStart(SOCKET* listenSockPtr, SOCKET* sockPtr, WssProtocolHandshake** 
     ConnData_setWS(*cd, *ms); /* Set default setup */
     MS_constructor(*ms);
 
-    void* ctx = 0;
-
+#ifdef LWIP_RAW
+    SeCtx* ctx = 0;
+#else
+    void *ctx = 0;
+#endif
     SOCKET_constructor(listenSockPtr, ctx);
     SOCKET_constructor(sockPtr, ctx);
 

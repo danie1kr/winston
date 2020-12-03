@@ -7,7 +7,16 @@
 #include "winston.h"
 #include "winston-minnow.h"
 #include "railways.h"
+
+#ifdef WINSTON_PLATFORM_WIN_x64
 #include "winston-hal-x64.h"
+#endif
+
+#ifdef WINSTON_PLATFORM_STM32
+#include "winston-hal-stm32.h"
+#endif
+
+
 #include "external/central-z21/Z21.h"
 
 //#define RAILWAY_CLASS RailwayWithSiding
@@ -396,25 +405,37 @@ private:
 
     const std::string z21IP = { "192.168.0.100" };
     const unsigned short z21Port = 5000;
-
-
 };
 
+MRS mrs;
+void winston_setup()
+{
+	winston::hal::text("Hello from Winston!");
+
+	//using Modelleisenbahn = MRS<RailwayWithSiding>;
+	//using Modelleisenbahn = MRS<TimeSaverRailway
+	//using Modelleisenbahn = MRS<Y2020Railway>;
+
+#ifdef WINSTON_PLATFORM_WIN_x64
+	setStoragePath(MRS::name());
+#endif
+
+	// setup
+	mrs.setup();
+}
+
+void winston_loop()
+{
+    mrs.loop();
+}
+
+#ifdef WINSTON_PLATFORM_WIN_x64
 int main()
 {
-    winston::hal::text("Hello from Winston!");
-
-    //using Modelleisenbahn = MRS<RailwayWithSiding>;
-    //using Modelleisenbahn = MRS<TimeSaverRailway
-    //using Modelleisenbahn = MRS<Y2020Railway>;
-
-    setStoragePath(MRS::name());
-
-    // setup
-    MRS mrs;
-    mrs.setup();
+    winston_setup();
 
     // and loop
     while (true)
-        mrs.loop();
+        winston_loop();
 }
+#endif

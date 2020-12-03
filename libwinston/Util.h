@@ -68,6 +68,7 @@ namespace winston
 	template<typename T> struct is_shared_ptr : std::false_type {};
 	template<typename T> struct is_shared_ptr<std::shared_ptr<T>> : std::true_type {};
 	
+	std::string build();
 	std::string build(const std::string first);
 	std::string build(const unsigned int first);
 	std::string build(const int first);

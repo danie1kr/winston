@@ -40,6 +40,7 @@
 #include "../../selib.h"
 #include <lwip/sys.h>
 #include <lwip/dns.h>
+#include <lwip/ip_addr.h>
 
 #ifndef SharkSSLlwIPRaw
 #error SharkSSLlwIPRaw not defined -> Using incorrect selibplat.h
@@ -48,7 +49,7 @@
 /* dns_gethostbyname callback
  */
 static void
-se_DnsCb(const char *name, struct ip_addr *ipaddr, void* s)
+se_DnsCb(const char *name, ip_addr_t *ipaddr, void* s)
 {
    SOCKET* sock = (SOCKET*)s;
    (void)name;

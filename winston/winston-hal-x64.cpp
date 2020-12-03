@@ -1,3 +1,4 @@
+#include "..\libwinston\HAL.h"
 #include "../libwinston/HAL.h"
 #include "../libwinston/Util.h"
 
@@ -86,6 +87,12 @@ namespace winston::hal
     void text(const std::string& error)
     {
         std::cout << error << std::endl;
+    }
+
+    void fatal(const std::string text)
+    {
+        throw std::exception(text.c_str());
+        exit(-1);
     }
 
     void delay(const unsigned int ms)

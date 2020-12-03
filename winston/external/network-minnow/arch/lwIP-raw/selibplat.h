@@ -35,6 +35,8 @@
  *
  */
 
+#pragma once
+
 #include <lwip/tcp.h>
 #include <lwip/dns.h>
 #include "../../SeCtx.h"

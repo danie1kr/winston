@@ -38,7 +38,7 @@ namespace winston
 		RailwayWithRails(const Callbacks callbacks) : Railway(callbacks), sections() { };
 		virtual ~RailwayWithRails() = default;
 
-		using Sections = typename _SectionsClass;
+		using Sections = _SectionsClass;
 
 		Result init()
 		{

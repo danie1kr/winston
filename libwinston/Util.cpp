@@ -40,6 +40,11 @@ namespace winston
 
 	Callback::Shared nop = Callback::make([]() {});
 
+	std::string build()
+	{
+		return std::string("");
+	}
+
 	std::string build(const std::string first)
 	{
 		return first;

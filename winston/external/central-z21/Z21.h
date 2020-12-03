@@ -17,8 +17,8 @@
 #include <functional>
 using boolean = bool;
 
-#include "../../libwinston/HAL.h"
-#include "../../libwinston/DigitalCentralStation.h"
+#include "../../../libwinston/HAL.h"
+#include "../../../libwinston/DigitalCentralStation.h"
 
 #include "Z21Const.h"
 #include "Z21Packet.h"

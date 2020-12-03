@@ -12,13 +12,13 @@
 #include "Z21.h"
 #include "Z21Const.h"
 
-#include "../../libwinston/Winston.h"
-#include "../../libwinston/HAL.h"
+#include "../../../libwinston/Winston.h"
+#include "../../../libwinston/HAL.h"
 
 #include <memory>
 
 Z21::Z21(winston::hal::UDPSocket::Shared& socket, winston::DigitalCentralStation::AddressTranslator::Shared& addressTranslator, winston::SignalBox::Shared& signalBox, winston::DigitalCentralStation::Callbacks callbacks)
-    : socket(socket), winston::DigitalCentralStation(addressTranslator, signalBox, callbacks)
+    : winston::DigitalCentralStation(addressTranslator, signalBox, callbacks), socket(socket)
 {
 
 }
@@ -488,8 +488,8 @@ void Z21::processLocoInfo(uint8_t* data) {
 
     boolean busy      = Z21Packet::hasBit(XDB2, 0x08);
     boolean forward   = Z21Packet::hasBit(XDB3, 0x80);
-    boolean consist   = Z21Packet::hasBit(XDB4, 0x40);
-    boolean transpond = Z21Packet::hasBit(XDB4, 0x20);
+    // boolean consist   = Z21Packet::hasBit(XDB4, 0x40);
+    // boolean transpond = Z21Packet::hasBit(XDB4, 0x20);
 
     int speed = (XDB3 & 0x7F);
     if (speed > 1) {

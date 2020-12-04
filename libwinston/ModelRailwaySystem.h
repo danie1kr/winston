@@ -53,9 +53,9 @@ namespace winston
 		virtual void populateLocomotiveShed() = 0;
 
 
-		void addLocomotive(Address address, std::string name)
+		void addLocomotive(const winston::Locomotive::Callbacks callbacks, const Address address, std::string name)
 		{
-			auto loco = Locomotive::make(address, name);
+			auto loco = Locomotive::make(callbacks, address, name);
 			this->locomotiveShed.push_back(loco);
 		}
 

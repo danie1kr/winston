@@ -2,32 +2,36 @@
 
 namespace winston
 {
-	Locomotive::Locomotive(const Address address, const std::string name) :
-		details{ .address = address, .name = name }
+	Locomotive::Locomotive(const Callbacks callbacks, const Address address, const std::string name) :
+		callbacks(callbacks), details{ .address = address, .name = name }
 	{
 	}
 
 	void Locomotive::light(bool on)
 	{
+		//this->details.functions = (this->details.functions & ~(1UL << 1)) | ((on ? 1 : 0) << 1);
+		//this->details.functions &= (0xFFFFFFFF & 0b1 | ;
+		this->callbacks.functions(this->address(), this->details.functions);
 	}
 
-	bool Locomotive::light()
+	const bool Locomotive::light()
 	{
 		return this->details.functions & 0b1;
 	}
 	
-	bool Locomotive::forward()
+	const bool Locomotive::forward()
 	{
 		return this->details.forward;
 	}
 	
-	unsigned char Locomotive::speed()
+	const unsigned char Locomotive::speed()
 	{
 		return this->details.speed;
 	}
 
-	void Locomotive::drive(bool forward, unsigned char speed)
+	void Locomotive::drive(const bool forward, const unsigned char speed)
 	{
+		this->callbacks.drive(this->address(), speed, forward);
 	}
 
 	void Locomotive::stop()
@@ -35,7 +39,7 @@ namespace winston
 		this->details.speed = 0;
 	}
 
-	void Locomotive::update(bool busy, bool forward, unsigned char speed, uint32_t functions)
+	void Locomotive::update(const bool busy, const bool forward, const unsigned char speed, const uint32_t functions)
 	{
 		this->details.busy = busy;
 		this->details.forward = forward;

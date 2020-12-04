@@ -32,8 +32,9 @@ public:
     const winston::Result connect();
 
     void requestTurnoutInfo(winston::Turnout::Shared turnout);
-    void locoDrive(winston::Locomotive::Shared locomotive);
-    void locoFunction(winston::Locomotive::Shared locomotive);
+    void triggerTurnoutChangeTo(winston::Turnout::Shared turnout, winston::Turnout::Direction direction);
+    void triggerLocoDrive(const winston::Address address, const unsigned char speed, const bool forward);
+    void triggerLocoFunction(const winston::Address address, const uint32_t functions);
 
     using winston::Shared_Ptr<Z21>::Shared;
     using winston::Shared_Ptr<Z21>::make;
@@ -123,18 +124,18 @@ public:
     const winston::Result logoff();
 
 // Layout Control
-    Z21Packet& setStop();
-    Z21Packet& getLocoInfo (uint16_t address);
-    Z21Packet& setLocoDrive(uint16_t address,
+    const winston::Result setStop();
+    const winston::Result getLocoInfo (uint16_t address);
+    const winston::Result setLocoDrive(uint16_t address,
                             boolean  forward,
                             uint8_t  speedRange,                    // See: const in class Z21_Speed_Range
                             uint8_t  speed);
-    Z21Packet& setLocoFunction(uint16_t address,
+    const winston::Result setLocoFunction(uint16_t address,
                                uint8_t  function,                   // See: const in class Z21_Function::FXX
                                uint8_t  action);                    // See: const in class Z21_Function_Action
 
-    Z21Packet& getAccessoryInfo(uint16_t address);
-    Z21Packet& setAccessory(uint16_t    address,
+    const winston::Result getAccessoryInfo(uint16_t address);
+    const winston::Result setAccessory(uint16_t    address,
                             uint8_t     pos,                        // See: const in class Z21_Accessory_Pos
                             boolean     activate,
                             boolean     queue);

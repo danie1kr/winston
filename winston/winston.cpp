@@ -52,6 +52,7 @@ private:
             speed
         }*/
         SendData sd;
+
         minnowSendPrepare(this->minnowCD, &sd, "loco");
         JEncoder_beginObject(&sd.encoder);
         JEncoder_setName(&sd.encoder, "address");
@@ -79,42 +80,33 @@ private:
     // message from websocket received
     int minnow_manageMessage(RecData* o, ConnData* cd, const char* msg, JErr* error, JVal* value)
     {
-        if (std::string("turnoutToggle").compare(msg) == 0)
+        if (std::string("doTurnoutToggle").compare(msg) == 0)
         {
             unsigned int id = 0;
             JVal_get(value, error, "{d}", "id", &id);
             if (JErr_isError(error) == false)
             {
                 auto turnout = std::dynamic_pointer_cast<winston::Turnout>(railway->section(id));
-                auto injectDir = winston::Turnout::otherDirection(turnout->direction());
-                //ConnData** mCD = &this->minnowCD;
-                auto cb = std::make_shared<winston::Callback>([this, id, turnout, injectDir]() {
-                    this->turnoutSendState(id, turnout->direction());
-                    this->stationDebugInjector->injectTurnoutUpdate(turnout, injectDir);
-                    });
-                //signalBox->notify(std::make_unique<winston::EventTurnoutStartToggle>(cb, turnout));
-                signalBox->order(winston::Command::make([this, id, turnout, injectDir](const unsigned long& created) -> const winston::State
+                auto requestDir = winston::Turnout::otherDirection(turnout->direction());
+                signalBox->order(winston::Command::make([this, id, turnout, requestDir](const unsigned long& created) -> const winston::State
                 {
-                    signalBox->order(winston::Command::make([this, turnout, injectDir](const unsigned long& created) -> const winston::State
+                    signalBox->order(winston::Command::make([this, turnout, requestDir](const unsigned long& created) -> const winston::State
                     {
                         if (winston::hal::now()-created > 2000)
                         {
-                            this->stationDebugInjector->injectTurnoutUpdate(turnout, injectDir);
+                            this->stationDebugInjector->injectTurnoutUpdate(turnout, requestDir);
                             return winston::State::Finished;
                         }
-
                         return winston::State::Running;
-                        
                     }));
-
-                    //this->turnoutSendState(id, turnout->direction());
+                    this->digitalCentralStation->triggerTurnoutChangeTo(turnout, requestDir);
                     return turnout->startToggle();
                 }));
                 return false;
             }
             return true;
         }
-        else if (std::string("turnoutState").compare(msg) == 0)
+        else if (std::string("getTurnoutState").compare(msg) == 0)
         {
             unsigned int id = 0;
             JVal_get(value, error, "{d}", "id", &id);
@@ -234,7 +226,7 @@ private:
             for (auto& loco : this->locomotiveShed)
                 this->locoSend(loco);
         }
-        else if (std::string("controlLoco").compare(msg) == 0)
+        else if (std::string("doControlLoco").compare(msg) == 0)
         {
             /*
             {
@@ -244,17 +236,56 @@ private:
                 speed
             }
             */
-            winston::Address address;
+            unsigned int addr;
             bool light, forward;
             unsigned int speed;
-            JVal_get(value, error, "{dbbd}", "address", &address, "light", &light, "forward", &forward, "speed", &speed);
+            JVal_get(value, error, "{dbbd}", "address", &addr, "light", &light, "forward", &forward, "speed", &speed);
 
             if (JErr_isError(error) == false)
+            {
+                winston::Address address = (uint16_t)addr;
                 if (auto loco = this->get(address))
                 {
-                    loco->light(light);
-                    loco->drive(forward, (unsigned char)(speed & 0xFF));
+                    unsigned char speed128 = (unsigned char)(speed & 0xFF);
+                    if (loco->light() != light)
+                    {
+                        signalBox->order(winston::Command::make([this, loco, light](const unsigned long& created) -> const winston::State
+                            {
+                                signalBox->order(winston::Command::make([this, loco, light](const unsigned long& created) -> const winston::State
+                                    {
+                                        if (winston::hal::now() - created > 2000)
+                                        {
+                                            this->stationDebugInjector->injectLocoUpdate(loco, false, loco->forward(), loco->speed(), light ? 1 : 0);
+                                            return winston::State::Finished;
+                                        }
+                                        return winston::State::Running;
+                                    }));
+
+                                this->digitalCentralStation->triggerLocoFunction(loco->address(), light ? 1 : 0);
+                                return winston::State::Finished;
+                            }));
+                    }
+
+                    if (loco->forward() != forward || loco->speed() != speed128)
+                    {
+                        signalBox->order(winston::Command::make([this, loco, speed128, forward](const unsigned long& created) -> const winston::State
+                            {
+                                signalBox->order(winston::Command::make([this, loco, speed128, forward](const unsigned long& created) -> const winston::State
+                                    {
+                                        if (winston::hal::now() - created > 2000)
+                                        {
+                                            this->stationDebugInjector->injectLocoUpdate(loco, false, forward, speed128, loco->light() ? 1 : 0);
+                                            return winston::State::Finished;
+                                        }
+                                        return winston::State::Running;
+                                    }));
+
+                                this->digitalCentralStation->triggerLocoDrive(loco->address(), speed128, forward);
+                                return winston::State::Finished;
+                            }));
+                    }
                 }
+            }
         }
         else
         {
@@ -312,6 +343,35 @@ private:
             //turnoutSendState(id, direction);
             turnout->finalizeChangeTo(direction);
             return winston::State::Finished;
+        };
+
+        callbacks.locomotiveUpdateCallback = [=](winston::Locomotive::Shared loco, bool busy, bool  forward, unsigned char  speed, uint32_t functions)
+        {
+            loco->update(busy, forward, speed, functions);
+            locoSend(loco->address());
+        };
+
+        return callbacks;
+    }
+
+    winston::Locomotive::Callbacks locoCallbacks()
+    {
+        winston::Locomotive::Callbacks callbacks;
+
+        callbacks.drive = [=](const winston::Address address, const unsigned char speed, const bool forward) {
+            this->signalBox->order(winston::Command::make([this, address, speed, forward](const unsigned long& created) -> const winston::State
+                {
+                    this->digitalCentralStation->triggerLocoDrive(address, speed, forward);
+                    return winston::State::Finished;
+                }));
+        };
+
+        callbacks.functions = [=](const winston::Address address, const uint32_t functions) {
+            this->signalBox->order(winston::Command::make([this, address, functions](const unsigned long& created) -> const winston::State
+                {
+                    this->digitalCentralStation->triggerLocoFunction(address, functions);
+                    return winston::State::Finished;
+                }));
         };
 
         return callbacks;
@@ -384,9 +444,11 @@ private:
 
     void populateLocomotiveShed()
     {
-        this->addLocomotive(1, "BR 114");
-        this->addLocomotive(4, "BR 106");
-        this->addLocomotive(5, "BR 64");
+        auto callbacks = locoCallbacks();
+        this->addLocomotive(callbacks, 3, "BR 114");
+        this->addLocomotive(callbacks, 4, "BR 106");
+        this->addLocomotive(callbacks, 5, "BR 64");
+        this->addLocomotive(callbacks, 6, "E 11");
     }
 
     // minnow related

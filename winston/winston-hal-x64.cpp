@@ -42,6 +42,8 @@ UDPSocketLWIP::UDPSocketLWIP(const std::string ip, const unsigned short port) : 
     this->addr.sin_family = AF_INET;
     this->addr.sin_port = htons(port);
     this->addr.sin_addr.s_addr = inet_addr(ip.c_str());
+
+    this->connect();
 }
 
 const winston::Result UDPSocketLWIP::connect()

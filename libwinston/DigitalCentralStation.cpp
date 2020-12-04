@@ -19,6 +19,11 @@ namespace winston
 		this->station->turnoutUpdate(turnout, direction);
 	}
 
+	void DigitalCentralStation::DebugInjector::injectLocoUpdate(Locomotive::Shared loco, bool busy, bool forward, unsigned char speed, uint32_t functions)
+	{
+		this->station->callbacks.locomotiveUpdateCallback(loco, busy, forward, speed, functions);
+	}
+
 	DigitalCentralStation::AddressTranslator::AddressTranslator() : Shared_Ptr<AddressTranslator>()
 	{
 	}

@@ -8,14 +8,23 @@ namespace winston
 	class Locomotive : public Shared_Ptr<Locomotive>
 	{
 	public:
-		Locomotive(const Address address, const std::string name);
-		void light(bool on);
-		bool light();
-		bool forward();
-		unsigned char speed();
-		void drive(bool forward, unsigned char speed);
+		struct Callbacks
+		{
+			using DriveCallback = std::function<void(const Address address, const unsigned char speed, const bool forward)>;
+			DriveCallback drive;
+
+			using FunctionsCallback = std::function<void(const Address address, const uint32_t functions)>;
+			FunctionsCallback functions;
+		};
+		
+		Locomotive(const Callbacks callbacks, const Address address, const std::string name);
+		inline void light(bool on);
+		const bool light();
+		const bool forward();
+		const unsigned char speed();
+		void drive(const bool forward, const unsigned char speed);
 		void stop();
-		void update(bool busy, bool forward, unsigned char speed, uint32_t functions);
+		void update(const bool busy, const bool forward, const unsigned char speed, const uint32_t functions);
 		const Address& address();
 		const std::string& name();
 	private:
@@ -29,6 +38,8 @@ namespace winston
 			unsigned char speed = { 0 };
 			uint32_t functions = { 0 };
 		} details;
+
+		const Callbacks callbacks;
 	};
 }
 

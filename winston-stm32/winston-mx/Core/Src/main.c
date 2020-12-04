@@ -22,10 +22,10 @@
 #include "lwip.h"
 #include "usb_host.h"
 
-#include "../../../winston/winston.h"
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+
+#include "../../../winston/winston.h"
 
 /* USER CODE END Includes */
 
@@ -105,6 +105,7 @@ int main(void)
   MX_USB_HOST_Init();
   /* USER CODE BEGIN 2 */
 
+  // setup winston
   winston_setup();
 
   /* USER CODE END 2 */
@@ -117,6 +118,7 @@ int main(void)
     MX_USB_HOST_Process();
 
     /* USER CODE BEGIN 3 */
+    // loop call
     winston_loop();
   }
   /* USER CODE END 3 */

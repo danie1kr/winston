@@ -112,59 +112,65 @@ const winston::Result Z21::logoff() {
     return this->send(packet);
 }
 
-Z21Packet& Z21::setStop() {
+const winston::Result Z21::setStop() {
+    Z21Packet packet;
     packet.setXPacket(Z21TX_LAN_X::SET_STOP);
-    return packet;
+    return this->send(packet);
 }
 
-Z21Packet& Z21::getLocoInfo (uint16_t address) {
+const winston::Result Z21::getLocoInfo (uint16_t address) {
+    Z21Packet packet;
     packet.setXPacket(Z21TX_LAN_X::GET_LOCO_INFO,
                       Z21TX_DB0::GET_LOCO_INFO,
                       Z21Packet::MSBLocoAddress(address),
                       Z21Packet::LSBLocoAddress(address));
-    return packet;
+    return this->send(packet);
 }
 
-Z21Packet& Z21::setLocoDrive(uint16_t address,
+const winston::Result Z21::setLocoDrive(uint16_t address,
                                        boolean  forward,
                                        uint8_t  speedRange,
                                        uint8_t  speed) {
+    Z21Packet packet;
     packet.setXPacket(Z21TX_LAN_X::SET_LOCO_DRIVE,
                       Z21TX_DB0::SET_LOCO_DRIVE | (speedRange & 0xF),
                       Z21Packet::MSBLocoAddress(address),
                       Z21Packet::LSBLocoAddress(address),
                       ((forward ? 0x80 : 0x00) | (speed & 0x7F)));
-    return packet;
+    return this->send(packet);
 }
 
-Z21Packet& Z21::setLocoFunction(uint16_t address,
+const winston::Result Z21::setLocoFunction(uint16_t address,
                                           uint8_t  function,
                                           uint8_t  action) {
+    Z21Packet packet;
     packet.setXPacket(Z21TX_LAN_X::SET_LOCO_FUNCTION,
                       Z21TX_DB0::SET_LOCO_FUNCTION,
                       Z21Packet::MSBLocoAddress(address),
                       Z21Packet::LSBLocoAddress(address),
                       ((action & 0x03) << 6) | (function & 0x1F));
-    return packet;
+    return this->send(packet);
 }
 
-Z21Packet& Z21::getAccessoryInfo(uint16_t address) {
+const winston::Result Z21::getAccessoryInfo(uint16_t address) {
     packet.setXPacket(Z21TX_LAN_X::GET_TURNOUT_INFO,
                       Z21Packet::MSBAccessoryAddress(address),
                       Z21Packet::LSBAccessoryAddress(address));
-    return packet;
+    return this->send(packet);
 }
 
-Z21Packet& Z21::setAccessory(uint16_t    address,
+const winston::Result Z21::setAccessory(uint16_t    address,
                                        uint8_t     pos,
                                        boolean     activate,
                                        boolean     queue) {
+    
+    Z21Packet packet;
     packet.setXPacket(Z21TX_LAN_X::SET_TURNOUT,
                       Z21Packet::MSBAccessoryAddress(address),
                       Z21Packet::LSBAccessoryAddress(address),
                       0x80 | (queue ? 0x20: 0) | (activate ? 0x08: 0) | (pos == Z21_Accessory_Pos::P1 ? 0x01 : 0)
                       );
-    return packet;
+    return this->send(packet);
 }
 
 Z21Packet& Z21::getLocoMode(uint16_t address) {
@@ -403,17 +409,23 @@ void Z21::processPacket(uint8_t* data) {
 void Z21::requestTurnoutInfo(winston::Turnout::Shared turnout)
 {
     const unsigned int address = this->addressTranslator->address(turnout);
-    this->send(this->getAccessoryInfo((const unsigned short)address));
+    this->getAccessoryInfo((const unsigned short)address);
 }
 
-void Z21::locoDrive(winston::Locomotive::Shared locomotive)
+void Z21::triggerTurnoutChangeTo(winston::Turnout::Shared turnout, winston::Turnout::Direction direction)
 {
-    this->setLocoDrive(locomotive->address(), locomotive->forward(), Z21_Speed_Range::STEPS_128, locomotive->speed());
+    const unsigned int address = this->addressTranslator->address(turnout);
+    this->setAccessory((const unsigned short)address, (direction == winston::Turnout::Direction::A_B ? Z21_Accessory_Pos::P0 : Z21_Accessory_Pos::P1), true, true);
 }
 
-void Z21::locoFunction(winston::Locomotive::Shared locomotive)
+void Z21::triggerLocoDrive(const winston::Address address, const unsigned char speed, const bool forward)
 {
-    this->setLocoFunction(locomotive->address(), Z21_Function::F0, locomotive->light() ? Z21_Function_Action::ON : Z21_Function_Action::OFF);
+    this->setLocoDrive(address, forward, Z21_Speed_Range::STEPS_128, speed);
+}
+
+void Z21::triggerLocoFunction(const winston::Address address, const uint32_t functions)
+{
+    this->setLocoFunction(address, Z21_Function::F0, functions & 0b1 ? Z21_Function_Action::ON : Z21_Function_Action::OFF);
 }
 
 void Z21::processXPacket(uint8_t* data) {

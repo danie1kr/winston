@@ -293,14 +293,18 @@
                 let $locoShedContainerBody = $("#locoShedContainer>div.collapsible-body");
                 let locoTemplate = _.template($("#template_loco").html());
                 $element = $(locoTemplate({address: address, name: data.name }));
-                $element.find(".speed").on('change', function(event) { 
-                    let $loco = $(event.target).closest(".winston-locomotive");
-                    $loco.find(".speedValue").html(event.target.value);
+                $element.find(".speed").on("change", doControlLoco);
+                $element.find(".light").on("change", doControlLoco);
+                $element.find(".stop").on("click", function(event) { 
+                    $element.find(".speed").val(0);
+                    doControlLoco(event);
                 });
+
                 $locoShedContainerBody.append($element);
             }
 
-            $element.find(".speed").val(data.forward ? data.speed : -data.speed).trigger('change');
+            $element.find(".speed").val(data.forward ? data.speed : -data.speed);
+            $element.find(".speedValue").html(data.value);
             $element.find(".light").attr("checked", data.light ? "checked" : undefined);
         }
 
@@ -351,15 +355,33 @@
         {
             if(!allowWinstonSubmit())
                 return;
+
+            let id = parseInt(section);
+            cy.nodes(".turnout[section=" + id + "]").off("click");
+
             if(direction !== TurnoutState_Changing)
-                send("turnoutToggle", {id: parseInt(section)});
+                send("doTurnoutToggle", {id: id});
         }
 
         function turnoutRequestStatus(section)
         {
             if(!allowWinstonSubmit())
                 return;
-            send("turnoutState", {id: parseInt(section)});
+            send("getTurnoutState", {id: parseInt(section)});
+        }
+
+        function doControlLoco(event)
+        {
+            let $target = $(event.target);
+            let $loco = $($target.closest(".winston-locomotive"));
+            let speed = parseInt($loco.find(".speed").val());
+
+            send("doControlLoco", {
+                address: parseInt($loco.attr("winston-loco-address")),
+                light: $loco.find(".light").prop("checked"),
+                forward: speed > 0,
+                speed: speed
+            });
         }
 
         function hideContextMenus()
@@ -566,7 +588,7 @@
                 let turnoutTemplate = _.template($("#template_turnout").html());
                 let $turnout = $(turnoutTemplate({id: turnout.data("section"), name: turnout.data("displayName") ? turnout.data("displayName") : turnout.data("name"), direction: turnout.data("direction")}));
                 $turnout.on('click', function(event) {
-                    let $target = event.target;
+                    let $target = $(event.target);
                     let $closest = $($target.closest(".winston-turnout"));
                     sendTurnoutToggle($closest.attr("winston-turnout-section"), $closest.attr("winston-turnout-direction")); 
                 });

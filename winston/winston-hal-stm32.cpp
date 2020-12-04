@@ -3,6 +3,7 @@
 #include "../libwinston/Util.h"
 
 #include "winston-hal-stm32.h"
+#include "../winston-stm32/winston-mx/Core/Inc/main.h"
 
 static const auto winstonStorageSize = 32 * 1024;
 
@@ -79,18 +80,17 @@ namespace winston::hal
     {
     	// say something
     	// set all leds on/red
-        while(1);
+    	Error_Handler();
     }
 
     void delay(const unsigned int ms)
     {
-        //Sleep(ms);
-    	return;
+        HAL_Delay(ms);
     }
 
     unsigned long now()
     {
-        return 0;//GetTickCount();
+        return HAL_GetTick();
     }
 
     const uint8_t storageRead(const size_t address)

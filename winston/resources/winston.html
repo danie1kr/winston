@@ -389,36 +389,42 @@
             $(".contextMenu").hide();
         }
      
-        function showContextMenu(menu, event)
+        function click(menu, event)
         {
             if(!allowLayoutEdit())
-                return;
-            hideContextMenus();
-
-
-            let $contextMenu = $("#" + menu);
-            if(menu === "menuSectionNode")
             {
-                let node = event.target;
-                let name = node.data("displayName");
-                $("#sectionNodeName")
-                    .val(name ? name : node.data("name"))
-                    .off('change')
-                    .on('change', function(e) { 
-                        let name = e.target.value;
-                        node.data("displayName", name);
-                        $("#turnoutsContainer>div.collapsible-body")
-                            .find("[winston-turnout-section=\"" + node.data("section") + "\"]")
-                            .find(".name")
-                            .html(name);
-                    });
-                
+                graphCalculateReachability(event)
+                return;
             }
+            else
+            {
+                hideContextMenus();
 
-            $contextMenu
-                .css("top", event.originalEvent.clientY + 'px')
-                .css("left", (event.originalEvent.clientX + 20) + 'px')
-                .show();
+
+                let $contextMenu = $("#" + menu);
+                if(menu === "menuSectionNode")
+                {
+                    let node = event.target;
+                    let name = node.data("displayName");
+                    $("#sectionNodeName")
+                        .val(name ? name : node.data("name"))
+                        .off('change')
+                        .on('change', function(e) { 
+                            let name = e.target.value;
+                            node.data("displayName", name);
+                            $("#turnoutsContainer>div.collapsible-body")
+                                .find("[winston-turnout-section=\"" + node.data("section") + "\"]")
+                                .find(".name")
+                                .html(name);
+                        });
+
+                }
+
+                $contextMenu
+                    .css("top", event.originalEvent.clientY + 'px')
+                    .css("left", (event.originalEvent.clientX + 20) + 'px')
+                    .show();
+            }
         }
 
         function cytoscapeCreate()
@@ -503,6 +509,12 @@
                             "background-color": "orange",
 
                         }
+                    },
+                    {
+                        selector: ".reachable",
+                        style: {
+                            "line-color": 'green',
+                        }
                     }
                 ]
             }).gridGuide({
@@ -537,13 +549,13 @@
         function cytoscapePostAdd(cy)
         {
             cy.on('click', '.trackNode', function(event) {
-                showContextMenu("menuTrackNode", event);
+                click("menuTrackNode", event);
             });
             cy.on('click', '.track', function(event) {
-                showContextMenu("menuTrackEdge", event);
+                click("menuTrackEdge", event);
             });
             cy.on('click', '.section', function(event) {
-                showContextMenu("menuSectionNode", event);
+                click("menuSectionNode", event);
             });
             cy.on('unselect', '.track, .trackNode, .section', function() {
                 hideContextMenus();
@@ -665,6 +677,44 @@
             return success;
         }
 
+        function graphCalculateReachability(event)
+        {
+            cy.elements().removeClass("reachable");
+            function traverse($edge)
+            {
+                if($edge.hidden())
+                    return;
+                
+                $edge.addClass("reachable");
+                let $nodes = $edge.connectedNodes();
+                _.each($nodes, function($node) {
+
+                    if($node.hasClass("reachable"))
+                        return;
+
+                    let $edges = $node.connectedEdges().filter(function(e) { return e !== $edge; });
+
+                    if($node.hasClass("turnout") || $node.hasClass("turnoutConnection"))
+                    {
+                        $node.addClass("reachable");
+                        _.each($edges, traverse);
+                    }
+                    else if($node.hasClass("bumper"))
+                    { 
+                        // we came here somehow (via a), so there is nothing else to do
+                        $node.addClass("reachable");
+                    }
+                    else //rail
+                    {
+                        $node.addClass("reachable");
+                        _.each($edges, traverse);
+                    }
+                });
+            }
+            let $edge = cy.$(event.target);
+            traverse($edge);
+        }
+
         function buildRailwayGraph(data)
         {
             function classFromType(type)
@@ -725,9 +775,9 @@
                 if(type === 2)
                 {
                     nodes.push({group: 'nodes', data: {id: i, name: i, section: i, connections: {a: a, b: b, c: c}, direction: 1, relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "section turnout"});
-                    nodes.push({group: 'nodes', data: {id: i + "a", name: i + "a", section: i, relativePosition: {x: -20, y: 0}}, position: {x: i*100-20, y: 0}, classes: "turnoutConnection"});
-                    nodes.push({group: 'nodes', data: {id: i + "b", name: i + "b", section: i, relativePosition: {x: 20, y: 0}}, position: {x: i*100+20, y: 0}, classes: "turnoutConnection"});
-                    nodes.push({group: 'nodes', data: {id: i + "c", name: i + "c", section: i, relativePosition: {x: 20, y: 20}}, position: {x: i*100+20, y: 20}, classes: "turnoutConnection"});
+                    nodes.push({group: 'nodes', data: {id: i + "a", name: i + "a", section: i, relativePosition: {x: -20, y: 0}}, position: {x: i*100-20, y: 0}, classes: "turnoutConnection a"});
+                    nodes.push({group: 'nodes', data: {id: i + "b", name: i + "b", section: i, relativePosition: {x: 20, y: 0}}, position: {x: i*100+20, y: 0}, classes: "turnoutConnection b"});
+                    nodes.push({group: 'nodes', data: {id: i + "c", name: i + "c", section: i, relativePosition: {x: 20, y: 20}}, position: {x: i*100+20, y: 20}, classes: "turnoutConnection c"});
                 
                     edges.push({group: 'edges', data: {source: i, target: i+"a", connection: "a"}, classes: "internal"});
                     edges.push({group: 'edges', data: {source: i, target: i+"b", connection: "b"}, classes: "internal"});

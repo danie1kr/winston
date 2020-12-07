@@ -19,6 +19,8 @@
 
 #include "external/central-z21/Z21.h"
 
+#define RAILWAY_DEBUG_INJECTOR
+#define RAILWAY_DEBUG_INJECTOR_DELAY 1000
 //#define RAILWAY_CLASS RailwayWithSiding
 //#define RAILWAY_CLASS TimeSaverRailway
 #define RAILWAY_CLASS Y2020Railway
@@ -90,15 +92,17 @@ private:
                 auto requestDir = winston::Turnout::otherDirection(turnout->direction());
                 signalBox->order(winston::Command::make([this, id, turnout, requestDir](const unsigned long& created) -> const winston::State
                 {
+#ifdef RAILWAY_DEBUG_INJECTOR
                     signalBox->order(winston::Command::make([this, turnout, requestDir](const unsigned long& created) -> const winston::State
                     {
-                        if (winston::hal::now()-created > 2000)
+                        if (winston::hal::now()-created > RAILWAY_DEBUG_INJECTOR_DELAY)
                         {
                             this->stationDebugInjector->injectTurnoutUpdate(turnout, requestDir);
                             return winston::State::Finished;
                         }
                         return winston::State::Running;
                     }));
+#endif
                     this->digitalCentralStation->triggerTurnoutChangeTo(turnout, requestDir);
                     return turnout->startToggle();
                 }));
@@ -251,16 +255,17 @@ private:
                     {
                         signalBox->order(winston::Command::make([this, loco, light](const unsigned long& created) -> const winston::State
                             {
+#ifdef RAILWAY_DEBUG_INJECTOR
                                 signalBox->order(winston::Command::make([this, loco, light](const unsigned long& created) -> const winston::State
                                     {
-                                        if (winston::hal::now() - created > 2000)
+                                        if (winston::hal::now() - created > RAILWAY_DEBUG_INJECTOR_DELAY)
                                         {
                                             this->stationDebugInjector->injectLocoUpdate(loco, false, loco->forward(), loco->speed(), light ? 1 : 0);
                                             return winston::State::Finished;
                                         }
                                         return winston::State::Running;
                                     }));
-
+#endif
                                 this->digitalCentralStation->triggerLocoFunction(loco->address(), light ? 1 : 0);
                                 return winston::State::Finished;
                             }));
@@ -270,16 +275,17 @@ private:
                     {
                         signalBox->order(winston::Command::make([this, loco, speed128, forward](const unsigned long& created) -> const winston::State
                             {
+#ifdef RAILWAY_DEBUG_INJECTOR
                                 signalBox->order(winston::Command::make([this, loco, speed128, forward](const unsigned long& created) -> const winston::State
                                     {
-                                        if (winston::hal::now() - created > 2000)
+                                        if (winston::hal::now() - created > RAILWAY_DEBUG_INJECTOR_DELAY)
                                         {
                                             this->stationDebugInjector->injectLocoUpdate(loco, false, forward, speed128, loco->light() ? 1 : 0);
                                             return winston::State::Finished;
                                         }
                                         return winston::State::Running;
                                     }));
-
+#endif
                                 this->digitalCentralStation->triggerLocoDrive(loco->address(), speed128, forward);
                                 return winston::State::Finished;
                             }));

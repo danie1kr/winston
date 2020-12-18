@@ -13,7 +13,7 @@ namespace winston
 		enum class Aspect
 		{
 			Off =			0b00001,
-			Stop =			0b00010,
+			Halt =			0b00010,
 			Go =			0b00100,
 			ExpectHalt =	0b01000,
 			ExpectGo =		0b10000
@@ -55,14 +55,14 @@ namespace winston
 		*/
 
 		static const unsigned int AspectsProtection = (unsigned int)Aspect::Off
-			| (unsigned int)Aspect::Stop
+			| (unsigned int)Aspect::Halt
 			| (unsigned int)Aspect::Go;
 
-		static const unsigned int AspectsKS = (unsigned int)Aspect::Stop
+		static const unsigned int AspectsKS = (unsigned int)Aspect::Halt
 			| (unsigned int)Aspect::Go
 			| (unsigned int)Aspect::ExpectHalt;
 
-		static const unsigned int AspectsH = (unsigned int)Aspect::Stop
+		static const unsigned int AspectsH = (unsigned int)Aspect::Halt
 			| (unsigned int)Aspect::Go;
 
 		static const unsigned int AspectsV = (unsigned int)Aspect::Off
@@ -72,30 +72,47 @@ namespace winston
 		static const unsigned int AspectsHV = AspectsH | AspectsV;
 
 		using Callback = std::function<const State(const Aspect aspect)>;
+		static Callback defaultCallback();
 		Signal(const Callback callback);
 
-		const State set(const Aspect aspect);
+		const State aspect(const Aspect aspect);
 		const Aspect aspect();
-		virtual bool supports(const Aspect aspect) = 0;
+		const bool shows(Aspect aspect);
+		virtual const bool supports(const Aspect aspect, const bool any) = 0;
+		virtual const bool preSignal() = 0;
+		virtual const bool mainSignal() = 0;
 	protected:
 		Aspect _aspect;
 		const Callback callback;
 	};
 
+	
 	template<unsigned int _Aspects>
 	class SignalInstance : public Signal, public Shared_Ptr<SignalInstance<_Aspects>>
 	{
+	public:
 		SignalInstance(const Callback callback) : Signal(callback) { };
 
-		bool supports(const Aspect aspect)
+		const bool supports(const Aspect aspect, const bool any)
 		{
-			return (const unsigned int)aspect & (const unsigned int)_Aspects;
+			const unsigned int eval = (const unsigned int)aspect & (const unsigned int)_Aspects;
+			if (any)
+				return eval != 0;
+			else
+				return eval == (const unsigned int)aspect;
 		}
 
-		bool preSignal()
+		const bool preSignal()
 		{
-			return (unsigned int)_Aspects & ((unsigned int)Aspect::ExpectHalt | (unsigned int)Aspect::ExpectGo);
+			return ((const unsigned int)_Aspects & ((const unsigned int)Aspect::ExpectHalt | (const unsigned int)Aspect::ExpectGo)) != 0;
 		}
+
+		const bool mainSignal()
+		{
+			return ((const unsigned int)_Aspects & ((const unsigned int)Aspect::Go | (const unsigned int)Aspect::Halt)) != 0;
+		}
+		using Shared_Ptr<SignalInstance<_Aspects>>::Shared;
+		using Shared_Ptr<SignalInstance<_Aspects>>::make;
 	};
 
 	using SignalKS = SignalInstance<Signal::AspectsKS>;

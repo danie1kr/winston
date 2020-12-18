@@ -22,6 +22,18 @@ namespace winstontests
 
             return callbacks;
         }
+
+        static winston::Railway::Callbacks railwayCallbacksWithSignals(winston::SignalBox::Shared signalBox)
+        {
+            winston::Railway::Callbacks callbacks;
+
+            callbacks.turnoutUpdateCallback = signalBox->injectTurnoutSignalHandling([=](winston::Turnout::Shared turnout, const winston::Turnout::Direction direction) -> const winston::State
+            {
+                return winston::State::Finished;
+            });
+
+            return callbacks;
+        }
 	public:
 
 		TEST_METHOD(RailInit)
@@ -42,20 +54,20 @@ namespace winstontests
             
             winston::Section::Shared onto, onto2;
 
-            Assert::IsTrue(a->traverse(winston::Section::Connection::DeadEnd, onto));
+            Assert::IsTrue(a->traverse(winston::Section::Connection::DeadEnd, onto, false));
             Assert::IsTrue(onto.get() == t1.get());
 
-            Assert::IsFalse(a->traverse(winston::Section::Connection::A, onto));
+            Assert::IsFalse(a->traverse(winston::Section::Connection::A, onto, false));
             Assert::IsTrue(onto == nullptr);
 
             t1->finalizeChangeTo(winston::Turnout::Direction::A_B);
-            Assert::IsTrue(a->traverse(winston::Section::Connection::DeadEnd, onto));
-            Assert::IsTrue(onto->traverse(winston::Section::Connection::A, onto2));
+            Assert::IsTrue(a->traverse(winston::Section::Connection::DeadEnd, onto, false));
+            Assert::IsTrue(onto->traverse(winston::Section::Connection::A, onto2, false));
             Assert::IsTrue(onto2.get() == b.get());
 
             t1->finalizeChangeTo(winston::Turnout::Direction::A_C);
-            Assert::IsTrue(a->traverse(winston::Section::Connection::DeadEnd, onto));
-            Assert::IsTrue(onto->traverse(winston::Section::Connection::A, onto2));
+            Assert::IsTrue(a->traverse(winston::Section::Connection::DeadEnd, onto, false));
+            Assert::IsTrue(onto->traverse(winston::Section::Connection::A, onto2, false));
             Assert::IsTrue(onto2.get() == c.get());
         }
 
@@ -70,14 +82,13 @@ namespace winstontests
 
             winston::Section::Shared onto, onto2;
             winston::NullMutex nullMutex;
-            auto tr = std::dynamic_pointer_cast<winston::Railway>(testRailway);
-            auto signalBox = winston::SignalBox::make(tr, nullMutex);
+            auto signalBox = winston::SignalBox::make(nullMutex);
 
             auto direction = winston::Turnout::Direction::A_C;
             t1->finalizeChangeTo(direction);
             Assert::IsTrue(t1->direction() == direction);
-            Assert::IsTrue(a->traverse(winston::Section::Connection::DeadEnd, onto));
-            Assert::IsTrue(onto->traverse(winston::Section::Connection::A, onto2));
+            Assert::IsTrue(a->traverse(winston::Section::Connection::DeadEnd, onto, false));
+            Assert::IsTrue(onto->traverse(winston::Section::Connection::A, onto2, false));
             Assert::IsTrue(onto2.get() == c.get());
         }
 
@@ -92,8 +103,7 @@ namespace winstontests
 
             winston::Section::Shared onto, onto2;
             winston::NullMutex nullMutex;
-            auto tr = std::dynamic_pointer_cast<winston::Railway>(testRailway);
-            auto signalBox = winston::SignalBox::make(tr, nullMutex);
+            auto signalBox = winston::SignalBox::make(nullMutex);
 
             auto direction = winston::Turnout::Direction::A_C;
             auto cb = std::make_shared<winston::Callback>([]() {});
@@ -102,8 +112,8 @@ namespace winstontests
             for (int i = 0; i < 10; ++i)
                 signalBox->work();
             Assert::IsTrue(t1->direction() == direction);
-            Assert::IsTrue(a->traverse(winston::Section::Connection::DeadEnd, onto));
-            Assert::IsTrue(onto->traverse(winston::Section::Connection::A, onto2));
+            Assert::IsTrue(a->traverse(winston::Section::Connection::DeadEnd, onto, false));
+            Assert::IsTrue(onto->traverse(winston::Section::Connection::A, onto2, false));
             Assert::IsTrue(onto2.get() == c.get());
         }
 
@@ -118,8 +128,7 @@ namespace winstontests
 
             winston::Section::Shared onto, onto2;
             winston::NullMutex nullMutex;
-            auto tr = std::dynamic_pointer_cast<winston::Railway>(testRailway);
-            auto signalBox = winston::SignalBox::make(tr, nullMutex);
+            auto signalBox = winston::SignalBox::make(nullMutex);
 
             auto direction = winston::Turnout::Direction::A_B;
             auto cb = std::make_shared<winston::Callback>([]() {});
@@ -129,9 +138,9 @@ namespace winstontests
                 signalBox->work();
             Assert::IsTrue(t1->direction() == winston::Turnout::Direction::Changing);
 
-            Assert::IsFalse(t1->traverse(winston::Section::Connection::A, onto));
-            Assert::IsFalse(t1->traverse(winston::Section::Connection::B, onto));
-            Assert::IsFalse(t1->traverse(winston::Section::Connection::C, onto));
+            Assert::IsFalse(t1->traverse(winston::Section::Connection::A, onto, false));
+            Assert::IsFalse(t1->traverse(winston::Section::Connection::B, onto, false));
+            Assert::IsFalse(t1->traverse(winston::Section::Connection::C, onto, false));
 
             auto cb2 = std::make_shared<winston::Callback>([]() {});
             signalBox->order(winston::Command::make([t1, direction](const unsigned long& created) -> const winston::State { return t1->finalizeChangeTo(direction); }));
@@ -140,9 +149,44 @@ namespace winstontests
                 signalBox->work();
             Assert::IsTrue(t1->direction() == direction);
             
-            Assert::IsTrue(a->traverse(winston::Section::Connection::DeadEnd, onto));
-            Assert::IsTrue(onto->traverse(winston::Section::Connection::A, onto2));
+            Assert::IsTrue(a->traverse(winston::Section::Connection::DeadEnd, onto, false));
+            Assert::IsTrue(onto->traverse(winston::Section::Connection::A, onto2, false));
             Assert::IsTrue(onto2.get() == b.get());
+        }
+
+        TEST_METHOD(Signals_forTurnouts) {
+            winston::NullMutex nullMutex;
+            auto signalBox = winston::SignalBox::make(nullMutex);
+
+            testRailway = MiniRailway::make(railwayCallbacksWithSignals(signalBox));
+            Assert::IsTrue(testRailway->init() == winston::Result::OK);
+            auto a = testRailway->section(MiniRailway::Sections::A);
+            auto b = testRailway->section(MiniRailway::Sections::B);
+            auto c = testRailway->section(MiniRailway::Sections::C);
+            auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->section(MiniRailway::Sections::Turnout1));
+
+            auto sBA = b->signalGuarding(winston::Section::Connection::A);
+            auto sCA = c->signalGuarding(winston::Section::Connection::A);
+            Assert::IsTrue(sBA.operator bool() == true);
+            Assert::IsTrue(sCA.operator bool() == true);
+
+            signalBox->setSignalsFor(t1);
+            for (int i = 0; i < 10; ++i)
+                signalBox->work();
+            Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Go));
+            Assert::IsTrue(sCA->shows(winston::Signal::Aspect::Halt));
+
+            signalBox->order(winston::Command::make([t1](const unsigned long& created) -> const winston::State { return t1->finalizeChangeTo(winston::Turnout::Direction::A_C); }));
+            for (int i = 0; i < 10; ++i)
+                signalBox->work();
+            Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(sCA->shows(winston::Signal::Aspect::Go));
+            
+            signalBox->order(winston::Command::make([t1](const unsigned long& created) -> const winston::State { return t1->finalizeChangeTo(winston::Turnout::Direction::A_B); }));
+            for (int i = 0; i < 10; ++i)
+                signalBox->work();
+            Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Go));
+            Assert::IsTrue(sCA->shows(winston::Signal::Aspect::Halt));
         }
 	};
 }

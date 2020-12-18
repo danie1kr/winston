@@ -23,6 +23,9 @@ void MiniRailway::connect(std::array<winston::Section::Shared, sectionsCount()>&
     this->section(Sections::A)->connect(winston::Section::Connection::A, this->section(Sections::Turnout1), winston::Section::Connection::A)
         ->connect(winston::Section::Connection::B, this->section(Sections::B), winston::Section::Connection::A);
     this->section(Sections::Turnout1)->connect(winston::Section::Connection::C, this->section(Sections::C), winston::Section::Connection::A);
+
+    this->section(Sections::B)->attachSignal(winston::SignalH::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
+    this->section(Sections::C)->attachSignal(winston::SignalKS::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
 }
 
 const std::string MiniRailway::name()

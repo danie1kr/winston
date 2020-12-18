@@ -40,14 +40,13 @@ namespace winstontests
 
             winston::Section::Shared onto, onto2;
             winston::NullMutex nullMutex;
-            auto tr = std::dynamic_pointer_cast<winston::Railway>(testRailway);
-            auto signalBox = winston::SignalBox::make(tr, nullMutex);
+            auto signalBox = winston::SignalBox::make(nullMutex);
 
             auto direction = winston::Turnout::Direction::A_C;
             t1->finalizeChangeTo(direction);
             Assert::IsTrue(t1->direction() == direction);
-            Assert::IsTrue(b->traverse(winston::Section::Connection::DeadEnd, onto));
-            Assert::IsTrue(onto->traverse(winston::Section::Connection::A, onto2));
+            Assert::IsTrue(b->traverse(winston::Section::Connection::DeadEnd, onto, false));
+            Assert::IsTrue(onto->traverse(winston::Section::Connection::A, onto2, false));
             Assert::IsTrue(onto2.get() == t2.get());
         }
 

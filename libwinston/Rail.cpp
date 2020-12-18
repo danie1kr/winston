@@ -1,10 +1,26 @@
 #include "Rail.h"
+#include "HAL.h"
 #include "Util.h"
 
 namespace winston
 {
 	Section::Section() : Shared_Ptr<Section>()
 	{
+	}
+
+	void Section::attachSignal(Signal::Shared signal, const Connection guarding)
+	{
+		hal::fatal("Cannot attach signal");
+	}
+
+	Signal::Shared Section::signalFacing(const Connection facing)
+	{
+		return nullptr;
+	}
+
+	Signal::Shared Section::signalGuarding(const Connection guarding)
+	{
+		return nullptr;
 	}
 
 	Result Section::validateSingle(Section::Shared section)
@@ -34,28 +50,22 @@ namespace winston
 		return connection == Connection::A || connection == Connection::DeadEnd;
 	}
 
-	bool Bumper::traverse(const Connection from, Section::Shared& onto) const
-	{
-		if (!this->has(from))
-		{
-			onto.reset();
-			return false;
-		}
-		if (from == Connection::DeadEnd)
-		{
-			onto = a;
-			return true;
-		}
-		else
-		{
-			onto.reset();
-			return false;
-		}
-	}
-
 	void Bumper::collectAllConnections(std::set<Section::Shared>& sections) const
 	{
 		sections.insert(a);
+	}
+
+	const Section::Connection Bumper::whereConnects(Section::Shared& other) const
+	{
+		if (other == a)
+			return Connection::A;
+		else
+			return Connection::DeadEnd;
+	}
+
+	const Section::Connection Bumper::otherConnection(const Connection connection) const
+	{
+		return connection == Connection::A ? Connection::DeadEnd : Connection::A;
 	}
 
 	Section::Shared Bumper::connect(const Connection local, Section::Shared& to, const Connection remote, bool viceVersa)
@@ -89,13 +99,25 @@ namespace winston
 		return Type::Bumper;
 	}
 
-	void Bumper::attachSignal(Signal::Shared& signal, const Connection facing)
+	void Bumper::attachSignal(Signal::Shared signal, const Connection guarding)
 	{
-		switch (facing)
+		switch (guarding)
 		{
-		case Connection::A: this->signals[0] = signal; break;
-		case Connection::DeadEnd: this->signals[1] = signal; break;
+		case Connection::A: this->signals[0] = signal; return; break;
+		case Connection::DeadEnd: this->signals[1] = signal; return; break;
 		}
+
+		hal::fatal("cannot put signal");
+	}
+
+	Signal::Shared Bumper::signalGuarding(const Connection guarding)
+	{
+		return signals[guarding == Connection::A ? 0 : 1];
+	}
+
+	Signal::Shared Bumper::signalFacing(const Connection facing)
+	{
+		return signals[facing == Connection::A ? 1 : 0];
 	}
 
 	void Turnout::connections(Section::Shared& onA, Section::Shared& onB, Section::Shared& onC)
@@ -116,14 +138,17 @@ namespace winston
 		return connection == Connection::A || connection == Connection::B;
 	}
 
-	bool Rail::traverse(const Connection from, Section::Shared& onto) const
+	bool Rail::traverse(const Connection connection, Section::Shared& onto, bool leavingOnConnection) const
 	{
-		if (!this->has(from))
+		if (!this->has(connection))
 		{
 			onto.reset();
 			return false;
 		}
-		onto = from == Connection::A ? b : a;
+		if (leavingOnConnection)
+			onto = connection == Connection::A ? a : b;
+		else
+			onto = connection == Connection::A ? b : a;
 		return true;
 	}
 
@@ -131,6 +156,21 @@ namespace winston
 	{
 		sections.insert(a);
 		sections.insert(b);
+	}
+
+	const Section::Connection Rail::whereConnects(Section::Shared& other) const
+	{
+		if (a == other)
+			return Section::Connection::A;
+		else if (b == other)
+			return Section::Connection::B;
+		else
+			return Section::Connection::DeadEnd;
+	}
+
+	const Section::Connection Rail::otherConnection(const Connection connection) const
+	{
+		return connection == Connection::A ? Connection::B : Connection::A;
 	}
 
 	Section::Shared Rail::connect(const Connection local, Section::Shared& to, const Connection remote, bool viceVersa)
@@ -163,13 +203,25 @@ namespace winston
 		return Type::Rail;
 	}
 
-	void Rail::attachSignal(Signal::Shared& signal, const Connection facing)
+	void Rail::attachSignal(Signal::Shared signal, const Connection guarding)
 	{
-		switch (facing)
+		switch (guarding)
 		{
-		case Connection::A: this->signals[0] = signal; break;
-		case Connection::B: this->signals[1] = signal; break;
+		case Connection::A: this->signals[0] = signal; return; break;
+		case Connection::B: this->signals[1] = signal; return; break;
 		}
+
+		hal::fatal("cannot put signal");
+	}
+
+	Signal::Shared Rail::signalGuarding(const Connection guarding)
+	{
+		return this->signals[guarding == Connection::A ? 0 : 1];
+	}
+
+	Signal::Shared Rail::signalFacing(const Connection facing)
+	{
+		return signals[facing == Connection::A ? 1 : 0];
 	}
 
 	void Rail::connections(Section::Shared& onA, Section::Shared& onB)
@@ -189,26 +241,37 @@ namespace winston
 		return connection != Connection::DeadEnd;
 	}
 
-	bool Turnout::traverse(const Connection from, Section::Shared& onto) const
+	bool Turnout::traverse(const Connection connection, Section::Shared& onto, bool leavingOnConnection) const
 	{
-		if (!this->has(from) || this->dir == Direction::Changing)
+		if (!this->has(connection) || this->dir == Direction::Changing)
 		{
 			onto.reset();
 			return false;
 		}
-		if (from == Connection::A)
+		if (leavingOnConnection)
 		{
-			onto = this->dir == Direction::A_B ? b : c;
-			return true;
-		}
-		else if ((from == Connection::B && this->dir == Direction::A_B) ||
-			(from == Connection::C && this->dir == Direction::A_C))
-		{
-			onto = a;
-			return true;
+			switch (connection)
+			{
+			case Connection::A: onto = a; return true; break;
+			case Connection::B: onto = b; return true; break;
+			case Connection::C: onto = c; return true; break;
+			}
 		}
 		else
-			return false;
+		{
+			if (connection == Connection::A)
+			{
+				onto = this->dir == Direction::A_B ? b : c;
+				return true;
+			}
+			else if ((connection == Connection::B && this->dir == Direction::A_B) ||
+				(connection == Connection::C && this->dir == Direction::A_C))
+			{
+				onto = a;
+				return true;
+			}
+		}
+		return false;
 	}
 
 	void Turnout::collectAllConnections(std::set<Section::Shared>& sections) const
@@ -216,6 +279,26 @@ namespace winston
 		sections.insert(a);
 		sections.insert(b);
 		sections.insert(c);
+	}
+
+	const Section::Connection Turnout::whereConnects(Section::Shared& other) const
+	{
+		if (a == other)
+			return Section::Connection::A;
+		else if (b == other)
+			return Section::Connection::B;
+		else if (c == other)
+			return Section::Connection::C;
+		else
+			return Section::Connection::DeadEnd;
+	}
+
+	const Section::Connection Turnout::otherConnection(const Connection connection) const
+	{
+		if (connection == Connection::A)
+			return this->dir == Direction::A_B ? Connection::B : Connection::C;
+		else
+			return Connection::A;
 	}
 
 	Section::Shared Turnout::connect(const Connection local, Section::Shared& to, const Connection remote, bool viceVersa)
@@ -243,16 +326,6 @@ namespace winston
 	const Section::Type Turnout::type()
 	{
 		return Type::Turnout;
-	}
-
-	void Turnout::attachSignal(Signal::Shared& signal, const Connection facing)
-	{
-		switch (facing)
-		{
-		case Connection::A: this->signals[0] = signal; break;
-		case Connection::B: this->signals[1] = signal; break;
-		case Connection::C: this->signals[2] = signal; break;
-		}
 	}
 
 	const State Turnout::startChangeTo(const Direction direction)

@@ -406,8 +406,7 @@ private:
         this->addressTranslator = RAILWAY_CLASS::AddressTranslator::make(railway);
 
         // the internal signal box
-        winston::Railway::Shared rw = std::dynamic_pointer_cast<winston::Railway>(railway);
-        this->signalBox = winston::SignalBox::make(rw, nullMutex);
+        this->signalBox = winston::SignalBox::make(nullMutex);
 
         // the system specific digital central station
         auto at = std::dynamic_pointer_cast<winston::DigitalCentralStation::AddressTranslator>(addressTranslator);

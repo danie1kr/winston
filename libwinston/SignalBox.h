@@ -20,15 +20,19 @@ namespace winston
 			Count
 		};
 
-		SignalBox(Railway::Shared& railway, Mutex& mutex);
+		SignalBox(Mutex& mutex);
 
-		void setSignalsFor(Turnout::Shared& turnout, const Turnout::Direction& direction);
+		Railway::Callbacks::TurnoutUpdateCallback injectTurnoutSignalHandling(Railway::Callbacks::TurnoutUpdateCallback callback);
+
+		void setSignalsFor(Turnout::Shared turnout);
 
 		void order(Command::Shared command);
 		void work();
 	private:
+
+		static Signal::Shared nextSignal(Section::Shared& section, Section::Connection& connection, const bool main);
+
 		std::queue<Command::Shared> commands;
 		Mutex& mutex;
-		Railway::Shared railway;
 	};
 }

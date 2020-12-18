@@ -7,17 +7,82 @@
 
 namespace winston
 {
-	SignalBox::SignalBox(Railway::Shared& railway, Mutex& mutex)
-		: railway(railway), mutex(mutex)
+	SignalBox::SignalBox(Mutex& mutex)
+		: mutex(mutex)
 	{
 	}
 
-	void SignalBox::setSignalsFor(Turnout::Shared& turnout, const Turnout::Direction& direction)
+	Railway::Callbacks::TurnoutUpdateCallback SignalBox::injectTurnoutSignalHandling(Railway::Callbacks::TurnoutUpdateCallback callback)
 	{
-		Section::Connection from = direction == Turnout::Direction::A_B ? Section::Connection::B : Section::Connection::C;
-		Section::Shared onto;
-		turnout->traverse(from, onto);
+		return [this, callback](Turnout::Shared turnout, Turnout::Direction direction) -> State {
+			State state = callback(turnout, direction);
+			if (state == State::Finished)
+				this->setSignalsFor(turnout);
+			return state;
+		};
 	}
+
+	void SignalBox::setSignalsFor(Turnout::Shared turnout)
+	{
+		auto setSignals = [](Turnout::Shared turnout, const Turnout::Direction direction)
+		{
+			Section::Connection from = direction == Turnout::Direction::A_B ? Section::Connection::B : Section::Connection::C;
+			Section::Shared current = turnout;
+
+			const auto mainSignalAspect = turnout->direction() == direction ? Signal::Aspect::Go : Signal::Aspect::Halt;
+			const auto preSignalAspect = mainSignalAspect == Signal::Aspect::Go ? Signal::Aspect::ExpectGo : Signal::Aspect::ExpectHalt;
+
+			if (Signal::Shared mainSignal = SignalBox::nextSignal(current, from, true))
+			{
+				mainSignal->aspect(mainSignalAspect);
+				// current and from are now the position of mainSignal
+				if (Signal::Shared preSignal = SignalBox::nextSignal(current, from, false))
+					preSignal->aspect(preSignalAspect);
+			}
+		};
+
+		this->order(Command::make([turnout, setSignals](const unsigned long& created) -> const winston::State { setSignals(turnout, turnout->direction()); return State::Finished; }));
+		this->order(Command::make([turnout, setSignals](const unsigned long& created) -> const winston::State { setSignals(turnout, turnout->otherDirection(turnout->direction())); return State::Finished;  }));
+	}
+	
+	Signal::Shared SignalBox::nextSignal(Section::Shared& section, Section::Connection& leaving, const bool main)
+	{
+		Section::Connection connection = leaving;
+		Section::Shared onto;
+		Section::Shared& current = section;
+
+		bool done = false;
+		while (!done)
+		{
+			if(!current->traverse(connection, onto, true))
+				break;
+
+			Section::Connection backConnection = onto->whereConnects(current);
+			connection = onto->otherConnection(backConnection);
+
+			// we looped somehow
+			if (onto == section)
+				break;
+
+			if (onto->type() != Section::Type::Turnout)
+				if (auto signal = onto->signalGuarding(backConnection))
+				{
+					if ((signal->mainSignal() && main) || (signal->preSignal() && !main))
+					{
+						section = onto;
+						return signal;
+					}
+					else if (signal->mainSignal() && !main)
+						return nullptr;
+				}
+			
+			if (onto->type() == Section::Type::Bumper)
+				break;
+		}
+
+		return nullptr;
+	}
+
 
 	void SignalBox::order(Command::Shared command)
 	{

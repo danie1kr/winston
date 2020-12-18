@@ -558,6 +558,7 @@
                 click("menuSectionNode", event);
             });
             cy.on('unselect', '.track, .trackNode, .section', function() {
+                cy.elements().removeClass("reachable");
                 hideContextMenus();
             });
             cy.on('mouseover', '.turnout', function(event) {

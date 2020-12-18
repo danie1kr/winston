@@ -53,12 +53,16 @@ namespace winston
 		virtual bool has(const Connection connection) const = 0;
 		//Section& attachSignal(Signal &signal, const Connection comingFrom);
 
-		virtual bool traverse(const Connection from, Section::Shared& onto) const = 0;
+		virtual bool traverse(const Connection connection, Section::Shared& onto, bool leavingOnConnection) const { return false; };
 		virtual void collectAllConnections(std::set<Section::Shared>& sections) const = 0;
+		virtual const Connection whereConnects(Section::Shared& other) const = 0;
+		virtual const Connection otherConnection(const Connection connection) const = 0;
 		virtual const Result validate() = 0;
 		virtual const Type type() = 0;
 
-		virtual void attachSignal(Signal::Shared& signal, const Connection facing) = 0;
+		virtual void attachSignal(Signal::Shared signal, const Connection guarding);
+		virtual Signal::Shared signalFacing(const Connection facing);
+		virtual Signal::Shared signalGuarding(const Connection guarding);
 
 	protected:
 		Result validateSingle(const Section::Shared section);
@@ -72,13 +76,33 @@ namespace winston
 		//static Section::Shared make();
 
 		bool has(const Connection connection) const;
-		bool traverse(const Connection from, Section::Shared& onto) const;
+		template<bool _leavingOnConnection>
+		bool traverse(const Connection connection, Section::Shared& onto, bool leavingOnConnection) const
+		{
+			if (!this->has(connection))
+			{
+				onto.reset();
+				return false;
+			}
+			if ((_leavingOnConnection && connection == Connection::A) ||
+				(!_leavingOnConnection && connection == Connection::DeadEnd))
+			{
+				onto = a;
+				return true;
+			}
+			onto.reset();
+			return false;
+		}
 		void collectAllConnections(std::set<Section::Shared>& sections) const;
+		const Connection whereConnects(Section::Shared& other) const;
+		const Connection otherConnection(const Connection connection) const;
 		Section::Shared connect(const Connection local, Section::Shared&to, const Connection remote, bool viceVersa = true);
 		const Result validate();
 		const Type type();
 
-		void attachSignal(Signal::Shared& signal, const Connection facing);
+		void attachSignal(Signal::Shared signal, const Connection guarding);
+		Signal::Shared signalFacing(const Connection facing);
+		Signal::Shared signalGuarding(const Connection guarding);
 
 		void connections(Section::Shared& onA);
 
@@ -98,13 +122,18 @@ namespace winston
 		//static Section::Shared make();
 
 		bool has(const Connection connection) const;
-		bool traverse(const Connection from, Section::Shared& onto) const;
+		bool traverse(const Connection connection, Section::Shared& onto, bool leavingOnConnection) const;
+
 		void collectAllConnections(std::set<Section::Shared>& sections) const;
+		const Connection whereConnects(Section::Shared& other) const;
+		const Connection otherConnection(const Connection connection) const;
 		Section::Shared connect(const Connection local, Section::Shared& to, const Connection remote, bool viceVersa = true);
 		const Result validate();
 		const Type type();
 
-		void attachSignal(Signal::Shared& signal, const Connection facing);
+		void attachSignal(Signal::Shared signal, const Connection guarding);
+		Signal::Shared signalFacing(const Connection facing);
+		Signal::Shared signalGuarding(const Connection guarding);
 
 		void connections(Section::Shared& onA, Section::Shared& onB);
 
@@ -133,14 +162,15 @@ namespace winston
 		//static Section::Shared make(const Callback callback, const bool leftTurnout);
 
 		bool has(const Connection connection) const;
-		bool traverse(const Connection from, Section::Shared& onto) const;
+
+		bool traverse(const Connection connection, Section::Shared& onto, bool leavingOnConnection) const;
 		void collectAllConnections(std::set<Section::Shared>& sections) const;
+		const Connection whereConnects(Section::Shared& other) const;
+		const Connection otherConnection(const Connection connection) const;
 
 		Section::Shared connect(const Connection local, Section::Shared& to, const Connection remote, bool viceVersa = true);
 		const Result validate();
 		const Type type();
-
-		void attachSignal(Signal::Shared& signal, const Connection facing);
 
 		void connections(Section::Shared& onA, Section::Shared& onB, Section::Shared& onC);
 
@@ -161,7 +191,5 @@ namespace winston
 
 		Callback callback;
 		Section::Shared a, b, c;
-
-		std::array<Signal::Shared, 3> signals;
 	};
 }

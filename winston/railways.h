@@ -35,6 +35,54 @@ private:
     void connect(std::array < winston::Section::Shared, sectionsCount()>& sections);
 };
 
+enum class SignalTestRailwaySections : unsigned int
+{
+    A,
+    Turnout1,
+    B,
+    C,
+    D,
+    E,
+    F,
+    G,
+    H,
+    I,
+    J,
+    K,
+    L,
+    M,
+    N
+};
+
+class SignalTestRailway : public winston::RailwayWithRails<SignalTestRailwaySections>, winston::Shared_Ptr<SignalTestRailway>
+{
+    /*
+    * |====A====T1====HBa=B====|
+    *            \====HCa=C====|
+    * 
+    * |====D====VEa=E====HFa=F====|
+    * 
+    * |====G====VHa=H====HVIa=I====HJa=J====|
+    * 
+    * |====K====KVLa=L====KVMa=M====KNa=N====|
+    * 
+    */
+
+public:
+
+    SignalTestRailway(const Callbacks callbacks);
+    virtual ~SignalTestRailway() = default;
+
+    static const std::string name();
+
+    using winston::Shared_Ptr<SignalTestRailway>::Shared;
+    using winston::Shared_Ptr<SignalTestRailway>::make;
+
+private:
+    winston::Section::Shared define(const Sections section);
+    void connect(std::array < winston::Section::Shared, sectionsCount()>& sections);
+};
+
 /*
     /--A--\
     |     |

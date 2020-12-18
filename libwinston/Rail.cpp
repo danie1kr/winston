@@ -50,6 +50,21 @@ namespace winston
 		return connection == Connection::A || connection == Connection::DeadEnd;
 	}
 
+	bool Bumper::traverse(const Connection connection, Section::Shared& onto, bool leavingOnConnection) const
+	{
+		if(this->has(connection) && 
+			((leavingOnConnection && connection == Connection::A) ||
+			(!leavingOnConnection && connection == Connection::DeadEnd)))
+		{
+			onto = a;
+			return true;
+		}
+
+		onto.reset();
+		return false;
+
+	}
+
 	void Bumper::collectAllConnections(std::set<Section::Shared>& sections) const
 	{
 		sections.insert(a);

@@ -53,7 +53,7 @@ namespace winston
 		virtual bool has(const Connection connection) const = 0;
 		//Section& attachSignal(Signal &signal, const Connection comingFrom);
 
-		virtual bool traverse(const Connection connection, Section::Shared& onto, bool leavingOnConnection) const { return false; };
+		virtual bool traverse(const Connection connection, Section::Shared& onto, bool leavingOnConnection) const = 0;
 		virtual void collectAllConnections(std::set<Section::Shared>& sections) const = 0;
 		virtual const Connection whereConnects(Section::Shared& other) const = 0;
 		virtual const Connection otherConnection(const Connection connection) const = 0;
@@ -76,23 +76,7 @@ namespace winston
 		//static Section::Shared make();
 
 		bool has(const Connection connection) const;
-		template<bool _leavingOnConnection>
-		bool traverse(const Connection connection, Section::Shared& onto, bool leavingOnConnection) const
-		{
-			if (!this->has(connection))
-			{
-				onto.reset();
-				return false;
-			}
-			if ((_leavingOnConnection && connection == Connection::A) ||
-				(!_leavingOnConnection && connection == Connection::DeadEnd))
-			{
-				onto = a;
-				return true;
-			}
-			onto.reset();
-			return false;
-		}
+		bool traverse(const Connection connection, Section::Shared& onto, bool leavingOnConnection) const;
 		void collectAllConnections(std::set<Section::Shared>& sections) const;
 		const Connection whereConnects(Section::Shared& other) const;
 		const Connection otherConnection(const Connection connection) const;

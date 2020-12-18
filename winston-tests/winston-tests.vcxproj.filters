@@ -27,5 +27,8 @@
     <ClCompile Include="..\winston\railways.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="winston-tests-signal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

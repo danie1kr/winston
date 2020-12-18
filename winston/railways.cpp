@@ -33,6 +33,71 @@ const std::string MiniRailway::name()
     return std::string("MiniRailway");
 }
 
+SignalTestRailway::SignalTestRailway(const Callbacks callbacks) : winston::RailwayWithRails<SignalTestRailwaySections>(callbacks) {};
+
+winston::Section::Shared SignalTestRailway::define(const Sections section)
+{
+    switch (section) {
+    case Sections::A:
+    case Sections::B:
+    case Sections::C:
+    case Sections::D:
+    case Sections::F:
+    case Sections::G:
+    case Sections::J:
+    case Sections::K:
+    case Sections::N:
+        return winston::Bumper::make();
+    case Sections::E:
+    case Sections::H:
+    case Sections::I:
+    case Sections::L:
+    case Sections::M:
+        return winston::Rail::make();
+    case Sections::Turnout1:
+        return winston::Turnout::make([this, section](winston::Section::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Section>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
+    default:
+        winston::hal::fatal(std::string("section ") + std::string(magic_enum::enum_name(section)) + std::string("not in switch"));
+    }
+}
+
+void SignalTestRailway::connect(std::array<winston::Section::Shared, sectionsCount()>& sections)
+{
+    this->section(Sections::A)->connect(winston::Section::Connection::A, this->section(Sections::Turnout1), winston::Section::Connection::A)
+        ->connect(winston::Section::Connection::B, this->section(Sections::B), winston::Section::Connection::A);
+    this->section(Sections::Turnout1)->connect(winston::Section::Connection::C, this->section(Sections::C), winston::Section::Connection::A);
+
+    this->section(Sections::D)->connect(winston::Section::Connection::A, this->section(Sections::E), winston::Section::Connection::A)
+        ->connect(winston::Section::Connection::B, this->section(Sections::F), winston::Section::Connection::A);
+    
+    this->section(Sections::G)->connect(winston::Section::Connection::A, this->section(Sections::H), winston::Section::Connection::A)
+        ->connect(winston::Section::Connection::B, this->section(Sections::I), winston::Section::Connection::A)
+        ->connect(winston::Section::Connection::B, this->section(Sections::J), winston::Section::Connection::A);
+
+    this->section(Sections::K)->connect(winston::Section::Connection::A, this->section(Sections::L), winston::Section::Connection::A)
+        ->connect(winston::Section::Connection::B, this->section(Sections::M), winston::Section::Connection::A)
+        ->connect(winston::Section::Connection::B, this->section(Sections::N), winston::Section::Connection::A);
+
+    this->section(Sections::B)->attachSignal(winston::SignalH::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
+    this->section(Sections::C)->attachSignal(winston::SignalKS::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
+
+    this->section(Sections::E)->attachSignal(winston::SignalV::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
+    this->section(Sections::F)->attachSignal(winston::SignalH::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
+
+    this->section(Sections::H)->attachSignal(winston::SignalV::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
+    this->section(Sections::I)->attachSignal(winston::SignalHV::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
+    this->section(Sections::J)->attachSignal(winston::SignalH::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
+
+    this->section(Sections::L)->attachSignal(winston::SignalKS::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
+    this->section(Sections::M)->attachSignal(winston::SignalKS::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
+    this->section(Sections::N)->attachSignal(winston::SignalKS::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
+}
+
+const std::string SignalTestRailway::name()
+{
+    return std::string("SignalTestRailway");
+}
+
 RailwayWithSiding::RailwayWithSiding(const Callbacks callbacks) : winston::RailwayWithRails<RailwayWithSidingsSections>(callbacks) {};
 RailwayWithSiding::AddressTranslator::AddressTranslator(RailwayWithSiding::Shared railway) : winston::DigitalCentralStation::AddressTranslator(), Shared_Ptr<AddressTranslator>(), railway(railway) { };
 

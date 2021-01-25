@@ -35,8 +35,6 @@ namespace winstontests
             return callbacks;
         }
     public:
-
-        
         TEST_METHOD(Signals_forTurnouts) {
             winston::NullMutex nullMutex;
             auto signalBox = winston::SignalBox::make(nullMutex);
@@ -70,6 +68,32 @@ namespace winstontests
                 signalBox->work();
             Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sCA->shows(winston::Signal::Aspect::Halt));
+        }
+
+        TEST_METHOD(Signals_PreSignal) {
+            winston::NullMutex nullMutex;
+            auto signalBox = winston::SignalBox::make(nullMutex);
+
+            testRailway = SignalTestRailway::make(railwayCallbacksWithSignals(signalBox));
+            Assert::IsTrue(testRailway->init() == winston::Result::OK);
+            auto e = testRailway->section(SignalTestRailway::Sections::E);
+            auto f = testRailway->section(SignalTestRailway::Sections::F);
+
+            auto sHFa = f->signalGuarding(winston::Section::Connection::A);
+            auto sVEa = e->signalGuarding(winston::Section::Connection::A);
+
+            sHFa->aspect(winston::Signal::Aspect::Off);
+            sVEa->aspect(winston::Signal::Aspect::Off);
+
+            signalBox->
+        }
+
+
+        TEST_METHOD(Signals_PreMainSignalNotChanged) {
+        }
+
+
+        TEST_METHOD(Signals_loopAbort) {
         }
     };
 }

@@ -53,6 +53,8 @@ winston::Section::Shared SignalTestRailway::define(const Sections section)
     case Sections::I:
     case Sections::L:
     case Sections::M:
+    case Sections::O:
+    case Sections::P:
         return winston::Rail::make();
     case Sections::Turnout1:
         return winston::Turnout::make([this, section](winston::Section::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Section>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
@@ -78,6 +80,9 @@ void SignalTestRailway::connect(std::array<winston::Section::Shared, sectionsCou
         ->connect(winston::Section::Connection::B, this->section(Sections::M), winston::Section::Connection::A)
         ->connect(winston::Section::Connection::B, this->section(Sections::N), winston::Section::Connection::A);
 
+    this->section(Sections::O)->connect(winston::Section::Connection::A, this->section(Sections::P), winston::Section::Connection::A)
+        ->connect(winston::Section::Connection::B, this->section(Sections::O), winston::Section::Connection::B);
+    
     this->section(Sections::B)->attachSignal(winston::SignalH::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
     this->section(Sections::C)->attachSignal(winston::SignalKS::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
 
@@ -91,6 +96,8 @@ void SignalTestRailway::connect(std::array<winston::Section::Shared, sectionsCou
     this->section(Sections::L)->attachSignal(winston::SignalKS::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
     this->section(Sections::M)->attachSignal(winston::SignalKS::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
     this->section(Sections::N)->attachSignal(winston::SignalKS::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
+    
+    this->section(Sections::O)->attachSignal(winston::SignalHV::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
 }
 
 const std::string SignalTestRailway::name()

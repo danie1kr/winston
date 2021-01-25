@@ -24,6 +24,7 @@ namespace winston
 
 	void SignalBox::setSignalsFor(Turnout::Shared turnout)
 	{
+		// make public
 		auto setSignals = [](Turnout::Shared turnout, const Turnout::Direction direction)
 		{
 			Section::Connection from = direction == Turnout::Direction::A_B ? Section::Connection::B : Section::Connection::C;

@@ -51,7 +51,9 @@ enum class SignalTestRailwaySections : unsigned int
     K,
     L,
     M,
-    N
+    N,
+    O,
+    P
 };
 
 class SignalTestRailway : public winston::RailwayWithRails<SignalTestRailwaySections>, winston::Shared_Ptr<SignalTestRailway>
@@ -65,6 +67,10 @@ class SignalTestRailway : public winston::RailwayWithRails<SignalTestRailwaySect
     * |====G====VHa=H====HVIa=I====HJa=J====|
     * 
     * |====K====KVLa=L====KVMa=M====KNa=N====|
+    * 
+    *  /====KVOa=O====\
+      ||              ||
+       \======P=======/
     * 
     */
 

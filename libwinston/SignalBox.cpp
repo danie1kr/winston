@@ -46,20 +46,8 @@ namespace winston
 		{
 			Section::Connection from = direction == Turnout::Direction::A_B ? Section::Connection::B : Section::Connection::C;
 			Section::Shared current = turnout;
-
 			const auto mainSignalAspect = turnout->direction() == direction ? Signal::Aspect::Go : Signal::Aspect::Halt;
-
-			SignalBox::setSignalOn(current, true, from, mainSignalAspect, false);/*
-
-			const auto preSignalAspect = mainSignalAspect == Signal::Aspect::Go ? Signal::Aspect::ExpectGo : Signal::Aspect::ExpectHalt;
-
-			if (Signal::Shared mainSignal = SignalBox::nextSignal(current, true, from, true, false))
-			{
-				mainSignal->aspect(mainSignalAspect);
-				// current and from are now the position of mainSignal
-				if (Signal::Shared preSignal = SignalBox::nextSignal(current, true, from, false, false))
-					preSignal->aspect(preSignalAspect);
-			}*/
+			SignalBox::setSignalOn(current, true, from, mainSignalAspect, false);
 		};
 
 		this->order(Command::make([turnout, setSignals](const unsigned long& created) -> const winston::State { setSignals(turnout, turnout->direction()); return State::Finished; }));

@@ -85,7 +85,17 @@ namespace winstontests
             sHFa->aspect(winston::Signal::Aspect::Off);
             sVEa->aspect(winston::Signal::Aspect::Off);
 
-            //signalBox->
+            signalBox->setSignal(sHFa, winston::Signal::Aspect::Go);
+            for (int i = 0; i < 10; ++i)
+                signalBox->work();
+            Assert::IsTrue(sHFa->shows(winston::Signal::Aspect::Go));
+            Assert::IsTrue(sVEa->shows(winston::Signal::Aspect::ExpectGo));
+
+            signalBox->setSignal(sHFa, winston::Signal::Aspect::Halt);
+            for (int i = 0; i < 10; ++i)
+                signalBox->work();
+            Assert::IsTrue(sHFa->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(sVEa->shows(winston::Signal::Aspect::ExpectHalt));
         }
 
         /*

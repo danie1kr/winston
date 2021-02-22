@@ -39,5 +39,13 @@ namespace winston
 		protected:
 			State state;
 		};
+
+		class Device : public Shared_Ptr<Device>
+		{
+		public:
+			virtual void init() = 0;
+			virtual Result send(std::vector<unsigned char> data) = 0;
+			virtual unsigned int receive() = 0;
+		};
 	}
 }

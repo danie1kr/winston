@@ -25,12 +25,14 @@ namespace winston
 		Railway::Callbacks::TurnoutUpdateCallback injectTurnoutSignalHandling(Railway::Callbacks::TurnoutUpdateCallback callback);
 
 		void setSignalsFor(Turnout::Shared turnout);
-
+		static void setSignal(Signal::Shared signal, const Signal::Aspect aspect);
+		static void setSignalOn(Section::Shared section, const bool guarding, const Section::Connection connection, const Signal::Aspect aspect, const bool includingFirst);
+		
 		void order(Command::Shared command);
 		void work();
 	private:
 
-		static Signal::Shared nextSignal(Section::Shared& section, Section::Connection& connection, const bool main);
+		static Signal::Shared nextSignal(Section::Shared& section, const bool guarding, Section::Connection& leaving, const bool main, const bool includingFirst);
 
 		std::queue<Command::Shared> commands;
 		Mutex& mutex;

@@ -394,6 +394,12 @@ private:
             return winston::State::Finished;
         };
 
+        callbacks.signalUpdateCallback = [=](winston::Signal::Shared signal, const winston::Signal::Aspect aspect) -> const winston::State
+        {
+            //signalSendState(
+            return winston::State::Finished;
+        };
+
         return callbacks;
     }
 

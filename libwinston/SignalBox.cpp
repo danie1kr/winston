@@ -1,5 +1,6 @@
 #include <typeinfo>
 #include <typeindex>
+#include <unordered_set>
 
 #include "SignalBox.h"
 #include "HAL.h"
@@ -22,6 +23,22 @@ namespace winston
 		};
 	}
 
+	void SignalBox::setSignalOn(Section::Shared section, const bool guarding, const Section::Connection connection, const Signal::Aspect aspect, const bool includingFirst)
+	{
+		const auto preSignalAspect = aspect == Signal::Aspect::Go ? Signal::Aspect::ExpectGo : Signal::Aspect::ExpectHalt;
+		
+		auto current = section;
+		auto from = connection;
+		// current and from are now the position of mainSignal
+		if (Signal::Shared mainSignal = SignalBox::nextSignal(current, guarding, from, true, includingFirst))
+		{
+			mainSignal->aspect(aspect);
+			// current and from are now the position of mainSignal
+			if (Signal::Shared preSignal = SignalBox::nextSignal(current, guarding, from, false, includingFirst))
+				preSignal->aspect(preSignalAspect);
+		}
+	}
+
 	void SignalBox::setSignalsFor(Turnout::Shared turnout)
 	{
 		// make public
@@ -31,42 +48,61 @@ namespace winston
 			Section::Shared current = turnout;
 
 			const auto mainSignalAspect = turnout->direction() == direction ? Signal::Aspect::Go : Signal::Aspect::Halt;
+
+			SignalBox::setSignalOn(current, true, from, mainSignalAspect, false);/*
+
 			const auto preSignalAspect = mainSignalAspect == Signal::Aspect::Go ? Signal::Aspect::ExpectGo : Signal::Aspect::ExpectHalt;
 
-			if (Signal::Shared mainSignal = SignalBox::nextSignal(current, from, true))
+			if (Signal::Shared mainSignal = SignalBox::nextSignal(current, true, from, true, false))
 			{
 				mainSignal->aspect(mainSignalAspect);
 				// current and from are now the position of mainSignal
-				if (Signal::Shared preSignal = SignalBox::nextSignal(current, from, false))
+				if (Signal::Shared preSignal = SignalBox::nextSignal(current, true, from, false, false))
 					preSignal->aspect(preSignalAspect);
-			}
+			}*/
 		};
 
 		this->order(Command::make([turnout, setSignals](const unsigned long& created) -> const winston::State { setSignals(turnout, turnout->direction()); return State::Finished; }));
 		this->order(Command::make([turnout, setSignals](const unsigned long& created) -> const winston::State { setSignals(turnout, turnout->otherDirection(turnout->direction())); return State::Finished;  }));
 	}
 	
-	Signal::Shared SignalBox::nextSignal(Section::Shared& section, Section::Connection& leaving, const bool main)
+	Signal::Shared SignalBox::nextSignal(Section::Shared& section, const bool guarding, Section::Connection& leaving, const bool main, const bool includingFirst)
 	{
 		Section::Connection connection = leaving;
+		Section::Connection checkConnection = connection;
 		Section::Shared onto;
 		Section::Shared& current = section;
 
+		std::unordered_set<Section::Shared> visited;
+
 		bool done = false;
+		bool skipTraverse = !includingFirst;
 		while (!done)
 		{
-			if(!current->traverse(connection, onto, true))
-				break;
+			if (!skipTraverse)
+			{
+				if (!current->traverse(connection, onto, true))
+					break;
 
-			Section::Connection backConnection = onto->whereConnects(current);
-			connection = onto->otherConnection(backConnection);
+				Section::Connection backConnection = onto->whereConnects(current);
+				connection = onto->otherConnection(backConnection);
+				checkConnection = guarding ? backConnection : connection;
 
-			// we looped somehow
-			if (onto == section)
-				break;
+				// we looped somehow
+				if (visited.contains(onto))
+					break;
+			}
+			else
+			{
+				onto = current;
+				skipTraverse = false;
+			}
+			visited.insert(onto);
 
 			if (onto->type() != Section::Type::Turnout)
-				if (auto signal = onto->signalGuarding(backConnection))
+			{
+				auto signal = guarding ? onto->signalGuarding(checkConnection) : onto->signalFacing(checkConnection);
+				if (signal)
 				{
 					if ((signal->mainSignal() && main) || (signal->preSignal() && !main))
 					{
@@ -76,6 +112,7 @@ namespace winston
 					else if (signal->mainSignal() && !main)
 						return nullptr;
 				}
+			}
 			
 			if (onto->type() == Section::Type::Bumper)
 				break;

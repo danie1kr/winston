@@ -365,7 +365,7 @@ namespace winston
 		State state = this->callback(this->shared_from_this(), direction);
 		this->dir = direction;
 
-		return State::Finished;
+		return state;
 	}
 
 	const Turnout::Direction Turnout::direction()

@@ -24,8 +24,8 @@ void MiniRailway::connect(std::array<winston::Section::Shared, sectionsCount()>&
         ->connect(winston::Section::Connection::B, this->section(Sections::B), winston::Section::Connection::A);
     this->section(Sections::Turnout1)->connect(winston::Section::Connection::C, this->section(Sections::C), winston::Section::Connection::A);
 
-    this->section(Sections::B)->attachSignal(winston::SignalH::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
-    this->section(Sections::C)->attachSignal(winston::SignalKS::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
+    this->section(Sections::B)->attachSignal(winston::SignalH::make(), winston::Section::Connection::A);
+    this->section(Sections::C)->attachSignal(winston::SignalKS::make(), winston::Section::Connection::A);
 }
 
 const std::string MiniRailway::name()
@@ -83,21 +83,21 @@ void SignalTestRailway::connect(std::array<winston::Section::Shared, sectionsCou
     this->section(Sections::O)->connect(winston::Section::Connection::A, this->section(Sections::P), winston::Section::Connection::A)
         ->connect(winston::Section::Connection::B, this->section(Sections::O), winston::Section::Connection::B);
     
-    this->section(Sections::B)->attachSignal(winston::SignalH::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
-    this->section(Sections::C)->attachSignal(winston::SignalKS::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
+    this->section(Sections::B)->attachSignal(winston::SignalH::make(), winston::Section::Connection::A);
+    this->section(Sections::C)->attachSignal(winston::SignalKS::make(), winston::Section::Connection::A);
 
-    this->section(Sections::E)->attachSignal(winston::SignalV::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
-    this->section(Sections::F)->attachSignal(winston::SignalH::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
+    this->section(Sections::E)->attachSignal(winston::SignalV::make(), winston::Section::Connection::A);
+    this->section(Sections::F)->attachSignal(winston::SignalH::make(), winston::Section::Connection::A);
 
-    this->section(Sections::H)->attachSignal(winston::SignalV::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
-    this->section(Sections::I)->attachSignal(winston::SignalHV::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
-    this->section(Sections::J)->attachSignal(winston::SignalH::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
+    this->section(Sections::H)->attachSignal(winston::SignalV::make(), winston::Section::Connection::A);
+    this->section(Sections::I)->attachSignal(winston::SignalHV::make(), winston::Section::Connection::A);
+    this->section(Sections::J)->attachSignal(winston::SignalH::make(), winston::Section::Connection::A);
 
-    this->section(Sections::L)->attachSignal(winston::SignalKS::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
-    this->section(Sections::M)->attachSignal(winston::SignalKS::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
-    this->section(Sections::N)->attachSignal(winston::SignalKS::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
+    this->section(Sections::L)->attachSignal(winston::SignalKS::make(), winston::Section::Connection::A);
+    this->section(Sections::M)->attachSignal(winston::SignalKS::make(), winston::Section::Connection::A);
+    this->section(Sections::N)->attachSignal(winston::SignalKS::make(), winston::Section::Connection::A);
     
-    this->section(Sections::O)->attachSignal(winston::SignalHV::make(winston::Signal::defaultCallback()), winston::Section::Connection::A);
+    this->section(Sections::O)->attachSignal(winston::SignalHV::make(), winston::Section::Connection::A);
 }
 
 const std::string SignalTestRailway::name()
@@ -279,6 +279,8 @@ winston::Section::Shared Y2020Railway::define(const Sections section)
     case Sections::F:
     case Sections::G:
         return winston::Bumper::make();
+    case Sections::G1:
+        return winston::Rail::make();
     case Sections::Turnout1:
     case Sections::Turnout2:
         return winston::Turnout::make([this, section](winston::Section::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Section>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
@@ -305,6 +307,7 @@ void Y2020Railway::connect(std::array<winston::Section::Shared, sectionsCount()>
     auto e = this->section(Sections::E);
     auto f = this->section(Sections::F);
     auto g = this->section(Sections::G);
+    auto g1 = this->section(Sections::G1);
     auto t1 = this->section(Sections::Turnout1);
     auto t2 = this->section(Sections::Turnout2);
     auto t3 = this->section(Sections::Turnout3);
@@ -316,6 +319,7 @@ void Y2020Railway::connect(std::array<winston::Section::Shared, sectionsCount()>
     auto t9 = this->section(Sections::Turnout9);
 
     a->connect(winston::Section::Connection::A, t2, winston::Section::Connection::B)
+        ->connect(winston::Section::Connection::A, g1, winston::Section::Connection::B)
         ->connect(winston::Section::Connection::A, t4, winston::Section::Connection::B)
         ->connect(winston::Section::Connection::A, t5, winston::Section::Connection::A)
         ->connect(winston::Section::Connection::B, t1, winston::Section::Connection::A)
@@ -337,4 +341,10 @@ void Y2020Railway::connect(std::array<winston::Section::Shared, sectionsCount()>
     t8->connect(winston::Section::Connection::B, t9, winston::Section::Connection::A)
         ->connect(winston::Section::Connection::B, g, winston::Section::Connection::A);
     t9->connect(winston::Section::Connection::C, f, winston::Section::Connection::A);
+
+#define attachSignal(section, SignalClass, guardedConnection) \
+    section->attachSignal(SignalClass::make([=](const winston::Signal::Aspect aspect)->const winston::State { return this->callbacks.signalUpdateCallback(section->signalGuarding(guardedConnection), aspect); }), guardedConnection);
+
+    attachSignal(g1, winston::SignalKS, winston::Section::Connection::A);
+    attachSignal(g1, winston::SignalKS, winston::Section::Connection::B);
 }

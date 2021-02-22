@@ -204,7 +204,8 @@ enum class Y2020RailwaySections : unsigned int
     D,
     E,
     F,
-    G
+    G,
+    G1
 };
 
 class Y2020Railway : public winston::RailwayWithRails<Y2020RailwaySections>, winston::Shared_Ptr<Y2020Railway>
@@ -223,7 +224,7 @@ class Y2020Railway : public winston::RailwayWithRails<Y2020RailwaySections>, win
      \\                     //                   //
       \\====Turnout1====Turnout3====Turnout4====//
                 \\                     //
-    |====A====Turnout2==================
+    |====A====Turnout2========G1========
     */
 
 public:

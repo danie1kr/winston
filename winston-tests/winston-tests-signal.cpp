@@ -69,7 +69,7 @@ namespace winstontests
             Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sCA->shows(winston::Signal::Aspect::Halt));
         }
-
+        
         TEST_METHOD(Signals_PreSignal) {
             winston::NullMutex nullMutex;
             auto signalBox = winston::SignalBox::make(nullMutex);
@@ -85,15 +85,15 @@ namespace winstontests
             sHFa->aspect(winston::Signal::Aspect::Off);
             sVEa->aspect(winston::Signal::Aspect::Off);
 
-            signalBox->
+            //signalBox->
         }
 
-
+        /*
         TEST_METHOD(Signals_PreMainSignalNotChanged) {
         }
 
 
         TEST_METHOD(Signals_loopAbort) {
-        }
+        }*/
     };
 }

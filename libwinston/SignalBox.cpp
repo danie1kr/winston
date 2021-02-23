@@ -34,7 +34,8 @@ namespace winston
 		{
 			mainSignal->aspect(aspect);
 			// current and from are now the position of mainSignal
-			if (Signal::Shared preSignal = SignalBox::nextSignal(current, guarding, from, false, includingFirst))
+			auto otherFrom = current->otherConnection(from);
+			if (Signal::Shared preSignal = SignalBox::nextSignal(current, guarding, otherFrom, false, false))
 				preSignal->aspect(preSignalAspect);
 		}
 	}
@@ -47,7 +48,7 @@ namespace winston
 			Section::Connection from = direction == Turnout::Direction::A_B ? Section::Connection::B : Section::Connection::C;
 			Section::Shared current = turnout;
 			const auto mainSignalAspect = turnout->direction() == direction ? Signal::Aspect::Go : Signal::Aspect::Halt;
-			SignalBox::setSignalOn(current, true, from, mainSignalAspect, false);
+			SignalBox::setSignalOn(current, true, from, mainSignalAspect, true);
 		};
 
 		this->order(Command::make([turnout, setSignals](const unsigned long& created) -> const winston::State { setSignals(turnout, turnout->direction()); return State::Finished; }));
@@ -64,7 +65,7 @@ namespace winston
 		std::unordered_set<Section::Shared> visited;
 
 		bool done = false;
-		bool skipTraverse = !includingFirst;
+		bool skipTraverse = includingFirst;
 		while (!done)
 		{
 			if (!skipTraverse)

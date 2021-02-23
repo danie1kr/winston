@@ -79,30 +79,56 @@ namespace winstontests
             auto e = testRailway->section(SignalTestRailway::Sections::E);
             auto f = testRailway->section(SignalTestRailway::Sections::F);
 
-            auto sHFa = f->signalGuarding(winston::Section::Connection::A);
-            auto sVEa = e->signalGuarding(winston::Section::Connection::A);
+            auto sVFa = f->signalGuarding(winston::Section::Connection::A);
+            auto sHEa = e->signalGuarding(winston::Section::Connection::A);
 
-            sHFa->aspect(winston::Signal::Aspect::Off);
-            sVEa->aspect(winston::Signal::Aspect::Off);
+            sVFa->aspect(winston::Signal::Aspect::Off);
+            sHEa->aspect(winston::Signal::Aspect::Off);
 
-            signalBox->setSignal(sHFa, winston::Signal::Aspect::Go);
+            signalBox->setSignalOn(e, true, winston::Section::Connection::A, winston::Signal::Aspect::Go, true);
             for (int i = 0; i < 10; ++i)
                 signalBox->work();
-            Assert::IsTrue(sHFa->shows(winston::Signal::Aspect::Go));
-            Assert::IsTrue(sVEa->shows(winston::Signal::Aspect::ExpectGo));
+            Assert::IsTrue(sHEa->shows(winston::Signal::Aspect::Go));
+            Assert::IsTrue(sVFa->shows(winston::Signal::Aspect::ExpectGo));
 
-            signalBox->setSignal(sHFa, winston::Signal::Aspect::Halt);
+            signalBox->setSignalOn(e, true, winston::Section::Connection::A, winston::Signal::Aspect::Halt, true);
             for (int i = 0; i < 10; ++i)
                 signalBox->work();
-            Assert::IsTrue(sHFa->shows(winston::Signal::Aspect::Halt));
-            Assert::IsTrue(sVEa->shows(winston::Signal::Aspect::ExpectHalt));
+            Assert::IsTrue(sHEa->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(sVFa->shows(winston::Signal::Aspect::ExpectHalt));
+        }
+
+        TEST_METHOD(Signals_PreMainSignalNotChanged) {
+            winston::NullMutex nullMutex;
+            auto signalBox = winston::SignalBox::make(nullMutex);
+
+            testRailway = SignalTestRailway::make(railwayCallbacksWithSignals(signalBox));
+            Assert::IsTrue(testRailway->init() == winston::Result::OK);
+            auto h = testRailway->section(SignalTestRailway::Sections::H);
+            auto i = testRailway->section(SignalTestRailway::Sections::I);
+            auto j = testRailway->section(SignalTestRailway::Sections::J);
+
+            auto sHHa = h->signalGuarding(winston::Section::Connection::A);
+            auto sHVIa = i->signalGuarding(winston::Section::Connection::A);
+            auto sVJa = j->signalGuarding(winston::Section::Connection::A);
+
+            sHHa->aspect(winston::Signal::Aspect::Off);
+            sHVIa->aspect(winston::Signal::Aspect::Off);
+            sVJa->aspect(winston::Signal::Aspect::Off);
+
+            signalBox->setSignalOn(h, true, winston::Section::Connection::A, winston::Signal::Aspect::Go, true);
+            for (int i = 0; i < 10; ++i)
+                signalBox->work();
+            Assert::IsTrue(sHVIa->shows(winston::Signal::Aspect::ExpectGo));
+            Assert::IsTrue(sVJa->shows(winston::Signal::Aspect::Off));
+            signalBox->setSignalOn(h, true, winston::Section::Connection::A, winston::Signal::Aspect::Halt, true);
+            for (int i = 0; i < 10; ++i)
+                signalBox->work();
+            Assert::IsTrue(sHVIa->shows(winston::Signal::Aspect::ExpectHalt));
+            Assert::IsTrue(sVJa->shows(winston::Signal::Aspect::Off));
         }
 
         /*
-        TEST_METHOD(Signals_PreMainSignalNotChanged) {
-        }
-
-
         TEST_METHOD(Signals_loopAbort) {
         }*/
     };

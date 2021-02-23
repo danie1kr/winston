@@ -18,6 +18,7 @@ namespace winston
 			ExpectHalt =	0b01000,
 			ExpectGo =		0b10000
 		};
+		using Aspects = unsigned int;
 
 		/*
 		
@@ -54,38 +55,42 @@ namespace winston
 
 		*/
 
-		static const unsigned int AspectsProtection = (unsigned int)Aspect::Off
+		static const Aspects AspectsProtection = (unsigned int)Aspect::Off
 			| (unsigned int)Aspect::Halt
 			| (unsigned int)Aspect::Go;
 
-		static const unsigned int AspectsKS = (unsigned int)Aspect::Halt
+		static const Aspects AspectsKS = (unsigned int)Aspect::Halt
 			| (unsigned int)Aspect::Go
 			| (unsigned int)Aspect::ExpectHalt;
 
-		static const unsigned int AspectsH = (unsigned int)Aspect::Halt
+		static const Aspects AspectsH = (unsigned int)Aspect::Halt
 			| (unsigned int)Aspect::Go;
 
-		static const unsigned int AspectsV = (unsigned int)Aspect::Off
+		static const Aspects AspectsV = (unsigned int)Aspect::Off
 			| (unsigned int)Aspect::ExpectHalt
 			| (unsigned int)Aspect::ExpectGo;
 
-		static const unsigned int AspectsHV = AspectsH | AspectsV;
+		static const Aspects MaskPreSignalAspect =
+			(unsigned int)Aspect::ExpectHalt | (unsigned int)Aspect::ExpectGo;
+		static const Aspects MaskMainSignalAspect =
+			(unsigned int)Aspect::Halt | (unsigned int)Aspect::Go;
 
-		using Callback = std::function<const State(const Aspect aspect)>;
+		static const Aspects AspectsHV = AspectsH | AspectsV;
+
+		using Callback = std::function<const State(const Aspects aspect)>;
 		static Callback defaultCallback();
 		Signal(const Callback callback = defaultCallback());
 
 		const State aspect(const Aspect aspect);
-		const Aspect aspect();
+		const Aspects aspect();
 		const bool shows(Aspect aspect);
 		virtual const bool supports(const Aspect aspect, const bool any) = 0;
 		virtual const bool preSignal() = 0;
 		virtual const bool mainSignal() = 0;
 	protected:
-		Aspect _aspect;
+		Aspects _aspect;
 		const Callback callback;
 	};
-
 	
 	template<unsigned int _Aspects>
 	class SignalInstance : public Signal, public Shared_Ptr<SignalInstance<_Aspects>>

@@ -62,11 +62,14 @@ class SignalTestRailway : public winston::RailwayWithRails<SignalTestRailwaySect
     * |====A====T1====HBa=B====|
     *            \====HCa=C====|
     * 
-    * |====D====VEa=E====HFa=F====|
+    * D|      Da-Ea   <  Eb-Fa < F| 
+    * |====D====HEa=E====VFa=F====|
     * 
-    * |====G====VHa=H====HVIa=I====HJa=J====|
+    * G|      Ga-Ha        Hb-Ia    Ib-Ja  J|
+    * |====G====HHa=H====HVIa=I====VJa=J====|
     * 
-    * |====K====KVLa=L====KVMa=M====KNa=N====|
+    * K|      Ka-La        Lb-Ma    Mb-Na   N|
+    * |====K====KLa=L====KMa=M====KNa=N====|
     * 
     *  /====KVOa=O====\
       ||              ||

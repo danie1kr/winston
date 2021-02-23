@@ -98,7 +98,7 @@ namespace winstontests
             Assert::IsTrue(sVFa->shows(winston::Signal::Aspect::ExpectHalt));
         }
 
-        TEST_METHOD(Signals_PreMainSignalNotChanged) {
+        TEST_METHOD(Signals_ThreeSectionWithPreSignals) {
             winston::NullMutex nullMutex;
             auto signalBox = winston::SignalBox::make(nullMutex);
 
@@ -126,6 +126,24 @@ namespace winstontests
                 signalBox->work();
             Assert::IsTrue(sHVIa->shows(winston::Signal::Aspect::ExpectHalt));
             Assert::IsTrue(sVJa->shows(winston::Signal::Aspect::Off));
+            signalBox->setSignalOn(i, true, winston::Section::Connection::A, winston::Signal::Aspect::Halt, true);
+            for (int i = 0; i < 10; ++i)
+                signalBox->work();
+            Assert::IsTrue(sHVIa->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(sHVIa->shows(winston::Signal::Aspect::ExpectHalt));
+            Assert::IsTrue(sVJa->shows(winston::Signal::Aspect::ExpectHalt));
+            signalBox->setSignalOn(h, true, winston::Section::Connection::A, winston::Signal::Aspect::Go, true);
+            for (int i = 0; i < 10; ++i)
+                signalBox->work();
+            Assert::IsTrue(sHVIa->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(sHVIa->shows(winston::Signal::Aspect::ExpectGo));
+            Assert::IsTrue(sVJa->shows(winston::Signal::Aspect::ExpectHalt));
+            signalBox->setSignalOn(i, true, winston::Section::Connection::A, winston::Signal::Aspect::Go, true);
+            for (int i = 0; i < 10; ++i)
+                signalBox->work();
+            Assert::IsTrue(sHVIa->shows(winston::Signal::Aspect::ExpectGo));
+            Assert::IsTrue(sHVIa->shows(winston::Signal::Aspect::Go));
+            Assert::IsTrue(sVJa->shows(winston::Signal::Aspect::ExpectGo));
         }
 
         /*

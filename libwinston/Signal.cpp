@@ -18,19 +18,19 @@ namespace winston
 		// pre-signal off if main signal shows Halt
 		if ((unsigned int)aspect & Signal::MaskPreSignalAspect)
 		{
-			if(this->_aspect & (unsigned int)Signal::Aspect::Halt)
-				this->_aspect = this->_aspect & (unsigned int)Signal::MaskMainSignalAspect; // & pre-signal Off
-			else
+			//if(this->_aspect & (unsigned int)Signal::Aspect::Halt)
+			//	this->_aspect = this->_aspect & (unsigned int)Signal::MaskMainSignalAspect; // & pre-signal Off
+			//else
 				this->_aspect = (this->_aspect & (unsigned int)Signal::MaskMainSignalAspect) | (unsigned int)aspect; // & pre-signal Off
 		}
 		else
 		{
 			// Go: keep pre signal
 			// Halt: pre signal off
-			if ((unsigned int)aspect & (unsigned int)Signal::Aspect::Go)
+			//if ((unsigned int)aspect & (unsigned int)Signal::Aspect::Go)
 				this->_aspect = (this->_aspect & (unsigned int)Signal::MaskPreSignalAspect) | (unsigned int)aspect;
-			else
-				this->_aspect = (unsigned int)aspect;
+			//else
+			//	this->_aspect = (unsigned int)aspect;
 		}
 		return this->callback(this->_aspect);
 	}

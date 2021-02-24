@@ -47,27 +47,27 @@ namespace winstontests
             testRailway = MiniRailway::make(railwayCallbacks());
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
 
-            auto a = testRailway->section(MiniRailway::Sections::A);
-            auto b = testRailway->section(MiniRailway::Sections::B);
-            auto c = testRailway->section(MiniRailway::Sections::C);
-            auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->section(MiniRailway::Sections::Turnout1));
+            auto a = testRailway->track(MiniRailway::Tracks::A);
+            auto b = testRailway->track(MiniRailway::Tracks::B);
+            auto c = testRailway->track(MiniRailway::Tracks::C);
+            auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->track(MiniRailway::Tracks::Turnout1));
             
-            winston::Section::Shared onto, onto2;
+            winston::Track::Shared onto, onto2;
 
-            Assert::IsTrue(a->traverse(winston::Section::Connection::DeadEnd, onto, false));
+            Assert::IsTrue(a->traverse(winston::Track::Connection::DeadEnd, onto, false));
             Assert::IsTrue(onto.get() == t1.get());
 
-            Assert::IsFalse(a->traverse(winston::Section::Connection::A, onto, false));
+            Assert::IsFalse(a->traverse(winston::Track::Connection::A, onto, false));
             Assert::IsTrue(onto == nullptr);
 
             t1->finalizeChangeTo(winston::Turnout::Direction::A_B);
-            Assert::IsTrue(a->traverse(winston::Section::Connection::DeadEnd, onto, false));
-            Assert::IsTrue(onto->traverse(winston::Section::Connection::A, onto2, false));
+            Assert::IsTrue(a->traverse(winston::Track::Connection::DeadEnd, onto, false));
+            Assert::IsTrue(onto->traverse(winston::Track::Connection::A, onto2, false));
             Assert::IsTrue(onto2.get() == b.get());
 
             t1->finalizeChangeTo(winston::Turnout::Direction::A_C);
-            Assert::IsTrue(a->traverse(winston::Section::Connection::DeadEnd, onto, false));
-            Assert::IsTrue(onto->traverse(winston::Section::Connection::A, onto2, false));
+            Assert::IsTrue(a->traverse(winston::Track::Connection::DeadEnd, onto, false));
+            Assert::IsTrue(onto->traverse(winston::Track::Connection::A, onto2, false));
             Assert::IsTrue(onto2.get() == c.get());
         }
 
@@ -75,20 +75,20 @@ namespace winstontests
         {
             testRailway = MiniRailway::make(railwayCallbacks());
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
-            auto a = testRailway->section(MiniRailway::Sections::A);
-            auto b = testRailway->section(MiniRailway::Sections::B);
-            auto c = testRailway->section(MiniRailway::Sections::C);
-            auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->section(MiniRailway::Sections::Turnout1));
+            auto a = testRailway->track(MiniRailway::Tracks::A);
+            auto b = testRailway->track(MiniRailway::Tracks::B);
+            auto c = testRailway->track(MiniRailway::Tracks::C);
+            auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->track(MiniRailway::Tracks::Turnout1));
 
-            winston::Section::Shared onto, onto2;
+            winston::Track::Shared onto, onto2;
             winston::NullMutex nullMutex;
             auto signalBox = winston::SignalBox::make(nullMutex);
 
             auto direction = winston::Turnout::Direction::A_C;
             t1->finalizeChangeTo(direction);
             Assert::IsTrue(t1->direction() == direction);
-            Assert::IsTrue(a->traverse(winston::Section::Connection::DeadEnd, onto, false));
-            Assert::IsTrue(onto->traverse(winston::Section::Connection::A, onto2, false));
+            Assert::IsTrue(a->traverse(winston::Track::Connection::DeadEnd, onto, false));
+            Assert::IsTrue(onto->traverse(winston::Track::Connection::A, onto2, false));
             Assert::IsTrue(onto2.get() == c.get());
         }
 
@@ -96,12 +96,12 @@ namespace winstontests
         {
             testRailway = MiniRailway::make(railwayCallbacks());
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
-            auto a = testRailway->section(MiniRailway::Sections::A);
-            auto b = testRailway->section(MiniRailway::Sections::B);
-            auto c = testRailway->section(MiniRailway::Sections::C);
-            auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->section(MiniRailway::Sections::Turnout1));
+            auto a = testRailway->track(MiniRailway::Tracks::A);
+            auto b = testRailway->track(MiniRailway::Tracks::B);
+            auto c = testRailway->track(MiniRailway::Tracks::C);
+            auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->track(MiniRailway::Tracks::Turnout1));
 
-            winston::Section::Shared onto, onto2;
+            winston::Track::Shared onto, onto2;
             winston::NullMutex nullMutex;
             auto signalBox = winston::SignalBox::make(nullMutex);
 
@@ -112,8 +112,8 @@ namespace winstontests
             for (int i = 0; i < 10; ++i)
                 signalBox->work();
             Assert::IsTrue(t1->direction() == direction);
-            Assert::IsTrue(a->traverse(winston::Section::Connection::DeadEnd, onto, false));
-            Assert::IsTrue(onto->traverse(winston::Section::Connection::A, onto2, false));
+            Assert::IsTrue(a->traverse(winston::Track::Connection::DeadEnd, onto, false));
+            Assert::IsTrue(onto->traverse(winston::Track::Connection::A, onto2, false));
             Assert::IsTrue(onto2.get() == c.get());
         }
 
@@ -121,12 +121,12 @@ namespace winstontests
         {
             testRailway = MiniRailway::make(railwayCallbacks());
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
-            auto a = testRailway->section(MiniRailway::Sections::A);
-            auto b = testRailway->section(MiniRailway::Sections::B);
-            auto c = testRailway->section(MiniRailway::Sections::C);
-            auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->section(MiniRailway::Sections::Turnout1));
+            auto a = testRailway->track(MiniRailway::Tracks::A);
+            auto b = testRailway->track(MiniRailway::Tracks::B);
+            auto c = testRailway->track(MiniRailway::Tracks::C);
+            auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->track(MiniRailway::Tracks::Turnout1));
 
-            winston::Section::Shared onto, onto2;
+            winston::Track::Shared onto, onto2;
             winston::NullMutex nullMutex;
             auto signalBox = winston::SignalBox::make(nullMutex);
 
@@ -138,9 +138,9 @@ namespace winstontests
                 signalBox->work();
             Assert::IsTrue(t1->direction() == winston::Turnout::Direction::Changing);
 
-            Assert::IsFalse(t1->traverse(winston::Section::Connection::A, onto, false));
-            Assert::IsFalse(t1->traverse(winston::Section::Connection::B, onto, false));
-            Assert::IsFalse(t1->traverse(winston::Section::Connection::C, onto, false));
+            Assert::IsFalse(t1->traverse(winston::Track::Connection::A, onto, false));
+            Assert::IsFalse(t1->traverse(winston::Track::Connection::B, onto, false));
+            Assert::IsFalse(t1->traverse(winston::Track::Connection::C, onto, false));
 
             auto cb2 = std::make_shared<winston::Callback>([]() {});
             signalBox->order(winston::Command::make([t1, direction](const unsigned long& created) -> const winston::State { return t1->finalizeChangeTo(direction); }));
@@ -149,8 +149,8 @@ namespace winstontests
                 signalBox->work();
             Assert::IsTrue(t1->direction() == direction);
             
-            Assert::IsTrue(a->traverse(winston::Section::Connection::DeadEnd, onto, false));
-            Assert::IsTrue(onto->traverse(winston::Section::Connection::A, onto2, false));
+            Assert::IsTrue(a->traverse(winston::Track::Connection::DeadEnd, onto, false));
+            Assert::IsTrue(onto->traverse(winston::Track::Connection::A, onto2, false));
             Assert::IsTrue(onto2.get() == b.get());
         }
 
@@ -160,13 +160,13 @@ namespace winstontests
 
             testRailway = MiniRailway::make(railwayCallbacksWithSignals(signalBox));
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
-            auto a = testRailway->section(MiniRailway::Sections::A);
-            auto b = testRailway->section(MiniRailway::Sections::B);
-            auto c = testRailway->section(MiniRailway::Sections::C);
-            auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->section(MiniRailway::Sections::Turnout1));
+            auto a = testRailway->track(MiniRailway::Tracks::A);
+            auto b = testRailway->track(MiniRailway::Tracks::B);
+            auto c = testRailway->track(MiniRailway::Tracks::C);
+            auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->track(MiniRailway::Tracks::Turnout1));
 
-            auto sBA = b->signalGuarding(winston::Section::Connection::A);
-            auto sCA = c->signalGuarding(winston::Section::Connection::A);
+            auto sBA = b->signalGuarding(winston::Track::Connection::A);
+            auto sCA = c->signalGuarding(winston::Track::Connection::A);
             Assert::IsTrue(sBA.operator bool() == true);
             Assert::IsTrue(sCA.operator bool() == true);
 

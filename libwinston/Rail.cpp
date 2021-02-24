@@ -4,29 +4,29 @@
 
 namespace winston
 {
-	Section::Section() : Shared_Ptr<Section>()
+	Track::Track() : Shared_Ptr<Track>()
 	{
 	}
 
-	void Section::attachSignal(Signal::Shared signal, const Connection guarding)
+	void Track::attachSignal(Signal::Shared signal, const Connection guarding)
 	{
 		hal::fatal("Cannot attach signal");
 	}
 
-	Signal::Shared Section::signalFacing(const Connection facing)
+	Signal::Shared Track::signalFacing(const Connection facing)
 	{
 		return nullptr;
 	}
 
-	Signal::Shared Section::signalGuarding(const Connection guarding)
+	Signal::Shared Track::signalGuarding(const Connection guarding)
 	{
 		return nullptr;
 	}
 
-	Result Section::validateSingle(Section::Shared section)
+	Result Track::validateSingle(Track::Shared track)
 	{
-		std::set<Section::Shared> others;
-		section->collectAllConnections(others);
+		std::set<Track::Shared> others;
+		track->collectAllConnections(others);
 
 		bool foundMe = false;
 		for (auto other : others)
@@ -40,7 +40,7 @@ namespace winston
 	}
 
 	Bumper::Bumper()
-		: Section(), Shared_Ptr<Bumper>(), a()
+		: Track(), Shared_Ptr<Bumper>(), a()
 	{
 
 	}
@@ -50,7 +50,7 @@ namespace winston
 		return connection == Connection::A || connection == Connection::DeadEnd;
 	}
 
-	bool Bumper::traverse(const Connection connection, Section::Shared& onto, bool leavingOnConnection) const
+	bool Bumper::traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const
 	{
 		if(this->has(connection) && 
 			((leavingOnConnection && connection == Connection::A) ||
@@ -65,12 +65,12 @@ namespace winston
 
 	}
 
-	void Bumper::collectAllConnections(std::set<Section::Shared>& sections) const
+	void Bumper::collectAllConnections(std::set<Track::Shared>& tracks) const
 	{
-		sections.insert(a);
+		tracks.insert(a);
 	}
 
-	const Section::Connection Bumper::whereConnects(Section::Shared& other) const
+	const Track::Connection Bumper::whereConnects(Track::Shared& other) const
 	{
 		if (other == a)
 			return Connection::A;
@@ -78,19 +78,19 @@ namespace winston
 			return Connection::DeadEnd;
 	}
 
-	const Section::Connection Bumper::otherConnection(const Connection connection) const
+	const Track::Connection Bumper::otherConnection(const Connection connection) const
 	{
 		return connection == Connection::A ? Connection::DeadEnd : Connection::A;
 	}
 
-	Section::Shared Bumper::connect(const Connection local, Section::Shared& to, const Connection remote, bool viceVersa)
+	Track::Shared Bumper::connect(const Connection local, Track::Shared& to, const Connection remote, bool viceVersa)
 	{
 		if (local == Connection::A)
 		{
 			a = to;
 			if (viceVersa)
 			{
-				Section::Shared that = this->shared_from_this();
+				Track::Shared that = this->shared_from_this();
 				to->connect(remote, that, local, false);
 			}
 		}
@@ -104,12 +104,12 @@ namespace winston
 		return this->validateSingle(a);
 	}
 
-	void Bumper::connections(Section::Shared& onA)
+	void Bumper::connections(Track::Shared& onA)
 	{
 		onA = this->a;
 	}
 
-	const Section::Type Bumper::type()
+	const Track::Type Bumper::type()
 	{
 		return Type::Bumper;
 	}
@@ -135,7 +135,7 @@ namespace winston
 		return signals[facing == Connection::A ? 1 : 0];
 	}
 
-	void Turnout::connections(Section::Shared& onA, Section::Shared& onB, Section::Shared& onC)
+	void Turnout::connections(Track::Shared& onA, Track::Shared& onB, Track::Shared& onC)
 	{
 		onA = a;
 		onB = b;
@@ -143,7 +143,7 @@ namespace winston
 	}
 
 	Rail::Rail()
-		: Section(), Shared_Ptr<Rail>(), a(), b()
+		: Track(), Shared_Ptr<Rail>(), a(), b()
 	{
 
 	}
@@ -153,7 +153,7 @@ namespace winston
 		return connection == Connection::A || connection == Connection::B;
 	}
 
-	bool Rail::traverse(const Connection connection, Section::Shared& onto, bool leavingOnConnection) const
+	bool Rail::traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const
 	{
 		if (!this->has(connection))
 		{
@@ -167,28 +167,28 @@ namespace winston
 		return true;
 	}
 
-	void Rail::collectAllConnections(std::set<Section::Shared>& sections) const
+	void Rail::collectAllConnections(std::set<Track::Shared>& tracks) const
 	{
-		sections.insert(a);
-		sections.insert(b);
+		tracks.insert(a);
+		tracks.insert(b);
 	}
 
-	const Section::Connection Rail::whereConnects(Section::Shared& other) const
+	const Track::Connection Rail::whereConnects(Track::Shared& other) const
 	{
 		if (a == other)
-			return Section::Connection::A;
+			return Track::Connection::A;
 		else if (b == other)
-			return Section::Connection::B;
+			return Track::Connection::B;
 		else
-			return Section::Connection::DeadEnd;
+			return Track::Connection::DeadEnd;
 	}
 
-	const Section::Connection Rail::otherConnection(const Connection connection) const
+	const Track::Connection Rail::otherConnection(const Connection connection) const
 	{
 		return connection == Connection::A ? Connection::B : Connection::A;
 	}
 
-	Section::Shared Rail::connect(const Connection local, Section::Shared& to, const Connection remote, bool viceVersa)
+	Track::Shared Rail::connect(const Connection local, Track::Shared& to, const Connection remote, bool viceVersa)
 	{
 		if (local == Connection::C)
 			error("Rail::connect, local not A or B");
@@ -201,7 +201,7 @@ namespace winston
 			
 			if (viceVersa)
 			{
-				Section::Shared that = this->shared_from_this();
+				Track::Shared that = this->shared_from_this();
 				to->connect(remote, that, local, false);
 			}
 		}
@@ -213,7 +213,7 @@ namespace winston
 		return this->validateSingle(a) == Result::OK && this->validateSingle(b) == Result::OK ? Result::OK : Result::ValidationFailed;
 	}
 
-	const Section::Type Rail::type()
+	const Track::Type Rail::type()
 	{
 		return Type::Rail;
 	}
@@ -239,14 +239,14 @@ namespace winston
 		return signals[facing == Connection::A ? 1 : 0];
 	}
 
-	void Rail::connections(Section::Shared& onA, Section::Shared& onB)
+	void Rail::connections(Track::Shared& onA, Track::Shared& onB)
 	{
 		onA = this->a;
 		onB = this->b;
 	}
 
 	Turnout::Turnout(const Callback callback, const bool leftTurnout)
-		: Section(), Shared_Ptr<Turnout>(), callback(callback), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c()
+		: Track(), Shared_Ptr<Turnout>(), callback(callback), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c()
 	{
 
 	}
@@ -256,7 +256,7 @@ namespace winston
 		return connection != Connection::DeadEnd;
 	}
 
-	bool Turnout::traverse(const Connection connection, Section::Shared& onto, bool leavingOnConnection) const
+	bool Turnout::traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const
 	{
 		if (!this->has(connection) || this->dir == Direction::Changing)
 		{
@@ -289,26 +289,26 @@ namespace winston
 		return false;
 	}
 
-	void Turnout::collectAllConnections(std::set<Section::Shared>& sections) const
+	void Turnout::collectAllConnections(std::set<Track::Shared>& tracks) const
 	{
-		sections.insert(a);
-		sections.insert(b);
-		sections.insert(c);
+		tracks.insert(a);
+		tracks.insert(b);
+		tracks.insert(c);
 	}
 
-	const Section::Connection Turnout::whereConnects(Section::Shared& other) const
+	const Track::Connection Turnout::whereConnects(Track::Shared& other) const
 	{
 		if (a == other)
-			return Section::Connection::A;
+			return Track::Connection::A;
 		else if (b == other)
-			return Section::Connection::B;
+			return Track::Connection::B;
 		else if (c == other)
-			return Section::Connection::C;
+			return Track::Connection::C;
 		else
-			return Section::Connection::DeadEnd;
+			return Track::Connection::DeadEnd;
 	}
 
-	const Section::Connection Turnout::otherConnection(const Connection connection) const
+	const Track::Connection Turnout::otherConnection(const Connection connection) const
 	{
 		if (connection == Connection::A)
 			return this->dir == Direction::A_B ? Connection::B : Connection::C;
@@ -316,7 +316,7 @@ namespace winston
 			return Connection::A;
 	}
 
-	Section::Shared Turnout::connect(const Connection local, Section::Shared& to, const Connection remote, bool viceVersa)
+	Track::Shared Turnout::connect(const Connection local, Track::Shared& to, const Connection remote, bool viceVersa)
 	{
 		if (local == Connection::A)
 			a = to;
@@ -327,7 +327,7 @@ namespace winston
 
 		if (viceVersa)
 		{
-			Section::Shared that = this->shared_from_this();
+			Track::Shared that = this->shared_from_this();
 			to->connect(remote, that, local, false);
 		}
 		return to;
@@ -338,7 +338,7 @@ namespace winston
 		return this->validateSingle(a) == Result::OK && this->validateSingle(b) == Result::OK && this->validateSingle(c) == Result::OK ? Result::OK : Result::ValidationFailed;
 	}
 
-	const Section::Type Turnout::type()
+	const Track::Type Turnout::type()
 	{
 		return Type::Turnout;
 	}

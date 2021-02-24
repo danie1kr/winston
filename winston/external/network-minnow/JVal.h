@@ -64,7 +64,7 @@ accept a NULL "this" pointer.
 
 <h2>Examples:</h2>
 
-See the JSON tutorial, section
+See the JSON tutorial, track
 [Using JParserValFact](@ref UsingJParserValFact)
 , for examples on how to use JVal.
 
@@ -117,7 +117,7 @@ struct JVal
       <td>All getXXX methods</td></tr>
       </table>
 
-      See the JSON tutorial, section
+      See the JSON tutorial, track
       [Using JParserValFact](@ref UsingJParserValFact)
       , for examples on how to use JVal.
 

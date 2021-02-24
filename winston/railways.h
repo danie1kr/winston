@@ -3,7 +3,7 @@
 #include <array>
 #include "../libwinston/Winston.h"
 
-enum class MiniRailwaySections : unsigned int
+enum class MiniRailwayTracks : unsigned int
 {
     A,
     Turnout1,
@@ -11,7 +11,7 @@ enum class MiniRailwaySections : unsigned int
     C
 };
 
-class MiniRailway : public winston::RailwayWithRails<MiniRailwaySections>, winston::Shared_Ptr<MiniRailway>
+class MiniRailway : public winston::RailwayWithRails<MiniRailwayTracks>, winston::Shared_Ptr<MiniRailway>
 {
     /*
 |====A====Turnout1====B====|
@@ -31,11 +31,11 @@ public:
     using winston::Shared_Ptr<MiniRailway>::make;
 
 private:
-    winston::Section::Shared define(const Sections section);
-    void connect(std::array < winston::Section::Shared, sectionsCount()>& sections);
+    winston::Track::Shared define(const Tracks track);
+    void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
 };
 
-enum class SignalTestRailwaySections : unsigned int
+enum class SignalTestRailwayTracks : unsigned int
 {
     A,
     Turnout1,
@@ -53,10 +53,12 @@ enum class SignalTestRailwaySections : unsigned int
     M,
     N,
     O,
-    P
+    P,
+    Turnout2,
+    Q
 };
 
-class SignalTestRailway : public winston::RailwayWithRails<SignalTestRailwaySections>, winston::Shared_Ptr<SignalTestRailway>
+class SignalTestRailway : public winston::RailwayWithRails<SignalTestRailwayTracks>, winston::Shared_Ptr<SignalTestRailway>
 {
     /*
     * |====A====T1====HBa=B====|
@@ -71,9 +73,9 @@ class SignalTestRailway : public winston::RailwayWithRails<SignalTestRailwaySect
     * K|      Ka-La        Lb-Ma    Mb-Na   N|
     * |====K====KLa=L====KMa=M====KNa=N====|
     * 
-    *  /====KVOa=O====\
-      ||              ||
-       \======P=======/
+    *  /====O====\
+      ||         /
+       \====P====T2====KVQa=Q====|
     * 
     */
 
@@ -88,8 +90,8 @@ public:
     using winston::Shared_Ptr<SignalTestRailway>::make;
 
 private:
-    winston::Section::Shared define(const Sections section);
-    void connect(std::array < winston::Section::Shared, sectionsCount()>& sections);
+    winston::Track::Shared define(const Tracks track);
+    void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
 };
 
 /*
@@ -103,7 +105,7 @@ A-Turnout1-B-Turnout2-A
 
 */
 
-enum class RailwayWithSidingsSections : unsigned int
+enum class RailwayWithSidingsTracks : unsigned int
 {
     A,
     Turnout1,
@@ -112,7 +114,7 @@ enum class RailwayWithSidingsSections : unsigned int
     Turnout2
 };
 
-class RailwayWithSiding : public winston::RailwayWithRails<RailwayWithSidingsSections>, winston::Shared_Ptr<RailwayWithSiding>
+class RailwayWithSiding : public winston::RailwayWithRails<RailwayWithSidingsTracks>, winston::Shared_Ptr<RailwayWithSiding>
 {
 public:
     RailwayWithSiding(const Callbacks callbacks);
@@ -123,8 +125,8 @@ public:
     using winston::Shared_Ptr<RailwayWithSiding>::Shared;
     using winston::Shared_Ptr<RailwayWithSiding>::make;
 private:
-    winston::Section::Shared define(const Sections section);
-    void connect(std::array < winston::Section::Shared, sectionsCount()>& sections);
+    winston::Track::Shared define(const Tracks track);
+    void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
 
 public:
     class AddressTranslator : public winston::DigitalCentralStation::AddressTranslator, winston::Shared_Ptr<AddressTranslator>
@@ -133,7 +135,7 @@ public:
         AddressTranslator(winston::Shared_Ptr<RailwayWithSiding>::Shared railway);
         virtual winston::Turnout::Shared turnout(const winston::Address address);
         virtual winston::Locomotive::Shared locomotive(const winston::Address address);
-        virtual const winston::Address address(winston::Section::Shared section);
+        virtual const winston::Address address(winston::Track::Shared track);
 
         using Shared_Ptr<AddressTranslator>::Shared;
         using Shared_Ptr<AddressTranslator>::make;
@@ -143,7 +145,7 @@ public:
     };
 };
 
-enum class TimeSaverRailwaySections : unsigned int
+enum class TimeSaverRailwayTracks : unsigned int
 {
     A,
     Turnout1,
@@ -157,7 +159,7 @@ enum class TimeSaverRailwaySections : unsigned int
     E
 };
 
-class TimeSaverRailway : public winston::RailwayWithRails<TimeSaverRailwaySections>, winston::Shared_Ptr<TimeSaverRailway>
+class TimeSaverRailway : public winston::RailwayWithRails<TimeSaverRailwayTracks>, winston::Shared_Ptr<TimeSaverRailway>
 {
     /*
 |====A====Turnout1====B====|
@@ -186,11 +188,11 @@ public:
     using winston::Shared_Ptr<TimeSaverRailway>::Shared;
     using winston::Shared_Ptr<TimeSaverRailway>::make;
 private:
-    winston::Section::Shared define(const Sections section);
-    void connect(std::array < winston::Section::Shared, sectionsCount()>& sections);
+    winston::Track::Shared define(const Tracks track);
+    void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
 };
 
-enum class Y2020RailwaySections : unsigned int
+enum class Y2020RailwayTracks : unsigned int
 {
     Turnout1,
     Turnout2,
@@ -211,7 +213,7 @@ enum class Y2020RailwaySections : unsigned int
     G1
 };
 
-class Y2020Railway : public winston::RailwayWithRails<Y2020RailwaySections>, winston::Shared_Ptr<Y2020Railway>
+class Y2020Railway : public winston::RailwayWithRails<Y2020RailwayTracks>, winston::Shared_Ptr<Y2020Railway>
 {
     /*
       //==============Turnout5==================\\
@@ -246,7 +248,7 @@ public:
         AddressTranslator(winston::Shared_Ptr<Y2020Railway>::Shared railway);
         virtual winston::Turnout::Shared turnout(const winston::Address address);
         virtual winston::Locomotive::Shared locomotive(const winston::Address address);
-        virtual const winston::Address address(winston::Section::Shared section);
+        virtual const winston::Address address(winston::Track::Shared track);
 
         using Shared_Ptr<AddressTranslator>::Shared;
         using Shared_Ptr<AddressTranslator>::make;
@@ -255,6 +257,6 @@ public:
         winston::Shared_Ptr<Y2020Railway>::Shared railway;
     };
 private:
-    winston::Section::Shared define(const Sections section);
-    void connect(std::array < winston::Section::Shared, sectionsCount()>& sections);
+    winston::Track::Shared define(const Tracks track);
+    void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
 };

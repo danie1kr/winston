@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -89,7 +89,7 @@
     </style>
 
     <script type="text/template" id="template_turnout">
-    <div class="winston-turnout row" winston-turnout-section="<%= id %>" winston-turnout-direction="<%= direction %>">
+    <div class="winston-turnout row" winston-turnout-track="<%= id %>" winston-turnout-direction="<%= direction %>">
         <div class="name col s1"><%= name %></div><div class="direction col s3"><%= direction %></div>
 
 <div class="col s2"><a class="waves-effect waves-light btn">toggle</a></div>
@@ -152,10 +152,10 @@
         <a class="waves-effect waves-light btn cancel">cancel</a>
     </div>
 
-    <div id="menuSectionNode" class="contextMenu row">
+    <div id="menuTrackNode" class="contextMenu row">
         <div class="input-field col">
-            <input placeholder="name" id="sectionNodeName" type="text" class="validate">
-            <label for="sectionNodeName">Name</label>
+            <input placeholder="name" id="trackNodeName" type="text" class="validate">
+            <label for="trackNodeName">Name</label>
         </div>
         <div class="col">
             <a class="waves-effect waves-light btn cancel">cancel</a>
@@ -316,7 +316,7 @@
         function turnoutUpdate(turnout)
         {
             let direction = turnout.data("direction");
-            let section = turnout.data("section");
+            let track = turnout.data("track");
             switch(direction)
             {
                 case TurnoutState_A_B:
@@ -334,7 +334,7 @@
                     break;
             }
 
-            $(".winston-turnout[winston-turnout-section=\"" + section + "\"]>.direction").html(turnoutDirectionLabelFromDirection(direction));
+            $(".winston-turnout[winston-turnout-track=\"" + track + "\"]>.direction").html(turnoutDirectionLabelFromDirection(direction));
         }
 
         function turnoutState(data)
@@ -342,32 +342,32 @@
             let id = data.id;
             let direction = data.state;
 
-            let turnout = cy.nodes(".turnout[section=" + id + "]").data("direction", direction);
+            let turnout = cy.nodes(".turnout[track=" + id + "]").data("direction", direction);
             turnoutUpdate(turnout);
         }
 
         function turnoutToggle(event)
         {
-            sendTurnoutToggle(event.target.data("section"), event.target.data("direction"));
+            sendTurnoutToggle(event.target.data("track"), event.target.data("direction"));
         }
 
-        function sendTurnoutToggle(section, direction)
+        function sendTurnoutToggle(track, direction)
         {
             if(!allowWinstonSubmit())
                 return;
 
-            let id = parseInt(section);
-            cy.nodes(".turnout[section=" + id + "]").off("click");
+            let id = parseInt(track);
+            cy.nodes(".turnout[track=" + id + "]").off("click");
 
             if(direction !== TurnoutState_Changing)
                 send("doTurnoutToggle", {id: id});
         }
 
-        function turnoutRequestStatus(section)
+        function turnoutRequestStatus(track)
         {
             if(!allowWinstonSubmit())
                 return;
-            send("getTurnoutState", {id: parseInt(section)});
+            send("getTurnoutState", {id: parseInt(track)});
         }
 
         function doControlLoco(event)
@@ -402,18 +402,18 @@
 
 
                 let $contextMenu = $("#" + menu);
-                if(menu === "menuSectionNode")
+                if(menu === "menuTrackNode")
                 {
                     let node = event.target;
                     let name = node.data("displayName");
-                    $("#sectionNodeName")
+                    $("#trackNodeName")
                         .val(name ? name : node.data("name"))
                         .off('change')
                         .on('change', function(e) { 
                             let name = e.target.value;
                             node.data("displayName", name);
                             $("#turnoutsContainer>div.collapsible-body")
-                                .find("[winston-turnout-section=\"" + node.data("section") + "\"]")
+                                .find("[winston-turnout-track=\"" + node.data("track") + "\"]")
                                 .find(".name")
                                 .html(name);
                         });
@@ -434,7 +434,7 @@
                 layout: {name: 'preset'},
                 style: [
                     /*{
-                        selector: 'node.section',
+                        selector: 'node.track',
                         style: {
                             'content': 'data(name)'
                         }
@@ -470,7 +470,7 @@
                         }
                     },
                     {
-                        selector: ".sectionConnector",
+                        selector: ".trackConnector",
                         style: {
                             "line-color": '#F00',
                             "width": 1
@@ -529,7 +529,7 @@
                 }
             }).nodeHtmlLabel([
             {
-                query: '.section',
+                query: '.track',
                 valign: "center",
                 halign: "center",
                 valignBox: "center",
@@ -554,10 +554,10 @@
             cy.on('click', '.track', function(event) {
                 click("menuTrackEdge", event);
             });
-            cy.on('click', '.section', function(event) {
-                click("menuSectionNode", event);
+            cy.on('click', '.track', function(event) {
+                click("menuTrackNode", event);
             });
-            cy.on('unselect', '.track, .trackNode, .section', function() {
+            cy.on('unselect', '.track, .trackNode, .track', function() {
                 cy.elements().removeClass("reachable");
                 hideContextMenus();
             });
@@ -577,7 +577,7 @@
                 if(!allowLayoutEdit())
                     return;
                 let that = event.target;
-                cy.$("node.turnoutConnection[section=" + that.data("section") + "]").each(function(e) {
+                cy.$("node.turnoutConnection[track=" + that.data("track") + "]").each(function(e) {
                     e.position({x: that.position().x + e.data("relativePosition").x, y: that.position().y + e.data("relativePosition").y});
                 });
             });
@@ -586,7 +586,7 @@
                 if(!allowLayoutEdit())
                     return;
                 let that = event.target;
-                let parentPosition = cy.$("node.turnout[section=" + that.data("section") + "]").position();
+                let parentPosition = cy.$("node.turnout[track=" + that.data("track") + "]").position();
                 that.data("relativePosition", {x: that.position().x - parentPosition.x, y: that.position().y - parentPosition.y});
             });
 
@@ -599,14 +599,14 @@
             cy.$(".turnout").each(function(turnout) {
             
                 let turnoutTemplate = _.template($("#template_turnout").html());
-                let $turnout = $(turnoutTemplate({id: turnout.data("section"), name: turnout.data("displayName") ? turnout.data("displayName") : turnout.data("name"), direction: turnout.data("direction")}));
+                let $turnout = $(turnoutTemplate({id: turnout.data("track"), name: turnout.data("displayName") ? turnout.data("displayName") : turnout.data("name"), direction: turnout.data("direction")}));
                 $turnout.on('click', function(event) {
                     let $target = $(event.target);
                     let $closest = $($target.closest(".winston-turnout"));
-                    sendTurnoutToggle($closest.attr("winston-turnout-section"), $closest.attr("winston-turnout-direction")); 
+                    sendTurnoutToggle($closest.attr("winston-turnout-track"), $closest.attr("winston-turnout-direction")); 
                 });
                 $turnoutsContainerBody.append($turnout);
-                turnoutRequestStatus(turnout.data("section"));
+                turnoutRequestStatus(turnout.data("track"));
             });
 
             return cy;
@@ -665,13 +665,13 @@
             cyLayout.add(layout.cy);
             
             let success = true;
-            _.each(railway, function(section, i) {
+            _.each(railway, function(track, i) {
 
-                let layoutSection = cyLayout.$(".section[name=" + i + "]");
+                let layoutTrack = cyLayout.$(".track[name=" + i + "]");
 
-                success &&= layoutSection !== undefined && layoutSection.data("connections").a === section.a &&
-                                                          layoutSection.data("connections").b === section.b &&
-                                                          layoutSection.data("connections").c === section.c;
+                success &&= layoutTrack !== undefined && layoutTrack.data("connections").a === track.a &&
+                                                          layoutTrack.data("connections").b === track.b &&
+                                                          layoutTrack.data("connections").c === track.c;
 
             });
 
@@ -730,16 +730,16 @@
 
             let nodes = [];
             let edges = [];
-            railway = data.sections;
+            railway = data.tracks;
 
-            _.each(data.sections, function(section, i) {
+            _.each(data.tracks, function(track, i) {
 
                 function connect(that, connection, connectionName)
                 {
-                    let other = data.sections[connection];
+                    let other = data.tracks[connection];
 
-                    let thatNode = _.find(nodes, function(n) { return n.data.section === that;});
-                    let otherNode = _.find(nodes, function(n) { return n.data.section === connection;});
+                    let thatNode = _.find(nodes, function(n) { return n.data.track === that;});
+                    let otherNode = _.find(nodes, function(n) { return n.data.track === connection;});
 
                     if(thatNode === undefined || otherNode === undefined)
                         return;
@@ -763,9 +763,9 @@
                 }
 
 
-                let a = section.a;
-                let b = section.b;
-                let c = section.c;
+                let a = track.a;
+                let b = track.b;
+                let c = track.c;
 
                 let type = 0;
                 if(c !== undefined)
@@ -775,10 +775,10 @@
 
                 if(type === 2)
                 {
-                    nodes.push({group: 'nodes', data: {id: i, name: i, section: i, connections: {a: a, b: b, c: c}, direction: 1, relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "section turnout"});
-                    nodes.push({group: 'nodes', data: {id: i + "a", name: i + "a", section: i, relativePosition: {x: -20, y: 0}}, position: {x: i*100-20, y: 0}, classes: "turnoutConnection a"});
-                    nodes.push({group: 'nodes', data: {id: i + "b", name: i + "b", section: i, relativePosition: {x: 20, y: 0}}, position: {x: i*100+20, y: 0}, classes: "turnoutConnection b"});
-                    nodes.push({group: 'nodes', data: {id: i + "c", name: i + "c", section: i, relativePosition: {x: 20, y: 20}}, position: {x: i*100+20, y: 20}, classes: "turnoutConnection c"});
+                    nodes.push({group: 'nodes', data: {id: i, name: i, track: i, connections: {a: a, b: b, c: c}, direction: 1, relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "track turnout"});
+                    nodes.push({group: 'nodes', data: {id: i + "a", name: i + "a", track: i, relativePosition: {x: -20, y: 0}}, position: {x: i*100-20, y: 0}, classes: "turnoutConnection a"});
+                    nodes.push({group: 'nodes', data: {id: i + "b", name: i + "b", track: i, relativePosition: {x: 20, y: 0}}, position: {x: i*100+20, y: 0}, classes: "turnoutConnection b"});
+                    nodes.push({group: 'nodes', data: {id: i + "c", name: i + "c", track: i, relativePosition: {x: 20, y: 20}}, position: {x: i*100+20, y: 20}, classes: "turnoutConnection c"});
                 
                     edges.push({group: 'edges', data: {source: i, target: i+"a", connection: "a"}, classes: "internal"});
                     edges.push({group: 'edges', data: {source: i, target: i+"b", connection: "b"}, classes: "internal"});
@@ -786,11 +786,11 @@
                 }
                 else if(type === 1)
                 {
-                    nodes.push({group: 'nodes', data: {id: i, name: i, section: i, connections: {a: a, b: b, c: c}, relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "section rail"});
+                    nodes.push({group: 'nodes', data: {id: i, name: i, track: i, connections: {a: a, b: b, c: c}, relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "track rail"});
                 }
                 else
                 {
-                    nodes.push({group: 'nodes', data: {id: i, name: i, section: i, connections: {a: a, b: b, c: c}, relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "section bumper"});
+                    nodes.push({group: 'nodes', data: {id: i, name: i, track: i, connections: {a: a, b: b, c: c}, relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "track bumper"});
                 }
 
                 if(a !== undefined) connect(i, a, "a");
@@ -902,8 +902,8 @@
             $railway = $("#railway");
             $("#splitEdge").on('click', cySplitEdge);
             $("#deleteTrackNode").on('click', cyDeleteTrackNode);
-            //$("#rotateSectionNodeCW").on('click', cyRotateNodeCW);
-            //$("#rotateSectionNodeCCW").on('click', cyRotateNodeCCW);
+            //$("#rotateTrackNodeCW").on('click', cyRotateNodeCW);
+            //$("#rotateTrackNodeCCW").on('click', cyRotateNodeCCW);
             $(".cancel").on('click', function(event)
             {
                 $(".contextMenu").hide();

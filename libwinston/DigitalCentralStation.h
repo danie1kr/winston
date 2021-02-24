@@ -17,7 +17,7 @@ namespace winston
 			AddressTranslator();
 			virtual Turnout::Shared turnout(const Address address) = 0;
 			virtual Locomotive::Shared locomotive(const Address address) = 0;
-			virtual const Address address(winston::Section::Shared section) = 0;
+			virtual const Address address(winston::Track::Shared track) = 0;
 		};
 
 		struct Callbacks : public Railway::Callbacks

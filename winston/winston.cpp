@@ -30,13 +30,13 @@ class MRS : public winston::ModelRailwaySystem<RAILWAY_CLASS::Shared, RAILWAY_CL
 private:
 
     // send a turnout state via websocket
-    void turnoutSendState(unsigned int turnoutSectionId, winston::Turnout::Direction dir)
+    void turnoutSendState(unsigned int turnoutTrackId, winston::Turnout::Direction dir)
     {
         SendData sd;
         minnowSendPrepare(this->minnowCD, &sd, "turnoutState");
         JEncoder_beginObject(&sd.encoder);
         JEncoder_setName(&sd.encoder, "id");
-        JEncoder_setInt(&sd.encoder, turnoutSectionId);
+        JEncoder_setInt(&sd.encoder, turnoutTrackId);
         JEncoder_setName(&sd.encoder, "state");
         JEncoder_setInt(&sd.encoder, (int)dir);
 
@@ -88,7 +88,7 @@ private:
             JVal_get(value, error, "{d}", "id", &id);
             if (JErr_isError(error) == false)
             {
-                auto turnout = std::dynamic_pointer_cast<winston::Turnout>(railway->section(id));
+                auto turnout = std::dynamic_pointer_cast<winston::Turnout>(railway->track(id));
                 auto requestDir = winston::Turnout::otherDirection(turnout->direction());
                 signalBox->order(winston::Command::make([this, id, turnout, requestDir](const unsigned long& created) -> const winston::State
                 {
@@ -116,7 +116,7 @@ private:
             JVal_get(value, error, "{d}", "id", &id);
             if (JErr_isError(error) == false)
             {
-                auto turnout = std::dynamic_pointer_cast<winston::Turnout>(railway->section(id));
+                auto turnout = std::dynamic_pointer_cast<winston::Turnout>(railway->track(id));
                 this->turnoutSendState(id, turnout->direction());
                 return false;
             }
@@ -128,35 +128,35 @@ private:
             minnowSendPrepare(this->minnowCD, &sd, "railway");
 
             JEncoder_beginObject(&sd.encoder);
-            JEncoder_setName(&sd.encoder, "sections");
+            JEncoder_setName(&sd.encoder, "tracks");
             JEncoder_beginArray(&sd.encoder);
-            for (unsigned int i = 0; i < railway->sectionsCount(); ++i)
+            for (unsigned int i = 0; i < railway->tracksCount(); ++i)
             {
-                auto section = railway->section(i);
-                switch (section->type())
+                auto track = railway->track(i);
+                switch (track->type())
                 {
-                case winston::Section::Type::Bumper:
+                case winston::Track::Type::Bumper:
                 {
-                    winston::Bumper::Shared bumper = std::dynamic_pointer_cast<winston::Bumper>(section);
-                    winston::Section::Shared a;
+                    winston::Bumper::Shared bumper = std::dynamic_pointer_cast<winston::Bumper>(track);
+                    winston::Track::Shared a;
                     bumper->connections(a);
-                    JEncoder_set(&sd.encoder, "{d}", "a", railway->sectionIndex(a));
+                    JEncoder_set(&sd.encoder, "{d}", "a", railway->trackIndex(a));
                     break;
                 }
-                case winston::Section::Type::Rail:
+                case winston::Track::Type::Rail:
                 {
-                    winston::Rail::Shared rail = std::dynamic_pointer_cast<winston::Rail>(section);
-                    winston::Section::Shared a, b;
+                    winston::Rail::Shared rail = std::dynamic_pointer_cast<winston::Rail>(track);
+                    winston::Track::Shared a, b;
                     rail->connections(a, b);
-                    JEncoder_set(&sd.encoder, "{dd}", "a", railway->sectionIndex(a), "b", railway->sectionIndex(b));
+                    JEncoder_set(&sd.encoder, "{dd}", "a", railway->trackIndex(a), "b", railway->trackIndex(b));
                     break;
                 }
-                case winston::Section::Type::Turnout:
+                case winston::Track::Type::Turnout:
                 {
-                    winston::Turnout::Shared turnout = std::dynamic_pointer_cast<winston::Turnout>(section);
-                    winston::Section::Shared a, b, c;
+                    winston::Turnout::Shared turnout = std::dynamic_pointer_cast<winston::Turnout>(track);
+                    winston::Track::Shared a, b, c;
                     turnout->connections(a, b, c);
-                    JEncoder_set(&sd.encoder, "{ddd}", "a", railway->sectionIndex(a), "b", railway->sectionIndex(b), "c", railway->sectionIndex(c));
+                    JEncoder_set(&sd.encoder, "{ddd}", "a", railway->trackIndex(a), "b", railway->trackIndex(b), "c", railway->trackIndex(c));
                     break;
                 }
                 }
@@ -345,7 +345,7 @@ private:
         // what to do when the digital central station updated a turnout
         callbacks.turnoutUpdateCallback = [=](winston::Turnout::Shared turnout, const winston::Turnout::Direction direction) -> const winston::State
         {
-            //auto id = this->railway->sectionIndex(turnout);
+            //auto id = this->railway->trackIndex(turnout);
             //turnoutSendState(id, direction);
             turnout->finalizeChangeTo(direction);
             return winston::State::Finished;
@@ -389,7 +389,7 @@ private:
 
         callbacks.turnoutUpdateCallback = [=](winston::Turnout::Shared turnout, const winston::Turnout::Direction direction) -> const winston::State
         {
-            auto id = this->railway->sectionIndex(turnout);
+            auto id = this->railway->trackIndex(turnout);
             turnoutSendState(id, direction);
             return winston::State::Finished;
         };
@@ -426,12 +426,12 @@ private:
 
     void systemSetupComplete()
     {
-        for (size_t i = 0; i < this->railway->sectionsCount(); ++i)
+        for (size_t i = 0; i < this->railway->tracksCount(); ++i)
         {
-            auto section = this->railway->section(magic_enum::enum_value<RAILWAY_CLASS::Sections>(i));
-            if (section->type() == winston::Section::Type::Turnout)
+            auto track = this->railway->track(magic_enum::enum_value<RAILWAY_CLASS::Tracks>(i));
+            if (track->type() == winston::Track::Type::Turnout)
             {
-                auto turnout = std::dynamic_pointer_cast<winston::Turnout>(section);
+                auto turnout = std::dynamic_pointer_cast<winston::Turnout>(track);
                 this->digitalCentralStation->requestTurnoutInfo(turnout);
             }
         }

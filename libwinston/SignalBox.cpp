@@ -23,11 +23,11 @@ namespace winston
 		};
 	}
 
-	void SignalBox::setSignalOn(Section::Shared section, const bool guarding, const Section::Connection connection, const Signal::Aspect aspect, const bool includingFirst)
+	void SignalBox::setSignalOn(Track::Shared track, const bool guarding, const Track::Connection connection, const Signal::Aspect aspect, const bool includingFirst)
 	{
 		const auto preSignalAspect = aspect == Signal::Aspect::Go ? Signal::Aspect::ExpectGo : Signal::Aspect::ExpectHalt;
 		
-		auto current = section;
+		auto current = track;
 		auto from = connection;
 		// current and from are now the position of mainSignal
 		if (Signal::Shared mainSignal = SignalBox::nextSignal(current, guarding, from, true, includingFirst))
@@ -45,8 +45,8 @@ namespace winston
 		// make public
 		auto setSignals = [](Turnout::Shared turnout, const Turnout::Direction direction)
 		{
-			Section::Connection from = direction == Turnout::Direction::A_B ? Section::Connection::B : Section::Connection::C;
-			Section::Shared current = turnout;
+			Track::Connection from = direction == Turnout::Direction::A_B ? Track::Connection::B : Track::Connection::C;
+			Track::Shared current = turnout;
 			const auto mainSignalAspect = turnout->direction() == direction ? Signal::Aspect::Go : Signal::Aspect::Halt;
 			SignalBox::setSignalOn(current, true, from, mainSignalAspect, true);
 		};
@@ -55,14 +55,14 @@ namespace winston
 		this->order(Command::make([turnout, setSignals](const unsigned long& created) -> const winston::State { setSignals(turnout, turnout->otherDirection(turnout->direction())); return State::Finished;  }));
 	}
 	
-	Signal::Shared SignalBox::nextSignal(Section::Shared& section, const bool guarding, Section::Connection& leaving, const bool main, const bool includingFirst)
+	Signal::Shared SignalBox::nextSignal(Track::Shared& track, const bool guarding, Track::Connection& leaving, const bool main, const bool includingFirst)
 	{
-		Section::Connection connection = leaving;
-		Section::Connection checkConnection = connection;
-		Section::Shared onto;
-		Section::Shared& current = section;
+		Track::Connection connection = leaving;
+		Track::Connection checkConnection = connection;
+		Track::Shared onto;
+		Track::Shared& current = track;
 
-		std::unordered_set<Section::Shared> visited;
+		std::unordered_set<Track::Shared> visited;
 
 		bool done = false;
 		bool skipTraverse = includingFirst;
@@ -73,7 +73,7 @@ namespace winston
 				if (!current->traverse(connection, onto, true))
 					break;
 
-				Section::Connection backConnection = onto->whereConnects(current);
+				Track::Connection backConnection = onto->whereConnects(current);
 				connection = onto->otherConnection(backConnection);
 				checkConnection = guarding ? backConnection : connection;
 
@@ -88,14 +88,14 @@ namespace winston
 			}
 			visited.insert(onto);
 
-			if (onto->type() != Section::Type::Turnout)
+			if (onto->type() != Track::Type::Turnout)
 			{
 				auto signal = guarding ? onto->signalGuarding(checkConnection) : onto->signalFacing(checkConnection);
 				if (signal)
 				{
 					if ((signal->mainSignal() && main) || (signal->preSignal() && !main))
 					{
-						section = onto;
+						track = onto;
 						return signal;
 					}
 					else if (signal->mainSignal() && !main)
@@ -103,7 +103,7 @@ namespace winston
 				}
 			}
 			
-			if (onto->type() == Section::Type::Bumper)
+			if (onto->type() == Track::Type::Bumper)
 				break;
 		}
 

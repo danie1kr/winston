@@ -440,7 +440,7 @@ void Z21::processXPacket(uint8_t* data) {
             {
                 uint16_t address = Z21Packet::getBEuint16(data, 5);
                 uint8_t accessoryState = Z21Packet::getByte(data, 7);
-                auto turnout = this->addressTranslator->turnout(address);// std::dynamic_pointer_cast<winston::Turnout>(railway->section(RailwayWithSiding::sectionFromAddress(address)));
+                auto turnout = this->addressTranslator->turnout(address);// std::dynamic_pointer_cast<winston::Turnout>(railway->track(RailwayWithSiding::trackFromAddress(address)));
                 auto direction = accessoryState == 0 ? winston::Turnout::Direction::A_B : winston::Turnout::Direction::A_C;
                 this->turnoutUpdate(turnout, direction);
                 
@@ -449,7 +449,7 @@ void Z21::processXPacket(uint8_t* data) {
                 {
                     uint16_t address = Z21Packet::getBEuint16(data, 5);
                     uint8_t accessoryState = Z21Packet::getByte(data, 7);
-                    auto turnout = this->addressTranslator->turnout(address);// std::dynamic_pointer_cast<winston::Turnout>(railway->section(RailwayWithSiding::sectionFromAddress(address)));
+                    auto turnout = this->addressTranslator->turnout(address);// std::dynamic_pointer_cast<winston::Turnout>(railway->track(RailwayWithSiding::trackFromAddress(address)));
                     auto direction = accessoryState == 0 ? winston::Turnout::Direction::A_B : winston::Turnout::Direction::A_C;
 
                     this->signalBox->

@@ -2,30 +2,30 @@
 #include <stdexcept>
 #include <string>
 
-MiniRailway::MiniRailway(const Callbacks callbacks) : winston::RailwayWithRails<MiniRailwaySections>(callbacks) {};
+MiniRailway::MiniRailway(const Callbacks callbacks) : winston::RailwayWithRails<MiniRailwayTracks>(callbacks) {};
 
-winston::Section::Shared MiniRailway::define(const Sections section)
+winston::Track::Shared MiniRailway::define(const Tracks track)
 {
-    switch (section) {
-    case Sections::A:
-    case Sections::B:
-    case Sections::C:
+    switch (track) {
+    case Tracks::A:
+    case Tracks::B:
+    case Tracks::C:
         return winston::Bumper::make();
-    case Sections::Turnout1:
-        return winston::Turnout::make([this, section](winston::Section::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Section>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
+    case Tracks::Turnout1:
+        return winston::Turnout::make([this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
     default:
-        winston::hal::fatal(std::string("section ") + std::string(magic_enum::enum_name(section)) + std::string("not in switch"));
+        winston::hal::fatal(std::string("track ") + std::string(magic_enum::enum_name(track)) + std::string("not in switch"));
     }
 }
 
-void MiniRailway::connect(std::array<winston::Section::Shared, sectionsCount()>& sections)
+void MiniRailway::connect(std::array<winston::Track::Shared, tracksCount()>& tracks)
 {
-    this->section(Sections::A)->connect(winston::Section::Connection::A, this->section(Sections::Turnout1), winston::Section::Connection::A)
-        ->connect(winston::Section::Connection::B, this->section(Sections::B), winston::Section::Connection::A);
-    this->section(Sections::Turnout1)->connect(winston::Section::Connection::C, this->section(Sections::C), winston::Section::Connection::A);
+    this->track(Tracks::A)->connect(winston::Track::Connection::A, this->track(Tracks::Turnout1), winston::Track::Connection::A)
+        ->connect(winston::Track::Connection::B, this->track(Tracks::B), winston::Track::Connection::A);
+    this->track(Tracks::Turnout1)->connect(winston::Track::Connection::C, this->track(Tracks::C), winston::Track::Connection::A);
 
-    this->section(Sections::B)->attachSignal(winston::SignalH::make(), winston::Section::Connection::A);
-    this->section(Sections::C)->attachSignal(winston::SignalKS::make(), winston::Section::Connection::A);
+    this->track(Tracks::B)->attachSignal(winston::SignalH::make(), winston::Track::Connection::A);
+    this->track(Tracks::C)->attachSignal(winston::SignalKS::make(), winston::Track::Connection::A);
 }
 
 const std::string MiniRailway::name()
@@ -33,71 +33,75 @@ const std::string MiniRailway::name()
     return std::string("MiniRailway");
 }
 
-SignalTestRailway::SignalTestRailway(const Callbacks callbacks) : winston::RailwayWithRails<SignalTestRailwaySections>(callbacks) {};
+SignalTestRailway::SignalTestRailway(const Callbacks callbacks) : winston::RailwayWithRails<SignalTestRailwayTracks>(callbacks) {};
 
-winston::Section::Shared SignalTestRailway::define(const Sections section)
+winston::Track::Shared SignalTestRailway::define(const Tracks track)
 {
-    switch (section) {
-    case Sections::A:
-    case Sections::B:
-    case Sections::C:
-    case Sections::D:
-    case Sections::F:
-    case Sections::G:
-    case Sections::J:
-    case Sections::K:
-    case Sections::N:
+    switch (track) {
+    case Tracks::A:
+    case Tracks::B:
+    case Tracks::C:
+    case Tracks::D:
+    case Tracks::F:
+    case Tracks::G:
+    case Tracks::J:
+    case Tracks::K:
+    case Tracks::N:
+    case Tracks::Q:
         return winston::Bumper::make();
-    case Sections::E:
-    case Sections::H:
-    case Sections::I:
-    case Sections::L:
-    case Sections::M:
-    case Sections::O:
-    case Sections::P:
+    case Tracks::E:
+    case Tracks::H:
+    case Tracks::I:
+    case Tracks::L:
+    case Tracks::M:
+    case Tracks::O:
+    case Tracks::P:
         return winston::Rail::make();
-    case Sections::Turnout1:
-        return winston::Turnout::make([this, section](winston::Section::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Section>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
+    case Tracks::Turnout1:
+    case Tracks::Turnout2:
+        return winston::Turnout::make([this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
     default:
-        winston::hal::fatal(std::string("section ") + std::string(magic_enum::enum_name(section)) + std::string("not in switch"));
+        winston::hal::fatal(std::string("track ") + std::string(magic_enum::enum_name(track)) + std::string("not in switch"));
     }
 }
 
-void SignalTestRailway::connect(std::array<winston::Section::Shared, sectionsCount()>& sections)
+void SignalTestRailway::connect(std::array<winston::Track::Shared, tracksCount()>& tracks)
 {
-    this->section(Sections::A)->connect(winston::Section::Connection::A, this->section(Sections::Turnout1), winston::Section::Connection::A)
-        ->connect(winston::Section::Connection::B, this->section(Sections::B), winston::Section::Connection::A);
-    this->section(Sections::Turnout1)->connect(winston::Section::Connection::C, this->section(Sections::C), winston::Section::Connection::A);
+    this->track(Tracks::A)->connect(winston::Track::Connection::A, this->track(Tracks::Turnout1), winston::Track::Connection::A)
+        ->connect(winston::Track::Connection::B, this->track(Tracks::B), winston::Track::Connection::A);
+    this->track(Tracks::Turnout1)->connect(winston::Track::Connection::C, this->track(Tracks::C), winston::Track::Connection::A);
 
-    this->section(Sections::D)->connect(winston::Section::Connection::A, this->section(Sections::E), winston::Section::Connection::A)
-        ->connect(winston::Section::Connection::B, this->section(Sections::F), winston::Section::Connection::A);
+    this->track(Tracks::D)->connect(winston::Track::Connection::A, this->track(Tracks::E), winston::Track::Connection::A)
+        ->connect(winston::Track::Connection::B, this->track(Tracks::F), winston::Track::Connection::A);
     
-    this->section(Sections::G)->connect(winston::Section::Connection::A, this->section(Sections::H), winston::Section::Connection::A)
-        ->connect(winston::Section::Connection::B, this->section(Sections::I), winston::Section::Connection::A)
-        ->connect(winston::Section::Connection::B, this->section(Sections::J), winston::Section::Connection::A);
+    this->track(Tracks::G)->connect(winston::Track::Connection::A, this->track(Tracks::H), winston::Track::Connection::A)
+        ->connect(winston::Track::Connection::B, this->track(Tracks::I), winston::Track::Connection::A)
+        ->connect(winston::Track::Connection::B, this->track(Tracks::J), winston::Track::Connection::A);
 
-    this->section(Sections::K)->connect(winston::Section::Connection::A, this->section(Sections::L), winston::Section::Connection::A)
-        ->connect(winston::Section::Connection::B, this->section(Sections::M), winston::Section::Connection::A)
-        ->connect(winston::Section::Connection::B, this->section(Sections::N), winston::Section::Connection::A);
+    this->track(Tracks::K)->connect(winston::Track::Connection::A, this->track(Tracks::L), winston::Track::Connection::A)
+        ->connect(winston::Track::Connection::B, this->track(Tracks::M), winston::Track::Connection::A)
+        ->connect(winston::Track::Connection::B, this->track(Tracks::N), winston::Track::Connection::A);
 
-    this->section(Sections::O)->connect(winston::Section::Connection::A, this->section(Sections::P), winston::Section::Connection::A)
-        ->connect(winston::Section::Connection::B, this->section(Sections::O), winston::Section::Connection::B);
+    this->track(Tracks::Q)->connect(winston::Track::Connection::A, this->track(Tracks::Turnout2), winston::Track::Connection::B)
+        ->connect(winston::Track::Connection::A, this->track(Tracks::P), winston::Track::Connection::A)
+        ->connect(winston::Track::Connection::B, this->track(Tracks::O), winston::Track::Connection::A)
+        ->connect(winston::Track::Connection::B, this->track(Tracks::Turnout2), winston::Track::Connection::C);
     
-    this->section(Sections::B)->attachSignal(winston::SignalH::make(), winston::Section::Connection::A);
-    this->section(Sections::C)->attachSignal(winston::SignalKS::make(), winston::Section::Connection::A);
+    this->track(Tracks::B)->attachSignal(winston::SignalH::make(), winston::Track::Connection::A);
+    this->track(Tracks::C)->attachSignal(winston::SignalKS::make(), winston::Track::Connection::A);
 
-    this->section(Sections::F)->attachSignal(winston::SignalV::make(), winston::Section::Connection::A);
-    this->section(Sections::E)->attachSignal(winston::SignalH::make(), winston::Section::Connection::A);
+    this->track(Tracks::F)->attachSignal(winston::SignalV::make(), winston::Track::Connection::A);
+    this->track(Tracks::E)->attachSignal(winston::SignalH::make(), winston::Track::Connection::A);
 
-    this->section(Sections::H)->attachSignal(winston::SignalH::make(), winston::Section::Connection::A);
-    this->section(Sections::I)->attachSignal(winston::SignalHV::make(), winston::Section::Connection::A);
-    this->section(Sections::J)->attachSignal(winston::SignalV::make(), winston::Section::Connection::A);
+    this->track(Tracks::H)->attachSignal(winston::SignalH::make(), winston::Track::Connection::A);
+    this->track(Tracks::I)->attachSignal(winston::SignalHV::make(), winston::Track::Connection::A);
+    this->track(Tracks::J)->attachSignal(winston::SignalV::make(), winston::Track::Connection::A);
 
-    this->section(Sections::L)->attachSignal(winston::SignalKS::make(), winston::Section::Connection::A);
-    this->section(Sections::M)->attachSignal(winston::SignalKS::make(), winston::Section::Connection::A);
-    this->section(Sections::N)->attachSignal(winston::SignalKS::make(), winston::Section::Connection::A);
+    this->track(Tracks::L)->attachSignal(winston::SignalKS::make(), winston::Track::Connection::A);
+    this->track(Tracks::M)->attachSignal(winston::SignalKS::make(), winston::Track::Connection::A);
+    this->track(Tracks::N)->attachSignal(winston::SignalKS::make(), winston::Track::Connection::A);
     
-    this->section(Sections::O)->attachSignal(winston::SignalHV::make(), winston::Section::Connection::A);
+    this->track(Tracks::Q)->attachSignal(winston::SignalHV::make(), winston::Track::Connection::A);
 }
 
 const std::string SignalTestRailway::name()
@@ -105,28 +109,28 @@ const std::string SignalTestRailway::name()
     return std::string("SignalTestRailway");
 }
 
-RailwayWithSiding::RailwayWithSiding(const Callbacks callbacks) : winston::RailwayWithRails<RailwayWithSidingsSections>(callbacks) {};
+RailwayWithSiding::RailwayWithSiding(const Callbacks callbacks) : winston::RailwayWithRails<RailwayWithSidingsTracks>(callbacks) {};
 RailwayWithSiding::AddressTranslator::AddressTranslator(RailwayWithSiding::Shared railway) : winston::DigitalCentralStation::AddressTranslator(), Shared_Ptr<AddressTranslator>(), railway(railway) { };
 
 winston::Turnout::Shared RailwayWithSiding::AddressTranslator::turnout(const winston::Address address)
 {
-    Sections section;
+    Tracks track;
     switch (address)
     {
     default:
-    case 0: section = Sections::Turnout1; break;
-    case 1: section = Sections::Turnout2; break;
+    case 0: track = Tracks::Turnout1; break;
+    case 1: track = Tracks::Turnout2; break;
     }
-    return std::dynamic_pointer_cast<winston::Turnout>(railway->section(section));
+    return std::dynamic_pointer_cast<winston::Turnout>(railway->track(track));
 }
 
-const winston::Address RailwayWithSiding::AddressTranslator::address(winston::Section::Shared section)
+const winston::Address RailwayWithSiding::AddressTranslator::address(winston::Track::Shared track)
 {
-    switch (railway->sectionEnum(section))
+    switch (railway->trackEnum(track))
     {
     default:
-    case Sections::Turnout1: return 0; break;
-    case Sections::Turnout2: return 1; break;
+    case Tracks::Turnout1: return 0; break;
+    case Tracks::Turnout2: return 1; break;
     }
     return 0;
 }
@@ -136,36 +140,36 @@ winston::Locomotive::Shared RailwayWithSiding::AddressTranslator::locomotive(con
     return nullptr;
 }
 
-winston::Section::Shared RailwayWithSiding::define(const Sections section)
+winston::Track::Shared RailwayWithSiding::define(const Tracks track)
 {
-    switch (section)
+    switch (track)
     {
-    case Sections::A:
-    case Sections::B:
-    case Sections::C:
+    case Tracks::A:
+    case Tracks::B:
+    case Tracks::C:
         return winston::Rail::make();
-    case Sections::Turnout1:
-    case Sections::Turnout2:
-        return winston::Turnout::make([this, section](winston::Section::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Section>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, section == Sections::Turnout2);
+    case Tracks::Turnout1:
+    case Tracks::Turnout2:
+        return winston::Turnout::make([this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, track == Tracks::Turnout2);
     default:
-        winston::hal::fatal(std::string("section ") + std::string(magic_enum::enum_name(section)) + std::string("not in switch"));
+        winston::hal::fatal(std::string("track ") + std::string(magic_enum::enum_name(track)) + std::string("not in switch"));
     }
 }
 
-void RailwayWithSiding::connect(std::array<winston::Section::Shared, sectionsCount()> & sections)
+void RailwayWithSiding::connect(std::array<winston::Track::Shared, tracksCount()> & tracks)
 {
-    auto a = this->section(Sections::A);
-    auto b = this->section(Sections::B);
-    auto c = this->section(Sections::C);
-    auto t1 = this->section(Sections::Turnout1);
-    auto t2 = this->section(Sections::Turnout2);
+    auto a = this->track(Tracks::A);
+    auto b = this->track(Tracks::B);
+    auto c = this->track(Tracks::C);
+    auto t1 = this->track(Tracks::Turnout1);
+    auto t2 = this->track(Tracks::Turnout2);
 
-    a->connect(winston::Section::Connection::A, t1, winston::Section::Connection::A)
-        ->connect(winston::Section::Connection::B, b, winston::Section::Connection::A)
-        ->connect(winston::Section::Connection::B, t2, winston::Section::Connection::C)
-        ->connect(winston::Section::Connection::A, a, winston::Section::Connection::B);
-    t1->connect(winston::Section::Connection::C, c, winston::Section::Connection::A)
-        ->connect(winston::Section::Connection::B, t2, winston::Section::Connection::B);
+    a->connect(winston::Track::Connection::A, t1, winston::Track::Connection::A)
+        ->connect(winston::Track::Connection::B, b, winston::Track::Connection::A)
+        ->connect(winston::Track::Connection::B, t2, winston::Track::Connection::C)
+        ->connect(winston::Track::Connection::A, a, winston::Track::Connection::B);
+    t1->connect(winston::Track::Connection::C, c, winston::Track::Connection::A)
+        ->connect(winston::Track::Connection::B, t2, winston::Track::Connection::B);
 }
 
 const std::string RailwayWithSiding::name()
@@ -173,57 +177,57 @@ const std::string RailwayWithSiding::name()
     return std::string("RailwayWithSiding");
 }
 
-TimeSaverRailway::TimeSaverRailway(const Callbacks callbacks) : winston::RailwayWithRails<TimeSaverRailwaySections>(callbacks) {};
-winston::Section::Shared TimeSaverRailway::define(const Sections section)
+TimeSaverRailway::TimeSaverRailway(const Callbacks callbacks) : winston::RailwayWithRails<TimeSaverRailwayTracks>(callbacks) {};
+winston::Track::Shared TimeSaverRailway::define(const Tracks track)
 {
-    switch (section)
+    switch (track)
     {
-    case Sections::A:
-    case Sections::B:
-    case Sections::C:
-    case Sections::D:
-    case Sections::E:
+    case Tracks::A:
+    case Tracks::B:
+    case Tracks::C:
+    case Tracks::D:
+    case Tracks::E:
         return winston::Bumper::make();
-    case Sections::Turnout1:
-    case Sections::Turnout3:
-    case Sections::Turnout4:
-        return winston::Turnout::make([this, section](winston::Section::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Section>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, true);
-    case Sections::Turnout2:
-    case Sections::Turnout5:
-        return winston::Turnout::make([this, section](winston::Section::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Section>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
+    case Tracks::Turnout1:
+    case Tracks::Turnout3:
+    case Tracks::Turnout4:
+        return winston::Turnout::make([this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, true);
+    case Tracks::Turnout2:
+    case Tracks::Turnout5:
+        return winston::Turnout::make([this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
     default:
-        winston::hal::fatal(std::string("section ") + std::string(magic_enum::enum_name(section)) + std::string("not in switch"));
+        winston::hal::fatal(std::string("track ") + std::string(magic_enum::enum_name(track)) + std::string("not in switch"));
     }
 }
 
-void TimeSaverRailway::connect(std::array<winston::Section::Shared, sectionsCount()>& sections)
+void TimeSaverRailway::connect(std::array<winston::Track::Shared, tracksCount()>& tracks)
 {
     // counter-wise orientation
-    auto a = this->section(Sections::A);
-    auto b = this->section(Sections::B);
-    auto c = this->section(Sections::C);
-    auto d = this->section(Sections::D);
-    auto e = this->section(Sections::E);
-    auto t1 = this->section(Sections::Turnout1);
-    auto t2 = this->section(Sections::Turnout2);
-    auto t3 = this->section(Sections::Turnout3);
-    auto t4 = this->section(Sections::Turnout4);
-    auto t5 = this->section(Sections::Turnout5);
+    auto a = this->track(Tracks::A);
+    auto b = this->track(Tracks::B);
+    auto c = this->track(Tracks::C);
+    auto d = this->track(Tracks::D);
+    auto e = this->track(Tracks::E);
+    auto t1 = this->track(Tracks::Turnout1);
+    auto t2 = this->track(Tracks::Turnout2);
+    auto t3 = this->track(Tracks::Turnout3);
+    auto t4 = this->track(Tracks::Turnout4);
+    auto t5 = this->track(Tracks::Turnout5);
 
-    a->connect(winston::Section::Connection::A, t1, winston::Section::Connection::B)
-        ->connect(winston::Section::Connection::A, b, winston::Section::Connection::A);
+    a->connect(winston::Track::Connection::A, t1, winston::Track::Connection::B)
+        ->connect(winston::Track::Connection::A, b, winston::Track::Connection::A);
 
-    t1->connect(winston::Section::Connection::C, t2, winston::Section::Connection::B)
-        ->connect(winston::Section::Connection::A, t3, winston::Section::Connection::C)
-        ->connect(winston::Section::Connection::A, c, winston::Section::Connection::A);
+    t1->connect(winston::Track::Connection::C, t2, winston::Track::Connection::B)
+        ->connect(winston::Track::Connection::A, t3, winston::Track::Connection::C)
+        ->connect(winston::Track::Connection::A, c, winston::Track::Connection::A);
 
-    t2->connect(winston::Section::Connection::C, t5, winston::Section::Connection::C)
-        ->connect(winston::Section::Connection::A, d, winston::Section::Connection::A);
+    t2->connect(winston::Track::Connection::C, t5, winston::Track::Connection::C)
+        ->connect(winston::Track::Connection::A, d, winston::Track::Connection::A);
 
-    t3->connect(winston::Section::Connection::B, t4, winston::Section::Connection::B)
-        ->connect(winston::Section::Connection::A, t5, winston::Section::Connection::B);
+    t3->connect(winston::Track::Connection::B, t4, winston::Track::Connection::B)
+        ->connect(winston::Track::Connection::A, t5, winston::Track::Connection::B);
 
-    t4->connect(winston::Section::Connection::C, e, winston::Section::Connection::A);
+    t4->connect(winston::Track::Connection::C, e, winston::Track::Connection::A);
 }
     
 const std::string TimeSaverRailway::name()
@@ -231,7 +235,7 @@ const std::string TimeSaverRailway::name()
     return std::string("TimeSaverRailway");
 }
 
-Y2020Railway::Y2020Railway(const Callbacks callbacks) : winston::RailwayWithRails<Y2020RailwaySections>(callbacks) {};
+Y2020Railway::Y2020Railway(const Callbacks callbacks) : winston::RailwayWithRails<Y2020RailwayTracks>(callbacks) {};
 const std::string Y2020Railway::name()
 {
     return std::string("Y2020Railway");
@@ -241,14 +245,14 @@ Y2020Railway::AddressTranslator::AddressTranslator(Y2020Railway::Shared railway)
 
 winston::Turnout::Shared Y2020Railway::AddressTranslator::turnout(const winston::Address address)
 {
-	Sections section;
+	Tracks track;
     switch (address)
     {
     default:
-    case 0: section = Sections::Turnout1; break;
-    case 1: section = Sections::Turnout2; break;
+    case 0: track = Tracks::Turnout1; break;
+    case 1: track = Tracks::Turnout2; break;
     }
-    return std::dynamic_pointer_cast<winston::Turnout>(railway->section(section));
+    return std::dynamic_pointer_cast<winston::Turnout>(railway->track(track));
 }
 
 winston::Locomotive::Shared Y2020Railway::AddressTranslator::locomotive(const winston::Address address)
@@ -256,95 +260,95 @@ winston::Locomotive::Shared Y2020Railway::AddressTranslator::locomotive(const wi
     return nullptr;
 }
 
-const winston::Address Y2020Railway::AddressTranslator::address(winston::Section::Shared section)
+const winston::Address Y2020Railway::AddressTranslator::address(winston::Track::Shared track)
 {
-    switch (railway->sectionEnum(section))
+    switch (railway->trackEnum(track))
     {
     default:
-    case Sections::Turnout1: return 0; break;
-    case Sections::Turnout2: return 1; break;
+    case Tracks::Turnout1: return 0; break;
+    case Tracks::Turnout2: return 1; break;
     }
     return 0;
 }
 
-winston::Section::Shared Y2020Railway::define(const Sections section)
+winston::Track::Shared Y2020Railway::define(const Tracks track)
 {
-    switch (section)
+    switch (track)
     {
-    case Sections::A:
-    case Sections::B:
-    case Sections::C:
-    case Sections::D:
-    case Sections::E:
-    case Sections::F:
-    case Sections::G:
+    case Tracks::A:
+    case Tracks::B:
+    case Tracks::C:
+    case Tracks::D:
+    case Tracks::E:
+    case Tracks::F:
+    case Tracks::G:
         return winston::Bumper::make();
-    case Sections::G1:
+    case Tracks::G1:
         return winston::Rail::make();
-    case Sections::Turnout1:
-    case Sections::Turnout2:
-        return winston::Turnout::make([this, section](winston::Section::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Section>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
-    case Sections::Turnout3:
-    case Sections::Turnout4:
-    case Sections::Turnout5:
-    case Sections::Turnout6:
-    case Sections::Turnout7:
-    case Sections::Turnout8:
-    case Sections::Turnout9:
-        return winston::Turnout::make([this, section](winston::Section::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Section>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, true);
+    case Tracks::Turnout1:
+    case Tracks::Turnout2:
+        return winston::Turnout::make([this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
+    case Tracks::Turnout3:
+    case Tracks::Turnout4:
+    case Tracks::Turnout5:
+    case Tracks::Turnout6:
+    case Tracks::Turnout7:
+    case Tracks::Turnout8:
+    case Tracks::Turnout9:
+        return winston::Turnout::make([this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, true);
     default:
-        winston::hal::fatal(std::string("section ") + std::string(magic_enum::enum_name(section)) + std::string("not in switch"));
+        winston::hal::fatal(std::string("track ") + std::string(magic_enum::enum_name(track)) + std::string("not in switch"));
     }
 
 }
 
-void Y2020Railway::connect(std::array<winston::Section::Shared, sectionsCount()>& sections)
+void Y2020Railway::connect(std::array<winston::Track::Shared, tracksCount()>& tracks)
 {
-    auto a = this->section(Sections::A);
-    auto b = this->section(Sections::B);
-    auto c = this->section(Sections::C);
-    auto d = this->section(Sections::D);
-    auto e = this->section(Sections::E);
-    auto f = this->section(Sections::F);
-    auto g = this->section(Sections::G);
-    auto g1 = this->section(Sections::G1);
-    auto t1 = this->section(Sections::Turnout1);
-    auto t2 = this->section(Sections::Turnout2);
-    auto t3 = this->section(Sections::Turnout3);
-    auto t4 = this->section(Sections::Turnout4);
-    auto t5 = this->section(Sections::Turnout5);
-    auto t6 = this->section(Sections::Turnout6);
-    auto t7 = this->section(Sections::Turnout7);
-    auto t8 = this->section(Sections::Turnout8);
-    auto t9 = this->section(Sections::Turnout9);
+    auto a = this->track(Tracks::A);
+    auto b = this->track(Tracks::B);
+    auto c = this->track(Tracks::C);
+    auto d = this->track(Tracks::D);
+    auto e = this->track(Tracks::E);
+    auto f = this->track(Tracks::F);
+    auto g = this->track(Tracks::G);
+    auto g1 = this->track(Tracks::G1);
+    auto t1 = this->track(Tracks::Turnout1);
+    auto t2 = this->track(Tracks::Turnout2);
+    auto t3 = this->track(Tracks::Turnout3);
+    auto t4 = this->track(Tracks::Turnout4);
+    auto t5 = this->track(Tracks::Turnout5);
+    auto t6 = this->track(Tracks::Turnout6);
+    auto t7 = this->track(Tracks::Turnout7);
+    auto t8 = this->track(Tracks::Turnout8);
+    auto t9 = this->track(Tracks::Turnout9);
 
-    a->connect(winston::Section::Connection::A, t2, winston::Section::Connection::B)
-        ->connect(winston::Section::Connection::A, g1, winston::Section::Connection::B)
-        ->connect(winston::Section::Connection::A, t4, winston::Section::Connection::B)
-        ->connect(winston::Section::Connection::A, t5, winston::Section::Connection::A)
-        ->connect(winston::Section::Connection::B, t1, winston::Section::Connection::A)
-        ->connect(winston::Section::Connection::C, t2, winston::Section::Connection::C);
+    a->connect(winston::Track::Connection::A, t2, winston::Track::Connection::B)
+        ->connect(winston::Track::Connection::A, g1, winston::Track::Connection::B)
+        ->connect(winston::Track::Connection::A, t4, winston::Track::Connection::B)
+        ->connect(winston::Track::Connection::A, t5, winston::Track::Connection::A)
+        ->connect(winston::Track::Connection::B, t1, winston::Track::Connection::A)
+        ->connect(winston::Track::Connection::C, t2, winston::Track::Connection::C);
 
-    t1->connect(winston::Section::Connection::B, t3, winston::Section::Connection::A)
-        ->connect(winston::Section::Connection::B, t4, winston::Section::Connection::C);
+    t1->connect(winston::Track::Connection::B, t3, winston::Track::Connection::A)
+        ->connect(winston::Track::Connection::B, t4, winston::Track::Connection::C);
 
-    t3->connect(winston::Section::Connection::C, b, winston::Section::Connection::A);
+    t3->connect(winston::Track::Connection::C, b, winston::Track::Connection::A);
 
-    t5->connect(winston::Section::Connection::C, t6, winston::Section::Connection::C)
-        ->connect(winston::Section::Connection::A, t7, winston::Section::Connection::A)
-        ->connect(winston::Section::Connection::C, t8, winston::Section::Connection::C)
-        ->connect(winston::Section::Connection::A, e, winston::Section::Connection::A);
+    t5->connect(winston::Track::Connection::C, t6, winston::Track::Connection::C)
+        ->connect(winston::Track::Connection::A, t7, winston::Track::Connection::A)
+        ->connect(winston::Track::Connection::C, t8, winston::Track::Connection::C)
+        ->connect(winston::Track::Connection::A, e, winston::Track::Connection::A);
 
-    t6->connect(winston::Section::Connection::B, c, winston::Section::Connection::A);
-    t7->connect(winston::Section::Connection::B, d, winston::Section::Connection::A);
+    t6->connect(winston::Track::Connection::B, c, winston::Track::Connection::A);
+    t7->connect(winston::Track::Connection::B, d, winston::Track::Connection::A);
 
-    t8->connect(winston::Section::Connection::B, t9, winston::Section::Connection::A)
-        ->connect(winston::Section::Connection::B, g, winston::Section::Connection::A);
-    t9->connect(winston::Section::Connection::C, f, winston::Section::Connection::A);
+    t8->connect(winston::Track::Connection::B, t9, winston::Track::Connection::A)
+        ->connect(winston::Track::Connection::B, g, winston::Track::Connection::A);
+    t9->connect(winston::Track::Connection::C, f, winston::Track::Connection::A);
 
-#define attachSignal(section, SignalClass, guardedConnection) \
-    section->attachSignal(SignalClass::make([=](const winston::Signal::Aspects aspect)->const winston::State { return this->callbacks.signalUpdateCallback(section->signalGuarding(guardedConnection), aspect); }), guardedConnection);
+#define attachSignal(track, SignalClass, guardedConnection) \
+    track->attachSignal(SignalClass::make([=](const winston::Signal::Aspects aspect)->const winston::State { return this->callbacks.signalUpdateCallback(track->signalGuarding(guardedConnection), aspect); }), guardedConnection);
 
-    attachSignal(g1, winston::SignalKS, winston::Section::Connection::A);
-    attachSignal(g1, winston::SignalKS, winston::Section::Connection::B);
+    attachSignal(g1, winston::SignalKS, winston::Track::Connection::A);
+    attachSignal(g1, winston::SignalKS, winston::Track::Connection::B);
 }

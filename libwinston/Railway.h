@@ -34,95 +34,95 @@ namespace winston
 		const Callbacks callbacks;
 	};
 
-	template<typename _SectionsClass>
+	template<typename _TracksClass>
 	class RailwayWithRails : public Railway
 	{
 	public:
-		RailwayWithRails(const Callbacks callbacks) : Railway(callbacks), sections() { };
+		RailwayWithRails(const Callbacks callbacks) : Railway(callbacks), tracks() { };
 		virtual ~RailwayWithRails() = default;
 
-		using Sections = _SectionsClass;
+		using Tracks = _TracksClass;
 
 		Result init()
 		{
-			for (size_t section = 0; section < sectionsCount(); ++section)
-				this->sections[section] = define(magic_enum::enum_value<Sections>(section));
-			connect(this->sections);
+			for (size_t track = 0; track < tracksCount(); ++track)
+				this->tracks[track] = define(magic_enum::enum_value<Tracks>(track));
+			connect(this->tracks);
 			return this->validate();
 		}
-		static constexpr size_t sectionsCount() noexcept {
-			return magic_enum::enum_count<Sections>();
+		static constexpr size_t tracksCount() noexcept {
+			return magic_enum::enum_count<Tracks>();
 		}
 
-		virtual winston::Section::Shared define(const Sections section) = 0;
-		virtual void connect(std::array < winston::Section::Shared, sectionsCount()>& sections) = 0;
+		virtual winston::Track::Shared define(const Tracks track) = 0;
+		virtual void connect(std::array < winston::Track::Shared, tracksCount()>& tracks) = 0;
 
-		template<typename _Section, typename ..._args>
-		Section::Shared& add(Sections section, _args && ...args) {
-			return this->sections[static_cast<size_t>(section)] = std::make_shared<_Section>(std::forward<_args>(args)...);
+		template<typename _Track, typename ..._args>
+		Track::Shared& add(Tracks track, _args && ...args) {
+			return this->tracks[static_cast<size_t>(track)] = std::make_shared<_Track>(std::forward<_args>(args)...);
 		}
 
-		bool traverse(const Section::Connection from, Section::Shared& on, Section::Shared& onto) const
+		bool traverse(const Track::Connection from, Track::Shared& on, Track::Shared& onto) const
 		{
 			return on ? on->traverse(from, onto) : false;
 		}
 
-		inline Sections sectionEnum(size_t index)
+		inline Tracks trackEnum(size_t index)
 		{
-			return magic_enum::enum_cast<Sections>((unsigned int)index).value();
+			return magic_enum::enum_cast<Tracks>((unsigned int)index).value();
 		}
 
-		inline unsigned int sectionIndex(Sections section)
+		inline unsigned int trackIndex(Tracks track)
 		{
-			return magic_enum::enum_integer(section);
+			return magic_enum::enum_integer(track);
 		}
 
-		inline unsigned int sectionIndex(Section::Shared section)
+		inline unsigned int trackIndex(Track::Shared track)
 		{
-			return magic_enum::enum_integer(sectionEnum(section));
+			return magic_enum::enum_integer(trackEnum(track));
 		}
 
-		inline Section::Shared& section(Sections index)
+		inline Track::Shared& track(Tracks index)
 		{
-			return this->sections[static_cast<size_t>(index)];
+			return this->tracks[static_cast<size_t>(index)];
 		}
 
-		inline Section::Shared& section(size_t index)
+		inline Track::Shared& track(size_t index)
 		{
-			return this->sections[index];
+			return this->tracks[index];
 		}
 
-		Sections sectionEnum(Section::Shared& section)
+		Tracks trackEnum(Track::Shared& track)
 		{
-			auto it = std::find(this->sections.begin(), this->sections.end(), section);
-			return this->sectionEnum(std::distance(this->sections.begin(), it));
+			auto it = std::find(this->tracks.begin(), this->tracks.end(), track);
+			return this->trackEnum(std::distance(this->tracks.begin(), it));
 		}
 
-		inline Sections section(Bumper::Shared& section)
+		inline Tracks track(Bumper::Shared& track)
 		{
-			auto s = std::dynamic_pointer_cast<Section>(section);
-			return this->section(s);
+			auto s = std::dynamic_pointer_cast<Track>(track);
+			return this->track(s);
 		}
 		
-		inline Sections section(Rail::Shared& section)
+		inline Tracks track(Rail::Shared& track)
 		{
-			auto s = std::dynamic_pointer_cast<Section>(section);
-			return this->section(s);
+			auto s = std::dynamic_pointer_cast<Track>(track);
+			return this->track(s);
 		}
 
-		inline Sections section(Turnout::Shared& section)
+		inline Tracks track(Turnout::Shared& track)
 		{
-			auto s = std::dynamic_pointer_cast<Section>(section);
-			return this->section(s);
+			auto s = std::dynamic_pointer_cast<Track>(track);
+			return this->track(s);
 		}
 	private:
 		Result validate()
 		{
 			bool passed = true;
 
-			for(size_t i = 0; i < sectionsCount() && passed; ++i)
+			for(size_t i = 0; i < tracksCount() && passed; ++i)
 			{
-				auto current = this->sections[i];
+				auto current = this->tracks[i];
 				if (!current)
 					return Result::ValidationFailed;
 
@@ -133,6 +133,6 @@ namespace winston
 		}
 
 	protected:
-		std::array<Section::Shared, sectionsCount()> sections;
+		std::array<Track::Shared, tracksCount()> tracks;
 	};
 }

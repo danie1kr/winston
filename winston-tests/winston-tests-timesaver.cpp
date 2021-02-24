@@ -34,19 +34,19 @@ namespace winstontests
         {
             testRailway = std::make_shared<TimeSaverRailway>(railwayCallbacks());
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
-            auto b = testRailway->section(TimeSaverRailway::Sections::B);
-            auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->section(TimeSaverRailway::Sections::Turnout1));
-            auto t2 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->section(TimeSaverRailway::Sections::Turnout2));
+            auto b = testRailway->track(TimeSaverRailway::Tracks::B);
+            auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->track(TimeSaverRailway::Tracks::Turnout1));
+            auto t2 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->track(TimeSaverRailway::Tracks::Turnout2));
 
-            winston::Section::Shared onto, onto2;
+            winston::Track::Shared onto, onto2;
             winston::NullMutex nullMutex;
             auto signalBox = winston::SignalBox::make(nullMutex);
 
             auto direction = winston::Turnout::Direction::A_C;
             t1->finalizeChangeTo(direction);
             Assert::IsTrue(t1->direction() == direction);
-            Assert::IsTrue(b->traverse(winston::Section::Connection::DeadEnd, onto, false));
-            Assert::IsTrue(onto->traverse(winston::Section::Connection::A, onto2, false));
+            Assert::IsTrue(b->traverse(winston::Track::Connection::DeadEnd, onto, false));
+            Assert::IsTrue(onto->traverse(winston::Track::Connection::A, onto2, false));
             Assert::IsTrue(onto2.get() == t2.get());
         }
 
@@ -59,10 +59,10 @@ namespace winstontests
 
             testRailway = std::make_shared<TimeSaverRailway>(railwayCallbacks());
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
-            auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->section(TimeSaverRailway::Sections::Turnout1));
-            auto t2 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->section(TimeSaverRailway::Sections::Turnout2));
+            auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->track(TimeSaverRailway::Tracks::Turnout1));
+            auto t2 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->track(TimeSaverRailway::Tracks::Turnout2));
 
-            winston::Section::Shared onto, onto2;
+            winston::Track::Shared onto, onto2;
             winston::NullMutex nullMutex;
             auto tr = std::dynamic_pointer_cast<winston::Railway>(testRailway);
             auto signalBox = winston::SignalBox::make(tr, nullMutex);

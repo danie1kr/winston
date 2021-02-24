@@ -26,13 +26,13 @@ namespace winston
 
 		void setSignalsFor(Turnout::Shared turnout);
 		//static void setSignal(Signal::Shared signal, const Signal::Aspect aspect);
-		static void setSignalOn(Section::Shared section, const bool guarding, const Section::Connection connection, const Signal::Aspect aspect, const bool includingFirst);
+		static void setSignalOn(Track::Shared track, const bool guarding, const Track::Connection connection, const Signal::Aspect aspect, const bool includingFirst);
 		
 		void order(Command::Shared command);
 		void work();
 	private:
 
-		static Signal::Shared nextSignal(Section::Shared& section, const bool guarding, Section::Connection& leaving, const bool main, const bool includingFirst);
+		static Signal::Shared nextSignal(Track::Shared& track, const bool guarding, Track::Connection& leaving, const bool main, const bool includingFirst);
 
 		std::queue<Command::Shared> commands;
 		Mutex& mutex;

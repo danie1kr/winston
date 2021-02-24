@@ -10,7 +10,7 @@ namespace winston
 
 	using Id = unsigned int;
 
-	using SectionIndex = size_t;
+	using TrackIndex = size_t;
 
 
 	enum class State
@@ -61,7 +61,7 @@ namespace winston
 	class ModelRailwaySystem;
 
 	class Block;
-	class Section;
+	class Track;
 	class Bumper;
 	class Rail;
 	class Turnout;

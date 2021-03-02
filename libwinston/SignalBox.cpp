@@ -33,6 +33,13 @@ namespace winston
 		if (Signal::Shared mainSignal = SignalBox::nextSignal(current, guarding, from, true, includingFirst))
 		{
 			mainSignal->aspect(aspect);
+			if (aspect == Signal::Aspect::Go && mainSignal->preSignal())
+			{
+				auto preCurrent = current;
+				auto preFrom = from;
+				if(Signal::Shared preOfMainSignal = SignalBox::nextSignal(preCurrent, guarding, preFrom, true, false))
+					mainSignal->aspect(preOfMainSignal->shows(Signal::Aspect::Go) ? Signal::Aspect::ExpectGo : Signal::Aspect::ExpectHalt);
+			}
 			// current and from are now the position of mainSignal
 			auto otherFrom = current->otherConnection(from);
 			if (Signal::Shared preSignal = SignalBox::nextSignal(current, guarding, otherFrom, false, false))
@@ -51,8 +58,12 @@ namespace winston
 			SignalBox::setSignalOn(current, true, from, mainSignalAspect, true);
 		};
 
+		// A_facing = leave turnout at A, find first main signal facing A
+		// B_guarding = leave turnout at B, find first pre signal if 
+
+		// 
 		this->order(Command::make([turnout, setSignals](const unsigned long& created) -> const winston::State { setSignals(turnout, turnout->direction()); return State::Finished; }));
-		this->order(Command::make([turnout, setSignals](const unsigned long& created) -> const winston::State { setSignals(turnout, turnout->otherDirection(turnout->direction())); return State::Finished;  }));
+		this->order(Command::make([turnout, setSignals](const unsigned long& created) -> const winston::State { setSignals(turnout, turnout->otherDirection(turnout->direction())); return State::Finished; }));
 	}
 	
 	Signal::Shared SignalBox::nextSignal(Track::Shared& track, const bool guarding, Track::Connection& leaving, const bool main, const bool includingFirst)

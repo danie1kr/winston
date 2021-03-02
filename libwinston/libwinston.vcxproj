@@ -84,6 +84,7 @@
     <ClInclude Include="DigitalCentralStation.h" />
     <ClInclude Include="Callback.h" />
     <ClInclude Include="HAL.h" />
+    <ClInclude Include="Library.h" />
     <ClInclude Include="Locomotive.h" />
     <ClInclude Include="magic_enum.hpp" />
     <ClInclude Include="ModelRailwaySystem.h" />
@@ -100,6 +101,7 @@
     <ClCompile Include="DigitalCentralStation.cpp" />
     <ClCompile Include="Callback.cpp" />
     <ClCompile Include="HAL.cpp" />
+    <ClCompile Include="Library.cpp" />
     <ClCompile Include="Locomotive.cpp" />
     <ClCompile Include="Railway.cpp" />
     <ClCompile Include="Signal.cpp" />

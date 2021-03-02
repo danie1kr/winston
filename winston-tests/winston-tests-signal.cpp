@@ -69,6 +69,70 @@ namespace winstontests
             Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sCA->shows(winston::Signal::Aspect::Halt));
         }
+
+        TEST_METHOD(Signals_fullTurnoutsSignalization) {
+            winston::NullMutex nullMutex;
+            auto signalBox = winston::SignalBox::make(nullMutex);
+
+            testRailway = SignalTestRailway::make(railwayCallbacksWithSignals(signalBox));
+            Assert::IsTrue(testRailway->init() == winston::Result::OK);
+            auto r = testRailway->track(SignalTestRailway::Tracks::R);
+            auto s = testRailway->track(SignalTestRailway::Tracks::S);
+            auto t = testRailway->track(SignalTestRailway::Tracks::T);
+            auto u = testRailway->track(SignalTestRailway::Tracks::U);
+            auto v = testRailway->track(SignalTestRailway::Tracks::V);
+            auto w = testRailway->track(SignalTestRailway::Tracks::W);
+            auto t3 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->track(SignalTestRailway::Tracks::Turnout3));
+
+            auto sRA = r->signalGuarding(winston::Track::Connection::A);
+            auto sSA = s->signalGuarding(winston::Track::Connection::A);
+            auto sSB = s->signalGuarding(winston::Track::Connection::B);
+            auto sTA = t->signalGuarding(winston::Track::Connection::A);
+            auto sTB = t->signalGuarding(winston::Track::Connection::B);
+            auto sUA = u->signalGuarding(winston::Track::Connection::A);
+            auto sVA = v->signalGuarding(winston::Track::Connection::A);
+            auto sVB = v->signalGuarding(winston::Track::Connection::B);
+            auto sWA = w->signalGuarding(winston::Track::Connection::A);
+            Assert::IsTrue(sRA.operator bool() == true);
+            Assert::IsTrue(sSA.operator bool() == true);
+            Assert::IsTrue(sSB.operator bool() == true);
+            Assert::IsTrue(sTA.operator bool() == true);
+            Assert::IsTrue(sTB.operator bool() == true);
+            Assert::IsTrue(sUA.operator bool() == true);
+            Assert::IsTrue(sVA.operator bool() == true);
+            Assert::IsTrue(sVB.operator bool() == true);
+            Assert::IsTrue(sWA.operator bool() == true);
+
+            sRA->aspect(winston::Signal::Aspect::Halt);
+            sSA->aspect(winston::Signal::Aspect::Halt);
+            sSB->aspect(winston::Signal::Aspect::Halt);
+            sTA->aspect(winston::Signal::Aspect::Halt);
+            sTB->aspect(winston::Signal::Aspect::Halt);
+            sUA->aspect(winston::Signal::Aspect::Halt);
+            sVA->aspect(winston::Signal::Aspect::Halt);
+            sVB->aspect(winston::Signal::Aspect::Halt);
+            sWA->aspect(winston::Signal::Aspect::Halt);
+
+            signalBox->setSignalsFor(t3);
+            for (int i = 0; i < 10; ++i)
+                signalBox->work();
+            Assert::IsTrue(sTB->shows(winston::Signal::Aspect::Go));
+            Assert::IsTrue(sUA->shows(winston::Signal::Aspect::ExpectGo));
+            Assert::IsTrue(sUA->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(sVB->shows(winston::Signal::Aspect::Halt));
+
+            /*signalBox->order(winston::Command::make([t3](const unsigned long& created) -> const winston::State { return t3->finalizeChangeTo(winston::Turnout::Direction::A_C); }));
+            for (int i = 0; i < 10; ++i)
+                signalBox->work();
+            Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(sCA->shows(winston::Signal::Aspect::Go));
+
+            signalBox->order(winston::Command::make([t3](const unsigned long& created) -> const winston::State { return t3->finalizeChangeTo(winston::Turnout::Direction::A_B); }));
+            for (int i = 0; i < 10; ++i)
+                signalBox->work();
+            Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Go));
+            Assert::IsTrue(sCA->shows(winston::Signal::Aspect::Halt));*/
+        }
         
         TEST_METHOD(Signals_PreSignal) {
             winston::NullMutex nullMutex;
@@ -173,7 +237,6 @@ namespace winstontests
             Assert::IsTrue(sHVQa->shows(winston::Signal::Aspect::Go));
             Assert::IsFalse(sHVQa->shows(winston::Signal::Aspect::ExpectGo));
             Assert::IsFalse(sHVQa->shows(winston::Signal::Aspect::ExpectHalt));
-
         }
     };
 }

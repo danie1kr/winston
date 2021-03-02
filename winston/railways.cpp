@@ -48,6 +48,9 @@ winston::Track::Shared SignalTestRailway::define(const Tracks track)
     case Tracks::K:
     case Tracks::N:
     case Tracks::Q:
+    case Tracks::R:
+    case Tracks::U:
+    case Tracks::W:
         return winston::Bumper::make();
     case Tracks::E:
     case Tracks::H:
@@ -56,9 +59,13 @@ winston::Track::Shared SignalTestRailway::define(const Tracks track)
     case Tracks::M:
     case Tracks::O:
     case Tracks::P:
+    case Tracks::S:
+    case Tracks::T:
+    case Tracks::V:
         return winston::Rail::make();
     case Tracks::Turnout1:
     case Tracks::Turnout2:
+    case Tracks::Turnout3:
         return winston::Turnout::make([this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
     default:
         winston::hal::fatal(std::string("track ") + std::string(magic_enum::enum_name(track)) + std::string("not in switch"));
@@ -87,6 +94,13 @@ void SignalTestRailway::connect(std::array<winston::Track::Shared, tracksCount()
         ->connect(winston::Track::Connection::B, this->track(Tracks::O), winston::Track::Connection::A)
         ->connect(winston::Track::Connection::B, this->track(Tracks::Turnout2), winston::Track::Connection::C);
     
+    this->track(Tracks::R)->connect(winston::Track::Connection::A, this->track(Tracks::S), winston::Track::Connection::B)
+        ->connect(winston::Track::Connection::A, this->track(Tracks::Turnout3), winston::Track::Connection::A)
+        ->connect(winston::Track::Connection::B, this->track(Tracks::T), winston::Track::Connection::B)
+        ->connect(winston::Track::Connection::A, this->track(Tracks::U), winston::Track::Connection::A);
+    this->track(Tracks::Turnout3)->connect(winston::Track::Connection::C, this->track(Tracks::V), winston::Track::Connection::B)
+        ->connect(winston::Track::Connection::A, this->track(Tracks::W), winston::Track::Connection::A);
+
     this->track(Tracks::B)->attachSignal(winston::SignalH::make(), winston::Track::Connection::A);
     this->track(Tracks::C)->attachSignal(winston::SignalKS::make(), winston::Track::Connection::A);
 
@@ -102,6 +116,16 @@ void SignalTestRailway::connect(std::array<winston::Track::Shared, tracksCount()
     this->track(Tracks::N)->attachSignal(winston::SignalKS::make(), winston::Track::Connection::A);
     
     this->track(Tracks::Q)->attachSignal(winston::SignalHV::make(), winston::Track::Connection::A);
+
+    this->track(Tracks::R)->attachSignal(winston::SignalKS::make(), winston::Track::Connection::A);
+    this->track(Tracks::S)->attachSignal(winston::SignalKS::make(), winston::Track::Connection::A);
+    this->track(Tracks::S)->attachSignal(winston::SignalKS::make(), winston::Track::Connection::B);
+    this->track(Tracks::T)->attachSignal(winston::SignalKS::make(), winston::Track::Connection::A);
+    this->track(Tracks::T)->attachSignal(winston::SignalKS::make(), winston::Track::Connection::B);
+    this->track(Tracks::U)->attachSignal(winston::SignalKS::make(), winston::Track::Connection::A);
+    this->track(Tracks::V)->attachSignal(winston::SignalKS::make(), winston::Track::Connection::A);
+    this->track(Tracks::V)->attachSignal(winston::SignalKS::make(), winston::Track::Connection::B);
+    this->track(Tracks::W)->attachSignal(winston::SignalKS::make(), winston::Track::Connection::A);
 }
 
 const std::string SignalTestRailway::name()

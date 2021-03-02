@@ -77,4 +77,6 @@ namespace winston
 
 	class Command;
 	class Payload;
+
+	using Length = unsigned int;
 }

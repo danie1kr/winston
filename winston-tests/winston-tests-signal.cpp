@@ -70,6 +70,35 @@ namespace winstontests
             Assert::IsTrue(sCA->shows(winston::Signal::Aspect::Halt));
         }
 
+        TEST_METHOD(Signals_longTrackInBetween) {
+            winston::NullMutex nullMutex;
+            auto signalBox = winston::SignalBox::make(nullMutex);
+
+            testRailway = SignalTestRailway::make(railwayCallbacksWithSignals(signalBox));
+            Assert::IsTrue(testRailway->init() == winston::Result::OK);
+            auto l0 = testRailway->track(SignalTestRailway::Tracks::L0);
+            auto l1 = testRailway->track(SignalTestRailway::Tracks::L1);
+            auto l2 = testRailway->track(SignalTestRailway::Tracks::L2);
+            auto l3 = testRailway->track(SignalTestRailway::Tracks::L3);
+            auto l4 = testRailway->track(SignalTestRailway::Tracks::L4);
+            auto l5 = testRailway->track(SignalTestRailway::Tracks::L5);
+            auto sL0a = l0->signalGuarding(winston::Track::Connection::A);
+            auto sL1b = l1->signalGuarding(winston::Track::Connection::B);
+            auto sL4a = l4 ->signalGuarding(winston::Track::Connection::A);
+            auto sL5a = l5->signalGuarding(winston::Track::Connection::A);
+
+            sL0a->aspect(winston::Signal::Aspect::Halt);
+            sL1b->aspect(winston::Signal::Aspect::Halt);
+            sL4a->aspect(winston::Signal::Aspect::Halt);
+            sL5a->aspect(winston::Signal::Aspect::Halt);
+            
+            signalBox->setSignalOn(l4, true, winston::Track::Connection::A, winston::Signal::Aspect::Go, true);
+            Assert::IsTrue(sL0a->shows(winston::Signal::Aspect::ExpectGo));
+            Assert::IsTrue(sL1b->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(sL4a->shows(winston::Signal::Aspect::Go));
+            Assert::IsTrue(sL5a->shows(winston::Signal::Aspect::Halt));
+        }
+
         TEST_METHOD(Signals_fullTurnoutsSignalization) {
             winston::NullMutex nullMutex;
             auto signalBox = winston::SignalBox::make(nullMutex);
@@ -113,6 +142,7 @@ namespace winstontests
             sVB->aspect(winston::Signal::Aspect::Halt);
             sWA->aspect(winston::Signal::Aspect::Halt);
 
+            // S = T3 = T
             signalBox->setSignalsFor(t3);
             for (int i = 0; i < 10; ++i)
                 signalBox->work();
@@ -120,6 +150,11 @@ namespace winstontests
             Assert::IsTrue(sUA->shows(winston::Signal::Aspect::ExpectGo));
             Assert::IsTrue(sUA->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sVB->shows(winston::Signal::Aspect::Halt));
+
+            signalBox->setSignalOn(t, true, winston::Track::Connection::A, winston::Signal::Aspect::Go, true);
+            Assert::IsTrue(sTA->shows(winston::Signal::Aspect::Go));
+            Assert::IsTrue(sSA->shows(winston::Signal::Aspect::ExpectGo));
+
 
             /*signalBox->order(winston::Command::make([t3](const unsigned long& created) -> const winston::State { return t3->finalizeChangeTo(winston::Turnout::Direction::A_C); }));
             for (int i = 0; i < 10; ++i)

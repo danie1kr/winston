@@ -33,16 +33,16 @@ namespace winston
 		if (Signal::Shared mainSignal = SignalBox::nextSignal(current, guarding, from, true, includingFirst))
 		{
 			mainSignal->aspect(aspect);
-			if (aspect == Signal::Aspect::Go && mainSignal->preSignal())
+			/*if (aspect == Signal::Aspect::Go && mainSignal->preSignal())
 			{
 				auto preCurrent = current;
 				auto preFrom = from;
 				if(Signal::Shared preOfMainSignal = SignalBox::nextSignal(preCurrent, guarding, preFrom, true, false))
 					mainSignal->aspect(preOfMainSignal->shows(Signal::Aspect::Go) ? Signal::Aspect::ExpectGo : Signal::Aspect::ExpectHalt);
-			}
+			}*/
 			// current and from are now the position of mainSignal
 			auto otherFrom = current->otherConnection(from);
-			if (Signal::Shared preSignal = SignalBox::nextSignal(current, guarding, otherFrom, false, false))
+			if (Signal::Shared preSignal = SignalBox::nextSignal(current, false, otherFrom, false, false))
 				preSignal->aspect(preSignalAspect);
 		}
 	}
@@ -55,7 +55,7 @@ namespace winston
 			Track::Connection from = direction == Turnout::Direction::A_B ? Track::Connection::B : Track::Connection::C;
 			Track::Shared current = turnout;
 			const auto mainSignalAspect = turnout->direction() == direction ? Signal::Aspect::Go : Signal::Aspect::Halt;
-			SignalBox::setSignalOn(current, true, from, mainSignalAspect, true);
+			SignalBox::setSignalOn(current, false, from, mainSignalAspect, false);
 		};
 
 		// A_facing = leave turnout at A, find first main signal facing A
@@ -69,7 +69,7 @@ namespace winston
 	Signal::Shared SignalBox::nextSignal(Track::Shared& track, const bool guarding, Track::Connection& leaving, const bool main, const bool includingFirst)
 	{
 		Track::Connection connection = leaving;
-		Track::Connection checkConnection = connection;
+		//Track::Connection checkConnection = connection;
 		Track::Shared onto;
 		Track::Shared& current = track;
 
@@ -84,9 +84,8 @@ namespace winston
 				if (!current->traverse(connection, onto, true))
 					break;
 
-				Track::Connection backConnection = onto->whereConnects(current);
-				connection = onto->otherConnection(backConnection);
-				checkConnection = guarding ? backConnection : connection;
+				connection = onto->otherConnection(onto->whereConnects(current));
+				//checkConnection = guarding ? backConnection : connection;
 
 				// we looped somehow
 				if (visited.contains(onto))
@@ -101,7 +100,7 @@ namespace winston
 
 			if (onto->type() != Track::Type::Turnout)
 			{
-				auto signal = guarding ? onto->signalGuarding(checkConnection) : onto->signalFacing(checkConnection);
+				auto signal = guarding ? onto->signalGuarding(connection) : onto->signalFacing(connection);
 				if (signal)
 				{
 					if ((signal->mainSignal() && main) || (signal->preSignal() && !main))
@@ -116,6 +115,8 @@ namespace winston
 			
 			if (onto->type() == Track::Type::Bumper)
 				break;
+
+			current = onto;
 		}
 
 		return nullptr;

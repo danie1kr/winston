@@ -68,6 +68,9 @@ winston::Track::Shared SignalTestRailway::define(const Tracks track)
     case Tracks::L2:
     case Tracks::L3:
     case Tracks::L4:
+    case Tracks::L20:
+    case Tracks::L2S:
+    case Tracks::L23:
         return winston::Rail::make();
     case Tracks::Turnout1:
     case Tracks::Turnout2:
@@ -129,11 +132,15 @@ void SignalTestRailway::connect(std::array<winston::Track::Shared, tracksCount()
 
     this->track(Tracks::L0)->connect(winston::Track::Connection::A, this->track(Tracks::L1), winston::Track::Connection::B)
         ->connect(winston::Track::Connection::A, this->track(Tracks::L2), winston::Track::Connection::B)
+        ->connect(winston::Track::Connection::A, this->track(Tracks::L20), winston::Track::Connection::B)
+        ->connect(winston::Track::Connection::A, this->track(Tracks::L2S), winston::Track::Connection::B)
+        ->connect(winston::Track::Connection::A, this->track(Tracks::L23), winston::Track::Connection::B)
         ->connect(winston::Track::Connection::A, this->track(Tracks::L3), winston::Track::Connection::B)
         ->connect(winston::Track::Connection::A, this->track(Tracks::L4), winston::Track::Connection::B)
         ->connect(winston::Track::Connection::A, this->track(Tracks::L5), winston::Track::Connection::A);
     this->track(Tracks::L0)->attachSignal(winston::SignalKS::make(), winston::Track::Connection::A);
     this->track(Tracks::L1)->attachSignal(winston::SignalKS::make(), winston::Track::Connection::B);
+    this->track(Tracks::L2S)->attachSignal(winston::SignalKS::make(), winston::Track::Connection::A);
     this->track(Tracks::L4)->attachSignal(winston::SignalKS::make(), winston::Track::Connection::A);
     this->track(Tracks::L5)->attachSignal(winston::SignalKS::make(), winston::Track::Connection::A);
 }

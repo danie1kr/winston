@@ -128,7 +128,7 @@ const winston::Result Z21::getLocoInfo (uint16_t address) {
 }
 
 const winston::Result Z21::setLocoDrive(uint16_t address,
-                                       boolean  forward,
+                                       bool  forward,
                                        uint8_t  speedRange,
                                        uint8_t  speed) {
     Z21Packet packet;
@@ -161,8 +161,8 @@ const winston::Result Z21::getAccessoryInfo(uint16_t address) {
 
 const winston::Result Z21::setAccessory(uint16_t    address,
                                        uint8_t     pos,
-                                       boolean     activate,
-                                       boolean     queue) {
+                                       bool     activate,
+                                       bool     queue) {
     
     Z21Packet packet;
     packet.setXPacket(Z21TX_LAN_X::SET_TURNOUT,
@@ -260,7 +260,7 @@ Z21Packet& Z21::dccWriteOnMainLocoCVByte(uint16_t address, uint16_t cv, uint8_t 
                       value);
     return packet;
 }
-Z21Packet& Z21::dccWriteOnMainLocoCVBit (uint16_t address, uint16_t cv, uint8_t bit, boolean value) {
+Z21Packet& Z21::dccWriteOnMainLocoCVBit (uint16_t address, uint16_t cv, uint8_t bit, bool value) {
     packet.setXPacket(Z21TX_LAN_X::CV_POM_WRITE_BIT,
                       Z21TX_DB0::CV_POM_WRITE_BIT,
                       Z21Packet::MSBLocoAddress(address),
@@ -293,7 +293,7 @@ Z21Packet& Z21::dccWriteOnMainAccessoryCVByte(uint16_t address, uint8_t pos, uin
     return packet;
 }
 
-Z21Packet& Z21::dccWriteOnMainAccessoryCVBit (uint16_t address, uint8_t pos, uint16_t cv, uint8_t bit, boolean value) {
+Z21Packet& Z21::dccWriteOnMainAccessoryCVBit (uint16_t address, uint8_t pos, uint16_t cv, uint8_t bit, bool value) {
     packet.setXPacket(Z21TX_LAN_X::CV_POM_ACCESSORY_WRITE_BIT,
                       Z21TX_DB0::CV_POM_ACCESSORY_WRITE_BIT,
                       Z21Packet::MSBAccessoryPosition(address),
@@ -498,10 +498,10 @@ void Z21::processLocoInfo(uint8_t* data) {
     uint32_t XDB6 = Z21Packet::getDB6(data);
     uint32_t XDB7 = Z21Packet::getDB7(data);
 
-    boolean busy      = Z21Packet::hasBit(XDB2, 0x08);
-    boolean forward   = Z21Packet::hasBit(XDB3, 0x80);
-    // boolean consist   = Z21Packet::hasBit(XDB4, 0x40);
-    // boolean transpond = Z21Packet::hasBit(XDB4, 0x20);
+    bool busy      = Z21Packet::hasBit(XDB2, 0x08);
+    bool forward   = Z21Packet::hasBit(XDB3, 0x80);
+    // bool consist   = Z21Packet::hasBit(XDB4, 0x40);
+    // bool transpond = Z21Packet::hasBit(XDB4, 0x20);
 
     int speed = (XDB3 & 0x7F);
     if (speed > 1) {

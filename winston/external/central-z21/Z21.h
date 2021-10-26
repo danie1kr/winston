@@ -15,7 +15,6 @@
 // no more <Arduino.h>
 #include <stdint.h>
 #include <functional>
-using boolean = bool;
 
 #include "../../../libwinston/HAL.h"
 #include "../../../libwinston/DigitalCentralStation.h"
@@ -77,10 +76,10 @@ public:
 
 // Layout Info
     void (*onLocoInfo)(uint16_t address,
-                       boolean  busy,
-                       boolean  consist,
-                       boolean  transpond,
-                       boolean  forward,
+                       bool  busy,
+                       bool  consist,
+                       bool  transpond,
+                       bool  forward,
                        uint8_t  speed,                                  // In 128 speed range
                        uint32_t functions);                             // See: const in class Z21_Function::BIT_FXX
 
@@ -127,7 +126,7 @@ public:
     const winston::Result setStop();
     const winston::Result getLocoInfo (uint16_t address);
     const winston::Result setLocoDrive(uint16_t address,
-                            boolean  forward,
+                            bool  forward,
                             uint8_t  speedRange,                    // See: const in class Z21_Speed_Range
                             uint8_t  speed);
     const winston::Result setLocoFunction(uint16_t address,
@@ -137,8 +136,8 @@ public:
     const winston::Result getAccessoryInfo(uint16_t address);
     const winston::Result setAccessory(uint16_t    address,
                             uint8_t     pos,                        // See: const in class Z21_Accessory_Pos
-                            boolean     activate,
-                            boolean     queue);
+                            bool     activate,
+                            bool     queue);
 
 // Programming
     Z21Packet& getLocoMode(uint16_t address);
@@ -159,12 +158,12 @@ public:
     //CV1 = 0, ..., CV256 = 255, ..., CV1024 = 1023
     Z21Packet& dccReadOnMainLocoCVByte (uint16_t address, uint16_t cv);
     Z21Packet& dccWriteOnMainLocoCVByte(uint16_t address, uint16_t cv, uint8_t value);
-    Z21Packet& dccWriteOnMainLocoCVBit (uint16_t address, uint16_t cv, uint8_t bit, boolean value);         // See: const Z21_CV_BIT_XXX
+    Z21Packet& dccWriteOnMainLocoCVBit (uint16_t address, uint16_t cv, uint8_t bit, bool value);         // See: const Z21_CV_BIT_XXX
 
     // See: const Z21_ACCESSORY_POS_XXX
     Z21Packet& dccReadOnMainAccessoryCVByte(uint16_t address, uint8_t pos, uint16_t cv);
     Z21Packet& dccWriteOnMainAccessoryCVByte(uint16_t address, uint8_t pos, uint16_t cv, uint8_t value);
-    Z21Packet& dccWriteOnMainAccessoryCVBit (uint16_t address, uint8_t pos, uint16_t cv, uint8_t bit, boolean value);    // See: const Z21_CV_BIT_XXX
+    Z21Packet& dccWriteOnMainAccessoryCVBit (uint16_t address, uint8_t pos, uint16_t cv, uint8_t bit, bool value);    // See: const Z21_CV_BIT_XXX
 
 // Other Networks
     Z21Packet& railcomGetData();

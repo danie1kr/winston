@@ -56,6 +56,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -71,6 +72,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -93,6 +95,7 @@
     <ClInclude Include="Signal.h" />
     <ClInclude Include="SignalBox.h" />
     <ClInclude Include="Util.h" />
+    <ClInclude Include="WebServer.h" />
     <ClInclude Include="Winston.h" />
     <ClInclude Include="WinstonTypes.h" />
   </ItemGroup>
@@ -109,6 +112,9 @@
     <ClCompile Include="SignalBox.cpp" />
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="Winston.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="design.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -5,8 +5,9 @@
 #include "../libwinston/Winston.h"
 
 #include "winston.h"
-#include "winston-minnow.h"
 #include "railways.h"
+
+#include "json.hpp"
 
 #ifdef WINSTON_PLATFORM_WIN_x64
 #include "winston-hal-x64.h"
@@ -16,7 +17,6 @@
 #include "winston-hal-stm32.h"
 #endif
 
-
 #include "external/central-z21/Z21.h"
 
 #define RAILWAY_DEBUG_INJECTOR
@@ -25,6 +25,7 @@
 //#define RAILWAY_CLASS TimeSaverRailway
 #define RAILWAY_CLASS Y2020Railway
 
+using namespace giri::json;
 class MRS : public winston::ModelRailwaySystem<RAILWAY_CLASS::Shared, RAILWAY_CLASS::AddressTranslator::Shared, Z21::Shared>
 {
 private:
@@ -32,27 +33,36 @@ private:
     // send a turnout state via websocket
     void turnoutSendState(unsigned int turnoutTrackId, winston::Turnout::Direction dir)
     {
-        SendData sd;
-        minnowSendPrepare(this->minnowCD, &sd, "turnoutState");
-        JEncoder_beginObject(&sd.encoder);
-        JEncoder_setName(&sd.encoder, "id");
-        JEncoder_setInt(&sd.encoder, turnoutTrackId);
-        JEncoder_setName(&sd.encoder, "state");
-        JEncoder_setInt(&sd.encoder, (int)dir);
-
-        JEncoder_endObject(&sd.encoder);
-        minnowSendSubmit(&sd);
+        JSON obj({
+            "op", "turnoutState",
+            "data", JSON({
+                "id", turnoutTrackId,
+                "state", (int)dir}
+            )
+            });
+        webServer.broadcast(obj.ToString());
     }
 
     void locoSend(winston::Locomotive::Shared& loco)
     {
+        JSON obj({
+            "op", "loco",
+            "data", JSON({
+                "address", loco->address(),
+                "name", loco->name().c_str(),
+                "light", loco->light(),
+                "forward", loco->forward(),
+                "speed", loco->speed()
+            })
+            });
+        webServer.broadcast(obj.ToString());
         /*{
             address
             name
             light
             forward
             speed
-        }*/
+        }*
         SendData sd;
 
         minnowSendPrepare(this->minnowCD, &sd, "loco");
@@ -68,7 +78,7 @@ private:
         JEncoder_setName(&sd.encoder, "speed");
         JEncoder_setInt(&sd.encoder, loco->speed());
         JEncoder_endObject(&sd.encoder);
-        minnowSendSubmit(&sd);
+        minnowSendSubmit(&sd);*/
     }
 
     void locoSend(winston::Address address)
@@ -79,7 +89,7 @@ private:
         }
     }
 
-    // message from websocket received
+    /* message from websocket received
     int minnow_manageMessage(RecData* o, ConnData* cd, const char* msg, JErr* error, JVal* value)
     {
         if (std::string("doTurnoutToggle").compare(msg) == 0)
@@ -103,8 +113,9 @@ private:
                         return winston::State::Running;
                     }));
 #endif
-                    this->digitalCentralStation->triggerTurnoutChangeTo(turnout, requestDir);
-                    return turnout->startToggle();
+                    // tell the central station to trigger the turnout switch
+                    // update internal representation. will inform the UI in its callback, too
+                    return this->turnoutChangeTo(turnout, requestDir);
                 }));
                 return false;
             }
@@ -239,7 +250,7 @@ private:
                 forward
                 speed
             }
-            */
+            *
             unsigned int addr;
             bool light, forward;
             unsigned int speed;
@@ -266,8 +277,7 @@ private:
                                         return winston::State::Running;
                                     }));
 #endif
-                                this->digitalCentralStation->triggerLocoFunction(loco->address(), light ? 1 : 0);
-                                return winston::State::Finished;
+                                return this->locoFunction(loco->address(), light ? 1 : 0);
                             }));
                     }
 
@@ -286,8 +296,7 @@ private:
                                         return winston::State::Running;
                                     }));
 #endif
-                                this->digitalCentralStation->triggerLocoDrive(loco->address(), speed128, forward);
-                                return winston::State::Finished;
+                                return this->locoDrive(loco->address(), speed128, forward);
                             }));
                     }
                 }
@@ -301,9 +310,9 @@ private:
         }
 
         return 0;
-    }
+    }*/
 
-    // reply a html page
+    /* reply a html page
     int minnow_fetchPage(MST* mst, const char* path, FetchPageSend minnow_send)
     {
         std::string p(path);
@@ -326,7 +335,7 @@ private:
             return 0;
 
         return 1;
-    }
+    }*/
 
     void initNetwork()
     {
@@ -334,8 +343,8 @@ private:
         z21Socket = UDPSocketLWIP::make(z21IP, z21Port);
         
         // webSocket
-        minnowStart(webSocketListenPtr, webSocketSendPtr, &this->minnowWPH, &this->minnowCD, &this->minnowRD, &this->minnowServer, [this](struct RecData* o, struct ConnData* cd, const char* msg, JErr* e, JVal* v)->int { return this->minnow_manageMessage(o, cd, msg, e, v); }, [this](MST* mst, const char* path, FetchPageSend send)->int {return this->minnow_fetchPage(mst, path, send);  });
-        this->webSocketState = winston::hal::UDPSocket::State::Connecting;
+        //minnowStart(webSocketListenPtr, webSocketSendPtr, &this->minnowWPH, &this->minnowCD, &this->minnowRD, &this->minnowServer, [this](struct RecData* o, struct ConnData* cd, const char* msg, JErr* e, JVal* v)->int { return this->minnow_manageMessage(o, cd, msg, e, v); }, [this](MST* mst, const char* path, FetchPageSend send)->int {return this->minnow_fetchPage(mst, path, send);  });
+        //this->webSocketState = winston::hal::UDPSocket::State::Connecting;
     }
 
     winston::DigitalCentralStation::Callbacks z21Callbacks()
@@ -389,6 +398,10 @@ private:
 
         callbacks.turnoutUpdateCallback = [=](winston::Turnout::Shared turnout, const winston::Turnout::Direction direction) -> const winston::State
         {
+            // tell the signal box to update the signals
+            this->signalBox->setSignalsFor(turnout);
+
+            // tell the ui what happens
             auto id = this->railway->trackIndex(turnout);
             turnoutSendState(id, direction);
             return winston::State::Finished;
@@ -401,6 +414,286 @@ private:
         };
 
         return callbacks;
+    }
+
+    // Define a callback to handle incoming messages
+    WebServerWSPP::HTTPResponse on_http(WebServerWSPP::Client client, std::string resource) {
+        //auto con = this->webserver.get_con_from_hdl(hdl);
+
+        //std::string resource(con->get_resource());
+
+        const std::string path_index("/");
+        const std::string path_railway("/railway");
+
+        const std::string header_html("\r\ncontent-type: text/html; charset=UTF-8\r\n");
+        const std::string header_json("\r\ncontent-type: application/json; charset=UTF-8\r\n");
+        WebServerWSPP::HTTPResponse response;
+        if (resource.compare(path_index) == 0)
+        {
+            response.headers = { {"content-type", "text/html; charset=UTF-8"} };
+            response.body = "<html>winston</html>";
+        }
+        else if (resource.compare(path_index) == 0)
+        {
+            response.headers = { {"content-type", "application/json; charset=UTF-8"} };
+            response.body = "{}";
+        }
+        response.status = 200;
+
+        return response;
+    }
+
+    // Define a callback to handle incoming messages
+    void on_message(WebServerWSPP::Client client, std::string message) {
+        /*std::cout << "on_message called with hdl: " << hdl.lock().get()
+                  << " and message (" << msg->get_payload().size() << "): " << msg->get_payload()
+                  << std::endl;
+        
+        try {
+            //this->webserver.send(hdl, msg->get_payload(), msg->get_opcode());
+        }
+        catch (websocketpp::exception const& e) {
+            std::cout << "Echo failed because: "
+                << "(" << e.what() << ")" << std::endl;
+        }*/
+
+        JSON m = JSON::Load(message);
+        std::string op = m["op"].ToString();
+        JSON data = m["data"];
+
+        if (std::string("doTurnoutToggle").compare(op) == 0)
+        {
+            unsigned int id = (unsigned int)data["id"].ToInt();
+            auto turnout = std::dynamic_pointer_cast<winston::Turnout>(railway->track(id));
+            auto requestDir = winston::Turnout::otherDirection(turnout->direction());
+            signalBox->order(winston::Command::make([this, id, turnout, requestDir](const unsigned long& created) -> const winston::State
+                {
+#ifdef RAILWAY_DEBUG_INJECTOR
+                    signalBox->order(winston::Command::make([this, turnout, requestDir](const unsigned long& created) -> const winston::State
+                        {
+                            if (winston::hal::now() - created > RAILWAY_DEBUG_INJECTOR_DELAY)
+                            {
+                                this->stationDebugInjector->injectTurnoutUpdate(turnout, requestDir);
+                                return winston::State::Finished;
+                            }
+                            return winston::State::Running;
+                        }));
+#endif
+                    // tell the central station to trigger the turnout switch
+                    // update internal representation. will inform the UI in its callback, too
+                    return this->turnoutChangeTo(turnout, requestDir);
+                }));
+        }
+        else if (std::string("getTurnoutState").compare(op) == 0)
+        {
+            unsigned int id = (unsigned int)data["id"].ToInt();
+            auto turnout = std::dynamic_pointer_cast<winston::Turnout>(railway->track(id));
+            this->turnoutSendState(id, turnout->direction());
+        }
+        else if (std::string("getRailway").compare(op) == 0)
+        {
+            //SendData sd;
+            //minnowSendPrepare(this->minnowCD, &sd, "railway");
+
+            JSON railwayMessage = JSON::Make(JSON::Class::Object);
+            railwayMessage["op"] = "railway";
+            railwayMessage["data"] = JSON::Make(JSON::Class::Object);
+            auto& tracks = railwayMessage["data"]["tracks"] = JSON::Make(JSON::Class::Array);
+            //JEncoder_beginObject(&sd.encoder);
+            //JEncoder_setName(&sd.encoder, "tracks");
+            //JEncoder_beginArray(&sd.encoder);
+            for (unsigned int i = 0; i < railway->tracksCount(); ++i)
+            {
+                auto track = railway->track(i);
+                switch (track->type())
+                {
+                case winston::Track::Type::Bumper:
+                {
+                    winston::Bumper::Shared bumper = std::dynamic_pointer_cast<winston::Bumper>(track);
+                    winston::Track::Shared a;
+                    bumper->connections(a);
+                    //JEncoder_set(&sd.encoder, "{d}", "a", railway->trackIndex(a));
+                    JSON track = JSON::Make(JSON::Class::Object);
+                    track["a"] = railway->trackIndex(a);
+                    tracks.append(track);
+                    break;
+                }
+                case winston::Track::Type::Rail:
+                {
+                    winston::Rail::Shared rail = std::dynamic_pointer_cast<winston::Rail>(track);
+                    winston::Track::Shared a, b;
+                    rail->connections(a, b);
+                    //JEncoder_set(&sd.encoder, "{dd}", "a", railway->trackIndex(a), "b", railway->trackIndex(b));
+                    JSON track = JSON::Make(JSON::Class::Object);
+                    track["a"] = railway->trackIndex(a);
+                    track["b"] = railway->trackIndex(b);
+                    tracks.append(track);
+                    break;
+                }
+                case winston::Track::Type::Turnout:
+                {
+                    winston::Turnout::Shared turnout = std::dynamic_pointer_cast<winston::Turnout>(track);
+                    winston::Track::Shared a, b, c;
+                    turnout->connections(a, b, c);
+                    //JEncoder_set(&sd.encoder, "{ddd}", "a", railway->trackIndex(a), "b", railway->trackIndex(b), "c", railway->trackIndex(c));
+                    JSON track = JSON::Make(JSON::Class::Object);
+                    track["a"] = railway->trackIndex(a);
+                    track["b"] = railway->trackIndex(b);
+                    track["c"] = railway->trackIndex(c);
+                    tracks.append(track);
+                    break;
+                }
+                }
+            }
+            //JEncoder_endArray(&sd.encoder);
+            //JEncoder_endObject(&sd.encoder);
+            //minnowSendSubmit(&sd);
+            this->webServer.send(client, railwayMessage.ToString());
+        }
+        else if (std::string("storeRailwayLayout").compare(op) == 0)
+        {
+            unsigned int address = 0;
+            auto layout = data.ToUnescapedString();
+            auto length = layout.size();
+
+            winston::hal::storageWrite(address + 0, (length >> 0) & 0xFF);
+            winston::hal::storageWrite(address + 1, (length >> 8) & 0xFF);
+            winston::hal::storageWrite(address + 2, (length >> 16) & 0xFF);
+            winston::hal::storageWrite(address + 3, (length >> 24) & 0xFF);
+
+            address = 4;
+            for (auto s : layout)
+                winston::hal::storageWrite(address++, s);
+
+            winston::hal::storageCommit();
+
+            JSON successObject = JSON::Make(JSON::Class::Object);
+            successObject["op"] = "storeRailwayLayoutSuccessful";
+            successObject["data"] = true;
+            this->webServer.send(client, successObject.ToString());
+            /*SendData sd;
+            minnowSendPrepare(this->minnowCD, &sd, "storeRailwayLayoutSuccessful");
+            JEncoder_setBoolean(&sd.encoder, true);
+            minnowSendSubmit(&sd);*/
+        }
+        else if (std::string("getRailwayLayout").compare(op) == 0)
+        {
+            size_t address = 0;
+            size_t length = (winston::hal::storageRead(address + 0) << 0) |
+                (winston::hal::storageRead(address + 1) << 8) |
+                (winston::hal::storageRead(address + 2) << 16) |
+                (winston::hal::storageRead(address + 3) << 24);
+            address = 4;
+
+            const size_t sizePerMessage = size_t(0.7f * webServer.maxMessageSize());
+            size_t remaining = length;
+            size_t offset = 0;
+
+            while (remaining > 0)
+            {
+                size_t sent = remaining > sizePerMessage ? sizePerMessage : remaining;
+                auto layout = std::string(sent, '0');
+
+                for (size_t i = 0; i < sent; ++i)
+                    layout[i] = winston::hal::storageRead(address + offset + i);
+
+                JSON successObject = JSON::Make(JSON::Class::Object);
+                successObject["op"] = "layout";
+                auto data = JSON::Make(JSON::Class::Object);
+                data["offset"] = (unsigned int)offset;
+                data["fullSize"] = (unsigned int)length;
+                data["layout"] = layout.c_str();
+                successObject["data"] = data;
+                this->webServer.send(client, successObject.ToString());
+
+                /*SendData sd;
+                minnowSendPrepare(this->minnowCD, &sd, "layout");
+                JEncoder_beginObject(&sd.encoder);
+                JEncoder_setName(&sd.encoder, "offset");
+                JEncoder_setInt(&sd.encoder, (unsigned int)offset);
+                JEncoder_setName(&sd.encoder, "fullSize");
+                JEncoder_setInt(&sd.encoder, (unsigned int)length);
+                JEncoder_setName(&sd.encoder, "layout");
+                JEncoder_setString(&sd.encoder, layout.c_str());
+                JEncoder_endObject(&sd.encoder);
+                minnowSendSubmit(&sd);*/
+
+                offset += sent;
+                remaining -= sent;
+            }
+
+        }
+        else if (std::string("getLocoShed").compare(op) == 0)
+        {
+            for (auto& loco : this->locomotiveShed)
+                this->locoSend(loco);
+        }
+        else if (std::string("doControlLoco").compare(op) == 0)
+        {
+            /*
+            {
+                address
+                light
+                forward
+                speed
+            }
+            *
+            unsigned int addr;
+            bool light, forward;
+            unsigned int speed;
+            JVal_get(value, error, "{dbbd}", "address", &addr, "light", &light, "forward", &forward, "speed", &speed);
+
+            if (JErr_isError(error) == false)
+            {
+                winston::Address address = (uint16_t)addr;
+                if (auto loco = this->get(address))
+                {
+                    unsigned char speed128 = (unsigned char)(speed & 0xFF);
+                    if (loco->light() != light)
+                    {
+                        signalBox->order(winston::Command::make([this, loco, light](const unsigned long& created) -> const winston::State
+                            {
+#ifdef RAILWAY_DEBUG_INJECTOR
+                                signalBox->order(winston::Command::make([this, loco, light](const unsigned long& created) -> const winston::State
+                                    {
+                                        if (winston::hal::now() - created > RAILWAY_DEBUG_INJECTOR_DELAY)
+                                        {
+                                            this->stationDebugInjector->injectLocoUpdate(loco, false, loco->forward(), loco->speed(), light ? 1 : 0);
+                                            return winston::State::Finished;
+                                        }
+                                        return winston::State::Running;
+                                    }));
+#endif
+                                return this->locoFunction(loco->address(), light ? 1 : 0);
+                            }));
+                    }
+
+                    if (loco->forward() != forward || loco->speed() != speed128)
+                    {
+                        signalBox->order(winston::Command::make([this, loco, speed128, forward](const unsigned long& created) -> const winston::State
+                            {
+#ifdef RAILWAY_DEBUG_INJECTOR
+                                signalBox->order(winston::Command::make([this, loco, speed128, forward](const unsigned long& created) -> const winston::State
+                                    {
+                                        if (winston::hal::now() - created > RAILWAY_DEBUG_INJECTOR_DELAY)
+                                        {
+                                            this->stationDebugInjector->injectLocoUpdate(loco, false, forward, speed128, loco->light() ? 1 : 0);
+                                            return winston::State::Finished;
+                                        }
+                                        return winston::State::Running;
+                                    }));
+#endif
+                                return this->locoDrive(loco->address(), speed128, forward);
+                            }));
+                    }
+                }
+            }*/
+        }
+        else
+        {
+            winston::hal::text("Received unknown message: ");
+            winston::hal::text(message);
+        }
     }
 
     // setup our model railway system
@@ -422,6 +715,25 @@ private:
         // a debug injector
         auto dcs = std::dynamic_pointer_cast<winston::DigitalCentralStation>(this->digitalCentralStation);
         this->stationDebugInjector = winston::DigitalCentralStation::DebugInjector::make(dcs);
+
+
+        this->webServer.init(
+            std::bind(&MRS::on_http, this, std::placeholders::_1, std::placeholders::_2),
+            std::bind(&MRS::on_message, this, std::placeholders::_1, std::placeholders::_2),
+            8080);
+        /*
+        this->webserver.init_asio();
+
+        this->webserver.set_http_handler(websocketpp::lib::bind(&on_http, this, websocketpp::lib::placeholders::_1));
+        this->webserver.set_message_handler(websocketpp::lib::bind(&on_message, this, websocketpp::lib::placeholders::_1, websocketpp::lib::placeholders::_2));
+        this->webserver.set_open_handler(websocketpp::lib::bind(&on_open, this, websocketpp::lib::placeholders::_1));
+        this->webserver.set_close_handler(websocketpp::lib::bind(&on_close, this, websocketpp::lib::placeholders::_1));
+
+        // Listen on port 8080
+        this->webserver.listen(8080);
+
+        // Start the server accept loop
+        this->webserver.start_accept();*/
     };
 
     void systemSetupComplete()
@@ -439,18 +751,20 @@ private:
 
     // accept new requests and loop over what the signal box has to do
     void systemLoop() {
+        /*
         if(this->webSocketState == winston::hal::UDPSocket::State::Connecting && minnowAccept(webSocketListenPtr, 2, webSocketSendPtr, this->minnowServer, this->minnowWPH) == 1)
             this->webSocketState = winston::hal::UDPSocket::State::Connected;
-            
+            */
+        this->webServer.step();
         this->signalBox->work();
-
+        /*
         if (this->webSocketState == winston::hal::UDPSocket::State::Connected && !minnowLoop(webSocketListenPtr, webSocketSendPtr, this->minnowWPH, this->minnowCD, this->minnowRD, this->minnowServer))
         {
             this->webSocketState = winston::hal::UDPSocket::State::Closing;
             minnowClose(webSocketListenPtr, webSocketSendPtr);
             minnowStart(webSocketListenPtr, webSocketSendPtr, &this->minnowWPH, &this->minnowCD, &this->minnowRD, &this->minnowServer, [this](struct RecData* o, struct ConnData* cd, const char* msg, JErr* e, JVal* v)->int { return this->minnow_manageMessage(o, cd, msg, e, v); }, [this](MST* mst, const char* path, FetchPageSend send)->int {return this->minnow_fetchPage(mst, path, send);  });
             this->webSocketState = winston::hal::UDPSocket::State::Connecting;
-        }
+        }*/
     }
 
     void populateLocomotiveShed()
@@ -462,20 +776,25 @@ private:
         this->addLocomotive(callbacks, 6, "E 11");
     }
 
-    // minnow related
+    /* websocket */
+    WebServerWSPP webServer;// std::bind(&on_http, this, std::placeholders::_1), 8080);
+    //typedef std::set<WebServerConnection, std::owner_less<WebServerConnection>> WebServerConnections;
+   // WebServerConnections webServerConnections;
+
+    /* minnow related
     WssProtocolHandshake* minnowWPH = nullptr;
     ConnData* minnowCD = nullptr;
     RecData* minnowRD = nullptr;
     MS* minnowServer = nullptr;
 
-    UDPSocketLWIP::Shared z21Socket;
 
     SOCKET webSocketListen, webSocketSend;
     SOCKET* webSocketListenPtr = &webSocketListen;
     SOCKET* webSocketSendPtr = &webSocketSend;
 
     winston::hal::UDPSocket::State webSocketState = { winston::hal::UDPSocket::State::NotConnected };
-
+    */
+    UDPSocketLWIP::Shared z21Socket;
     const std::string z21IP = { "192.168.0.100" };
     const unsigned short z21Port = 5000;
 };

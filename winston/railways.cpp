@@ -15,6 +15,7 @@ winston::Track::Shared MiniRailway::define(const Tracks track)
         return winston::Turnout::make([this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
     default:
         winston::hal::fatal(std::string("track ") + std::string(magic_enum::enum_name(track)) + std::string("not in switch"));
+        return winston::Bumper::make();
     }
 }
 
@@ -78,6 +79,7 @@ winston::Track::Shared SignalTestRailway::define(const Tracks track)
         return winston::Turnout::make([this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
     default:
         winston::hal::fatal(std::string("track ") + std::string(magic_enum::enum_name(track)) + std::string("not in switch"));
+        return winston::Bumper::make();
     }
 }
 
@@ -194,6 +196,7 @@ winston::Track::Shared RailwayWithSiding::define(const Tracks track)
         return winston::Turnout::make([this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, track == Tracks::Turnout2);
     default:
         winston::hal::fatal(std::string("track ") + std::string(magic_enum::enum_name(track)) + std::string("not in switch"));
+        return winston::Bumper::make();
     }
 }
 
@@ -238,6 +241,7 @@ winston::Track::Shared TimeSaverRailway::define(const Tracks track)
         return winston::Turnout::make([this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
     default:
         winston::hal::fatal(std::string("track ") + std::string(magic_enum::enum_name(track)) + std::string("not in switch"));
+        return winston::Bumper::make();
     }
 }
 
@@ -292,6 +296,13 @@ winston::Turnout::Shared Y2020Railway::AddressTranslator::turnout(const winston:
     default:
     case 0: track = Tracks::Turnout1; break;
     case 1: track = Tracks::Turnout2; break;
+    case 2: track = Tracks::Turnout3; break;
+    case 3: track = Tracks::Turnout4; break;
+    case 4: track = Tracks::Turnout5; break;
+    case 5: track = Tracks::Turnout6; break;
+    case 6: track = Tracks::Turnout7; break;
+    case 7: track = Tracks::Turnout8; break;
+    case 8: track = Tracks::Turnout9; break;
     }
     return std::dynamic_pointer_cast<winston::Turnout>(railway->track(track));
 }
@@ -308,6 +319,13 @@ const winston::Address Y2020Railway::AddressTranslator::address(winston::Track::
     default:
     case Tracks::Turnout1: return 0; break;
     case Tracks::Turnout2: return 1; break;
+    case Tracks::Turnout3: return 2; break;
+    case Tracks::Turnout4: return 3; break;
+    case Tracks::Turnout5: return 4; break;
+    case Tracks::Turnout6: return 5; break;
+    case Tracks::Turnout7: return 6; break;
+    case Tracks::Turnout8: return 7; break;
+    case Tracks::Turnout9: return 8; break;
     }
     return 0;
 }
@@ -339,6 +357,7 @@ winston::Track::Shared Y2020Railway::define(const Tracks track)
         return winston::Turnout::make([this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, true);
     default:
         winston::hal::fatal(std::string("track ") + std::string(magic_enum::enum_name(track)) + std::string("not in switch"));
+        return winston::Bumper::make();
     }
 
 }

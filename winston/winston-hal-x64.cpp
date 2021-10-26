@@ -1,6 +1,7 @@
-#include "..\libwinston\HAL.h"
 #include "../libwinston/HAL.h"
 #include "../libwinston/Util.h"
+#include <WinSock2.h>
+#include <WS2tcpip.h>
 
 #include <iostream>
 #include <fstream>
@@ -9,6 +10,93 @@
 #include "winston-hal-x64.h"
 
 #pragma comment(lib, "ws2_32.lib")
+
+using websocketpp::lib::placeholders::_1;
+using websocketpp::lib::placeholders::_2;
+
+WebServerWSPP::WebServerWSPP() : winston::WebServer<ConnectionWSPP>()
+{
+
+}
+
+void WebServerWSPP::init(OnHTTP onHTTP, OnMessage onMessage, unsigned int port)
+{
+    this->onHTTP = onHTTP;
+    this->onMessage = onMessage;
+    this->server.init_asio();
+
+    this->server.set_http_handler(websocketpp::lib::bind(&WebServerWSPP::on_http, this, websocketpp::lib::placeholders::_1));
+    this->server.set_message_handler(websocketpp::lib::bind(&WebServerWSPP::on_msg, this, websocketpp::lib::placeholders::_1, websocketpp::lib::placeholders::_2));
+    this->server.set_open_handler(websocketpp::lib::bind(&WebServerWSPP::on_open, this, websocketpp::lib::placeholders::_1));
+    this->server.set_close_handler(websocketpp::lib::bind(&WebServerWSPP::on_close, this, websocketpp::lib::placeholders::_1));
+
+    this->server.listen(port);
+
+    this->server.start_accept();
+}
+
+void WebServerWSPP::send(ConnectionWSPP& connection, const std::string &data)
+{
+    this->server.send(connection, data, websocketpp::frame::opcode::text);
+}
+
+void WebServerWSPP::step()
+{
+    this->server.poll_one();
+}
+
+ConnectionWSPP WebServerWSPP::getClient(unsigned int clientId)
+{
+    return this->connections[clientId];
+}
+unsigned int WebServerWSPP::getClientId(ConnectionWSPP client)
+{
+    auto result = std::find_if(
+        this->connections.begin(),
+        this->connections.end(),
+        [client](const auto& it) {return it.second.lock() == client.lock(); });
+
+    if (result != this->connections.end())
+        this->connections.erase(result->first);
+    return 0;
+}
+
+void WebServerWSPP::on_http(ConnectionWSPP hdl)
+{
+    auto con = this->server.get_con_from_hdl(hdl);
+    const auto response = this->onHTTP(hdl, con->get_resource());
+
+    for (auto const& [key, value]: response.headers)
+        con->append_header(key, value);
+    con->set_status(websocketpp::http::status_code::value(response.status));
+    con->set_body(response.body);
+}
+
+void WebServerWSPP::on_msg(ConnectionWSPP hdl, websocketpp::server<websocketpp::config::asio>::message_ptr msg)
+{
+    this->onMessage(hdl, msg->get_payload());
+}
+
+void WebServerWSPP::on_open(ConnectionWSPP hdl) {
+    this->connections.insert({ this->newClientId(), hdl });
+}
+
+void WebServerWSPP::on_close(ConnectionWSPP hdl) {
+    auto id = this->getClientId(hdl);
+
+    if (id)
+        this->connections.erase(id);
+}
+
+void WebServerWSPP::shutdown()
+{
+    this->server.stop();
+}
+
+size_t WebServerWSPP::maxMessageSize()
+{
+    return this->server.get_max_message_size();
+}
 
 static const std::string constWinstonStoragePath = "winston.storage";
 static std::string winstonStoragePath = constWinstonStoragePath;
@@ -41,7 +129,7 @@ UDPSocketLWIP::UDPSocketLWIP(const std::string ip, const unsigned short port) : 
 {
     this->addr.sin_family = AF_INET;
     this->addr.sin_port = htons(port);
-    this->addr.sin_addr.s_addr = inet_addr(ip.c_str());
+    inet_pton(AF_INET, ip.c_str(), &this->addr.sin_addr.s_addr);
 
     this->connect();
 }

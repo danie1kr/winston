@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -224,7 +224,7 @@
         function connect()
         {
             socketState = SocketConnecting;
-            socket = new WebSocket("ws://127.0.0.1");
+            socket = new WebSocket("ws://127.0.0.1:8080");
         }
 
         connect();
@@ -554,9 +554,9 @@
             cy.on('click', '.track', function(event) {
                 click("menuTrackEdge", event);
             });
-            cy.on('click', '.track', function(event) {
+            /*cy.on('click', '.track', function(event) {
                 click("menuTrackNode", event);
-            });
+            });*/
             cy.on('unselect', '.track, .trackNode, .track', function() {
                 cy.elements().removeClass("reachable");
                 hideContextMenus();
@@ -669,9 +669,10 @@
 
                 let layoutTrack = cyLayout.$(".track[name=" + i + "]");
 
-                success &&= layoutTrack !== undefined && layoutTrack.data("connections").a === track.a &&
-                                                          layoutTrack.data("connections").b === track.b &&
-                                                          layoutTrack.data("connections").c === track.c;
+                success &&= layoutTrack !== undefined && layoutTrack.length > 0 &&
+                            layoutTrack.data("connections").a === track.a &&
+                            layoutTrack.data("connections").b === track.b &&
+                            layoutTrack.data("connections").c === track.c;
 
             });
 

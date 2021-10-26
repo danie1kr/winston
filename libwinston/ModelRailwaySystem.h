@@ -41,6 +41,24 @@ namespace winston
 				return *it;
 		}
 
+		inline const State turnoutChangeTo(winston::Turnout::Shared turnout, winston::Turnout::Direction direction)
+		{
+			this->digitalCentralStation->triggerTurnoutChangeTo(turnout, direction);
+			return turnout->startToggle();
+		}
+
+		inline const State locoFunction(const winston::Address address, const uint32_t functions)
+		{
+			this->digitalCentralStation->triggerLocoFunction(address, functions);
+			return winston::State::Finished;
+		}
+
+		inline const State locoDrive(const Address address, const unsigned char speed, const bool forward)
+		{
+			this->digitalCentralStation->triggerLocoDrive(address, speed, forward);
+			return winston::State::Finished;
+		}
+
 		void loop() {
 			this->systemLoop();
 		};
@@ -51,7 +69,6 @@ namespace winston
 		virtual void systemSetupComplete() = 0;
 		virtual void systemLoop() = 0;
 		virtual void populateLocomotiveShed() = 0;
-
 
 		void addLocomotive(const winston::Locomotive::Callbacks callbacks, const Address address, std::string name)
 		{

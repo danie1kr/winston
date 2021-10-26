@@ -72,7 +72,7 @@ public:
     static uint8_t  getDB6(uint8_t *data)     { return data[11];}
     static uint8_t  getDB7(uint8_t *data)     { return data[12];}
 
-    static boolean  hasBit(uint8_t data, uint8_t mask)  { return (data & mask) != 0;}
+    static bool  hasBit(uint8_t data, uint8_t mask)  { return (data & mask) != 0;}
 };
 
 #endif //__Z21_PACKET_H__

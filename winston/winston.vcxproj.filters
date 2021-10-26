@@ -16,17 +16,11 @@
     <Filter Include="external">
       <UniqueIdentifier>{8d43d962-bf6c-42b8-a9de-01c4d58f95e5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="external\ethernet-minnow">
-      <UniqueIdentifier>{ec23a981-e91a-46f7-baa8-3493c0a1a39f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="external\central-z21">
       <UniqueIdentifier>{75f486df-1bf9-4e4e-9fc3-954dc94be17e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="external\ethernet-minnow\arch">
-      <UniqueIdentifier>{31add721-6a8a-46ba-bdf4-b48d850433c4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="external\ethernet-minnow\arch\windows">
-      <UniqueIdentifier>{66faa1aa-4676-4d9a-ba01-75a8dbed56fb}</UniqueIdentifier>
+    <Filter Include="external\websocketpp">
+      <UniqueIdentifier>{aaaf94e4-118c-4cf8-95de-3b86882303a4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -35,33 +29,6 @@
     </ClCompile>
     <ClCompile Include="winston-hal-x64.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="winston-minnow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="external\network-minnow\AllocatorIntf.c">
-      <Filter>external\ethernet-minnow</Filter>
-    </ClCompile>
-    <ClCompile Include="external\network-minnow\BaAtoi.c">
-      <Filter>external\ethernet-minnow</Filter>
-    </ClCompile>
-    <ClCompile Include="external\network-minnow\BufPrint.c">
-      <Filter>external\ethernet-minnow</Filter>
-    </ClCompile>
-    <ClCompile Include="external\network-minnow\JEncoder.c">
-      <Filter>external\ethernet-minnow</Filter>
-    </ClCompile>
-    <ClCompile Include="external\network-minnow\JParser.c">
-      <Filter>external\ethernet-minnow</Filter>
-    </ClCompile>
-    <ClCompile Include="external\network-minnow\JVal.c">
-      <Filter>external\ethernet-minnow</Filter>
-    </ClCompile>
-    <ClCompile Include="external\network-minnow\MSLib.c">
-      <Filter>external\ethernet-minnow</Filter>
-    </ClCompile>
-    <ClCompile Include="external\network-minnow\selib.c">
-      <Filter>external\ethernet-minnow</Filter>
     </ClCompile>
     <ClCompile Include="external\central-z21\Z21Packet.cpp">
       <Filter>external\central-z21</Filter>
@@ -77,39 +44,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="winston-minnow.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="external\network-minnow\AllocatorIntf.h">
-      <Filter>external\ethernet-minnow</Filter>
-    </ClInclude>
-    <ClInclude Include="external\network-minnow\BaAtoi.h">
-      <Filter>external\ethernet-minnow</Filter>
-    </ClInclude>
-    <ClInclude Include="external\network-minnow\BufPrint.h">
-      <Filter>external\ethernet-minnow</Filter>
-    </ClInclude>
-    <ClInclude Include="external\network-minnow\JEncoder.h">
-      <Filter>external\ethernet-minnow</Filter>
-    </ClInclude>
-    <ClInclude Include="external\network-minnow\JParser.h">
-      <Filter>external\ethernet-minnow</Filter>
-    </ClInclude>
-    <ClInclude Include="external\network-minnow\JVal.h">
-      <Filter>external\ethernet-minnow</Filter>
-    </ClInclude>
-    <ClInclude Include="external\network-minnow\MSLib.h">
-      <Filter>external\ethernet-minnow</Filter>
-    </ClInclude>
-    <ClInclude Include="external\network-minnow\selib.h">
-      <Filter>external\ethernet-minnow</Filter>
-    </ClInclude>
-    <ClInclude Include="external\network-minnow\TargConfig.h">
-      <Filter>external\ethernet-minnow</Filter>
-    </ClInclude>
-    <ClInclude Include="external\network-minnow\arch\Windows\selibplat.h">
-      <Filter>external\ethernet-minnow\arch\windows</Filter>
-    </ClInclude>
     <ClInclude Include="external\central-z21\Z21Const.h">
       <Filter>external\central-z21</Filter>
     </ClInclude>
@@ -122,14 +56,17 @@
     <ClInclude Include="winston.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="mio.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="railways.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="winston-hal-x64.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="json.hpp">
+      <Filter>external</Filter>
+    </ClInclude>
+    <ClInclude Include="mio.hpp">
+      <Filter>external</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -138,9 +75,6 @@
     </None>
     <None Include="external\central-z21\readme.md">
       <Filter>external\central-z21</Filter>
-    </None>
-    <None Include="external\network-minnow\readme.md">
-      <Filter>external\ethernet-minnow</Filter>
     </None>
     <None Include="resources\package.json">
       <Filter>Resource Files</Filter>

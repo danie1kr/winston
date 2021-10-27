@@ -8,6 +8,17 @@ namespace winston
 	{
 	}
 
+	std::string Track::ConnectionString(Connection connection)
+	{
+		switch (connection)
+		{
+		case Connection::A: return "a";
+		case Connection::B: return "b";
+		case Connection::C: return "c";
+		case Connection::DeadEnd: return "x";
+		}
+	}
+
 	void Track::attachSignal(Signal::Shared signal, const Connection guarding)
 	{
 		hal::fatal("Cannot attach signal");

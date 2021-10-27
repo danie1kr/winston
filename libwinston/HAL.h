@@ -8,7 +8,7 @@ namespace winston
 {
 	namespace hal
 	{
-		extern unsigned long now();
+		extern unsigned long long now();
 		extern void text(const std::string& text);
 		extern void fatal(const std::string text);
 

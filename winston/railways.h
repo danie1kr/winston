@@ -223,24 +223,26 @@ enum class Y2020RailwayTracks : unsigned int
     E,
     F,
     G,
-    G1
+    G1,
+    G2,
+    G3
 };
 
 class Y2020Railway : public winston::RailwayWithRails<Y2020RailwayTracks>, winston::Shared_Ptr<Y2020Railway>
 {
     /*
-      //==============Turnout5==================\\
-     //                 //                       \\
-     ||             Turnout6====C====|           ||
-     ||               //                         ||
-     ||  |====D====Turnout7                      ||
-     ||              //           /=======F====| ||
-     || |====E====Turnout8====Turnout9====G====| ||
-     ||                                          ||
-     ||                       --                 ||
-     ||                      B                   ||
-     \\                     //                   //
-      \\====Turnout1====Turnout3====Turnout4====//
+      //==============Turnout5======================\\
+     //                 //                           \\
+     ||             Turnout6====C====|               ||
+     ||               //                             ||
+     ||  |====D====Turnout7                          ||
+     ||              //           /=======F====|     ||
+     || |====E====Turnout8====Turnout9====G====|     ||
+     ||                                              ||
+     ||                       --                     ||
+     ||                      B                       ||
+     \\                     //                       //
+      \\====Turnout1==G2==Turnout3==G3==Turnout4====//
                 \\                     //
     |====A====Turnout2========G1========
     */

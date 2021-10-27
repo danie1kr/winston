@@ -190,9 +190,9 @@ namespace winston::hal
         Sleep(ms);
     }
     
-    unsigned long now()
+    unsigned long long now()
     {
-        return GetTickCount();
+        return GetTickCount64();
     }
 
     const uint8_t storageRead(const size_t address)

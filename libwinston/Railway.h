@@ -24,7 +24,7 @@ namespace winston
 			using TurnoutUpdateCallback = std::function<const State(Turnout::Shared turnout, const Turnout::Direction direction)>;
 			TurnoutUpdateCallback turnoutUpdateCallback;
 
-			using SignalUpdateCallback = std::function<const State(Signal::Shared signal, const Signal::Aspects aspect)>;
+			using SignalUpdateCallback = std::function<const State(Track::Shared track, Track::Connection connection, const Signal::Aspects aspect)>;
 			SignalUpdateCallback signalUpdateCallback;
 		};
 

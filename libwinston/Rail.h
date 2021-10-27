@@ -40,6 +40,8 @@ namespace winston
 			A, B, C, DeadEnd
 		};
 
+		static std::string ConnectionString(Connection connection);
+
 		enum class Type
 		{
 			Bumper,

@@ -275,3 +275,65 @@ private:
     winston::Track::Shared define(const Tracks track);
     void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
 };
+
+enum class SignalRailwayTracks : unsigned int
+{
+    Turnout1,
+    Turnout2,
+    Turnout3,
+    Turnout4,
+    Turnout5,
+    A,
+    B,
+    C,
+    G1,
+    G2,
+    G3,
+    G4,
+    G5,
+    G6,
+    G7
+};
+
+class SignalRailway : public winston::RailwayWithRails<SignalRailwayTracks>, winston::Shared_Ptr<SignalRailway>
+{
+    /*
+      //=====G6=======Turnout5===========G5==========\\
+     //                 //                           \\
+     ||        |====C====|                           ||
+     G7                       --                     G4
+     ||                      B                       ||
+     \\                     //                       //
+      \\====Turnout1==G2==Turnout3==G3==Turnout4====//
+                \\                     //
+    |====A====Turnout2========G1========
+    */
+
+public:
+    SignalRailway(const Callbacks callbacks);
+    virtual ~SignalRailway() = default;
+
+    static const std::string name();
+
+    using winston::Shared_Ptr<SignalRailway>::Shared;
+    using winston::Shared_Ptr<SignalRailway>::make;
+
+public:
+    class AddressTranslator : public winston::DigitalCentralStation::AddressTranslator, winston::Shared_Ptr<AddressTranslator>
+    {
+    public:
+        AddressTranslator(winston::Shared_Ptr<SignalRailway>::Shared railway);
+        virtual winston::Turnout::Shared turnout(const winston::Address address);
+        virtual winston::Locomotive::Shared locomotive(const winston::Address address);
+        virtual const winston::Address address(winston::Track::Shared track);
+
+        using Shared_Ptr<AddressTranslator>::Shared;
+        using Shared_Ptr<AddressTranslator>::make;
+
+    private:
+        winston::Shared_Ptr<SignalRailway>::Shared railway;
+    };
+private:
+    winston::Track::Shared define(const Tracks track);
+    void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
+};

@@ -25,7 +25,8 @@
 #define RAILWAY_DEBUG_INJECTOR_DELAY 1000
 //#define RAILWAY_CLASS RailwayWithSiding
 //#define RAILWAY_CLASS TimeSaverRailway
-#define RAILWAY_CLASS Y2020Railway
+//#define RAILWAY_CLASS Y2020Railway
+#define RAILWAY_CLASS SignalRailway
 
 using namespace giri::json;
 class MRS : public winston::ModelRailwaySystem<RAILWAY_CLASS::Shared, RAILWAY_CLASS::AddressTranslator::Shared, Z21::Shared>

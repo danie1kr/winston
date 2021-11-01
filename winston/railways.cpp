@@ -543,12 +543,12 @@ void SignalRailway::connect(std::array<winston::Track::Shared, tracksCount()>& t
     attachSignal(c, winston::SignalKS, winston::Track::Connection::A);
     attachSignal(g2, winston::SignalKS, winston::Track::Connection::A);
     attachSignal(g3, winston::SignalKS, winston::Track::Connection::B);
-    attachSignal(g4, winston::SignalKS, winston::Track::Connection::A);
+    //attachSignal(g4, winston::SignalKS, winston::Track::Connection::A);
     attachSignal(g4, winston::SignalKS, winston::Track::Connection::B);
     attachSignal(g5, winston::SignalKS, winston::Track::Connection::A);
-    attachSignal(g5, winston::SignalKS, winston::Track::Connection::B);
-    attachSignal(g6, winston::SignalKS, winston::Track::Connection::A);
+    //attachSignal(g5, winston::SignalKS, winston::Track::Connection::B);
+    //attachSignal(g6, winston::SignalKS, winston::Track::Connection::A);
     attachSignal(g6, winston::SignalKS, winston::Track::Connection::B);
-    attachSignal(g7, winston::SignalKS, winston::Track::Connection::A);
+    //attachSignal(g7, winston::SignalKS, winston::Track::Connection::A);
     attachSignal(g7, winston::SignalKS, winston::Track::Connection::B);
 }

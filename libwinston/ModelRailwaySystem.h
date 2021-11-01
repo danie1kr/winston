@@ -23,6 +23,16 @@ namespace winston
 			this->railway->init();
 			result = this->digitalCentralStation->connect();
 
+			for (size_t i = 0; i < this->railway->tracksCount(); ++i)
+			{
+				auto current = this->railway->track(i);
+				auto turnout = std::dynamic_pointer_cast<Turnout>(current);
+				if (turnout)
+				{
+					this->signalBox->setSignalsFor(turnout);
+				}
+			}
+
 			this->populateLocomotiveShed();
 			this->systemSetupComplete();
 		};

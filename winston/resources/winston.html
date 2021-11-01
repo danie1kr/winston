@@ -231,6 +231,26 @@
         {
             socketState = SocketConnecting;
             socket = new WebSocket("ws://127.0.0.1:8080");
+
+            socket.onmessage = function (event) {
+                parse(JSON.parse(event.data));
+            }
+
+            socket.onopen = function(event) {
+                socketState = SocketOpen;
+                $("#connection").html("connected");
+                $("#overlay").hide();
+            }
+
+            socket.onclose = function(event) {
+
+                if(socketState === SocketConnecting)
+                    _.delay(connect, SocketReconnectTimeout);
+
+                socketState = SocketClosed;
+                $("#connection").html("not connected");
+                $("#overlay").show();
+            }
         }
 
         connect();
@@ -242,26 +262,6 @@
         const TurnoutState_A_B = 0;
         const TurnoutState_A_C = 1;
         const TurnoutState_Changing = 2;
-
-        socket.onmessage = function (event) {
-            parse(JSON.parse(event.data));
-        }
-
-        socket.onopen = function(event) {
-            socketState = SocketOpen;
-            $("#connection").html("connected");
-            $("#overlay").hide();
-        }
-
-        socket.onclose = function(event) {
-
-            if(socketState === SocketConnecting)
-                _.delay(connect, SocketReconnectTimeout);
-
-            socketState = SocketClosed;
-            $("#connection").html("not connected");
-            $("#overlay").show();
-        }
 
         function turnoutDirectionLabelFromDirection(direction)
         {
@@ -374,6 +374,13 @@
             if(!allowWinstonSubmit())
                 return;
             send("getTurnoutState", {id: parseInt(track)});
+        }
+
+        function signalRequestStatus(guarding, parentTrack)
+        {
+            if(!allowWinstonSubmit())
+                return;
+            send("getSignalState", {parentTrack: parentTrack, guarding: guarding});
         }
 
         function signalState(data)
@@ -680,6 +687,9 @@
                 });
                 $turnoutsContainerBody.append($turnout);
                 turnoutRequestStatus(turnout.data("track"));
+            });
+            cy.$(".signal").each(function(signal) {
+                signalRequestStatus(signal.data("guarding"), signal.data("parentTrack"));
             });
 
             return cy;
@@ -1081,7 +1091,11 @@
                 }
             });
 
-            $("#reconnect").on('click', function() { connect(); });
+            $("#reconnect").on('click', function() { 
+                connect(); 
+                send("getRailway", {});
+                send("getLocoShed", {});
+            });
 
             //$('#sideLoco').sideNav({edge: "left", isFixed: true});
 

@@ -21,7 +21,7 @@
     <ClInclude Include="WinstonTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Rail.h">
+    <ClInclude Include="Track.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Railway.h">
@@ -74,7 +74,7 @@
     <ClCompile Include="Winston.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Rail.cpp">
+    <ClCompile Include="Track.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="SignalBox.cpp">

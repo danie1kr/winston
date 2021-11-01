@@ -1,6 +1,10 @@
-#include "Rail.h"
+#include <algorithm>
+
+#include "Track.h"
 #include "HAL.h"
 #include "Util.h"
+
+#include "magic_enum.hpp"
 
 namespace winston
 {
@@ -8,15 +12,19 @@ namespace winston
 	{
 	}
 
-	std::string Track::ConnectionString(Connection connection)
+	const std::string Track::ConnectionToString(const Connection connection)
 	{
-		switch (connection)
-		{
-		case Connection::A: return "a";
-		case Connection::B: return "b";
-		case Connection::C: return "c";
-		case Connection::DeadEnd: return "x";
-		}
+		auto name = std::string(magic_enum::enum_name(connection));
+		std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+		return name;
+	}
+
+	const Track::Connection Track::ConnectionFromString(const std::string connection)
+	{
+		std::string upper(connection.size(), ' ');
+		std::transform(connection.begin(), connection.end(), upper.begin(), ::toupper);
+		auto c = magic_enum::enum_cast<Connection>(upper);
+		return c.value();
 	}
 
 	void Track::attachSignal(Signal::Shared signal, const Connection guarding)

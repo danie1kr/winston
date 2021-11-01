@@ -90,7 +90,7 @@
     <ClInclude Include="Locomotive.h" />
     <ClInclude Include="magic_enum.hpp" />
     <ClInclude Include="ModelRailwaySystem.h" />
-    <ClInclude Include="Rail.h" />
+    <ClInclude Include="Track.h" />
     <ClInclude Include="Railway.h" />
     <ClInclude Include="Signal.h" />
     <ClInclude Include="SignalBox.h" />
@@ -108,7 +108,7 @@
     <ClCompile Include="Locomotive.cpp" />
     <ClCompile Include="Railway.cpp" />
     <ClCompile Include="Signal.cpp" />
-    <ClCompile Include="Rail.cpp" />
+    <ClCompile Include="Track.cpp" />
     <ClCompile Include="SignalBox.cpp" />
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="Winston.cpp" />

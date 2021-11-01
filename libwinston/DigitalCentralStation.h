@@ -2,7 +2,7 @@
 
 #include "Util.h"
 #include "WinstonTypes.h"
-#include "Rail.h"
+#include "Track.h"
 #include "Locomotive.h"
 #include "SignalBox.h"
 

@@ -23,6 +23,12 @@ namespace winston
 		};
 	}
 
+	void SignalBox::initSignalsForTurnouts(std::set<Turnout::Shared> turnouts)
+	{
+		for (auto &turnout: turnouts)
+			this->setSignalsFor(turnout);
+	}
+
 	void SignalBox::setSignalOn(Track::Shared track, const bool guarding, const Track::Connection connection, const Signal::Aspect aspect, const bool includingFirst)
 	{
 		const auto preSignalAspect = aspect == Signal::Aspect::Go ? Signal::Aspect::ExpectGo : Signal::Aspect::ExpectHalt;

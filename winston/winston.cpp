@@ -53,7 +53,7 @@ private:
             "op", "signalState",
             "data", JSON({
                 "parentTrack", trackId,
-                "guarding", winston::Track::ConnectionString(connection),
+                "guarding", winston::Track::ConnectionToString(connection),
                 "aspects", aspects
             })
         });
@@ -201,7 +201,7 @@ private:
         if (signal)
             signals.append(JSON({
                 "parentTrack", railway->trackIndex(track),
-                "guarding", winston::Track::ConnectionString(connection),
+                "guarding", winston::Track::ConnectionToString(connection),
                 "pre", signal->preSignal(),
                 "main", signal->mainSignal() }));
     }
@@ -240,6 +240,16 @@ private:
             unsigned int id = (unsigned int)data["id"].ToInt();
             auto turnout = std::dynamic_pointer_cast<winston::Turnout>(railway->track(id));
             this->turnoutSendState(id, turnout->direction());
+        }
+        else if (std::string("getSignalState").compare(op) == 0)
+        {
+            unsigned int id = (unsigned int)data["parentTrack"].ToInt();
+            std::string guarding = data["guarding"].ToString();
+
+            auto connection = winston::Track::ConnectionFromString(guarding);
+            auto signal = this->railway->track(id)->signalGuarding(connection);
+
+            this->signalSendState(id, connection, signal->aspect());
         }
         else if (std::string("getRailway").compare(op) == 0)
         {

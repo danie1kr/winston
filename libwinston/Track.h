@@ -35,12 +35,13 @@ namespace winston
 
 		Track();
 
-		enum class Connection
+		enum class Connection : unsigned int
 		{
 			A, B, C, DeadEnd
 		};
 
-		static std::string ConnectionString(Connection connection);
+		static const std::string ConnectionToString(const Connection connection);
+		static const Connection ConnectionFromString(const std::string connection);
 
 		enum class Type
 		{

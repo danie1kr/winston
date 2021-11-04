@@ -255,7 +255,7 @@
 
         connect();
 
-        let railway, layout, $railway, $saveLayout, $resetLayout, cy, uiEditLayout = false, allowLayoutStorage = true, allowLayoutLoading = true;
+        let railway, signals, layout, $railway, $saveLayout, $resetLayout, cy, uiEditLayout = false, allowLayoutStorage = true, allowLayoutLoading = true;
 
         const WinstonTypeTurnout = "turnout";
         const WinstonTypeLocomotive = "locomotive";
@@ -718,6 +718,7 @@
                     cy.destroy();
                     cy = cytoscapeCreate();
                     cy.add(layout.cy);
+                    cy = cytoscapeUpdateSignals(cy, signals);
                     cy = cytoscapePostAdd(cy);
 
                     cy.viewport({zoom: layout.viewport.zoom, pan: layout.viewport.pan});
@@ -810,6 +811,41 @@
             traverse($edge);
         }
 
+        function cytoscapeUpdateSignals(cy, signals)
+        {
+            let nodes = [];
+            let edges = [];
+
+            cy.$("node.signal").addClass("unverified");
+
+            _.each(signals, function(signal, i) {
+                let track = signal.parentTrack;
+                let guarding = signal.guarding;
+
+                let parentPosition = cy.$("node.connection." + guarding + "[track=" + track + "]").position();
+
+                let existing = cy.$("node.signal[parentTrack=" + track + "][guarding=\"" + guarding + "\"]");
+                if(existing.length > 0)
+                {
+                    existing.removeClass("unverified");
+                }
+                else
+                {
+                    nodes.push({group: 'nodes', data: {id: track + "_signal_" + guarding, guarding: guarding, parentTrack: track, relativePosition: {x: 0, y: 20}}, position: {x: parentPosition.x, y: parentPosition.y + 20}, classes: "signal"});
+                    edges.push({group: 'edges', data: {source: track + "_signal_" + guarding, target: track + guarding}, classes: "signalConnector"});
+                }
+            });
+
+            let unverified = cy.$(".unverified");
+            console.log("removing " + unverified.length + " signals");
+            unverified.remove();
+
+            cy.add(nodes);
+            cy.add(edges);
+
+            return cy;
+        }
+
         function buildRailwayGraph(data)
         {
             function classFromType(type)
@@ -825,6 +861,7 @@
             let nodes = [];
             let edges = [];
             railway = data.tracks;
+            signals = data.signals;
 
             _.each(data.tracks, function(track, i) {
 
@@ -904,22 +941,7 @@
             cy = cytoscapeCreate();
             cy.add(nodes);
             cy.add(edges);
-
-            nodes = [];
-            edges = [];
-            _.each(data.signals, function(signal, i) {
-                let track = signal.parentTrack;
-                let guarding = signal.guarding;
-
-                let parentPosition = cy.$("node.connection." + guarding + "[track=" + track + "]").position();
-
-                nodes.push({group: 'nodes', data: {id: track + "_signal_" + guarding, guarding: guarding, parentTrack: track, relativePosition: {x: 0, y: 20}}, position: {x: parentPosition.x, y: parentPosition.y + 20}, classes: "signal"});
-                edges.push({group: 'edges', data: {source: track + "_signal_" + guarding, target: track + guarding}, classes: "signalConnector"});
-            });
-
-            cy.add(nodes);
-            cy.add(edges);
-            
+            cy = cytoscapeUpdateSignals(cy, data.signals);
             cy = cytoscapePostAdd(cy);
 
             if(allowLayoutLoading)

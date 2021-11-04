@@ -26,6 +26,25 @@ namespace winston
 		auto c = magic_enum::enum_cast<Connection>(upper);
 		return c.value();
 	}
+	Track::Shared Track::connect(const Connection local, Track::Shared& to, const Connection remote)
+	{
+		return this->connectTo(local, nullptr, to, remote, nullptr);
+	}
+
+	Track::Shared Track::connect(const Connection local, SignalFactory guardingLocalSignalFactory, Track::Shared& to, const Connection remote)
+	{
+		return this->connectTo(local, guardingLocalSignalFactory, to, remote, nullptr);
+	}
+
+	Track::Shared Track::connect(const Connection local, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory)
+	{
+		return this->connectTo(local, nullptr, to, remote, guardingRemoteSignalFactory);
+	}
+
+	Track::Shared Track::connect(const Connection local, SignalFactory guardingLocalSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory)
+	{
+		return this->connectTo(local, guardingLocalSignalFactory, to, remote, guardingRemoteSignalFactory);
+	}
 
 	void Track::attachSignal(Signal::Shared signal, const Connection guarding)
 	{
@@ -102,21 +121,24 @@ namespace winston
 		return connection == Connection::A ? Connection::DeadEnd : Connection::A;
 	}
 
-	Track::Shared Bumper::connect(const Connection local, Track::Shared& to, const Connection remote, bool viceVersa)
+	Track::Shared Bumper::connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa)
 	{
 		if (local == Connection::A)
 		{
 			a = to;
+			Track::Shared that = this->shared_from_this();
 			if (viceVersa)
-			{
-				Track::Shared that = this->shared_from_this();
-				to->connect(remote, that, local, false);
-			}
+				to->connectTo(remote, nullptr, that, local, nullptr, false);
+			if (guardingSignalFactory)
+				this->attachSignal(guardingSignalFactory(that, local), local);
+			if(guardingRemoteSignalFactory)
+				to->attachSignal(guardingRemoteSignalFactory(to, remote), remote);
 		}
 		else
 			error("Bumper::connect, local not A");
 		return to;
 	}
+
 
 	const Result Bumper::validate()
 	{
@@ -207,7 +229,7 @@ namespace winston
 		return connection == Connection::A ? Connection::B : Connection::A;
 	}
 
-	Track::Shared Rail::connect(const Connection local, Track::Shared& to, const Connection remote, bool viceVersa)
+	Track::Shared Rail::connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa)
 	{
 		if (local == Connection::C)
 			error("Rail::connect, local not A or B");
@@ -218,11 +240,13 @@ namespace winston
 			else if (local == Connection::B)
 				b = to;
 			
+			Track::Shared that = this->shared_from_this();
 			if (viceVersa)
-			{
-				Track::Shared that = this->shared_from_this();
-				to->connect(remote, that, local, false);
-			}
+				to->connectTo(remote, nullptr, that, local, nullptr, false);
+			if (guardingSignalFactory)
+				this->attachSignal(guardingSignalFactory(that, local), local);
+			if (guardingRemoteSignalFactory)
+				to->attachSignal(guardingRemoteSignalFactory(to, remote), remote);
 		}
 		return to;
 	}
@@ -335,7 +359,7 @@ namespace winston
 			return Connection::A;
 	}
 
-	Track::Shared Turnout::connect(const Connection local, Track::Shared& to, const Connection remote, bool viceVersa)
+	Track::Shared Turnout::connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa)
 	{
 		if (local == Connection::A)
 			a = to;
@@ -347,8 +371,12 @@ namespace winston
 		if (viceVersa)
 		{
 			Track::Shared that = this->shared_from_this();
-			to->connect(remote, that, local, false);
+			to->connectTo(remote, nullptr, that, local, nullptr, false);
 		}
+		if (guardingSignalFactory)
+			hal::fatal("Cannot attach signal to turnout");
+		if (guardingRemoteSignalFactory)
+			to->attachSignal(guardingRemoteSignalFactory(to, remote), remote);
 		return to;
 	}
 

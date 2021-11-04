@@ -50,9 +50,14 @@ namespace winston
 			Turnout
 		};
 
+		using SignalFactory = std::function<Signal::Shared(Track::Shared track, Track::Connection connection)>;
+
 		//virtual bool drive(TrackIndex& enter, TrackIndex& exit, bool forward = true) const = 0;
 
-		virtual Track::Shared connect(const Connection local, Track::Shared& to, const Connection remote, bool viceVersa = true) = 0;
+		Track::Shared connect(const Connection local, Track::Shared& to, const Connection remote);
+		Track::Shared connect(const Connection local, SignalFactory guardingLocalSignalFactory, Track::Shared& to, const Connection remote);
+		Track::Shared connect(const Connection local, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory);
+		Track::Shared connect(const Connection local, SignalFactory guardingLocalSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory);
 		virtual bool has(const Connection connection) const = 0;
 		//Track& attachSignal(Signal &signal, const Connection comingFrom);
 
@@ -68,7 +73,12 @@ namespace winston
 		virtual Signal::Shared signalGuarding(const Connection guarding);
 
 	protected:
+		virtual Track::Shared connectTo(const Connection local, SignalFactory guardingLocalSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa = true) = 0;
 		Result validateSingle(const Track::Shared track);
+
+		friend class Bumper; 
+		friend class Rail;
+		friend class Turnout;
 	};
 	
 	// a====|
@@ -83,7 +93,6 @@ namespace winston
 		void collectAllConnections(std::set<Track::Shared>& tracks) const;
 		const Connection whereConnects(Track::Shared& other) const;
 		const Connection otherConnection(const Connection connection) const;
-		Track::Shared connect(const Connection local, Track::Shared&to, const Connection remote, bool viceVersa = true);
 		const Result validate();
 		const Type type();
 
@@ -97,6 +106,8 @@ namespace winston
 		using Shared_Ptr<Bumper>::make;
 
 	private:
+		Track::Shared connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa = true);
+		
 		Track::Shared a;
 		std::array<Signal::Shared, 2> signals;
 	};
@@ -114,7 +125,6 @@ namespace winston
 		void collectAllConnections(std::set<Track::Shared>& tracks) const;
 		const Connection whereConnects(Track::Shared& other) const;
 		const Connection otherConnection(const Connection connection) const;
-		Track::Shared connect(const Connection local, Track::Shared& to, const Connection remote, bool viceVersa = true);
 		const Result validate();
 		const Type type();
 
@@ -127,6 +137,8 @@ namespace winston
 		using Shared_Ptr<Rail>::Shared;
 		using Shared_Ptr<Rail>::make;
 	private:
+		Track::Shared connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa = true);
+		
 		Track::Shared a, b;
 		std::array<Signal::Shared, 2> signals;
 	};
@@ -155,7 +167,6 @@ namespace winston
 		const Connection whereConnects(Track::Shared& other) const;
 		const Connection otherConnection(const Connection connection) const;
 
-		Track::Shared connect(const Connection local, Track::Shared& to, const Connection remote, bool viceVersa = true);
 		const Result validate();
 		const Type type();
 
@@ -173,6 +184,8 @@ namespace winston
 		using Shared_Ptr<Turnout>::make;
 
 	private:
+		Track::Shared connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa = true);
+		
 		bool leftTurnout;
 		Direction dir;
 

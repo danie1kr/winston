@@ -9,7 +9,7 @@ void setStoragePath(std::string appendix);
 extern "C" {
 #endif
 void winston_setup();
-void winston_loop();
+bool winston_loop();
 
 #ifdef __cplusplus
 }

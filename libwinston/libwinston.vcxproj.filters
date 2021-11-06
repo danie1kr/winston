@@ -108,4 +108,7 @@
   <ItemGroup>
     <None Include="design.md" />
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="NatvisFile.natvis" />
+  </ItemGroup>
 </Project>

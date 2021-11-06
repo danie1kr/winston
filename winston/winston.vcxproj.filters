@@ -68,6 +68,9 @@
     <ClInclude Include="mio.hpp">
       <Filter>external</Filter>
     </ClInclude>
+    <ClInclude Include="external\magic_enum.hpp">
+      <Filter>external</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\winston.html">
@@ -79,5 +82,8 @@
     <None Include="resources\package.json">
       <Filter>Resource Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\libwinston\NatvisFile.natvis" />
   </ItemGroup>
 </Project>

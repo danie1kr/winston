@@ -29,7 +29,7 @@ namespace winston
 		static void setSignalOn(Track::Shared track, const bool guarding, const Track::Connection connection, const Signal::Aspect aspect, const bool includingFirst);
 		
 		void order(Command::Shared command);
-		void work();
+		bool work();
 	private:
 
 		static Signal::Shared nextSignal(Track::Shared& track, const bool guarding, Track::Connection& leaving, const bool main, const bool includingFirst);

@@ -438,6 +438,19 @@ private:
                 }
             }*/
         }
+#ifdef RAILWAY_DEBUG_INJECTOR
+        else if (op.starts_with(std::string("emu_z21_inject")))
+        {
+            if (std::string("emu_z21_inject_occupied").compare(op) == 0)
+            {
+                /*
+                unsigned int block = (unsigned int)data["block"].toInt();
+                unsigned int loco = (unsigned int)data["loco"].toInt();
+                // this->stationDebugInjector->injectBlockUpdate(block, loco);
+                */
+            }
+        }
+#endif
         else
         {
             winston::hal::text("Received unknown message: ");
@@ -480,21 +493,9 @@ private:
     }
 
     // accept new requests and loop over what the signal box has to do
-    void systemLoop() {
-        /*
-        if(this->webSocketState == winston::hal::UDPSocket::State::Connecting && minnowAccept(webSocketListenPtr, 2, webSocketSendPtr, this->minnowServer, this->minnowWPH) == 1)
-            this->webSocketState = winston::hal::UDPSocket::State::Connected;
-            */
+    bool systemLoop() {
         this->webServer.step();
-        this->signalBox->work();
-        /*
-        if (this->webSocketState == winston::hal::UDPSocket::State::Connected && !minnowLoop(webSocketListenPtr, webSocketSendPtr, this->minnowWPH, this->minnowCD, this->minnowRD, this->minnowServer))
-        {
-            this->webSocketState = winston::hal::UDPSocket::State::Closing;
-            minnowClose(webSocketListenPtr, webSocketSendPtr);
-            minnowStart(webSocketListenPtr, webSocketSendPtr, &this->minnowWPH, &this->minnowCD, &this->minnowRD, &this->minnowServer, [this](struct RecData* o, struct ConnData* cd, const char* msg, JErr* e, JVal* v)->int { return this->minnow_manageMessage(o, cd, msg, e, v); }, [this](MST* mst, const char* path, FetchPageSend send)->int {return this->minnow_fetchPage(mst, path, send);  });
-            this->webSocketState = winston::hal::UDPSocket::State::Connecting;
-        }*/
+        return this->signalBox->work();
     }
 
     void populateLocomotiveShed()
@@ -507,23 +508,9 @@ private:
     }
 
     /* websocket */
-    WebServerWSPP webServer;// std::bind(&on_http, this, std::placeholders::_1), 8080);
-    //typedef std::set<WebServerConnection, std::owner_less<WebServerConnection>> WebServerConnections;
-   // WebServerConnections webServerConnections;
+    WebServerWSPP webServer;
 
-    /* minnow related
-    WssProtocolHandshake* minnowWPH = nullptr;
-    ConnData* minnowCD = nullptr;
-    RecData* minnowRD = nullptr;
-    MS* minnowServer = nullptr;
-
-
-    SOCKET webSocketListen, webSocketSend;
-    SOCKET* webSocketListenPtr = &webSocketListen;
-    SOCKET* webSocketSendPtr = &webSocketSend;
-
-    winston::hal::UDPSocket::State webSocketState = { winston::hal::UDPSocket::State::NotConnected };
-    */
+    /* z21 */
     UDPSocketLWIP::Shared z21Socket;
     const std::string z21IP = { "192.168.0.100" };
     const unsigned short z21Port = 5000;
@@ -546,9 +533,9 @@ void winston_setup()
 	mrs.setup();
 }
 
-void winston_loop()
+bool winston_loop()
 {
-    mrs.loop();
+    return mrs.loop();
 }
 
 #ifdef WINSTON_PLATFORM_WIN_x64
@@ -559,8 +546,8 @@ int main()
     // and loop
     while (true)
     {
-        winston_loop();
-        winston::hal::delay(FRAME_SLEEP);
+        if(!winston_loop())
+            winston::hal::delay(FRAME_SLEEP);
     }
 }
 #endif

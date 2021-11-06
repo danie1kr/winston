@@ -8,7 +8,7 @@
 
 namespace winston
 {
-	Track::Track() : Shared_Ptr<Track>()
+	Track::Track(const std::string name, Length trackLength) : Shared_Ptr<Track>(), _name(name), trackLength(trackLength)
 	{
 	}
 
@@ -77,8 +77,18 @@ namespace winston
 		return Result::ValidationFailed;
 	}
 
-	Bumper::Bumper()
-		: Track(), Shared_Ptr<Bumper>(), a()
+	const Length Track::length()
+	{
+		return this->trackLength;
+	}
+	
+	const std::string Track::name()
+	{
+		return this->_name;
+	}
+
+	Bumper::Bumper(const std::string name)
+		: Track(name), Shared_Ptr<Bumper>(), a()
 	{
 
 	}
@@ -183,8 +193,8 @@ namespace winston
 		onC = c;
 	}
 
-	Rail::Rail()
-		: Track(), Shared_Ptr<Rail>(), a(), b()
+	Rail::Rail(const std::string name)
+		: Track(name), Shared_Ptr<Rail>(), a(), b()
 	{
 
 	}
@@ -288,8 +298,14 @@ namespace winston
 		onB = this->b;
 	}
 
-	Turnout::Turnout(const Callback callback, const bool leftTurnout)
-		: Track(), Shared_Ptr<Turnout>(), callback(callback), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c()
+	Turnout::Turnout(const std::string name, const Callback callback, const bool leftTurnout)
+		: Track(name), Shared_Ptr<Turnout>(), callback(callback), trackLengthCalculator(nullptr), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c()
+	{
+
+	}
+
+	Turnout::Turnout(const std::string name, const Callback callback, const TrackLengthCalculator trackLengthCalculator, const bool leftTurnout)
+		: Track(name), Shared_Ptr<Turnout>(), callback(callback), trackLengthCalculator(trackLengthCalculator), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c()
 	{
 
 	}
@@ -308,6 +324,12 @@ namespace winston
 		}
 		if (leavingOnConnection)
 		{
+			/*if ((this->dir == Direction::A_B && connection == Connection::C) || (this->dir == Direction::A_C && connection == Connection::B))
+			{
+				onto.reset();
+				return false;
+			}*/
+
 			switch (connection)
 			{
 			case Connection::A: onto = a; return true; break;
@@ -420,11 +442,27 @@ namespace winston
 		return this->dir;
 	}
 
-	Turnout::Direction Turnout::otherDirection(const Direction current)
+	const Turnout::Direction Turnout::otherDirection(const Direction current)
 	{
 		if (current == Direction::A_B)
 			return Direction::A_C;
 		else
 			return Direction::A_B;
+	}
+
+	const Turnout::Direction Turnout::fromConnection(const Connection connection)
+	{
+		if (connection == Connection::B)
+			return Direction::A_B;
+		else if (connection == Connection::C)
+			return Direction::A_C;
+		
+		hal::fatal("cannot derive direction from connection a");
+		return Direction::Changing;
+	}
+
+	const Length Turnout::length()
+	{
+		return this->trackLengthCalculator ? this->trackLengthCalculator(this->dir) : 0;
 	}
 }

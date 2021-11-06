@@ -63,7 +63,7 @@ enum class SignalTestRailwayTracks : unsigned int
     U,
     V,
     W,
-    L0, L1, L2, L20, L2S, L23, L3, L4, L5
+    L0, L1, L2, L3, L4, L5, L6, L7, L8
 };
 
 class SignalTestRailway : public winston::RailwayWithRails<SignalTestRailwayTracks>, winston::Shared_Ptr<SignalTestRailway>
@@ -89,7 +89,7 @@ class SignalTestRailway : public winston::RailwayWithRails<SignalTestRailwayTrac
     * |====R=KRa=KSb=S=KSa=T3=KTb=T=KTa=KUa=U====|
     *                       \=KVb=V=KVa=KWa=W====|
     * 
-    * |====L0====KL0a=KL1b====L1====L2====L20====L2S=KL2Sa====L23====L3====L4====KL4a=KL5a====L5====|
+    * |====L0====KL0a=KL1b====L1====L2====L3====L4=KL4a====L5====L6====L7====KL7a=KL8a====L8====|
     */
 
 public:

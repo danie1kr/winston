@@ -3,6 +3,7 @@
 #include <array>
 #include <vector>
 #include <set>
+#include <unordered_set>
 #include <memory>
 #include <functional>
 #include "Signal.h"
@@ -33,7 +34,7 @@ namespace winston
 	{
 	public:
 
-		Track();
+		Track(std::string name, Length tracklength = 0);
 
 		enum class Connection : unsigned int
 		{
@@ -62,6 +63,65 @@ namespace winston
 		//Track& attachSignal(Signal &signal, const Connection comingFrom);
 
 		virtual bool traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const = 0;
+
+		enum class TraversalResult : unsigned int
+		{
+			Looped,
+			Bumper,
+			OpenTurnout,
+			Signal
+		}; enum class TraversalSignalHandling : unsigned int
+		{
+			Ignore,
+			ForwardDirection,
+			OppositeDirection
+		};
+		template<TraversalSignalHandling _signalHandling >
+		static TraversalResult traverse(Track::Shared& start, Track::Connection& connection, Signal::Shared& signal)
+		{
+			auto& current = start;
+			Track::Shared onto = current;
+			std::unordered_set<Track::Shared> visited;
+			bool successful = true;
+			while (true)
+			{
+				if (_signalHandling == TraversalSignalHandling::OppositeDirection)
+				{// the signal looks in the same way as we travel
+					signal = onto->signalGuarding(connection);
+					if (signal)
+					{
+						start = current;
+						connection = connection;
+						return TraversalResult::Signal;
+					}
+				}
+				else if (_signalHandling == TraversalSignalHandling::ForwardDirection)
+				{// the signal faces us
+					signal = onto->signalFacing(connection);
+					if (signal)
+					{
+						start = current;
+						connection = connection;
+						return TraversalResult::Signal;
+					}
+				}
+				if (visited.contains(onto))
+					return TraversalResult::Looped;
+				if (onto->type() == Track::Type::Bumper)
+					return TraversalResult::Bumper;
+				visited.insert(onto);
+				successful = current->traverse(connection, onto, true);
+				if (!successful && current->type() == Track::Type::Turnout)
+				{
+					start = current;
+					connection = connection;
+					return TraversalResult::OpenTurnout;
+				}
+				connection = onto->otherConnection(onto->whereConnects(current));
+				current = onto;
+			}
+		}
+
 		virtual void collectAllConnections(std::set<Track::Shared>& tracks) const = 0;
 		virtual const Connection whereConnects(Track::Shared& other) const = 0;
 		virtual const Connection otherConnection(const Connection connection) const = 0;
@@ -71,6 +131,8 @@ namespace winston
 		virtual void attachSignal(Signal::Shared signal, const Connection guarding);
 		virtual Signal::Shared signalFacing(const Connection facing);
 		virtual Signal::Shared signalGuarding(const Connection guarding);
+		virtual const Length length();
+		const std::string name();
 
 	protected:
 		virtual Track::Shared connectTo(const Connection local, SignalFactory guardingLocalSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa = true) = 0;
@@ -79,13 +141,17 @@ namespace winston
 		friend class Bumper; 
 		friend class Rail;
 		friend class Turnout;
+
+	private:
+		const Length trackLength;
+		const std::string _name;
 	};
 	
 	// a====|
 	class Bumper : public Track, public Shared_Ptr<Bumper>, public std::enable_shared_from_this<Bumper>
 	{
 	public:
-		Bumper();
+		Bumper(const std::string name = "");
 		//static Track::Shared make();
 
 		bool has(const Connection connection) const;
@@ -116,7 +182,7 @@ namespace winston
 	class Rail : public Track, public Shared_Ptr<Rail>, public std::enable_shared_from_this<Rail>
 	{
 	public:
-		Rail();
+		Rail(const std::string name = "");
 		//static Track::Shared make();
 
 		bool has(const Connection connection) const;
@@ -148,7 +214,7 @@ namespace winston
 	class Turnout : public Track, public Shared_Ptr<Turnout>, public std::enable_shared_from_this<Turnout>
 	{
 	public:
-		enum class Direction
+		enum class Direction : unsigned int
 		{
 			A_B,
 			A_C,
@@ -157,7 +223,11 @@ namespace winston
 
 		using Callback = const std::function<State(Track::Shared turnout, Direction direction)>;
 
-		Turnout(const Callback callback, const bool leftTurnout = false);
+		using TrackLengthCalculator = const std::function<const Length(const Direction)>;
+
+		//Turnout(const Callback callback, const bool leftTurnout = false);
+		Turnout(const std::string name, const Callback callback, const bool leftTurnout = false);
+		Turnout(const std::string name, const Callback callback, const TrackLengthCalculator trackLengthCalculator, const bool leftTurnout = false);
 		//static Track::Shared make(const Callback callback, const bool leftTurnout);
 
 		bool has(const Connection connection) const;
@@ -178,14 +248,18 @@ namespace winston
 		const State finalizeChangeTo(const Direction direction);
 
 		const Direction direction();
-		static Direction otherDirection(const Direction current);
+		static const Direction otherDirection(const Direction current);
+		static const Direction fromConnection(const Connection connection);
 
 		using Shared_Ptr<Turnout>::Shared;
 		using Shared_Ptr<Turnout>::make;
+		virtual const Length length();
 
 	private:
 		Track::Shared connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa = true);
 		
+		const TrackLengthCalculator trackLengthCalculator;
+
 		bool leftTurnout;
 		Direction dir;
 

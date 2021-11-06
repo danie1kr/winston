@@ -69,15 +69,15 @@ namespace winston
 			return winston::State::Finished;
 		}
 
-		void loop() {
-			this->systemLoop();
+		bool loop() {
+			return this->systemLoop();
 		};
 		using Railway = _Railway;
 
 	protected:
 		virtual void systemSetup() = 0;
 		virtual void systemSetupComplete() = 0;
-		virtual void systemLoop() = 0;
+		virtual bool systemLoop() = 0;
 		virtual void populateLocomotiveShed() = 0;
 
 		void addLocomotive(const winston::Locomotive::Callbacks callbacks, const Address address, std::string name)

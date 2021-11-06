@@ -51,6 +51,14 @@ namespace winston
 			if (Signal::Shared preSignal = SignalBox::nextSignal(current, false, otherFrom, false, false))
 				preSignal->aspect(preSignalAspect);
 		}
+		/*else if (current->type() == Track::Type::Bumper)
+		{
+			mainSignal->aspect(Signal::Aspect::Go);
+			// current and from are now the position of mainSignal
+			auto otherFrom = current->otherConnection(from);
+			if (Signal::Shared preSignal = SignalBox::nextSignal(current, false, otherFrom, false, false))
+				preSignal->aspect(Signal::Aspect::ExpectGo);
+		}*/
 	}
 
 	void SignalBox::setSignalsFor(Turnout::Shared turnout)
@@ -67,19 +75,127 @@ namespace winston
 		// A_facing = leave turnout at A, find first main signal facing A
 		// B_guarding = leave turnout at B, find first pre signal if 
 
-		// 
+		// the direction
 		this->order(Command::make([turnout, setSignals](const unsigned long& created) -> const winston::State { setSignals(turnout, turnout->direction()); return State::Finished; }));
+		// the closed direction
 		this->order(Command::make([turnout, setSignals](const unsigned long& created) -> const winston::State { setSignals(turnout, turnout->otherDirection(turnout->direction())); return State::Finished; }));
+		// backwards on entry
+		this->order(Command::make([this, turnout](const unsigned long& created) -> const winston::State { 
+
+
+			Track::Shared signalCurrent = turnout;
+			auto signalConnection = Track::Connection::A;
+			auto signalToSet = this->nextSignal(signalCurrent, false, signalConnection, true, true);
+
+			Track::Shared current = turnout;
+			auto connection = Track::Connection::A;
+			Signal::Shared signal;
+			auto result = Track::traverse<Track::TraversalSignalHandling::OppositeDirection>(current, connection, signal);
+
+			Signal::Aspect aspect;
+			switch (result)
+			{
+			case Track::TraversalResult::Bumper: 
+			case Track::TraversalResult::Looped: 
+			case Track::TraversalResult::Signal: aspect = Signal::Aspect::Go; break;
+			case Track::TraversalResult::OpenTurnout: aspect = Signal::Aspect::Halt; break;
+			}
+			this->setSignalOn(signalCurrent, false, signalConnection, aspect, false);
+
+			/*
+			Track::Shared signalCurrent = turnout;
+			Track::Shared onto;
+			auto signalConnection = Track::Connection::A;
+			auto signal = this->nextSignal(signalCurrent, false, signalConnection, true, true);
+			auto canTraverse = true;
+			auto connection = signalConnection;
+			auto current = signalCurrent;
+			std::unordered_set<Track::Shared> visited;
+			bool looped = false;
+			bool forward = false;
+			Signal::Aspect aspect = Signal::Aspect::Halt;
+			while (canTraverse = current->traverse(connection, onto, forward))
+			{
+				if (visited.contains(onto))
+				{
+					aspect = Signal::Aspect::Go;
+					looped = true;
+					break;
+				}
+				// it should be sufficient to search for the next signal instead of trying to loop
+				forward = true;
+				connection = onto->otherConnection(onto->whereConnects(current));
+				visited.insert(onto);
+				current = onto;
+				if (onto->type() == Track::Type::Bumper && connection == Track::Connection::DeadEnd)
+				{
+					aspect = Signal::Aspect::Go;
+					break;
+				}
+			}
+			//auto aspect = (looped || (onto && onto->type() == Track::Type::Bumper)) ? Signal::Aspect::Go : Signal::Aspect::Halt;
+			this->setSignalOn(signalCurrent, false, signalConnection, aspect, false);
+			*/
+			return State::Finished; 
+
+		}));
 	}
 	
 	Signal::Shared SignalBox::nextSignal(Track::Shared& track, const bool guarding, Track::Connection& leaving, const bool main, const bool includingFirst)
 	{
+		Track::Connection connection = leaving;
+		Track::Shared onto = track;
+		Signal::Shared signal;
+		Track::TraversalResult result;
+
+		if (connection == Track::Connection::DeadEnd)
+			return nullptr;
+
+		if (!includingFirst)
+		{
+			if(!track->traverse(connection, onto, true))
+				return nullptr;
+			connection = onto->otherConnection(onto->whereConnects(track));
+		}
+
+		if (guarding)
+		{
+			result = Track::traverse<Track::TraversalSignalHandling::OppositeDirection>(onto, connection, signal);
+		}
+		else 
+		{
+			result = Track::traverse<Track::TraversalSignalHandling::ForwardDirection>(onto, connection, signal);
+		}
+
+		switch (result)
+		{
+		case Track::TraversalResult::Bumper:
+		case Track::TraversalResult::Looped:
+		case Track::TraversalResult::OpenTurnout: return nullptr;
+		case Track::TraversalResult::Signal: 
+			if (signal)
+			{
+				if ((signal->mainSignal() && main) || (signal->preSignal() && !main))
+				{
+					track = onto;
+					leaving = connection;
+					return signal;
+				}
+				else if (signal->mainSignal() && !main)
+					return nullptr;
+			}
+			break;
+		}
+
+		/*
 		Track::Connection connection = leaving;
 		//Track::Connection checkConnection = connection;
 		Track::Shared onto;
 		Track::Shared& current = track;
 
 		std::unordered_set<Track::Shared> visited;
+
+		Signal::Shared lastSignal = nullptr;
 
 		bool done = false;
 		bool skipTraverse = includingFirst;
@@ -104,6 +220,10 @@ namespace winston
 			}
 			visited.insert(onto);
 
+			auto currentSignal = guarding ? current->signalGuarding(connection) : current->signalFacing(connection);
+			if (currentSignal)
+				lastSignal = currentSignal;
+
 			if (onto->type() != Track::Type::Turnout)
 			{
 				auto signal = guarding ? onto->signalGuarding(connection) : onto->signalFacing(connection);
@@ -120,12 +240,16 @@ namespace winston
 			}
 			
 			if (onto->type() == Track::Type::Bumper)
-				break;
+			{
+				return nullptr;
+				//track = onto;
+				//return lastSignal;
+			}
 
 			current = onto;
 		}
 
-		return nullptr;
+		return nullptr;*/
 	}
 
 
@@ -134,7 +258,7 @@ namespace winston
 		this->commands.push(std::move(command));
 	}
 
-	void SignalBox::work()
+	bool SignalBox::work()
 	{
 		if (this->mutex.lock())
 		{
@@ -144,81 +268,15 @@ namespace winston
 				this->commands.pop();
 				this->mutex.unlock();
 
-				//auto payload = command->payload();
 				if (command->execute() == State::Running)
 				{
 					while (!this->mutex.lock());
 					this->commands.push(std::move(command));
 					this->mutex.unlock();
 				}
-				//else
-					//command->finished();
 			}
+			return true;
 		}
-
-		/*
-		if (this->mutex.lock())
-		{
-			if (this->tasks.size() > 0)
-			{
-				auto task = std::move(this->tasks.front());
-				this->tasks.pop();
-				this->mutex.unlock();
-				
-				auto payload = task->payload();
-				if (payload->execute(this->shared_from_this()) == State::Running)
-				{
-					while (!this->mutex.lock());
-					this->tasks.push(std::move(task));
-					this->mutex.unlock();
-				}
-				else
-					task->finished();
-			}
-			else
-				this->mutex.unlock();
-		}
-
-		if (this->mutex.lock())
-		{
-			if (this->events.size() > 0)
-			{
-				auto event = std::move(this->events.front());
-				this->events.pop();
-				this->mutex.unlock();
-
-				auto payload = event->payload();
-				payload->evaluate(this->shared_from_this());
-				auto task = Task::make(payload, std::move(event));
-				this->assign(std::move(task));/*
-
-				if (auto specificEvent = dynamic_unique_ptr_cast<Event, EventTurnoutStartToggle>(event))
-				{
-					this->work(std::move(specificEvent));
-				}
-				else if (auto specificEvent = dynamic_unique_ptr_cast<Event, EventTurnoutFinalizeToggle>(event))
-				{
-					this->work(std::move(specificEvent));
-				}*
-			}
-			else
-				this->mutex.unlock();
-		}
-*/
+		return false;
 	}
-
-	/*void SignalBox::work(EventTurnoutStartToggle::Unique event)
-	{
-		auto turnout = std::dynamic_pointer_cast<Turnout>(event->turnout());
-		auto task = TaskTurnoutStartToggle::make(std::move(event), turnout);
-		this->assign(std::move(task));
-	}
-
-	void SignalBox::work(EventTurnoutFinalizeToggle::Unique event)
-	{
-		auto turnout = std::dynamic_pointer_cast<Turnout>(event->turnout());
-		auto direction = event->direction();
-		auto task = TaskTurnoutFinalizeToggle::make(std::move(event), turnout, direction);
-		this->assign(std::move(task));
-	}*/
 }

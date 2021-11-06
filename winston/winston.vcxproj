@@ -106,6 +106,7 @@
     <ClInclude Include="external\central-z21\Z21.h" />
     <ClInclude Include="external\central-z21\Z21Const.h" />
     <ClInclude Include="external\central-z21\Z21Packet.h" />
+    <ClInclude Include="external\magic_enum.hpp" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="mio.hpp" />
     <ClInclude Include="railways.h" />
@@ -116,6 +117,12 @@
     <None Include="external\central-z21\readme.md" />
     <None Include="resources\package.json" />
     <None Include="resources\winston.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\libwinston\NatvisFile.natvis">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Natvis>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

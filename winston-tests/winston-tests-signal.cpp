@@ -78,51 +78,53 @@ namespace winstontests
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
             auto l0 = testRailway->track(SignalTestRailway::Tracks::L0);
             auto l1 = testRailway->track(SignalTestRailway::Tracks::L1);
-            auto l20 = testRailway->track(SignalTestRailway::Tracks::L20);
-            auto l2s = testRailway->track(SignalTestRailway::Tracks::L2S);
-            auto l23 = testRailway->track(SignalTestRailway::Tracks::L23);
+            auto l2 = testRailway->track(SignalTestRailway::Tracks::L2);
             auto l3 = testRailway->track(SignalTestRailway::Tracks::L3);
             auto l4 = testRailway->track(SignalTestRailway::Tracks::L4);
             auto l5 = testRailway->track(SignalTestRailway::Tracks::L5);
+            auto l6 = testRailway->track(SignalTestRailway::Tracks::L6);
+            auto l7 = testRailway->track(SignalTestRailway::Tracks::L7);
+            auto l8 = testRailway->track(SignalTestRailway::Tracks::L8);
             auto sL0a = l0->signalGuarding(winston::Track::Connection::A);
             auto sL1b = l1->signalGuarding(winston::Track::Connection::B);
-            auto sL2a = l2s->signalGuarding(winston::Track::Connection::A);
-            auto sL4a = l4 ->signalGuarding(winston::Track::Connection::A);
-            auto sL5a = l5->signalGuarding(winston::Track::Connection::A);
+            auto sL4a = l4->signalGuarding(winston::Track::Connection::A);
+            auto sL7a = l7 ->signalGuarding(winston::Track::Connection::A);
+            auto sL8a = l8->signalGuarding(winston::Track::Connection::A);
 
             sL0a->aspect(winston::Signal::Aspect::Halt);
             sL1b->aspect(winston::Signal::Aspect::Halt);
-            sL2a->aspect(winston::Signal::Aspect::Halt);
             sL4a->aspect(winston::Signal::Aspect::Halt);
-            sL5a->aspect(winston::Signal::Aspect::Halt);
+            sL7a->aspect(winston::Signal::Aspect::Halt);
+            sL8a->aspect(winston::Signal::Aspect::Halt);
             
-            signalBox->setSignalOn(l2s, true, winston::Track::Connection::A, winston::Signal::Aspect::Go, true);
+            // |====L0====KL0a=KL1b====L1====L2====L3====L4=KL4a====L5====L6====L7====KL7a=KL8a====L8====|
+            signalBox->setSignalOn(l4, true, winston::Track::Connection::A, winston::Signal::Aspect::Go, true);
             Assert::IsTrue(sL0a->shows(winston::Signal::Aspect::ExpectGo));
             Assert::IsTrue(sL1b->shows(winston::Signal::Aspect::Halt));
-            Assert::IsTrue(sL2a->shows(winston::Signal::Aspect::Go));
-            Assert::IsTrue(sL4a->shows(winston::Signal::Aspect::Halt));
-            Assert::IsTrue(sL5a->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(sL4a->shows(winston::Signal::Aspect::Go));
+            Assert::IsTrue(sL7a->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(sL8a->shows(winston::Signal::Aspect::Halt));
 
             signalBox->setSignalOn(l1, true, winston::Track::Connection::B, winston::Signal::Aspect::Go, true);
             Assert::IsTrue(sL0a->shows(winston::Signal::Aspect::ExpectGo));
             Assert::IsTrue(sL1b->shows(winston::Signal::Aspect::Go));
-            Assert::IsTrue(sL2a->shows(winston::Signal::Aspect::Go));
-            Assert::IsTrue(sL4a->shows(winston::Signal::Aspect::Halt));
-            Assert::IsTrue(sL5a->shows(winston::Signal::Aspect::ExpectGo));
+            Assert::IsTrue(sL4a->shows(winston::Signal::Aspect::Go));
+            Assert::IsTrue(sL7a->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(sL8a->shows(winston::Signal::Aspect::ExpectGo));
 
             signalBox->setSignalOn(l1, true, winston::Track::Connection::B, winston::Signal::Aspect::Halt, true);
             Assert::IsTrue(sL0a->shows(winston::Signal::Aspect::ExpectGo));
             Assert::IsTrue(sL1b->shows(winston::Signal::Aspect::Halt));
-            Assert::IsTrue(sL2a->shows(winston::Signal::Aspect::Go));
-            Assert::IsTrue(sL4a->shows(winston::Signal::Aspect::Halt));
-            Assert::IsTrue(sL5a->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(sL4a->shows(winston::Signal::Aspect::Go));
+            Assert::IsTrue(sL7a->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(sL8a->shows(winston::Signal::Aspect::Halt));
 
-            signalBox->setSignalOn(l2s, true, winston::Track::Connection::A, winston::Signal::Aspect::Halt, true);
+            signalBox->setSignalOn(l4, true, winston::Track::Connection::A, winston::Signal::Aspect::Halt, true);
             Assert::IsTrue(sL0a->shows(winston::Signal::Aspect::ExpectHalt));
             Assert::IsTrue(sL1b->shows(winston::Signal::Aspect::Halt));
-            Assert::IsTrue(sL2a->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sL4a->shows(winston::Signal::Aspect::Halt));
-            Assert::IsTrue(sL5a->shows(winston::Signal::Aspect::ExpectHalt));
+            Assert::IsTrue(sL7a->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(sL8a->shows(winston::Signal::Aspect::ExpectHalt));
         }
 
         TEST_METHOD(Signals_fullTurnoutsSignalization) {

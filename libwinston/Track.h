@@ -85,22 +85,12 @@ namespace winston
 			bool successful = true;
 			while (true)
 			{
-				if (_signalHandling == TraversalSignalHandling::OppositeDirection)
-				{// the signal looks in the same way as we travel
-					signal = onto->signalGuarding(connection);
-					if (signal)
-					{
-						start = current;
-						connection = connection;
-						return TraversalResult::Signal;
-					}
-				}
-				else if (_signalHandling == TraversalSignalHandling::ForwardDirection)
+				if (_signalHandling == TraversalSignalHandling::ForwardDirection)
 				{// the signal faces us
 					signal = onto->signalFacing(connection);
 					if (signal)
 					{
-						start = current;
+						start = onto;
 						connection = connection;
 						return TraversalResult::Signal;
 					}
@@ -117,7 +107,19 @@ namespace winston
 					connection = connection;
 					return TraversalResult::OpenTurnout;
 				}
-				connection = onto->otherConnection(onto->whereConnects(current));
+
+				connection = onto->whereConnects(current);
+				if (_signalHandling == TraversalSignalHandling::OppositeDirection)
+				{// the signal looks in the same way as we travel
+					signal = onto->signalGuarding(connection);
+					if (signal)
+					{
+						start = onto;
+						connection = connection;
+						return TraversalResult::Signal;
+					}
+				}
+				connection = onto->otherConnection(connection);
 				current = onto;
 			}
 		}
@@ -250,6 +252,8 @@ namespace winston
 		const Direction direction();
 		static const Direction otherDirection(const Direction current);
 		static const Direction fromConnection(const Connection connection);
+		void fromDirection(Track::Shared& a, Track::Shared& other) const;
+		const Connection fromDirection() const;
 
 		using Shared_Ptr<Turnout>::Shared;
 		using Shared_Ptr<Turnout>::make;

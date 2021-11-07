@@ -29,6 +29,32 @@ namespace winston
 			this->setSignalsFor(turnout);
 	}
 
+	void SignalBox::setSignalOn(Track::Shared track, const Track::Connection signalGuardedConnection, const Signal::Aspect aspect)
+	{
+		const auto preSignalAspect = aspect == Signal::Aspect::Go ? Signal::Aspect::ExpectGo : Signal::Aspect::ExpectHalt;
+
+		auto current = track;
+		auto connection = signalGuardedConnection;
+		// current and from are now the position of mainSignal
+		if (Signal::Shared mainSignal = track->signalGuarding(connection))
+		{
+			mainSignal->aspect(aspect);
+			auto otherConnection = current->otherConnection(connection);
+			Signal::Shared preSignal;
+			auto result = Track::traverse<Track::TraversalSignalHandling::OppositeDirection>(current, otherConnection, preSignal);
+			if (preSignal)
+				preSignal->aspect(preSignalAspect);
+		}
+		/*else if (current->type() == Track::Type::Bumper)
+		{
+			mainSignal->aspect(Signal::Aspect::Go);
+			// current and from are now the position of mainSignal
+			auto otherFrom = current->otherConnection(from);
+			if (Signal::Shared preSignal = SignalBox::nextSignal(current, false, otherFrom, false, false))
+				preSignal->aspect(Signal::Aspect::ExpectGo);
+		}*/
+	}
+
 	void SignalBox::setSignalOn(Track::Shared track, const bool guarding, const Track::Connection connection, const Signal::Aspect aspect, const bool includingFirst)
 	{
 		const auto preSignalAspect = aspect == Signal::Aspect::Go ? Signal::Aspect::ExpectGo : Signal::Aspect::ExpectHalt;
@@ -85,12 +111,12 @@ namespace winston
 
 			Track::Shared signalCurrent = turnout;
 			auto signalConnection = Track::Connection::A;
-			auto signalToSet = this->nextSignal(signalCurrent, false, signalConnection, true, true);
+			auto signalToSet = this->nextSignal(signalCurrent, true, signalConnection, true, true);
 
 			Track::Shared current = turnout;
-			auto connection = Track::Connection::A;
+			auto connection = turnout->fromDirection();
 			Signal::Shared signal;
-			auto result = Track::traverse<Track::TraversalSignalHandling::OppositeDirection>(current, connection, signal);
+			auto result = Track::traverse<Track::TraversalSignalHandling::ForwardDirection>(current, connection, signal);
 
 			Signal::Aspect aspect;
 			switch (result)
@@ -100,7 +126,7 @@ namespace winston
 			case Track::TraversalResult::Signal: aspect = Signal::Aspect::Go; break;
 			case Track::TraversalResult::OpenTurnout: aspect = Signal::Aspect::Halt; break;
 			}
-			this->setSignalOn(signalCurrent, false, signalConnection, aspect, false);
+			this->setSignalOn(signalCurrent, signalConnection, aspect);
 
 			/*
 			Track::Shared signalCurrent = turnout;

@@ -3,8 +3,17 @@
   <Type Name="std::shared_ptr&lt;winston::Track&gt;">
     <DisplayString>{ptr->_name}</DisplayString>
   </Type>
-  <Type Name="winston::Track&gt;">
+  <Type Name="winston::Track">
     <DisplayString>{_name}</DisplayString>
+  </Type>
+  <Type Name="winston::Bumper">
+    <DisplayString>{_name} a:{a->_name}</DisplayString>
+  </Type>
+  <Type Name="winston::Rail">
+    <DisplayString>{_name} a:{a->_name}, b:{b->_name}</DisplayString>
+  </Type>
+  <Type Name="winston::Turnout">
+    <DisplayString>{_name} a:{a->_name}, b:{b->_name}, c:{c->_name}</DisplayString>
   </Type>
 
   <Type Name="winston::SignalInstance&lt;*&gt;">

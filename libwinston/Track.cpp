@@ -461,6 +461,16 @@ namespace winston
 		return Direction::Changing;
 	}
 
+	void Turnout::fromDirection(Track::Shared& a, Track::Shared& other) const {
+		a = this->a;
+		other = this->dir == Direction::Changing ? nullptr : (this->dir == Direction::A_B ? this->b : this->c);
+	}
+
+	const Track::Connection Turnout::fromDirection() const
+	{
+		return this->dir == Direction::Changing ? Connection::DeadEnd : (this->dir == Direction::A_B ? Connection::B : Connection::C);
+	}
+
 	const Length Turnout::length()
 	{
 		return this->trackLengthCalculator ? this->trackLengthCalculator(this->dir) : 0;

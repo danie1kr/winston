@@ -98,28 +98,28 @@ namespace winstontests
             sL8a->aspect(winston::Signal::Aspect::Halt);
             
             // |====L0====KL0a=KL1b====L1====L2====L3====L4=KL4a====L5====L6====L7====KL7a=KL8a====L8====|
-            signalBox->setSignalOn(l4, true, winston::Track::Connection::A, winston::Signal::Aspect::Go, true);
+            signalBox->setSignalOn(l4, winston::Track::Connection::A, winston::Signal::Aspect::Go);
             Assert::IsTrue(sL0a->shows(winston::Signal::Aspect::ExpectGo));
             Assert::IsTrue(sL1b->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sL4a->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sL7a->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sL8a->shows(winston::Signal::Aspect::Halt));
 
-            signalBox->setSignalOn(l1, true, winston::Track::Connection::B, winston::Signal::Aspect::Go, true);
+            signalBox->setSignalOn(l1, winston::Track::Connection::B, winston::Signal::Aspect::Go);
             Assert::IsTrue(sL0a->shows(winston::Signal::Aspect::ExpectGo));
             Assert::IsTrue(sL1b->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sL4a->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sL7a->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sL8a->shows(winston::Signal::Aspect::ExpectGo));
 
-            signalBox->setSignalOn(l1, true, winston::Track::Connection::B, winston::Signal::Aspect::Halt, true);
+            signalBox->setSignalOn(l1, winston::Track::Connection::B, winston::Signal::Aspect::Halt);
             Assert::IsTrue(sL0a->shows(winston::Signal::Aspect::ExpectGo));
             Assert::IsTrue(sL1b->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sL4a->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sL7a->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sL8a->shows(winston::Signal::Aspect::Halt));
 
-            signalBox->setSignalOn(l4, true, winston::Track::Connection::A, winston::Signal::Aspect::Halt, true);
+            signalBox->setSignalOn(l4, winston::Track::Connection::A, winston::Signal::Aspect::Halt);
             Assert::IsTrue(sL0a->shows(winston::Signal::Aspect::ExpectHalt));
             Assert::IsTrue(sL1b->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sL4a->shows(winston::Signal::Aspect::Halt));
@@ -179,7 +179,7 @@ namespace winstontests
             Assert::IsTrue(sUA->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sVB->shows(winston::Signal::Aspect::Halt));
 
-            signalBox->setSignalOn(t, true, winston::Track::Connection::A, winston::Signal::Aspect::Go, true);
+            signalBox->setSignalOn(t, winston::Track::Connection::A, winston::Signal::Aspect::Go);
             Assert::IsTrue(sTA->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sSA->shows(winston::Signal::Aspect::ExpectGo));
 
@@ -212,13 +212,13 @@ namespace winstontests
             sVFa->aspect(winston::Signal::Aspect::Off);
             sHEa->aspect(winston::Signal::Aspect::Off);
 
-            signalBox->setSignalOn(e, true, winston::Track::Connection::A, winston::Signal::Aspect::Go, true);
+            signalBox->setSignalOn(e, winston::Track::Connection::A, winston::Signal::Aspect::Go);
             for (int i = 0; i < 10; ++i)
                 signalBox->work();
             Assert::IsTrue(sHEa->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sVFa->shows(winston::Signal::Aspect::ExpectGo));
 
-            signalBox->setSignalOn(e, true, winston::Track::Connection::A, winston::Signal::Aspect::Halt, true);
+            signalBox->setSignalOn(e, winston::Track::Connection::A, winston::Signal::Aspect::Halt);
             for (int i = 0; i < 10; ++i)
                 signalBox->work();
             Assert::IsTrue(sHEa->shows(winston::Signal::Aspect::Halt));
@@ -243,29 +243,29 @@ namespace winstontests
             sHVIa->aspect(winston::Signal::Aspect::Off);
             sVJa->aspect(winston::Signal::Aspect::Off);
 
-            signalBox->setSignalOn(h, true, winston::Track::Connection::A, winston::Signal::Aspect::Go, true);
+            signalBox->setSignalOn(h, winston::Track::Connection::A, winston::Signal::Aspect::Go);
             for (int i = 0; i < 10; ++i)
                 signalBox->work();
             Assert::IsTrue(sHVIa->shows(winston::Signal::Aspect::ExpectGo));
             Assert::IsTrue(sVJa->shows(winston::Signal::Aspect::Off));
-            signalBox->setSignalOn(h, true, winston::Track::Connection::A, winston::Signal::Aspect::Halt, true);
+            signalBox->setSignalOn(h, winston::Track::Connection::A, winston::Signal::Aspect::Halt);
             for (int i = 0; i < 10; ++i)
                 signalBox->work();
             Assert::IsTrue(sHVIa->shows(winston::Signal::Aspect::ExpectHalt));
             Assert::IsTrue(sVJa->shows(winston::Signal::Aspect::Off));
-            signalBox->setSignalOn(i, true, winston::Track::Connection::A, winston::Signal::Aspect::Halt, true);
+            signalBox->setSignalOn(i, winston::Track::Connection::A, winston::Signal::Aspect::Halt);
             for (int i = 0; i < 10; ++i)
                 signalBox->work();
             Assert::IsTrue(sHVIa->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sHVIa->shows(winston::Signal::Aspect::ExpectHalt));
             Assert::IsTrue(sVJa->shows(winston::Signal::Aspect::ExpectHalt));
-            signalBox->setSignalOn(h, true, winston::Track::Connection::A, winston::Signal::Aspect::Go, true);
+            signalBox->setSignalOn(h, winston::Track::Connection::A, winston::Signal::Aspect::Go);
             for (int i = 0; i < 10; ++i)
                 signalBox->work();
             Assert::IsTrue(sHVIa->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sHVIa->shows(winston::Signal::Aspect::ExpectGo));
             Assert::IsTrue(sVJa->shows(winston::Signal::Aspect::ExpectHalt));
-            signalBox->setSignalOn(i, true, winston::Track::Connection::A, winston::Signal::Aspect::Go, true);
+            signalBox->setSignalOn(i, winston::Track::Connection::A, winston::Signal::Aspect::Go);
             for (int i = 0; i < 10; ++i)
                 signalBox->work();
             Assert::IsTrue(sHVIa->shows(winston::Signal::Aspect::ExpectGo));
@@ -287,17 +287,17 @@ namespace winstontests
             t2->finalizeChangeTo(winston::Turnout::Direction::A_B);
             auto sHVQa = q->signalGuarding(winston::Track::Connection::A);
 
-            signalBox->setSignalOn(q, true, winston::Track::Connection::A, winston::Signal::Aspect::Go, true);
+            signalBox->setSignalOn(q, winston::Track::Connection::A, winston::Signal::Aspect::Go);
             for (int i = 0; i < 10; ++i)
                 signalBox->work();
             Assert::IsTrue(sHVQa->shows(winston::Signal::Aspect::Go));
             Assert::IsFalse(sHVQa->shows(winston::Signal::Aspect::ExpectGo));
             Assert::IsFalse(sHVQa->shows(winston::Signal::Aspect::ExpectHalt));
 
-            signalBox->setSignalOn(q, true, winston::Track::Connection::A, winston::Signal::Aspect::Halt, false);
+            signalBox->setSignalOn(q, winston::Track::Connection::A, winston::Signal::Aspect::Halt);
             for (int i = 0; i < 10; ++i)
                 signalBox->work();
-            Assert::IsTrue(sHVQa->shows(winston::Signal::Aspect::Go));
+            Assert::IsTrue(sHVQa->shows(winston::Signal::Aspect::Halt));
             Assert::IsFalse(sHVQa->shows(winston::Signal::Aspect::ExpectGo));
             Assert::IsFalse(sHVQa->shows(winston::Signal::Aspect::ExpectHalt));
         }

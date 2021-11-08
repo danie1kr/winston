@@ -45,17 +45,9 @@ namespace winston
 			if (preSignal)
 				preSignal->aspect(preSignalAspect);
 		}
-		/*else if (current->type() == Track::Type::Bumper)
-		{
-			mainSignal->aspect(Signal::Aspect::Go);
-			// current and from are now the position of mainSignal
-			auto otherFrom = current->otherConnection(from);
-			if (Signal::Shared preSignal = SignalBox::nextSignal(current, false, otherFrom, false, false))
-				preSignal->aspect(Signal::Aspect::ExpectGo);
-		}*/
 	}
 
-	void SignalBox::setSignalOn(Track::Shared track, const bool guarding, const Track::Connection connection, const Signal::Aspect aspect, const bool includingFirst)
+	/*void SignalBox::setSignalOn(Track::Shared track, const bool guarding, const Track::Connection connection, const Signal::Aspect aspect, const bool includingFirst)
 	{
 		const auto preSignalAspect = aspect == Signal::Aspect::Go ? Signal::Aspect::ExpectGo : Signal::Aspect::ExpectHalt;
 		
@@ -65,46 +57,31 @@ namespace winston
 		if (Signal::Shared mainSignal = SignalBox::nextSignal(current, guarding, from, true, includingFirst))
 		{
 			mainSignal->aspect(aspect);
-			/*if (aspect == Signal::Aspect::Go && mainSignal->preSignal())
-			{
-				auto preCurrent = current;
-				auto preFrom = from;
-				if(Signal::Shared preOfMainSignal = SignalBox::nextSignal(preCurrent, guarding, preFrom, true, false))
-					mainSignal->aspect(preOfMainSignal->shows(Signal::Aspect::Go) ? Signal::Aspect::ExpectGo : Signal::Aspect::ExpectHalt);
-			}*/
 			// current and from are now the position of mainSignal
 			auto otherFrom = current->otherConnection(from);
 			if (Signal::Shared preSignal = SignalBox::nextSignal(current, false, otherFrom, false, false))
 				preSignal->aspect(preSignalAspect);
 		}
-		/*else if (current->type() == Track::Type::Bumper)
-		{
-			mainSignal->aspect(Signal::Aspect::Go);
-			// current and from are now the position of mainSignal
-			auto otherFrom = current->otherConnection(from);
-			if (Signal::Shared preSignal = SignalBox::nextSignal(current, false, otherFrom, false, false))
-				preSignal->aspect(Signal::Aspect::ExpectGo);
-		}*/
+	}*/
+
+	void SignalBox::setSignalsFor(Turnout::Shared turnout, const Turnout::Direction direction)
+	{
+		Track::Shared signalCurrent = turnout;
+		const auto aspect = turnout->direction() == direction ? Signal::Aspect::Go : Signal::Aspect::Halt;
+		Track::Connection signalConnection = direction == Turnout::Direction::A_B ? Track::Connection::B : Track::Connection::C;
+		auto signalToSet = this->nextSignal(signalCurrent, true, signalConnection, true, true);
+		this->setSignalOn(signalCurrent, signalConnection, aspect);
 	}
 
 	void SignalBox::setSignalsFor(Turnout::Shared turnout)
 	{
-		// make public
-		auto setSignals = [](Turnout::Shared turnout, const Turnout::Direction direction)
-		{
-			Track::Connection from = direction == Turnout::Direction::A_B ? Track::Connection::B : Track::Connection::C;
-			Track::Shared current = turnout;
-			const auto mainSignalAspect = turnout->direction() == direction ? Signal::Aspect::Go : Signal::Aspect::Halt;
-			SignalBox::setSignalOn(current, false, from, mainSignalAspect, false);
-		};
-
 		// A_facing = leave turnout at A, find first main signal facing A
 		// B_guarding = leave turnout at B, find first pre signal if 
 
 		// the direction
-		this->order(Command::make([turnout, setSignals](const unsigned long& created) -> const winston::State { setSignals(turnout, turnout->direction()); return State::Finished; }));
+		this->order(Command::make([this, turnout](const unsigned long& created) -> const winston::State { this->setSignalsFor(turnout, turnout->direction()); return State::Finished; }));
 		// the closed direction
-		this->order(Command::make([turnout, setSignals](const unsigned long& created) -> const winston::State { setSignals(turnout, turnout->otherDirection(turnout->direction())); return State::Finished; }));
+		this->order(Command::make([this, turnout](const unsigned long& created) -> const winston::State { this->setSignalsFor(turnout, turnout->otherDirection(turnout->direction())); return State::Finished; }));
 		// backwards on entry
 		this->order(Command::make([this, turnout](const unsigned long& created) -> const winston::State { 
 
@@ -128,40 +105,6 @@ namespace winston
 			}
 			this->setSignalOn(signalCurrent, signalConnection, aspect);
 
-			/*
-			Track::Shared signalCurrent = turnout;
-			Track::Shared onto;
-			auto signalConnection = Track::Connection::A;
-			auto signal = this->nextSignal(signalCurrent, false, signalConnection, true, true);
-			auto canTraverse = true;
-			auto connection = signalConnection;
-			auto current = signalCurrent;
-			std::unordered_set<Track::Shared> visited;
-			bool looped = false;
-			bool forward = false;
-			Signal::Aspect aspect = Signal::Aspect::Halt;
-			while (canTraverse = current->traverse(connection, onto, forward))
-			{
-				if (visited.contains(onto))
-				{
-					aspect = Signal::Aspect::Go;
-					looped = true;
-					break;
-				}
-				// it should be sufficient to search for the next signal instead of trying to loop
-				forward = true;
-				connection = onto->otherConnection(onto->whereConnects(current));
-				visited.insert(onto);
-				current = onto;
-				if (onto->type() == Track::Type::Bumper && connection == Track::Connection::DeadEnd)
-				{
-					aspect = Signal::Aspect::Go;
-					break;
-				}
-			}
-			//auto aspect = (looped || (onto && onto->type() == Track::Type::Bumper)) ? Signal::Aspect::Go : Signal::Aspect::Halt;
-			this->setSignalOn(signalCurrent, false, signalConnection, aspect, false);
-			*/
 			return State::Finished; 
 
 		}));
@@ -213,69 +156,7 @@ namespace winston
 			break;
 		}
 
-		/*
-		Track::Connection connection = leaving;
-		//Track::Connection checkConnection = connection;
-		Track::Shared onto;
-		Track::Shared& current = track;
-
-		std::unordered_set<Track::Shared> visited;
-
-		Signal::Shared lastSignal = nullptr;
-
-		bool done = false;
-		bool skipTraverse = includingFirst;
-		while (!done)
-		{
-			if (!skipTraverse)
-			{
-				if (!current->traverse(connection, onto, true))
-					break;
-
-				connection = onto->otherConnection(onto->whereConnects(current));
-				//checkConnection = guarding ? backConnection : connection;
-
-				// we looped somehow
-				if (visited.contains(onto))
-					break;
-			}
-			else
-			{
-				onto = current;
-				skipTraverse = false;
-			}
-			visited.insert(onto);
-
-			auto currentSignal = guarding ? current->signalGuarding(connection) : current->signalFacing(connection);
-			if (currentSignal)
-				lastSignal = currentSignal;
-
-			if (onto->type() != Track::Type::Turnout)
-			{
-				auto signal = guarding ? onto->signalGuarding(connection) : onto->signalFacing(connection);
-				if (signal)
-				{
-					if ((signal->mainSignal() && main) || (signal->preSignal() && !main))
-					{
-						track = onto;
-						return signal;
-					}
-					else if (signal->mainSignal() && !main)
-						return nullptr;
-				}
-			}
-			
-			if (onto->type() == Track::Type::Bumper)
-			{
-				return nullptr;
-				//track = onto;
-				//return lastSignal;
-			}
-
-			current = onto;
-		}
-
-		return nullptr;*/
+		return nullptr;
 	}
 
 

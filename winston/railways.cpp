@@ -524,31 +524,31 @@ void SignalRailway::connect(std::array<winston::Track::Shared, tracksCount()>& t
     auto t4 = this->track(Tracks::Turnout4);
     auto t5 = this->track(Tracks::Turnout5);
 
-    auto KS = [=](winston::Track::Shared track, winston::Track::Connection connection)->winston::Signal::Shared {
-        return winston::SignalKS::make([=](const winston::Signal::Aspects aspect)->const winston::State {
+    /*auto KS = [distance, =](winston::Track::Shared track, winston::Track::Connection connection)->winston::Signal::Shared {
+        return winston::SignalKS::make(distance, [=](const winston::Signal::Aspects aspect)->const winston::State {
             return this->callbacks.signalUpdateCallback(track, connection, aspect);
           });
-    };
+    };*/
 
-    a->connect(winston::Track::Connection::A, KS, t2, winston::Track::Connection::B)
-        ->connect(winston::Track::Connection::A, g1, winston::Track::Connection::B, KS)
-        ->connect(winston::Track::Connection::A, KS, t4, winston::Track::Connection::C)
-        ->connect(winston::Track::Connection::A, g4, winston::Track::Connection::B, KS)
+    a->connect(winston::Track::Connection::A, KS(0), t2, winston::Track::Connection::B)
+        ->connect(winston::Track::Connection::A, g1, winston::Track::Connection::B, KS(0))
+        ->connect(winston::Track::Connection::A, KS(0), t4, winston::Track::Connection::C)
+        ->connect(winston::Track::Connection::A, g4, winston::Track::Connection::B, KS(0))
         ->connect(winston::Track::Connection::A, g5, winston::Track::Connection::B)
-        ->connect(winston::Track::Connection::A, KS, t5, winston::Track::Connection::A)
-        ->connect(winston::Track::Connection::B, g6, winston::Track::Connection::B, KS)
-        ->connect(winston::Track::Connection::A, g7, winston::Track::Connection::B, KS)
+        ->connect(winston::Track::Connection::A, KS(0), t5, winston::Track::Connection::A)
+        ->connect(winston::Track::Connection::B, g6, winston::Track::Connection::B, KS(0))
+        ->connect(winston::Track::Connection::A, g7, winston::Track::Connection::B, KS(0))
         ->connect(winston::Track::Connection::A, t1, winston::Track::Connection::A)
         ->connect(winston::Track::Connection::C, t2, winston::Track::Connection::C);
 
-    t1->connect(winston::Track::Connection::B, g2, winston::Track::Connection::A, KS)
+    t1->connect(winston::Track::Connection::B, g2, winston::Track::Connection::A, KS(0))
         ->connect(winston::Track::Connection::B, t3, winston::Track::Connection::A)
         ->connect(winston::Track::Connection::B, g3, winston::Track::Connection::A)
-        ->connect(winston::Track::Connection::B, KS, t4, winston::Track::Connection::B);
+        ->connect(winston::Track::Connection::B, KS(0), t4, winston::Track::Connection::B);
 
-    t3->connect(winston::Track::Connection::C, b, winston::Track::Connection::A, KS);
+    t3->connect(winston::Track::Connection::C, b, winston::Track::Connection::A, KS(0));
 
-    t5->connect(winston::Track::Connection::C, c, winston::Track::Connection::A, KS);
+    t5->connect(winston::Track::Connection::C, c, winston::Track::Connection::A, KS(0));
 
 #define attachSignalSR(track, SignalClass, guardedConnection) \
     track->attachSignal(SignalClass::make([=](const winston::Signal::Aspects aspect)->const winston::State { return this->callbacks.signalUpdateCallback(track, guardedConnection, aspect); }), guardedConnection);

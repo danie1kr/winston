@@ -2,8 +2,8 @@
 
 namespace winston
 {
-	Signal::Signal(const Callback callback)
-		: callback(callback), _aspect((unsigned int)Aspect::Off)
+	Signal::Signal(const Callback callback, const Length distance)
+		: callback(callback), _distance(distance), _aspect((unsigned int)Aspect::Off)
 	{
 
 	}
@@ -43,5 +43,10 @@ namespace winston
 	const bool Signal::shows(Aspect aspect)
 	{
 		return (const unsigned int)this->_aspect & (const unsigned int)aspect;
+	}
+
+	const Length Signal::distance()
+	{
+		return this->_distance;
 	}
 }

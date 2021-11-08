@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
-  <Type Name="std::shared_ptr&lt;winston::Track&gt;">
-    <DisplayString>{ptr->_name}</DisplayString>
-  </Type>
+
   <Type Name="winston::Track">
     <DisplayString>{_name}</DisplayString>
   </Type>
@@ -17,7 +15,7 @@
   </Type>
 
   <Type Name="winston::SignalInstance&lt;*&gt;">
-    <DisplayString>{_aspect}</DisplayString>
+    <DisplayString>{(winston::Signal::Aspect)_aspect}</DisplayString>
   </Type>
 
 </AutoVisualizer>

@@ -30,6 +30,10 @@ namespace winston
 
 		Railway(const Callbacks callbacks);
 		virtual ~Railway() = default;
+
+		using SignalFactory = std::function < winston::Signal::Shared (winston::Track::Shared track, winston::Track::Connection connection)>;
+		SignalFactory KS(const Length distance = 0);
+
 	protected:
 		const Callbacks callbacks;
 	};

@@ -47,23 +47,6 @@ namespace winston
 		}
 	}
 
-	/*void SignalBox::setSignalOn(Track::Shared track, const bool guarding, const Track::Connection connection, const Signal::Aspect aspect, const bool includingFirst)
-	{
-		const auto preSignalAspect = aspect == Signal::Aspect::Go ? Signal::Aspect::ExpectGo : Signal::Aspect::ExpectHalt;
-		
-		auto current = track;
-		auto from = connection;
-		// current and from are now the position of mainSignal
-		if (Signal::Shared mainSignal = SignalBox::nextSignal(current, guarding, from, true, includingFirst))
-		{
-			mainSignal->aspect(aspect);
-			// current and from are now the position of mainSignal
-			auto otherFrom = current->otherConnection(from);
-			if (Signal::Shared preSignal = SignalBox::nextSignal(current, false, otherFrom, false, false))
-				preSignal->aspect(preSignalAspect);
-		}
-	}*/
-
 	void SignalBox::setSignalsFor(Turnout::Shared turnout, const Turnout::Direction direction)
 	{
 		Track::Shared signalCurrent = turnout;

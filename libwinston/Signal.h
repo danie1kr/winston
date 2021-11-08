@@ -79,7 +79,7 @@ namespace winston
 
 		using Callback = std::function<const State(const Aspects aspect)>;
 		static Callback defaultCallback();
-		Signal(const Callback callback = defaultCallback());
+		Signal(const Callback callback = defaultCallback(), const Length distance = 0);
 
 		const State aspect(const Aspect aspect);
 		const Aspects aspect();
@@ -87,8 +87,11 @@ namespace winston
 		virtual const bool supports(const Aspect aspect, const bool any) = 0;
 		virtual const bool preSignal() = 0;
 		virtual const bool mainSignal() = 0;
+
+		const Length distance();
 	protected:
 		Aspects _aspect;
+		const Length _distance;
 		const Callback callback;
 	};
 	
@@ -96,7 +99,7 @@ namespace winston
 	class SignalInstance : public Signal, public Shared_Ptr<SignalInstance<_Aspects>>
 	{
 	public:
-		SignalInstance(const Callback callback = Signal::defaultCallback()) : Signal(callback) { };
+		SignalInstance(const Callback callback = Signal::defaultCallback(), const Length distance = 0) : Signal(callback, distance) { };
 
 		const bool supports(const Aspect aspect, const bool any)
 		{

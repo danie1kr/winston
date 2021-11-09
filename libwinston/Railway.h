@@ -13,6 +13,8 @@
 #include "WinstonTypes.h"
 #include "Util.h"
 #include "Track.h"
+#include "Block.h"
+#include "HAL.h"
 
 namespace winston
 {
@@ -34,8 +36,12 @@ namespace winston
 		using SignalFactory = std::function < winston::Signal::Shared (winston::Track::Shared track, winston::Track::Connection connection)>;
 		SignalFactory KS(const Length distance = 0);
 
+		void block(const Address address, const Trackset trackset);
+		Block::Shared block(Address address);
+
 	protected:
 		const Callbacks callbacks;
+		std::unordered_map<Address, Block::Shared> blocks;
 	};
 
 	template<typename _TracksClass>
@@ -47,11 +53,18 @@ namespace winston
 
 		using Tracks = _TracksClass;
 
-		Result init()
+		Result init(bool blocks = false)
 		{
 			for (size_t track = 0; track < tracksCount(); ++track)
 				this->tracks[track] = define(magic_enum::enum_value<Tracks>(track));
 			connect(this->tracks);
+			if (!blocks)
+			{
+				Trackset set;
+				for (size_t track = 0; track < tracksCount(); ++track)
+					set.insert(this->track(magic_enum::enum_value<Tracks>(track)));
+				this->block(1, set);
+			}
 			return this->validate();
 		}
 		static constexpr size_t tracksCount() noexcept {
@@ -64,6 +77,14 @@ namespace winston
 		template<typename _Track, typename ..._args>
 		Track::Shared& add(Tracks track, _args && ...args) {
 			return this->tracks[static_cast<size_t>(track)] = std::make_shared<_Track>(std::forward<_args>(args)...);
+		}
+
+		const Trackset trackset(std::initializer_list<Tracks> tracks)
+		{
+			Trackset set;
+			for (auto track: tracks)
+				set.insert(this->track(track));
+			return set;
 		}
 
 		bool traverse(const Track::Connection from, Track::Shared& on, Track::Shared& onto) const

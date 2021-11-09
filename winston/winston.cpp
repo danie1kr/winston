@@ -19,10 +19,10 @@
 
 #include "external/central-z21/Z21.h"
 
-#define FRAME_SLEEP 50
+constexpr auto FRAME_SLEEP = 50;
 
 #define RAILWAY_DEBUG_INJECTOR
-#define RAILWAY_DEBUG_INJECTOR_DELAY 1000
+constexpr auto RAILWAY_DEBUG_INJECTOR_DELAY = 1000;
 //#define RAILWAY_CLASS RailwayWithSiding
 //#define RAILWAY_CLASS TimeSaverRailway
 //#define RAILWAY_CLASS Y2020Railway

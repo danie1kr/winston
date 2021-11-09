@@ -27,6 +27,21 @@ namespace winston
 		ValidationFailed
 	};
 
+	enum class Features : unsigned int
+	{
+		None = 0,
+		Blocks = 1
+	};
+
+	inline Features operator|(Features a, Features b)
+	{
+		return static_cast<Features>(static_cast<int>(a) | static_cast<int>(b));
+	}
+
+	inline bool operator&(Features a, Features b)
+	{
+		return static_cast<bool>(static_cast<int>(a) & static_cast<int>(b));
+	}
 
 	template<class _T>
 	class Shared_Ptr
@@ -57,7 +72,7 @@ namespace winston
 	class SignalBox;
 
 	class DigitalCentralStation;
-	template<typename _Railway, class _AddressTranslator, class _DigitalCentralStation>
+	template<typename _Railway, class _AddressTranslator, class _DigitalCentralStation, Features _features>
 	class ModelRailwaySystem;
 
 	class Block;

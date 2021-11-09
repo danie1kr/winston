@@ -12,19 +12,6 @@
 namespace winston
 {
 	/*
-	// Block: a collection of rails secured by signals
-	class Block
-	{
-	public:
-		Block(const std::vector<Track&> tracks);
-		std::vector<Track*> tracks;
-		std::array<Signal*, 2> signals;
-
-		void entered(Locomotive& loco, Track& onto);
-		void left(Locomotive& loco, Track& to);
-	};*/
-
-	/*
 	        =======
 	     S4/ S5  S3
 	======/========
@@ -60,10 +47,14 @@ namespace winston
 		Track::Shared connect(const Connection local, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory);
 		Track::Shared connect(const Connection local, SignalFactory guardingLocalSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory);
 		virtual bool has(const Connection connection) const = 0;
-		//Track& attachSignal(Signal &signal, const Connection comingFrom);
+		virtual Track::Shared on(const Connection connection) const = 0;
+		
+		void block(const Address address);
+		const Address block() const;
 
 		virtual bool traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const = 0;
 
+		using TraversalCallback = std::function<bool(Track::Shared track, const Track::Connection connection)>;
 		enum class TraversalResult : unsigned int
 		{
 			Looped,
@@ -77,7 +68,7 @@ namespace winston
 			OppositeDirection
 		};
 		template<TraversalSignalHandling _signalHandling >
-		static TraversalResult traverse(Track::Shared& start, Track::Connection& connection, Signal::Shared& signal)
+		static TraversalResult traverse(Track::Shared& start, Track::Connection& connection, Signal::Shared& signal, TraversalCallback callback = nullptr)
 		{
 			auto& current = start;
 			Track::Shared onto = current;
@@ -107,7 +98,8 @@ namespace winston
 					connection = connection;
 					return TraversalResult::OpenTurnout;
 				}
-
+				if(callback)
+					callback(onto, connection);
 				connection = onto->whereConnects(current);
 				if (_signalHandling == TraversalSignalHandling::OppositeDirection)
 				{// the signal looks in the same way as we travel
@@ -120,9 +112,19 @@ namespace winston
 					}
 				}
 				connection = onto->otherConnection(connection);
+				if (callback)
+					callback(onto, connection);
 				current = onto;
 			}
 		}
+
+		static TraversalResult traverse(Track::Shared& start, Track::Connection& connection)
+		{
+			Signal::Shared signal;
+			return traverse<TraversalSignalHandling::Ignore>(start, connection, signal);
+		}
+
+		using TraversalCallback = std::function<bool(Track::Shared track, const Track::Connection connection)>;
 
 		virtual void collectAllConnections(std::set<Track::Shared>& tracks) const = 0;
 		virtual const Connection whereConnects(Track::Shared& other) const = 0;
@@ -147,7 +149,10 @@ namespace winston
 	private:
 		const Length trackLength;
 		const std::string _name;
+		Address _block;
 	};
+
+	using Trackset = std::set<Track::Shared>;
 	
 	// a====|
 	class Bumper : public Track, public Shared_Ptr<Bumper>, public std::enable_shared_from_this<Bumper>
@@ -157,6 +162,7 @@ namespace winston
 		//static Track::Shared make();
 
 		bool has(const Connection connection) const;
+		Track::Shared on(const Connection connection) const;
 		bool traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const;
 		void collectAllConnections(std::set<Track::Shared>& tracks) const;
 		const Connection whereConnects(Track::Shared& other) const;
@@ -188,6 +194,7 @@ namespace winston
 		//static Track::Shared make();
 
 		bool has(const Connection connection) const;
+		Track::Shared on(const Connection connection) const;
 		bool traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const;
 
 		void collectAllConnections(std::set<Track::Shared>& tracks) const;
@@ -233,6 +240,7 @@ namespace winston
 		//static Track::Shared make(const Callback callback, const bool leftTurnout);
 
 		bool has(const Connection connection) const;
+		Track::Shared on(const Connection connection) const;
 
 		bool traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const;
 		void collectAllConnections(std::set<Track::Shared>& tracks) const;

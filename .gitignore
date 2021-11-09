@@ -3,6 +3,7 @@
 ################################################################################
 
 /.vs/winston/v16
+/.vs/winston/v17
 /libwinston/Debug
 /libwinston/x64
 /libwinston/libwinston.vcxproj.user

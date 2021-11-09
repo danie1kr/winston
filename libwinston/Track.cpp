@@ -8,7 +8,7 @@
 
 namespace winston
 {
-	Track::Track(const std::string name, Length trackLength) : Shared_Ptr<Track>(), _name(name), trackLength(trackLength)
+	Track::Track(const std::string name, Length trackLength) : Shared_Ptr<Track>(), _name(name), _block(0), trackLength(trackLength)
 	{
 	}
 
@@ -46,6 +46,16 @@ namespace winston
 		return this->connectTo(local, guardingLocalSignalFactory, to, remote, guardingRemoteSignalFactory);
 	}
 
+	void Track::block(const Address address)
+	{
+		this->_block = address;
+	}
+
+	const Address Track::block() const
+	{
+		return this->_block;
+	}
+
 	void Track::attachSignal(Signal::Shared signal, const Connection guarding)
 	{
 		hal::fatal("Cannot attach signal");
@@ -63,6 +73,10 @@ namespace winston
 
 	Result Track::validateSingle(Track::Shared track)
 	{
+		if (track->block() == 0)
+			return Result::ValidationFailed;
+
+
 		std::set<Track::Shared> others;
 		track->collectAllConnections(others);
 
@@ -96,6 +110,13 @@ namespace winston
 	bool Bumper::has(const Connection connection) const
 	{
 		return connection == Connection::A || connection == Connection::DeadEnd;
+	}
+
+	Track::Shared Bumper::on(const Connection connection) const
+	{
+		if (connection == Connection::A)
+			return a;
+		return nullptr;
 	}
 
 	bool Bumper::traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const
@@ -202,6 +223,15 @@ namespace winston
 	bool Rail::has(const Connection connection) const
 	{
 		return connection == Connection::A || connection == Connection::B;
+	}
+
+	Track::Shared Rail::on(const Connection connection) const
+	{
+		if (connection == Connection::A)
+			return a;
+		else if (connection == Connection::B)
+			return b;
+		return nullptr;
 	}
 
 	bool Rail::traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const
@@ -313,6 +343,17 @@ namespace winston
 	bool Turnout::has(const Connection connection) const
 	{
 		return connection != Connection::DeadEnd;
+	}
+
+	Track::Shared Turnout::on(const Connection connection) const
+	{
+		if (connection == Connection::A)
+			return a;
+		else if (connection == Connection::B)
+			return b;
+		else if (connection == Connection::C)
+			return c;
+		return nullptr;
 	}
 
 	bool Turnout::traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const

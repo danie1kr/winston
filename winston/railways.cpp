@@ -13,12 +13,11 @@ MiniRailway::MiniRailway(const Callbacks callbacks) : winston::RailwayWithRails<
 winston::Track::Shared MiniRailway::define(const Tracks track)
 {
     switch (track) {
-    case Tracks::A:
-    case Tracks::B:
-    case Tracks::C:
-        return winston::Bumper::make();
+        BUMPER(A);
+        BUMPER(B);
+        BUMPER(C);
     case Tracks::Turnout1:
-        return winston::Turnout::make(std::string(""), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
+        return winston::Turnout::make(std::string("Turnout1"), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
     default:
         winston::hal::fatal(std::string("track ") + std::string(magic_enum::enum_name(track)) + std::string("not in switch"));
         return winston::Bumper::make();

@@ -6,7 +6,7 @@
 
 namespace winston
 {
-	template<typename _Railway, class _AddressTranslator, class _DigitalCentralStation>
+	template<typename _Railway, class _AddressTranslator, class _DigitalCentralStation, Features _features = Features::None>
 	class ModelRailwaySystem
 	{
 	public:
@@ -20,7 +20,8 @@ namespace winston
 
 			this->systemSetup();
 
-			this->railway->init();
+			this->railway->init(_features & Features::Blocks);
+
 			result = this->digitalCentralStation->connect();
 
 			for (size_t i = 0; i < this->railway->tracksCount(); ++i)

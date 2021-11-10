@@ -8,18 +8,23 @@ namespace winston
 
 	void Railway::block(const Address address, const Trackset trackset)
 	{
-		if (this->blocks.contains(address))
+		if (this->_blocks.contains(address))
 			hal::fatal("block address exists already");
 
 		for (auto& track : trackset)
 			track->block(address);
 
-		this->blocks.insert(std::make_pair(address, Block::make(address, trackset)));
+		this->_blocks.insert(std::make_pair(address, Block::make(address, trackset)));
 	}
 
 	Block::Shared Railway::block(Address address)
 	{
-		return this->blocks[address];
+		return this->_blocks[address];
+	}
+
+	const Blockmap Railway::blocks() const
+	{
+		return this->_blocks;
 	}
 
 	Railway::SignalFactory Railway::KS(const Length distance)

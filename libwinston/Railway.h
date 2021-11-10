@@ -38,10 +38,11 @@ namespace winston
 
 		void block(const Address address, const Trackset trackset);
 		Block::Shared block(Address address);
+		const Blockmap blocks() const;
 
 	protected:
 		const Callbacks callbacks;
-		std::unordered_map<Address, Block::Shared> blocks;
+		Blockmap _blocks;
 	};
 
 	template<typename _TracksClass>

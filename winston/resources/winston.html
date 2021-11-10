@@ -255,7 +255,7 @@
 
         connect();
 
-        let railway, signals, layout, $railway, $saveLayout, $resetLayout, cy, uiEditLayout = false, allowLayoutStorage = true, allowLayoutLoading = true;
+        let railway, signals, blocks, layout, $railway, $saveLayout, $resetLayout, cy, uiEditLayout = false, allowLayoutStorage = true, allowLayoutLoading = true;
 
         const WinstonTypeTurnout = "turnout";
         const WinstonTypeLocomotive = "locomotive";
@@ -573,6 +573,12 @@
                             "background-color": "green"
                         }
 
+                    },
+                    {
+                        selector: "node.blockColoring",
+                        style: {
+                            "background-color": "data(blockColor)"
+                        }
                     }
                 ]
             }).gridGuide({
@@ -719,6 +725,7 @@
                     cy = cytoscapeCreate();
                     cy.add(layout.cy);
                     cy = cytoscapeUpdateSignals(cy, signals);
+                    cy = cytoscapeUpdateBlocks(cy, blocks);
                     cy = cytoscapePostAdd(cy);
 
                     cy.viewport({zoom: layout.viewport.zoom, pan: layout.viewport.pan});
@@ -846,6 +853,19 @@
             return cy;
         }
 
+        function cytoscapeUpdateBlocks(cy, blocks) {
+            _.each(blocks, function (block, i) {
+                _.each(block.tracks, function (track, j) {
+                    cy.$("[track=" + track + "]").forEach(function(ele, i, eles) { 
+                        ele.data("block", block.address);
+                        ele.data("blockColor", "#red");
+                    });
+                });
+            });
+
+            return cy;
+        }
+
         function buildRailwayGraph(data)
         {
             function classFromType(type)
@@ -862,6 +882,7 @@
             let edges = [];
             railway = data.tracks;
             signals = data.signals;
+            blocks = data.blocks;
 
             _.each(data.tracks, function(track, i) {
 
@@ -942,6 +963,7 @@
             cy.add(nodes);
             cy.add(edges);
             cy = cytoscapeUpdateSignals(cy, data.signals);
+            cy = cytoscapeUpdateBlocks(cy, data.blocks);
             cy = cytoscapePostAdd(cy);
 
             if(allowLayoutLoading)

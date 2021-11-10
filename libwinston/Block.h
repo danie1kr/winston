@@ -17,16 +17,18 @@ namespace winston {
 
 		const bool contains(Track::Shared track) const;
 		const BlockEntrySet entries() const;
+		const Trackset tracks() const;
 
 		using Shared_Ptr<Block>::Shared;
 		using Shared_Ptr<Block>::make;
 	private:
 		BlockEntrySet blockEntrySet;
-		const Trackset tracks;
+		const Trackset _tracks;
 
 		const Address address;
 	};
 
 	using Blockset = std::set<Block::Shared>;
+	using Blockmap = std::unordered_map<Address, Block::Shared>;
 }
 

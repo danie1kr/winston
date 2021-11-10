@@ -258,6 +258,7 @@ private:
             railwayMessage["data"] = JSON::Make(JSON::Class::Object);
             auto& tracks = railwayMessage["data"]["tracks"] = JSON::Make(JSON::Class::Array);
             auto& signals = railwayMessage["data"]["signals"] = JSON::Make(JSON::Class::Array);
+            auto& blocks = railwayMessage["data"]["blocks"] = JSON::Make(JSON::Class::Array);
 
             for (unsigned int i = 0; i < railway->tracksCount(); ++i)
             {
@@ -313,6 +314,20 @@ private:
                 }
                 }
             }
+
+            for (auto& block: this->railway->blocks())
+            {
+                JSON b = JSON::Make(JSON::Class::Object);
+                b["address"] = block.first;
+                auto bl = block.second;
+
+                auto& tracks = b["tracks"] = JSON::Make(JSON::Class::Array);
+                for (auto& track : bl->tracks())
+                    tracks.append(this->railway->trackIndex(track));
+
+                blocks.append(b);
+            }
+
             this->webServer.send(client, railwayMessage.ToString());
         }
         else if (std::string("storeRailwayLayout").compare(op) == 0)

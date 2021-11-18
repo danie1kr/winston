@@ -1,0 +1,26 @@
+{
+  "Version": 1,
+  "ProjectMap": {
+    "6d8fde0e-4a98-4052-8d39-9348e0e1ed3a": {
+      "ProjectGuid": "6d8fde0e-4a98-4052-8d39-9348e0e1ed3a",
+      "DisplayName": "winston",
+      "ColorIndex": 0
+    },
+    "e2afe313-843b-4ee1-b7ac-988d2779b178": {
+      "ProjectGuid": "e2afe313-843b-4ee1-b7ac-988d2779b178",
+      "DisplayName": "libwinston",
+      "ColorIndex": 1
+    },
+    "415ead83-6a40-4cd3-8766-bcb3b14d32ce": {
+      "ProjectGuid": "415ead83-6a40-4cd3-8766-bcb3b14d32ce",
+      "DisplayName": "winston-tests",
+      "ColorIndex": 2
+    },
+    "a2fe74e1-b743-11d0-ae1a-00a0c90fffc3": {
+      "ProjectGuid": "a2fe74e1-b743-11d0-ae1a-00a0c90fffc3",
+      "DisplayName": "Miscellaneous Files",
+      "ColorIndex": -1
+    }
+  },
+  "NextColorIndex": 3
+}

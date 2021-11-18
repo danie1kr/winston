@@ -88,22 +88,57 @@ namespace winston
 			return set;
 		}
 
+		/*const std::unordered_map<Tracks, Track::Shared> tracks() const
+		{
+			std::unordered_map<Tracks, Track::Shared> map;
+			for (size_t i = 0; i < tracksCount(); ++i)
+				map.insert(std::make_pair(trackEnum(i), this->tracks[i]));
+			return map;
+		}*/
+
+		const std::unordered_map<Tracks, Bumper::Shared> bumper() const
+		{
+			std::unordered_map<Tracks, Bumper::Shared> map;
+			for (size_t i = 0; i < tracksCount(); ++i)
+				if(this->tracks[i]->type() == Track::Type::Bumper)
+					map[this->trackEnum(i)] = std::dynamic_pointer_cast<Bumper>(this->tracks[i]);
+			return map;
+		}
+
+		const std::unordered_map<Tracks, Rail::Shared> rails() const
+		{
+			std::unordered_map<Tracks, Rail::Shared> map;
+			for (size_t i = 0; i < tracksCount(); ++i)
+				if (this->tracks[i]->type() == Track::Type::Rail)
+					map[this->trackEnum(i)] = std::dynamic_pointer_cast<Rail>(this->tracks[i]);
+			return map;
+		}
+
+		const std::unordered_map<Tracks, Turnout::Shared> turnouts()
+		{
+			std::unordered_map<Tracks, Turnout::Shared> map;
+			for (size_t i = 0; i < tracksCount(); ++i)
+				if (this->tracks[i]->type() == Track::Type::Turnout)
+					map[this->trackEnum(i)] = std::dynamic_pointer_cast<Turnout>(this->tracks[i]);
+			return map;
+		}
+
 		bool traverse(const Track::Connection from, Track::Shared& on, Track::Shared& onto) const
 		{
 			return on ? on->traverse(from, onto) : false;
 		}
 
-		inline Tracks trackEnum(size_t index)
+		inline constexpr Tracks trackEnum(size_t index) const
 		{
 			return magic_enum::enum_cast<Tracks>((unsigned int)index).value();
 		}
 
-		inline unsigned int trackIndex(Tracks track)
+		inline constexpr unsigned int trackIndex(Tracks track) const
 		{
 			return magic_enum::enum_integer(track);
 		}
 
-		inline unsigned int trackIndex(Track::Shared track)
+		inline constexpr unsigned int trackIndex(Track::Shared track) const
 		{
 			return magic_enum::enum_integer(trackEnum(track));
 		}
@@ -118,7 +153,7 @@ namespace winston
 			return this->tracks[index];
 		}
 
-		Tracks trackEnum(Track::Shared& track)
+		const Tracks trackEnum(Track::Shared& track) const
 		{
 			auto it = std::find(this->tracks.begin(), this->tracks.end(), track);
 			return this->trackEnum(std::distance(this->tracks.begin(), it));

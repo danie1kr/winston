@@ -73,13 +73,6 @@ private:
             })
             });
         webServer.broadcast(obj.ToString());
-        /*{
-            address
-            name
-            light
-            forward
-            speed
-        }*/
     }
 
     void locoSend(winston::Address address)
@@ -496,15 +489,10 @@ private:
 
     void systemSetupComplete()
     {
-        for (size_t i = 0; i < this->railway->tracksCount(); ++i)
-        {
-            auto track = this->railway->track(magic_enum::enum_value<RAILWAY_CLASS::Tracks>(i));
-            if (track->type() == winston::Track::Type::Turnout)
-            {
-                auto turnout = std::dynamic_pointer_cast<winston::Turnout>(track);
-                this->digitalCentralStation->requestTurnoutInfo(turnout);
-            }
-        }
+#ifdef RAILWAY_DEBUG_INJECTOR
+        for (auto& [key, turnout]: this->railway->turnouts())
+            this->stationDebugInjector->injectTurnoutUpdate(turnout, std::rand() % 2 ? winston::Turnout::Direction::A_B : winston::Turnout::Direction::A_C);
+#endif
     }
 
     // accept new requests and loop over what the signal box has to do
@@ -535,6 +523,7 @@ MRS mrs;
 void winston_setup()
 {
 	winston::hal::text("Hello from Winston!");
+    std::srand((unsigned int)(winston::hal::now() & 0x00000000FFFFFFFF));
 
 	//using Modelleisenbahn = MRS<RailwayWithSiding>;
 	//using Modelleisenbahn = MRS<TimeSaverRailway

@@ -364,7 +364,11 @@ void md5_append(md5_state_t *pms, md5_byte_t const * data, size_t nbytes) {
     return;
 
     /* Update the message length. */
+
+#pragma warning( push )
+#pragma warning( disable : 4267)
     pms->count[1] += nbytes >> 29;
+#pragma warning( pop ) 
     pms->count[0] += nbits;
     if (pms->count[0] < nbits)
     pms->count[1]++;

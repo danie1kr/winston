@@ -173,7 +173,11 @@ inline void calc(void const * src, size_t bytelength, unsigned char * hash) {
         innerHash(result, w);
         clearWBuffert(w);
     }
+
+#pragma warning( push )
+#pragma warning( disable : 4267)
     w[15] = bytelength << 3;
+#pragma warning( pop ) 
     innerHash(result, w);
 
     // Store hash in result pointer, and make sure we get in in the correct

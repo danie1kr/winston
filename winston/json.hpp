@@ -906,10 +906,15 @@ namespace giri {
                     return Internal.Bool;
 
                 if (Type == Class::Integral)
+#pragma warning( push )
+#pragma warning( disable : 4244)
                     return Internal.Int;
+#pragma warning( pop ) 
 
                 if (Type == Class::String)
                 {
+#pragma warning( push )
+#pragma warning( disable : 4101)
                     double parsed;
                     try {
                         parsed = std::stod(*Internal.String);
@@ -922,6 +927,7 @@ namespace giri {
                     }
                     if (!ec)
                         return parsed;
+#pragma warning( pop ) 
                 }
 
                 ec = error::float_conversion_failed;
@@ -953,7 +959,10 @@ namespace giri {
                     return Internal.Bool;
 
                 if (Type == Class::Floating)
+#pragma warning( push )
+#pragma warning( disable : 4244)
                     return Internal.Float;
+#pragma warning( pop ) 
 
                 if (Type == Class::String)
                 {

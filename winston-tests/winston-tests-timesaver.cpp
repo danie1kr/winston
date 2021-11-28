@@ -70,8 +70,8 @@ namespace winstontests
             //signalBox->notify(winston::EventTurnoutStartToggle::make(cb, t1));
             //signalBox->notify(winston::EventTurnoutStartToggle::make(cb, t2));
 
-            signalBox->order(winston::Command::make([t1](const unsigned long& created) -> const winston::State { return t1->startToggle(); }));
-            signalBox->order(winston::Command::make([t2](const unsigned long& created) -> const winston::State { return t2->startToggle(); }));
+            signalBox->order(winston::Command::make([t1](const unsigned long long& created) -> const winston::State { return t1->startToggle(); }));
+            signalBox->order(winston::Command::make([t2](const unsigned long long& created) -> const winston::State { return t2->startToggle(); }));
 
 
             signalBox->work();

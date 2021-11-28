@@ -57,13 +57,13 @@ namespace winstontests
             Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sCA->shows(winston::Signal::Aspect::Halt));
 
-            signalBox->order(winston::Command::make([t1](const unsigned long& created) -> const winston::State { return t1->finalizeChangeTo(winston::Turnout::Direction::A_C); }));
+            signalBox->order(winston::Command::make([t1](const unsigned long long& created) -> const winston::State { return t1->finalizeChangeTo(winston::Turnout::Direction::A_C); }));
             for (int i = 0; i < 10; ++i)
                 signalBox->work();
             Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sCA->shows(winston::Signal::Aspect::Go));
 
-            signalBox->order(winston::Command::make([t1](const unsigned long& created) -> const winston::State { return t1->finalizeChangeTo(winston::Turnout::Direction::A_B); }));
+            signalBox->order(winston::Command::make([t1](const unsigned long long& created) -> const winston::State { return t1->finalizeChangeTo(winston::Turnout::Direction::A_B); }));
             for (int i = 0; i < 10; ++i)
                 signalBox->work();
             Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Go));
@@ -184,13 +184,13 @@ namespace winstontests
             Assert::IsTrue(sSA->shows(winston::Signal::Aspect::ExpectGo));
 
             /*
-            signalBox->order(winston::Command::make([t3](const unsigned long& created) -> const winston::State { return t3->finalizeChangeTo(winston::Turnout::Direction::A_C); }));
+            signalBox->order(winston::Command::make([t3](const unsigned long long& created) -> const winston::State { return t3->finalizeChangeTo(winston::Turnout::Direction::A_C); }));
             for (int i = 0; i < 10; ++i)
                 signalBox->work();
             Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sCA->shows(winston::Signal::Aspect::Go));*
 
-            signalBox->order(winston::Command::make([t3](const unsigned long& created) -> const winston::State { return t3->finalizeChangeTo(winston::Turnout::Direction::A_B); }));
+            signalBox->order(winston::Command::make([t3](const unsigned long long& created) -> const winston::State { return t3->finalizeChangeTo(winston::Turnout::Direction::A_B); }));
             for (int i = 0; i < 10; ++i)
                 signalBox->work();
             Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Go));

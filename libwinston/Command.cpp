@@ -14,7 +14,7 @@ namespace winston
 		return this->payload(this->created);
 	}
 
-	const unsigned long Command::age()
+	const unsigned long long Command::age() const
 	{
 		return hal::now() - this->created;
 	}

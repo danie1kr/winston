@@ -30,6 +30,9 @@
     <ClCompile Include="winston-tests-signal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="winston-tests-signaldevice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\winston\winston-hal-x64.h">

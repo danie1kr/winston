@@ -3,6 +3,7 @@
 #include <string>
 #include <array>
 #include <memory>
+#include <vector>
 
 namespace winston
 {
@@ -43,6 +44,19 @@ namespace winston
 		return static_cast<bool>(static_cast<int>(a) & static_cast<int>(b));
 	}
 
+	class Port
+	{
+	public:
+		Port();
+		Port(const size_t device, const size_t port);
+
+		const size_t device() const;
+		const size_t port() const;
+	private:
+		const size_t _device;
+		const size_t _port;
+	};
+
 	template<class _T>
 	class Shared_Ptr
 	{
@@ -67,6 +81,25 @@ namespace winston
 		}
 	};
 
+	class Device : public Shared_Ptr<Device>
+	{
+	public:
+		virtual const Result init() = 0;
+		using Shared_Ptr<Device>::Shared;
+		using Shared_Ptr<Device>::make;
+	};
+
+	template<typename T, unsigned int bits = 8 * sizeof(T)>
+	class SendDevice : public Shared_Ptr<SendDevice<T, bits>>
+	{
+	public:
+		using DataType = T;
+		virtual const Result send(const std::vector<DataType> data) = 0;
+
+		using Shared_Ptr<SendDevice<T, bits>>::Shared;
+		using Shared_Ptr<SendDevice<T, bits>>::make;
+	};
+
 	class Railway;
 
 	class SignalBox;
@@ -81,6 +114,8 @@ namespace winston
 	class Rail;
 	class Turnout;
 	class Task;
+
+	class Signal;
 	
 	class Event;
 

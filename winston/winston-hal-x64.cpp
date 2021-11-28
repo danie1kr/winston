@@ -98,6 +98,20 @@ size_t WebServerWSPP::maxMessageSize()
     return this->server.get_max_message_size();
 }
 
+SignalSPIDevice::SignalSPIDevice(const Pin chipSelect, const unsigned int speed, SPIDataOrder order, SPIMode mode, const Pin clock, const Pin mosi, const Pin miso)
+    : SPIDevice<unsigned int, 12>(chipSelect, speed, order, mode, clock, mosi, miso)
+{
+
+}
+const winston::Result SignalSPIDevice::init()
+{
+    return winston::Result::OK;
+}
+const winston::Result SignalSPIDevice::send(const std::vector<DataType> data)
+{
+    return winston::Result::OK;
+}
+
 static const std::string constWinstonStoragePath = "winston.storage";
 static std::string winstonStoragePath = constWinstonStoragePath;
 static const auto winstonStorageSize = 32 * 1024;

@@ -62,11 +62,11 @@ namespace winston
 		// B_guarding = leave turnout at B, find first pre signal if 
 
 		// the direction
-		this->order(Command::make([this, turnout](const unsigned long& created) -> const winston::State { this->setSignalsFor(turnout, turnout->direction()); return State::Finished; }));
+		this->order(Command::make([this, turnout](const unsigned long long& created) -> const winston::State { this->setSignalsFor(turnout, turnout->direction()); return State::Finished; }));
 		// the closed direction
-		this->order(Command::make([this, turnout](const unsigned long& created) -> const winston::State { this->setSignalsFor(turnout, turnout->otherDirection(turnout->direction())); return State::Finished; }));
+		this->order(Command::make([this, turnout](const unsigned long long& created) -> const winston::State { this->setSignalsFor(turnout, turnout->otherDirection(turnout->direction())); return State::Finished; }));
 		// backwards on entry
-		this->order(Command::make([this, turnout](const unsigned long& created) -> const winston::State { 
+		this->order(Command::make([this, turnout](const unsigned long long& created) -> const winston::State { 
 
 
 			Track::Shared signalCurrent = turnout;

@@ -27,12 +27,12 @@ namespace winston
 		return this->_blocks;
 	}
 
-	Railway::SignalFactory Railway::KS(const Length distance)
+	Railway::SignalFactory Railway::KS(const Length distance, const Port port)
 	{
-		return [distance, this](winston::Track::Shared track, winston::Track::Connection connection)->winston::Signal::Shared {
+		return [distance, port, this](winston::Track::Shared track, winston::Track::Connection connection)->winston::Signal::Shared {
 			return winston::SignalKS::make([=](const winston::Signal::Aspects aspect)->const winston::State {
 				return this->callbacks.signalUpdateCallback(track, connection, aspect);
-				}, distance);
+				}, distance, port);
 		};
 	}
 }

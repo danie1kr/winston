@@ -8,15 +8,15 @@ namespace winston
 	class Command : public Shared_Ptr<Command>
 	{
 	public:
-		using Payload = std::function<const State(const unsigned long& created)>;
+		using Payload = std::function<const State(const unsigned long long& created)>;
 
 		Command(Payload payload);
 		virtual ~Command() = default;
 
 		const State execute();
-		inline const unsigned long age();
+		inline const unsigned long long age() const;
 	private:
-		unsigned long created;
+		unsigned long long created;
 		Payload payload;
 	};
 }

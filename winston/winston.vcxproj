@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -110,6 +110,7 @@
     <ClInclude Include="json.hpp" />
     <ClInclude Include="mio.hpp" />
     <ClInclude Include="railways.h" />
+    <ClInclude Include="TLC5947_SignalDevice.h" />
     <ClInclude Include="winston-hal-x64.h" />
     <ClInclude Include="winston.h" />
   </ItemGroup>

@@ -71,6 +71,9 @@
     <ClInclude Include="external\magic_enum.hpp">
       <Filter>external</Filter>
     </ClInclude>
+    <ClInclude Include="TLC5947_SignalDevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\winston.html">

@@ -93,6 +93,7 @@
     <ClCompile Include="..\winston\winston-hal-x64.cpp" />
     <ClCompile Include="winston-tests-mini.cpp" />
     <ClCompile Include="winston-tests-signal.cpp" />
+    <ClCompile Include="winston-tests-signaldevice.cpp" />
     <ClCompile Include="winston-tests-timesaver.cpp" />
   </ItemGroup>
   <ItemGroup>

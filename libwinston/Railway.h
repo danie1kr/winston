@@ -34,7 +34,7 @@ namespace winston
 		virtual ~Railway() = default;
 
 		using SignalFactory = std::function < winston::Signal::Shared (winston::Track::Shared track, winston::Track::Connection connection)>;
-		SignalFactory KS(const Length distance = 0);
+		SignalFactory KS(const Length distance = 0, const Port port = Port());
 
 		void block(const Address address, const Trackset trackset);
 		Block::Shared block(Address address);

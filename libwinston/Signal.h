@@ -1,12 +1,13 @@
 #pragma once
 
 #include "WinstonTypes.h"
+#include "HAL.h"
 #include "Util.h"
 #include <functional>
+#include <span>
 
 namespace winston
 {
-
 	class Signal : public Shared_Ptr<Signal>
 	{
 	public:
@@ -19,6 +20,15 @@ namespace winston
 			ExpectGo =		0b10000
 		};
 		using Aspects = unsigned int;
+
+		struct Light
+		{
+			static Light make(const Port port);
+			const Port port;
+			unsigned int value = 0;
+			static const unsigned int range = 1 << 12;
+			static const unsigned int maximum = range - 1;
+		};
 
 		/*
 		
@@ -82,26 +92,40 @@ namespace winston
 		Signal(const Callback callback = defaultCallback(), const Length distance = 0);
 
 		const State aspect(const Aspect aspect);
-		const Aspects aspect();
-		const bool shows(Aspect aspect);
-		virtual const bool supports(const Aspect aspect, const bool any) = 0;
-		virtual const bool preSignal() = 0;
-		virtual const bool mainSignal() = 0;
+		const Aspects aspect() const;
+		const bool shows(Aspect aspect) const;
+		virtual const bool supports(const Aspect aspect, const bool any) const = 0;
+		virtual const bool preSignal() const = 0;
+		virtual const bool mainSignal() const = 0;
 
-		const Length distance();
+		const Length distance() const;
+		
+		virtual const std::span<const Light> lights() const = 0;
+		virtual const unsigned int lightsCount() const = 0;
 	protected:
+
+		virtual void updateLights() = 0;
+
 		Aspects _aspect;
 		const Length _distance;
 		const Callback callback;
 	};
+
+	inline const bool operator&(const Signal::Aspect a, const Signal::Aspect b)
+	{
+		return static_cast<const bool>(static_cast<const unsigned int>(a) & static_cast<const unsigned int>(b));
+	}
 	
-	template<unsigned int _Aspects>
-	class SignalInstance : public Signal, public Shared_Ptr<SignalInstance<_Aspects>>
+	template<unsigned int _Aspects, unsigned int _Lights>
+	class SignalInstance : public Signal, public Shared_Ptr<SignalInstance<_Aspects, _Lights>>
 	{
 	public:
-		SignalInstance(const Callback callback = Signal::defaultCallback(), const Length distance = 0) : Signal(callback, distance) { };
+		SignalInstance(const Callback callback = Signal::defaultCallback(), const Length distance = 0, const Port port = Port())
+			: Signal(callback, distance)
+			, _lights(Sequence<_Lights-1>::generate(port.device(), port.port())) {
+		};
 
-		const bool supports(const Aspect aspect, const bool any)
+		const bool supports(const Aspect aspect, const bool any) const
 		{
 			const unsigned int eval = (const unsigned int)aspect & (const unsigned int)_Aspects;
 			if (any)
@@ -110,21 +134,70 @@ namespace winston
 				return eval == (const unsigned int)aspect;
 		}
 
-		const bool preSignal()
+		const bool preSignal() const
 		{
 			return ((const unsigned int)_Aspects & ((const unsigned int)Aspect::ExpectHalt | (const unsigned int)Aspect::ExpectGo)) != 0;
 		}
 
-		const bool mainSignal()
+		const bool mainSignal() const
 		{
 			return ((const unsigned int)_Aspects & ((const unsigned int)Aspect::Go | (const unsigned int)Aspect::Halt)) != 0;
 		}
-		using Shared_Ptr<SignalInstance<_Aspects>>::Shared;
-		using Shared_Ptr<SignalInstance<_Aspects>>::make;
+
+		const std::span<const Light> lights() const {
+			return this->_lights;
+		}
+
+		const unsigned int lightsCount() const {
+			return _Lights;
+		};
+
+		void updateLights(); // { static_assert(false, "do not use"); };
+
+		using Shared_Ptr<SignalInstance<_Aspects, _Lights>>::Shared;
+		using Shared_Ptr<SignalInstance<_Aspects, _Lights>>::make;
+
+	private:
+		typedef std::array<Light, _Lights> LightsArray;
+
+		template<int... i> static constexpr LightsArray makeLightInSequence(const size_t device, const size_t startPort) { return LightsArray{ { Signal::Light::make(Port(device, startPort + i))... } }; }
+		template<int...> struct Sequence;
+		template<int... i> struct Sequence<0, i...>
+		{
+			static constexpr LightsArray generate(const size_t device, const size_t startPort) { return makeLightInSequence<0, i...>(device, startPort); }
+		};
+
+		template<int i, int... j> struct Sequence<i, j...>
+		{
+			static constexpr LightsArray generate(const size_t device, const size_t startPort) { return Sequence<i - 1, i, j...>::generate(device, startPort); }
+		};
+
+		LightsArray _lights;
 	};
 
-	using SignalKS = SignalInstance<Signal::AspectsKS>;
-	using SignalH = SignalInstance<Signal::AspectsH>;
-	using SignalV = SignalInstance<Signal::AspectsV>;
-	using SignalHV = SignalInstance<Signal::AspectsHV>;
+	using SignalKS = SignalInstance<Signal::AspectsKS, 3>;
+	using SignalH = SignalInstance<Signal::AspectsH, 2>;
+	using SignalV = SignalInstance<Signal::AspectsV, 2>;
+	using SignalHV = SignalInstance<Signal::AspectsHV, 4>;
+
+	template<typename T, unsigned int bits = 8*sizeof(T)>
+	class SignalDevice : public Shared_Ptr<SignalDevice<T, bits>>
+	{
+		static_assert(bits <= sizeof(T) * 8, "too many bits for T");
+	public:
+		SignalDevice(const size_t devices, const size_t portsPerDevice, SendDevice<T, bits>::Shared device)
+			: device(device), devices(devices), portsPerDevice(portsPerDevice)
+		{
+
+		}
+
+		virtual const Result update(winston::Signal::Shared signal) = 0;
+
+		using Shared_Ptr<SignalDevice<T, bits>>::Shared;
+		using Shared_Ptr<SignalDevice<T, bits>>::make;
+	protected:
+		size_t portsPerDevice;
+		size_t devices;
+		SendDevice<T, bits>::Shared device;
+	};
 }

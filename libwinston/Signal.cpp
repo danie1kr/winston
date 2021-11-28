@@ -2,6 +2,11 @@
 
 namespace winston
 {
+	Signal::Light Signal::Light::make(const Port port)
+	{
+		return { .port = port };
+	}
+
 	Signal::Signal(const Callback callback, const Length distance)
 		: callback(callback), _distance(distance), _aspect((unsigned int)Aspect::Off)
 	{
@@ -32,21 +37,50 @@ namespace winston
 			//else
 			//	this->_aspect = (unsigned int)aspect;
 		}
+		this->updateLights();
 		return this->callback(this->_aspect);
 	}
 
-	const Signal::Aspects Signal::aspect()
+	const Signal::Aspects Signal::aspect() const
 	{
 		return this->_aspect;
 	}
 
-	const bool Signal::shows(Aspect aspect)
+	const bool Signal::shows(Aspect aspect) const
 	{
 		return (const unsigned int)this->_aspect & (const unsigned int)aspect;
 	}
 
-	const Length Signal::distance()
+	const Length Signal::distance() const
 	{
 		return this->_distance;
+	}
+
+	template<> void SignalKS::updateLights()
+	{
+		// Halt, Go, ExpectHalt
+		this->_lights[0].value = this->shows(Aspect::Halt) ? Light::maximum : 0;
+		this->_lights[1].value = this->shows(Aspect::Go) ? Light::maximum : 0;
+		this->_lights[2].value = this->shows(Aspect::ExpectHalt) ? Light::maximum : 0;
+	}
+	template<> void SignalH::updateLights()
+	{
+		// Halt, Go
+		this->_lights[0].value = this->shows(Aspect::Halt) ? Light::maximum : 0;
+		this->_lights[1].value = this->shows(Aspect::Go) ? Light::maximum : 0;
+	}
+	template<> void SignalV::updateLights()
+	{
+		// ExpectHalt, ExpectGo
+		this->_lights[0].value = this->shows(Aspect::ExpectHalt) ? Light::maximum : 0;
+		this->_lights[1].value = this->shows(Aspect::ExpectGo) ? Light::maximum : 0;
+	}
+	template<> void SignalHV::updateLights()
+	{
+		// Halt, Go, ExpectHalt, ExpectGo
+		this->_lights[0].value = this->shows(Aspect::Halt) ? Light::maximum : 0;
+		this->_lights[1].value = this->shows(Aspect::Go) ? Light::maximum : 0;
+		this->_lights[2].value = this->shows(Aspect::ExpectHalt) ? Light::maximum : 0;
+		this->_lights[3].value = this->shows(Aspect::ExpectGo) ? Light::maximum : 0;
 	}
 }

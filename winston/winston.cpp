@@ -18,6 +18,7 @@
 #endif
 
 #include "external/central-z21/Z21.h"
+#include "TLC5947_SignalDevice.h"
 
 constexpr auto FRAME_SLEEP = 50;
 
@@ -122,7 +123,7 @@ private:
         winston::Locomotive::Callbacks callbacks;
 
         callbacks.drive = [=](const winston::Address address, const unsigned char speed, const bool forward) {
-            this->signalBox->order(winston::Command::make([this, address, speed, forward](const unsigned long& created) -> const winston::State
+            this->signalBox->order(winston::Command::make([this, address, speed, forward](const unsigned long long& created) -> const winston::State
                 {
                     this->digitalCentralStation->triggerLocoDrive(address, speed, forward);
                     return winston::State::Finished;
@@ -130,7 +131,7 @@ private:
         };
 
         callbacks.functions = [=](const winston::Address address, const uint32_t functions) {
-            this->signalBox->order(winston::Command::make([this, address, functions](const unsigned long& created) -> const winston::State
+            this->signalBox->order(winston::Command::make([this, address, functions](const unsigned long long& created) -> const winston::State
                 {
                     this->digitalCentralStation->triggerLocoFunction(address, functions);
                     return winston::State::Finished;
@@ -159,6 +160,7 @@ private:
         {
             auto id = this->railway->trackIndex(track);
             signalSendState(id, connection, aspects);
+            
             return winston::State::Finished;
         };
 
@@ -210,10 +212,10 @@ private:
             unsigned int id = (unsigned int)data["id"].ToInt();
             auto turnout = std::dynamic_pointer_cast<winston::Turnout>(railway->track(id));
             auto requestDir = winston::Turnout::otherDirection(turnout->direction());
-            signalBox->order(winston::Command::make([this, id, turnout, requestDir](const unsigned long& created) -> const winston::State
+            signalBox->order(winston::Command::make([this, id, turnout, requestDir](const unsigned long long& created) -> const winston::State
                 {
 #ifdef RAILWAY_DEBUG_INJECTOR
-                    signalBox->order(winston::Command::make([this, turnout, requestDir](const unsigned long& created) -> const winston::State
+                    signalBox->order(winston::Command::make([this, turnout, requestDir](const unsigned long long& created) -> const winston::State
                         {
                             if (winston::hal::now() - created > RAILWAY_DEBUG_INJECTOR_DELAY)
                             {
@@ -408,10 +410,10 @@ private:
                     unsigned char speed128 = (unsigned char)(speed & 0xFF);
                     if (loco->light() != light)
                     {
-                        signalBox->order(winston::Command::make([this, loco, light](const unsigned long& created) -> const winston::State
+                        signalBox->order(winston::Command::make([this, loco, light](const unsigned long long& created) -> const winston::State
                             {
 #ifdef RAILWAY_DEBUG_INJECTOR
-                                signalBox->order(winston::Command::make([this, loco, light](const unsigned long& created) -> const winston::State
+                                signalBox->order(winston::Command::make([this, loco, light](const unsigned long long& created) -> const winston::State
                                     {
                                         if (winston::hal::now() - created > RAILWAY_DEBUG_INJECTOR_DELAY)
                                         {
@@ -427,10 +429,10 @@ private:
 
                     if (loco->forward() != forward || loco->speed() != speed128)
                     {
-                        signalBox->order(winston::Command::make([this, loco, speed128, forward](const unsigned long& created) -> const winston::State
+                        signalBox->order(winston::Command::make([this, loco, speed128, forward](const unsigned long long& created) -> const winston::State
                             {
 #ifdef RAILWAY_DEBUG_INJECTOR
-                                signalBox->order(winston::Command::make([this, loco, speed128, forward](const unsigned long& created) -> const winston::State
+                                signalBox->order(winston::Command::make([this, loco, speed128, forward](const unsigned long long& created) -> const winston::State
                                     {
                                         if (winston::hal::now() - created > RAILWAY_DEBUG_INJECTOR_DELAY)
                                         {
@@ -485,6 +487,10 @@ private:
         // a debug injector
         auto dcs = std::dynamic_pointer_cast<winston::DigitalCentralStation>(this->digitalCentralStation);
         this->stationDebugInjector = winston::DigitalCentralStation::DebugInjector::make(dcs);
+
+        // signals
+        this->signalSPIDevice = SignalSPIDevice::make(0, 20000000);
+        this->signalDevice = TLC5947_SignalDevice::make(1, 24, this->signalSPIDevice);
     };
 
     void systemSetupComplete()
@@ -517,6 +523,10 @@ private:
     UDPSocketLWIP::Shared z21Socket;
     const std::string z21IP = { "192.168.0.100" };
     const unsigned short z21Port = 5000;
+
+    /* Signal Device */
+    SignalSPIDevice::Shared signalSPIDevice;
+    TLC5947_SignalDevice::Shared signalDevice;
 };
 
 MRS mrs;

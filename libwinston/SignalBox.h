@@ -32,6 +32,9 @@ namespace winston
 		
 		void order(Command::Shared command);
 		bool work();
+
+		using Shared_Ptr<SignalBox>::Shared;
+		using Shared_Ptr<SignalBox>::make;
 	private:
 
 		static Signal::Shared nextSignal(Track::Shared& track, const bool guarding, Track::Connection& leaving, const bool main, const bool includingFirst);

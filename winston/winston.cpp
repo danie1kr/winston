@@ -22,7 +22,6 @@
 
 constexpr auto FRAME_SLEEP = 50;
 
-#define RAILWAY_DEBUG_INJECTOR
 constexpr auto RAILWAY_DEBUG_INJECTOR_DELAY = 1000;
 //#define RAILWAY_CLASS RailwayWithSiding
 //#define RAILWAY_CLASS TimeSaverRailway
@@ -158,8 +157,12 @@ private:
 
         callbacks.signalUpdateCallback = [=](winston::Track::Shared track, winston::Track::Connection connection, const winston::Signal::Aspects aspects) -> const winston::State
         {
+            // send to web socket server
             auto id = this->railway->trackIndex(track);
             signalSendState(id, connection, aspects);
+
+            // update physical light
+            this->signalDevice->update(track->signalGuarding(connection));
             
             return winston::State::Finished;
         };
@@ -484,12 +487,16 @@ private:
         auto udp = std::dynamic_pointer_cast<winston::hal::UDPSocket>(this->z21Socket);
         this->digitalCentralStation = Z21::make(udp, at, this->signalBox, z21Callbacks());
 
+#ifdef RAILWAY_DEBUG_INJECTOR
         // a debug injector
         auto dcs = std::dynamic_pointer_cast<winston::DigitalCentralStation>(this->digitalCentralStation);
         this->stationDebugInjector = winston::DigitalCentralStation::DebugInjector::make(dcs);
+#endif
 
         // signals
         this->signalSPIDevice = SignalSPIDevice::make(0, 20000000);
+        this->signalSPIDevice->init();
+        this->signalSPIDevice->skipSend(true);
         this->signalDevice = TLC5947_SignalDevice::make(1, 24, this->signalSPIDevice);
     };
 
@@ -499,6 +506,9 @@ private:
         for (auto& [key, turnout]: this->railway->turnouts())
             this->stationDebugInjector->injectTurnoutUpdate(turnout, std::rand() % 2 ? winston::Turnout::Direction::A_B : winston::Turnout::Direction::A_C);
 #endif
+        this->signalSPIDevice->skipSend(false);
+        this->signalDevice->flush();
+        this->signalBox->order(this->signalDevice->flushCommand(40));
     }
 
     // accept new requests and loop over what the signal box has to do

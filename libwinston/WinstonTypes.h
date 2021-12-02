@@ -4,6 +4,7 @@
 #include <array>
 #include <memory>
 #include <vector>
+#include <span>
 
 namespace winston
 {
@@ -17,6 +18,7 @@ namespace winston
 	enum class State
 	{
 		Running,
+		Skipped,
 		Finished
 	};
 
@@ -25,7 +27,8 @@ namespace winston
 		OK,
 		InternalError,
 		SendFailed,
-		ValidationFailed
+		ValidationFailed,
+		ExternalHardwareFailed,
 	};
 
 	enum class Features : unsigned int
@@ -94,10 +97,17 @@ namespace winston
 	{
 	public:
 		using DataType = T;
-		virtual const Result send(const std::vector<DataType> data) = 0;
+		SendDevice() : skip(false) { };
+		virtual const Result send(const std::span<DataType> data) = 0;
+		void skipSend(bool skip)
+		{
+			this->skip = skip;
+		}
 
 		using Shared_Ptr<SendDevice<T, bits>>::Shared;
 		using Shared_Ptr<SendDevice<T, bits>>::make;
+	protected:
+		bool skip;
 	};
 
 	class Railway;

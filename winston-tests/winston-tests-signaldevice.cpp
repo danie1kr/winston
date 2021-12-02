@@ -11,15 +11,15 @@ namespace winstontests
 	class Test_SendDevice : public winston::SendDevice<T, bits>, public winston::Shared_Ptr<Test_SendDevice<T, bits>>
 	{
 	public:
-		const winston::Result send(const std::vector<T> data)
+		const winston::Result send(const std::span<T> data)
 		{
 			this->_data = data;
 			return winston::Result::OK;
 		};
 
-		const std::vector<T> data() { return this->_data; };
+		const std::span<T> data() { return this->_data; };
 
-		std::vector<T> _data;
+		std::span<T> _data;
 
 		using winston::Shared_Ptr<Test_SendDevice<T, bits>>::Shared;
 		using winston::Shared_Ptr<Test_SendDevice<T, bits>>::make;

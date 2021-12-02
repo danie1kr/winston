@@ -22,6 +22,9 @@
     <Filter Include="external\websocketpp">
       <UniqueIdentifier>{aaaf94e4-118c-4cf8-95de-3b86882303a4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="external\ftdi-ft232">
+      <UniqueIdentifier>{3788dd8f-f7fa-4eb1-9d55-5eda0d44d8bd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="winston-hal-stm32.cpp">
@@ -40,6 +43,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="railways.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FT232_SPIDevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -74,6 +80,15 @@
     <ClInclude Include="TLC5947_SignalDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FT232_SPIDevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="external\ftdi-232\ftd2xx.h">
+      <Filter>external\ftdi-ft232</Filter>
+    </ClInclude>
+    <ClInclude Include="external\ftdi-232\libMPSSE_spi.h">
+      <Filter>external\ftdi-ft232</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\winston.html">
@@ -88,5 +103,9 @@
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\libwinston\NatvisFile.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="external\ftdi-232\libMPSSE.lib" />
+    <Library Include="external\ftdi-232\libMPSSE-dbg.lib" />
   </ItemGroup>
 </Project>

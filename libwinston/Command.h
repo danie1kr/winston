@@ -14,9 +14,11 @@ namespace winston
 		virtual ~Command() = default;
 
 		const State execute();
+		void obsolete() noexcept;
 		inline const unsigned long long age() const;
 	private:
 		unsigned long long created;
 		Payload payload;
+		bool skip;
 	};
 }

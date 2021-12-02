@@ -4,13 +4,20 @@
 namespace winston
 {
 	Command::Command(Payload payload)
-		: payload(payload), created(hal::now())
+		: payload(payload), created(hal::now()), skip(false)
 	{
 
 	}
 
+	void Command::obsolete() noexcept
+	{
+		this->skip = true;
+	}
+
 	const State Command::execute()
 	{
+		if (this->skip)
+			return State::Skipped;
 		return this->payload(this->created);
 	}
 

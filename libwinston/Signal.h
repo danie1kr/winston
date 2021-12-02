@@ -5,6 +5,7 @@
 #include "Util.h"
 #include <functional>
 #include <span>
+#include "Command.h"
 
 namespace winston
 {
@@ -191,13 +192,39 @@ namespace winston
 
 		}
 
-		virtual const Result update(winston::Signal::Shared signal) = 0;
+		const Result update(winston::Signal::Shared signal)
+		{
+			this->lastUpdate = hal::now();
+			return this->updateInternal(signal);
+		}
+
+		const Result flush()
+		{
+			this->lastFlush = hal::now();
+			return this->flushInternal();
+		}
+
+		Command::Shared flushCommand(const unsigned long long waitPeriod = 40)
+		{
+			return Command::make([=](const unsigned long long& created) -> const State 
+			{
+				auto now = hal::now();
+				if (now - lastFlush > waitPeriod && lastUpdate > lastFlush)
+					this->flush();
+				return State::Running;
+			});
+		}
 
 		using Shared_Ptr<SignalDevice<T, bits>>::Shared;
 		using Shared_Ptr<SignalDevice<T, bits>>::make;
 	protected:
+		virtual const Result updateInternal(winston::Signal::Shared signal) = 0;
+		virtual const Result flushInternal() = 0;
 		size_t portsPerDevice;
 		size_t devices;
 		SendDevice<T, bits>::Shared device;
+	private:
+		unsigned long long lastFlush;
+		unsigned long long lastUpdate;
 	};
 }

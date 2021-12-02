@@ -13,33 +13,22 @@ public:
 
 	}
 
-	const winston::Result update(winston::Signal::Shared signal)
-	{
-	//	if (signal->port().device() >= this->portsPerDevice)
-	//		return winston::Result::InternalError;
-
-		for (auto& light : signal->lights())
-			setPort(light.port.device(), light.port.port(), light.value);
-		/*
-		const unsigned int maximum = (1 << bits) - 1;
-		if (signal->shows(winston::Signal::Aspect::Go))
-		{
-			setPort(signal->port().device(), signal->port().port(), 0);
-			setPort(signal->port().device(), signal->port().port() + 1, maximum);
-		}
-		if (signal->shows(winston::Signal::Aspect::Halt))
-		{
-			setPort(signal->port().device(), signal->port().port(), maximum);
-			setPort(signal->port().device(), signal->port().port() + 1, 0);
-		}
-		*/
-		this->device->send(data);
-		return winston::Result::OK;
-	}
-
 	using winston::Shared_Ptr<TLC5947<T, bits>>::Shared;
 	using winston::Shared_Ptr<TLC5947<T, bits>>::make;
 private:
+
+	const winston::Result updateInternal(winston::Signal::Shared signal)
+	{
+		for (auto& light : signal->lights())
+			setPort(light.port.device(), light.port.port(), light.value);
+		
+		return this->flush();
+	}
+
+	virtual const winston::Result flushInternal()
+	{
+		return this->device->send(data);
+	}
 
 	void setPort(const size_t dev, const size_t port, T value)
 	{
@@ -70,7 +59,6 @@ private:
 	}
 
 	std::vector<T> data;
-
 };
 
 using TLC5947_SignalDevice = TLC5947<unsigned int, 12>;

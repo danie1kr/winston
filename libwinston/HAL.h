@@ -64,7 +64,7 @@ namespace winston
 
 			using Shared_Ptr<SPIDevice<T, bits>>::Shared;
 			using Shared_Ptr<SPIDevice<T, bits>>::make;
-		private:
+		protected:
 			const Pin chipSelect, clock, miso, mosi;
 			const unsigned int speed;
 			const SPIMode mode;

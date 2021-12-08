@@ -276,6 +276,93 @@ private:
     void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
 };
 
+enum class Y2021RailwayTracks : unsigned int
+{
+    Turnout1,
+    Turnout2,
+    Turnout3,
+    Turnout4,
+    Turnout5,
+    Turnout6,
+    Turnout7,
+    Turnout8,
+    Turnout9,
+    Turnout10,
+    Turnout11,
+    Turnout12,
+    Turnout13,
+    Turnout14,
+    Turnout15,
+    Turnout16,
+    A,
+    B,
+    C,
+    D,
+    E,
+    F,
+    G,
+    G1,
+    G2,
+    G3
+};
+
+class Y2021Railway : public winston::RailwayWithRails<Y2021RailwayTracks>, winston::Shared_Ptr<Y2021Railway>
+{
+    /*
+     //====Turnout11=======================================\\
+    //           \\                                         \\
+    ||  //====Turnout10==============Turnout9====Turnout8\\  \\
+    ||  ||                          //                \\  \\  \\
+    ||  ||                      Turnout10====N3====|   \\ Turnout7
+    ||  ||                         //                   \\  ||
+    ||  || |====N2====Turnout12==Turnout11              ||  ||
+    ||  ||                 //         //                ||  ||
+    ||  ||              GBF1b        GBF2b              ||  ||
+    ||  ||               ||           ||                ||  ||
+    ||  ||               ||     Turnout14               ||  ||
+    ||  ||               ||     //    ||                ||  ||
+    ||  ||              Turnout13     ||                ||  ||
+    ||  ||               ||           ||                ||  ||
+    ||   \\             GBF1a        GBF2a              ||  ||
+    ||    \\             ||           ||               //   ||
+    ||     \\            --           --              //    ||
+ Turnout1   \\         //====N1====|                 //    //
+    ||  \\   \\       //                            //    //
+    \\    Turnout2=Turnout3========PBF3============//    //
+     \\======Turnout4========PBF2====================Turnout6
+                 \\                                    //
+    |====PBF5====Turnout5========PBF1=================//
+    */
+
+public:
+    Y2021Railway(const Callbacks callbacks);
+    virtual ~Y2021Railway() = default;
+
+    static const std::string name();
+
+    using winston::Shared_Ptr<Y2021Railway>::Shared;
+    using winston::Shared_Ptr<Y2021Railway>::make;
+
+public:
+    class AddressTranslator : public winston::DigitalCentralStation::AddressTranslator, winston::Shared_Ptr<AddressTranslator>
+    {
+    public:
+        AddressTranslator(winston::Shared_Ptr<Y2021Railway>::Shared railway);
+        virtual winston::Turnout::Shared turnout(const winston::Address address);
+        virtual winston::Locomotive::Shared locomotive(const winston::Address address);
+        virtual const winston::Address address(winston::Track::Shared track);
+
+        using Shared_Ptr<AddressTranslator>::Shared;
+        using Shared_Ptr<AddressTranslator>::make;
+
+    private:
+        winston::Shared_Ptr<Y2021Railway>::Shared railway;
+    };
+private:
+    winston::Track::Shared define(const Tracks track);
+    void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
+};
+
 enum class SignalRailwayTracks : unsigned int
 {
     Turnout1,

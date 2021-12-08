@@ -122,6 +122,7 @@
     <ClCompile Include="external\central-z21\Z21.cpp" />
     <ClCompile Include="external\central-z21\Z21Packet.cpp" />
     <ClCompile Include="FT232_SPIDevice.cpp" />
+    <ClCompile Include="Kornweinheim.cpp" />
     <ClCompile Include="railways.cpp" />
     <ClCompile Include="winston-hal-stm32.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -145,6 +146,7 @@
     <ClInclude Include="external\magic_enum.hpp" />
     <ClInclude Include="FT232_SPIDevice.h" />
     <ClInclude Include="json.hpp" />
+    <ClInclude Include="Kornweinheim.h" />
     <ClInclude Include="mio.hpp" />
     <ClInclude Include="railways.h" />
     <ClInclude Include="TLC5947_SignalDevice.h" />

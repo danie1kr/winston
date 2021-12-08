@@ -48,6 +48,9 @@
     <ClCompile Include="FT232_SPIDevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Kornweinheim.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\central-z21\Z21Const.h">
@@ -88,6 +91,9 @@
     </ClInclude>
     <ClInclude Include="external\ftdi-232\libMPSSE_spi.h">
       <Filter>external\ftdi-ft232</Filter>
+    </ClInclude>
+    <ClInclude Include="Kornweinheim.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

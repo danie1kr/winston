@@ -1,5 +1,8 @@
 // winston-simulator.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+
+#include "Kornweinheim.h"
+
+/*
 #include <functional>
 
 #include "../libwinston/Winston.h"
@@ -449,7 +452,7 @@ private:
                             }));
                     }
                 }
-            }*/
+            }*
         }
 #ifdef RAILWAY_DEBUG_INJECTOR
         else if (op.starts_with(std::string("emu_z21_inject")))
@@ -460,7 +463,7 @@ private:
                 unsigned int block = (unsigned int)data["block"].toInt();
                 unsigned int loco = (unsigned int)data["loco"].toInt();
                 // this->stationDebugInjector->injectBlockUpdate(block, loco);
-                */
+                *
             }
         }
 #endif
@@ -494,7 +497,7 @@ private:
 #endif
 
         // signals
-        this->signalSPIDevice = SignalSPIDevice::make(0, 20000000);
+        this->signalSPIDevice = SignalSPIDevice::make(3, 20000000);
         this->signalSPIDevice->init();
         this->signalSPIDevice->skipSend(true);
         this->signalDevice = TLC5947_SignalDevice::make(1, 24, this->signalSPIDevice);
@@ -526,20 +529,23 @@ private:
         this->addLocomotive(callbacks, 6, "E 11");
     }
 
-    /* websocket */
+    /* websocket *
     WebServerWSPP webServer;
 
-    /* z21 */
+    /* z21 *
     UDPSocketLWIP::Shared z21Socket;
     const std::string z21IP = { "192.168.0.100" };
     const unsigned short z21Port = 5000;
 
-    /* Signal Device */
+    /* Signal Device *
     SignalSPIDevice::Shared signalSPIDevice;
     TLC5947_SignalDevice::Shared signalDevice;
 };
 
 MRS mrs;
+*/
+
+Kornweinheim kwh;
 void winston_setup()
 {
 	winston::hal::text("Hello from Winston!");
@@ -550,28 +556,27 @@ void winston_setup()
 	//using Modelleisenbahn = MRS<Y2020Railway>;
 
 #ifdef WINSTON_PLATFORM_WIN_x64
-	setStoragePath(MRS::name());
+	setStoragePath(Kornweinheim::name());
 #endif
 
 	// setup
-	mrs.setup();
+    kwh.setup();
 }
 
-bool winston_loop()
+void winston_loop()
 {
-    return mrs.loop();
+    if (!kwh.loop())
+        winston::hal::delay(FRAME_SLEEP);
 }
 
 #ifdef WINSTON_PLATFORM_WIN_x64
 int main()
 {
+    // setup
     winston_setup();
 
     // and loop
     while (true)
-    {
-        if(!winston_loop())
-            winston::hal::delay(FRAME_SLEEP);
-    }
+        winston_loop();
 }
 #endif

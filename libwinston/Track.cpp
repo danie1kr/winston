@@ -4,7 +4,7 @@
 #include "HAL.h"
 #include "Util.h"
 
-#include "magic_enum.hpp"
+#include "better_enum.hpp"
 
 namespace winston
 {
@@ -14,17 +14,22 @@ namespace winston
 
 	const std::string Track::ConnectionToString(const Connection connection)
 	{
-		auto name = std::string(magic_enum::enum_name(connection));
-		std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-		return name;
+		switch (connection)
+		{
+		case Connection::A: return "a";
+		case Connection::B: return "b";
+		case Connection::C: return "c";
+		default:
+		case Connection::DeadEnd: return "deadend";
+		}
 	}
 
 	const Track::Connection Track::ConnectionFromString(const std::string connection)
 	{
-		std::string upper(connection.size(), ' ');
-		std::transform(connection.begin(), connection.end(), upper.begin(), ::toupper);
-		auto c = magic_enum::enum_cast<Connection>(upper);
-		return c.value();
+		if (connection == "A" || connection == "a") return Connection::A;
+		if (connection == "B" || connection == "b") return Connection::B;
+		if (connection == "C" || connection == "c") return Connection::C;
+		return Connection::DeadEnd;
 	}
 	Track::Shared Track::connect(const Connection local, Track::Shared& to, const Connection remote)
 	{
@@ -119,7 +124,7 @@ namespace winston
 		return nullptr;
 	}
 
-	bool Bumper::traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const
+	const bool Bumper::traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const
 	{
 		if(this->has(connection) && 
 			((leavingOnConnection && connection == Connection::A) ||
@@ -131,7 +136,11 @@ namespace winston
 
 		onto.reset();
 		return false;
+	}
 
+	const bool Bumper::canTraverse(const Connection entering) const
+	{
+		return entering == Connection::DeadEnd;
 	}
 
 	void Bumper::collectAllConnections(std::set<Track::Shared>& tracks) const
@@ -156,6 +165,9 @@ namespace winston
 	{
 		if (local == Connection::A)
 		{
+			if (a)
+				error("Bumper::connect on " + this->name() + ", A already connected");
+
 			a = to;
 			Track::Shared that = this->shared_from_this();
 			if (viceVersa)
@@ -166,7 +178,7 @@ namespace winston
 				to->attachSignal(guardingRemoteSignalFactory(to, remote), remote);
 		}
 		else
-			error("Bumper::connect, local not A");
+			error("Bumper::connect on " + this->name() + ", local not A");
 		return to;
 	}
 
@@ -234,7 +246,7 @@ namespace winston
 		return nullptr;
 	}
 
-	bool Rail::traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const
+	const bool Rail::traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const
 	{
 		if (!this->has(connection))
 		{
@@ -245,6 +257,11 @@ namespace winston
 			onto = connection == Connection::A ? a : b;
 		else
 			onto = connection == Connection::A ? b : a;
+		return true;
+	}
+
+	const bool Rail::canTraverse(const Connection entering) const
+	{
 		return true;
 	}
 
@@ -272,14 +289,21 @@ namespace winston
 	Track::Shared Rail::connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa)
 	{
 		if (local == Connection::C)
-			error("Rail::connect, local not A or B");
+			error("Rail::connect on " + this->name() + ", local not A or B");
 		else
 		{
 			if (local == Connection::A)
+			{
+				if (a)
+					error("Rail::connect on " + this->name() + ", A already connected");
 				a = to;
+			}
 			else if (local == Connection::B)
+			{
+				if (b)
+					error("Rail::connect on " + this->name() + ", B already connected");
 				b = to;
-			
+			}
 			Track::Shared that = this->shared_from_this();
 			if (viceVersa)
 				to->connectTo(remote, nullptr, that, local, nullptr, false);
@@ -356,7 +380,7 @@ namespace winston
 		return nullptr;
 	}
 
-	bool Turnout::traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const
+	const bool Turnout::traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const
 	{
 		if (!this->has(connection) || this->dir == Direction::Changing)
 		{
@@ -395,6 +419,13 @@ namespace winston
 		return false;
 	}
 
+	const bool Turnout::canTraverse(const Connection entering) const
+	{
+		return entering == Connection::A ||
+			(entering == Connection::B && this->dir == Direction::A_B) ||
+			(entering == Connection::C && this->dir == Direction::A_C);
+	}
+
 	void Turnout::collectAllConnections(std::set<Track::Shared>& tracks) const
 	{
 		tracks.insert(a);
@@ -425,12 +456,23 @@ namespace winston
 	Track::Shared Turnout::connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa)
 	{
 		if (local == Connection::A)
+		{
+			if (a)
+				error("Turnout::connect on " + this->name() + ", A already connected");
 			a = to;
+		}
 		else if (local == Connection::B)
+		{
+			if (b)
+				error("Turnout::connect on " + this->name() + ", B already connected");
 			b = to;
+		}
 		else
+		{
+			if (c)
+				error("Turnout::connect on " + this->name() + ", C already connected");
 			c = to;
-
+		}
 		if (viceVersa)
 		{
 			Track::Shared that = this->shared_from_this();

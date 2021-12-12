@@ -1,4 +1,4 @@
-#include "../libwinston/magic_enum.hpp"
+#include "../libwinston/better_enum.hpp"
 #include "Util.h"
 #include "HAL.h"
 
@@ -77,6 +77,14 @@ namespace winston
 
 	std::string build(const winston::Result first)
 	{
-		return std::string(magic_enum::enum_name(first));
+		switch (first)
+		{
+		case Result::OK: return "OK";
+		case Result::SendFailed: return "SendFailed";
+		case Result::ValidationFailed: return "ValidationFailed";
+		case Result::InternalError: return "InternalError";
+		case Result::ExternalHardwareFailed: return "ExternalHardwareFailed";
+		default: return "unknown Result code";
+		}
 	}
 }

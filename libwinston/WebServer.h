@@ -30,8 +30,8 @@ namespace winston
 
 		void broadcast(std::string data)
 		{
-			for (auto const& [id, connection] : this->connections)
-				this->send(id, data);
+			for (auto const& ic : this->connections)
+				this->send(ic.first, data);
 		}
 
 		virtual void send(unsigned int client, const std::string& data)

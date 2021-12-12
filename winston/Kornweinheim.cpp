@@ -1,46 +1,48 @@
 #include "Kornweinheim.h"
 
-
 // send a turnout state via websocket
 void Kornweinheim::turnoutSendState(const unsigned int turnoutTrackId, const winston::Turnout::Direction dir)
 {
-    JSON obj({
-        "op", "turnoutState",
-        "data", JSON({
-            "id", turnoutTrackId,
-            "state", (int)dir}
-        )
-        });
-    webServer.broadcast(obj.ToString());
+    Json obj = Json::object {
+        { "op", "turnoutState" },
+        { "data", Json::object{
+            { "id", (int)turnoutTrackId },
+            { "state", (int)dir }
+            }
+        }
+    };
+    webServer.broadcast(obj.dump());
 }
 
 // send a signal state via websocket
 void Kornweinheim::signalSendState(const unsigned int trackId, const winston::Track::Connection connection, const winston::Signal::Aspects aspects)
 {
-    JSON obj({
-        "op", "signalState",
-        "data", JSON({
-            "parentTrack", trackId,
-            "guarding", winston::Track::ConnectionToString(connection),
-            "aspects", aspects
-        })
-        });
-    webServer.broadcast(obj.ToString());
+    Json obj = Json::object {
+        { "op", "signalState" },
+        { "data", Json::object {
+            { "parentTrack", (int)trackId },
+            { "guarding", winston::Track::ConnectionToString(connection) },
+            { "aspects", (int)aspects }
+            }
+        }
+    };
+    webServer.broadcast(obj.dump());
 }
 
 void Kornweinheim::locoSend(winston::Locomotive::Shared& loco)
 {
-    JSON obj({
-        "op", "loco",
-        "data", JSON({
-            "address", loco->address(),
-            "name", loco->name().c_str(),
-            "light", loco->light(),
-            "forward", loco->forward(),
-            "speed", loco->speed()
-        })
-        });
-    webServer.broadcast(obj.ToString());
+    Json obj = Json::object{
+        { "op", "loco" },
+        { "data", Json::object {
+            { "address", loco->address() },
+            { "name", loco->name().c_str() },
+            { "light", loco->light() },
+            { "forward", loco->forward() },
+            { "speed", loco->speed() }
+        }
+        }
+    };
+    webServer.broadcast(obj.dump());
 }
 
 void Kornweinheim::locoSend(winston::Address address)
@@ -161,26 +163,28 @@ WebServerWSPP::HTTPResponse Kornweinheim::on_http(WebServerWSPP::Client client, 
     return response;
 }
 
-void Kornweinheim::writeAttachedSignal(JSON& signals, winston::Track::Shared track, winston::Track::Connection connection)
+void Kornweinheim::writeAttachedSignal(Json::array& signals, winston::Track::Shared track, const winston::Track::Connection connection)
 {
     auto signal = track->signalGuarding(connection);
     if (signal)
-        signals.append(JSON({
-            "parentTrack", railway->trackIndex(track),
-            "guarding", winston::Track::ConnectionToString(connection),
-            "pre", signal->preSignal(),
-            "main", signal->mainSignal() }));
+        signals.push_back(Json::object{
+            { "parentTrack", (int)railway->trackIndex(track)} ,
+            { "guarding", winston::Track::ConnectionToString(connection)},
+            { "pre", signal->preSignal()},
+            { "main", signal->mainSignal() }
+        });
 }
 
 // Define a callback to handle incoming messages
 void Kornweinheim::on_message(WebServerWSPP::Client client, std::string message) {
-    JSON m = JSON::Load(message);
-    std::string op = m["op"].ToString();
-    JSON data = m["data"];
+    std::string jsonParseError;
+    Json m = Json::parse(message, jsonParseError);
+    std::string op = m["op"].dump();
+    Json data = m["data"];
 
-    if (std::string("doTurnoutToggle").compare(op) == 0)
+    if (std::string("\"doTurnoutToggle\"").compare(op) == 0)
     {
-        unsigned int id = (unsigned int)data["id"].ToInt();
+        unsigned int id = (unsigned int)data["id"].int_value();
         auto turnout = std::dynamic_pointer_cast<winston::Turnout>(railway->track(id));
         auto requestDir = winston::Turnout::otherDirection(turnout->direction());
         signalBox->order(winston::Command::make([this, id, turnout, requestDir](const unsigned long long& created) -> const winston::State
@@ -201,30 +205,27 @@ void Kornweinheim::on_message(WebServerWSPP::Client client, std::string message)
                 return this->turnoutChangeTo(turnout, requestDir);
             }));
     }
-    else if (std::string("getTurnoutState").compare(op) == 0)
+    else if (std::string("\"getTurnoutState\"").compare(op) == 0)
     {
-        unsigned int id = (unsigned int)data["id"].ToInt();
+        unsigned int id = (unsigned int)data["id"].int_value();
         auto turnout = std::dynamic_pointer_cast<winston::Turnout>(railway->track(id));
         this->turnoutSendState(id, turnout->direction());
     }
-    else if (std::string("getSignalState").compare(op) == 0)
+    else if (std::string("\"getSignalState\"").compare(op) == 0)
     {
-        unsigned int id = (unsigned int)data["parentTrack"].ToInt();
-        std::string guarding = data["guarding"].ToString();
+        unsigned int id = (unsigned int)data["parentTrack"].int_value();
+        std::string guarding = data["guarding"].string_value();
 
         auto connection = winston::Track::ConnectionFromString(guarding);
         auto signal = this->railway->track(id)->signalGuarding(connection);
 
         this->signalSendState(id, connection, signal->aspect());
     }
-    else if (std::string("getRailway").compare(op) == 0)
+    else if (std::string("\"getRailway\"").compare(op) == 0)
     {
-        JSON railwayMessage = JSON::Make(JSON::Class::Object);
-        railwayMessage["op"] = "railway";
-        railwayMessage["data"] = JSON::Make(JSON::Class::Object);
-        auto& tracks = railwayMessage["data"]["tracks"] = JSON::Make(JSON::Class::Array);
-        auto& signals = railwayMessage["data"]["signals"] = JSON::Make(JSON::Class::Array);
-        auto& blocks = railwayMessage["data"]["blocks"] = JSON::Make(JSON::Class::Array);
+        auto tracks = Json::array();
+        auto signals = Json::array();
+        auto blocks = Json::array();
 
         for (unsigned int i = 0; i < railway->tracksCount(); ++i)
         {
@@ -237,9 +238,10 @@ void Kornweinheim::on_message(WebServerWSPP::Client client, std::string message)
                 winston::Track::Shared a;
                 bumper->connections(a);
 
-                JSON track = JSON::Make(JSON::Class::Object);
-                track["a"] = railway->trackIndex(a);
-                tracks.append(track);
+                Json::object track = Json::object();
+                track["a"] = (int)railway->trackIndex(a);
+                track["name"] = bumper->name();
+                tracks. push_back(track);
 
                 writeAttachedSignal(signals, bumper, winston::Track::Connection::A);
 
@@ -251,10 +253,11 @@ void Kornweinheim::on_message(WebServerWSPP::Client client, std::string message)
                 winston::Track::Shared a, b;
                 rail->connections(a, b);
 
-                JSON track = JSON::Make(JSON::Class::Object);
-                track["a"] = railway->trackIndex(a);
-                track["b"] = railway->trackIndex(b);
-                tracks.append(track);
+                Json::object track = Json::object();
+                track["a"] = (int)railway->trackIndex(a);
+                track["b"] = (int)railway->trackIndex(b);
+                track["name"] = rail->name();
+                tracks.push_back(track);
 
                 writeAttachedSignal(signals, rail, winston::Track::Connection::A);
                 writeAttachedSignal(signals, rail, winston::Track::Connection::B);
@@ -267,11 +270,12 @@ void Kornweinheim::on_message(WebServerWSPP::Client client, std::string message)
                 winston::Track::Shared a, b, c;
                 turnout->connections(a, b, c);
 
-                JSON track = JSON::Make(JSON::Class::Object);
-                track["a"] = railway->trackIndex(a);
-                track["b"] = railway->trackIndex(b);
-                track["c"] = railway->trackIndex(c);
-                tracks.append(track);
+                Json::object track = Json::object();
+                track["a"] = (int)railway->trackIndex(a);
+                track["b"] = (int)railway->trackIndex(b);
+                track["c"] = (int)railway->trackIndex(c);
+                track["name"] = turnout->name();
+                tracks.push_back(track);
 
                 writeAttachedSignal(signals, turnout, winston::Track::Connection::A);
                 writeAttachedSignal(signals, turnout, winston::Track::Connection::B);
@@ -283,23 +287,33 @@ void Kornweinheim::on_message(WebServerWSPP::Client client, std::string message)
 
         for (auto& block : this->railway->blocks())
         {
-            JSON b = JSON::Make(JSON::Class::Object);
+            Json::object b = Json::object();
             b["address"] = block.first;
             auto bl = block.second;
 
-            auto& tracks = b["tracks"] = JSON::Make(JSON::Class::Array);
+            Json::array blockTracks = Json::array();
             for (auto& track : bl->tracks())
-                tracks.append(this->railway->trackIndex(track));
-
-            blocks.append(b);
+                blockTracks.push_back((int)this->railway->trackIndex(track));
+            b["tracks"] = blockTracks;
+            blocks.push_back(b);
         }
 
-        this->webServer.send(client, railwayMessage.ToString());
+        Json railwayMessage = Json::object({
+            {"op", "railway"},
+            {"data", Json::object{
+                {"tracks", tracks},
+                {"signals", signals},
+                {"blocks", blocks},
+                }
+            }
+            });
+
+        this->webServer.send(client, railwayMessage.dump());
     }
-    else if (std::string("storeRailwayLayout").compare(op) == 0)
+    else if (std::string("\"storeRailwayLayout\"").compare(op) == 0)
     {
         unsigned int address = 0;
-        auto layout = data.ToUnescapedString();
+        auto layout = data.string_value();
         auto length = layout.size();
 
         winston::hal::storageWrite(address + 0, (length >> 0) & 0xFF);
@@ -313,12 +327,13 @@ void Kornweinheim::on_message(WebServerWSPP::Client client, std::string message)
 
         winston::hal::storageCommit();
 
-        JSON successObject = JSON::Make(JSON::Class::Object);
-        successObject["op"] = "storeRailwayLayoutSuccessful";
-        successObject["data"] = true;
-        this->webServer.send(client, successObject.ToString());
+        Json successObject = Json::object{
+            {"op", "storeRailwayLayoutSuccessful"},
+            {"data", true}
+        };
+        this->webServer.send(client, successObject.dump());
     }
-    else if (std::string("getRailwayLayout").compare(op) == 0)
+    else if (std::string("\"getRailwayLayout\"").compare(op) == 0)
     {
         size_t address = 0;
         size_t length = (winston::hal::storageRead(address + 0) << 0) |
@@ -339,26 +354,35 @@ void Kornweinheim::on_message(WebServerWSPP::Client client, std::string message)
             for (size_t i = 0; i < sent; ++i)
                 layout[i] = winston::hal::storageRead(address + offset + i);
 
+            Json successObject = Json::object{
+                {"op", "layout"},
+                {"data", Json::object{
+                    {"offset", (int)offset},
+                    {"fullSize", (int)length},
+                    {"layout", layout}
+                }}
+            };
+            /*this->webServer.send(client, successObject.dump());
             JSON successObject = JSON::Make(JSON::Class::Object);
             successObject["op"] = "layout";
             auto data = JSON::Make(JSON::Class::Object);
             data["offset"] = (unsigned int)offset;
             data["fullSize"] = (unsigned int)length;
             data["layout"] = layout.c_str();
-            successObject["data"] = data;
-            this->webServer.send(client, successObject.ToString());
+            successObject["data"] = data;*/
+            this->webServer.send(client, successObject.dump());
 
             offset += sent;
             remaining -= sent;
         }
 
     }
-    else if (std::string("getLocoShed").compare(op) == 0)
+    else if (std::string("\"getLocoShed\"").compare(op) == 0)
     {
         for (auto& loco : this->locomotiveShed)
             this->locoSend(loco);
     }
-    else if (std::string("doControlLoco").compare(op) == 0)
+    else if (std::string("\"doControlLoco\"").compare(op) == 0)
     {
         /*
         {
@@ -420,9 +444,9 @@ void Kornweinheim::on_message(WebServerWSPP::Client client, std::string message)
         }*/
     }
 #ifdef RAILWAY_DEBUG_INJECTOR
-    else if (op.starts_with(std::string("emu_z21_inject")))
+    else if (op.find(std::string("\"emu_z21_inject\"")) == 0)
     {
-        if (std::string("emu_z21_inject_occupied").compare(op) == 0)
+        if (std::string("\"emu_z21_inject_occupied\"").compare(op) == 0)
         {
             /*
             unsigned int block = (unsigned int)data["block"].toInt();
@@ -471,8 +495,13 @@ void Kornweinheim::systemSetup() {
 void Kornweinheim::systemSetupComplete()
 {
 #ifdef RAILWAY_DEBUG_INJECTOR
-    for (auto& [key, turnout] : this->railway->turnouts())
+    //for (auto& kv : this->railway->turnouts())
+    //auto turnouts = this->railway->turnouts();
+    this->railway->turnouts([=](const Tracks track, winston::Turnout::Shared turnout) {
         this->stationDebugInjector->injectTurnoutUpdate(turnout, std::rand() % 2 ? winston::Turnout::Direction::A_B : winston::Turnout::Direction::A_C);
+    });
+    //for (auto it = turnouts.begin(); it != turnouts.end(); it++)
+    //    this->stationDebugInjector->injectTurnoutUpdate(it->second, std::rand() % 2 ? winston::Turnout::Direction::A_B : winston::Turnout::Direction::A_C);
 #endif
     this->signalSPIDevice->skipSend(false);
     this->signalDevice->flush();

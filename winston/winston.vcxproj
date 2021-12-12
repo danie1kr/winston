@@ -70,9 +70,9 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);WINSTON_PLATFORM_WIN_x64;RAILWAY_DEBUG_INJECTOR</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);WINSTON_PLATFORM_WIN_x64;RAILWAY_DEBUG_INJECTOR;TCB_SPAN_NAMESPACE_NAME=std</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp14</LanguageStandard>
       <AdditionalIncludeDirectories>external;external\asio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -86,9 +86,9 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);WINSTON_PLATFORM_WIN_x64</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);WINSTON_PLATFORM_WIN_x64;TCB_SPAN_NAMESPACE_NAME=std</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp14</LanguageStandard>
       <AdditionalIncludeDirectories>external;external\asio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -104,9 +104,9 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);WINSTON_PLATFORM_WIN_x64</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);WINSTON_PLATFORM_WIN_x64;TCB_SPAN_NAMESPACE_NAME=std</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <LanguageStandard>stdcpp14</LanguageStandard>
       <AdditionalIncludeDirectories>external;external\asio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -121,14 +121,10 @@
   <ItemGroup>
     <ClCompile Include="external\central-z21\Z21.cpp" />
     <ClCompile Include="external\central-z21\Z21Packet.cpp" />
+    <ClCompile Include="external\json11\json11.cpp" />
     <ClCompile Include="FT232_SPIDevice.cpp" />
     <ClCompile Include="Kornweinheim.cpp" />
     <ClCompile Include="railways.cpp" />
-    <ClCompile Include="winston-hal-stm32.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Realworld|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="winston-hal-x64.cpp" />
     <ClCompile Include="winston.cpp" />
   </ItemGroup>
@@ -143,9 +139,8 @@
     <ClInclude Include="external\central-z21\Z21Packet.h" />
     <ClInclude Include="external\ftdi-232\ftd2xx.h" />
     <ClInclude Include="external\ftdi-232\libMPSSE_spi.h" />
-    <ClInclude Include="external\magic_enum.hpp" />
+    <ClInclude Include="external\json11\json11.hpp" />
     <ClInclude Include="FT232_SPIDevice.h" />
-    <ClInclude Include="json.hpp" />
     <ClInclude Include="Kornweinheim.h" />
     <ClInclude Include="mio.hpp" />
     <ClInclude Include="railways.h" />

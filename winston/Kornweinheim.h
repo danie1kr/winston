@@ -7,7 +7,7 @@
 #include "winston.h"
 #include "railways.h"
 
-#include "json.hpp"
+#include "external/json11/json11.hpp"
 
 #ifdef WINSTON_PLATFORM_WIN_x64
 #include "winston-hal-x64.h"
@@ -27,8 +27,9 @@ constexpr auto RAILWAY_DEBUG_INJECTOR_DELAY = 1000;
 //#define RAILWAY_CLASS TimeSaverRailway
 //#define RAILWAY_CLASS Y2020Railway
 #define RAILWAY_CLASS SignalRailway
+//#define RAILWAY_CLASS Y2021Railway
 
-using namespace giri::json;
+using namespace json11;
 
 class Kornweinheim : public winston::ModelRailwaySystem<RAILWAY_CLASS::Shared, RAILWAY_CLASS::AddressTranslator::Shared, Z21::Shared>
 {
@@ -55,7 +56,7 @@ private:
     // Define a callback to handle incoming messages
     WebServerWSPP::HTTPResponse on_http(WebServerWSPP::Client client, std::string resource);
 
-    void writeAttachedSignal(JSON& signals, winston::Track::Shared track, winston::Track::Connection connection);
+    void writeAttachedSignal(Json::array& signals, winston::Track::Shared track, const winston::Track::Connection connection);
 
     // Define a callback to handle incoming messages
     void on_message(WebServerWSPP::Client client, std::string message);

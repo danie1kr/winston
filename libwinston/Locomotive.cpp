@@ -3,7 +3,7 @@
 namespace winston
 {
 	Locomotive::Locomotive(const Callbacks callbacks, const Address address, const std::string name) :
-		callbacks(callbacks), details{ .address = address, .name = name }
+		callbacks(callbacks), details{ address, name, false, true, 0, 0 }
 	{
 	}
 

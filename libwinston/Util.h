@@ -86,7 +86,7 @@ namespace winston
 #define STRINGIZE(x) STRINGIZE2(x)
 #define STRINGIZE2(x) #x
 #define LINE STRINGIZE(__LINE__)
-#define CaR(code) { winston::Result r = code; if(r != winston::Result::OK) { winston::error(winston::build(__FILE__ "@" LINE ": " STRINGIZE(code) " -> ", std::string(magic_enum::enum_name(r)))); return r; } }
+#define CaR(code) { winston::Result r = code; if(r != winston::Result::OK) { winston::error(winston::build(__FILE__ "@" LINE ": " STRINGIZE(code) " -> ", winston::build(r))); return r; } }
 
 	//inline const Result checkResultAndComplain(const Result result, std::string message);
 

@@ -4,7 +4,7 @@
 #include "HAL.h"
 #include "Util.h"
 #include <functional>
-#include <span>
+#include "span.hpp"
 #include "Command.h"
 
 namespace winston
@@ -186,7 +186,7 @@ namespace winston
 	{
 		static_assert(bits <= sizeof(T) * 8, "too many bits for T");
 	public:
-		SignalDevice(const size_t devices, const size_t portsPerDevice, SendDevice<T, bits>::Shared device)
+		SignalDevice(const size_t devices, const size_t portsPerDevice, typename SendDevice<T, bits>::Shared device)
 			: device(device), devices(devices), portsPerDevice(portsPerDevice)
 		{
 
@@ -222,7 +222,7 @@ namespace winston
 		virtual const Result flushInternal() = 0;
 		size_t portsPerDevice;
 		size_t devices;
-		SendDevice<T, bits>::Shared device;
+		typename SendDevice<T, bits>::Shared device;
 	private:
 		unsigned long long lastFlush;
 		unsigned long long lastUpdate;

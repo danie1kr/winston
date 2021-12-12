@@ -8,7 +8,7 @@
 #include <set>
 #include <queue>
 
-#include "magic_enum.hpp"
+#include "better_enum.hpp"
 
 #include "WinstonTypes.h"
 #include "Util.h"
@@ -56,20 +56,20 @@ namespace winston
 
 		Result init(bool blocks = false)
 		{
-			for (size_t track = 0; track < tracksCount(); ++track)
-				this->tracks[track] = define(magic_enum::enum_value<Tracks>(track));
+			for (Tracks track : Tracks::_values())//for (size_t track = 0; track < tracksCount(); ++track)
+				this->tracks[track] = define(track);// static_cast<Tracks>(track));
 			connect(this->tracks);
 			if (!blocks)
 			{
 				Trackset set;
-				for (size_t track = 0; track < tracksCount(); ++track)
-					set.insert(this->track(magic_enum::enum_value<Tracks>(track)));
+				for (Tracks track : Tracks::_values())//for (size_t track = 0; track < tracksCount(); ++track)
+					set.insert(this->track(track));//static_cast<Tracks>(track)));
 				this->block(1, set);
 			}
 			return this->validate();
 		}
 		static constexpr size_t tracksCount() noexcept {
-			return magic_enum::enum_count<Tracks>();
+			return Tracks::_size();
 		}
 
 		virtual winston::Track::Shared define(const Tracks track) = 0;
@@ -114,13 +114,14 @@ namespace winston
 			return map;
 		}
 
-		const std::unordered_map<Tracks, Turnout::Shared> turnouts()
+		void turnouts(std::function<void(const Tracks track, Turnout::Shared turnout)> callback)
 		{
-			std::unordered_map<Tracks, Turnout::Shared> map;
+//			std::unordered_map<Tracks, Turnout::Shared> map;
 			for (size_t i = 0; i < tracksCount(); ++i)
 				if (this->tracks[i]->type() == Track::Type::Turnout)
-					map[this->trackEnum(i)] = std::dynamic_pointer_cast<Turnout>(this->tracks[i]);
-			return map;
+					callback(this->trackEnum(i), std::dynamic_pointer_cast<Turnout>(this->tracks[i]));
+					//map[this->trackEnum(i)] = std::dynamic_pointer_cast<Turnout>(this->tracks[i]);
+			//return map;
 		}
 
 		bool traverse(const Track::Connection from, Track::Shared& on, Track::Shared& onto) const
@@ -130,17 +131,17 @@ namespace winston
 
 		inline constexpr Tracks trackEnum(size_t index) const
 		{
-			return magic_enum::enum_cast<Tracks>((unsigned int)index).value();
+			return Tracks::_from_integral((unsigned int)index);
 		}
-
+		/*
 		inline constexpr unsigned int trackIndex(Tracks track) const
 		{
 			return magic_enum::enum_integer(track);
 		}
-
+*/
 		inline constexpr unsigned int trackIndex(Track::Shared track) const
 		{
-			return magic_enum::enum_integer(trackEnum(track));
+			return trackEnum(track)._to_integral();
 		}
 
 		inline Track::Shared& track(Tracks index)
@@ -156,7 +157,7 @@ namespace winston
 		const Tracks trackEnum(Track::Shared& track) const
 		{
 			auto it = std::find(this->tracks.begin(), this->tracks.end(), track);
-			return this->trackEnum(std::distance(this->tracks.begin(), it));
+			return Tracks::_from_integral((unsigned int)std::distance(this->tracks.begin(), it)); //this->trackEnum(std::distance(this->tracks.begin(), it));
 		}
 
 		inline Tracks track(Bumper::Shared& track)

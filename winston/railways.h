@@ -1,15 +1,16 @@
 #pragma once
 
 #include <array>
+#include "../libwinston/better_enum.hpp"
 #include "../libwinston/Winston.h"
 
-enum class MiniRailwayTracks : unsigned int
-{
+//enum class MiniRailwayTracks : unsigned int
+BETTER_ENUM(MiniRailwayTracks, unsigned int, //{
     A,
     Turnout1,
     B,
     C
-};
+);// };
 
 class MiniRailway : public winston::RailwayWithRails<MiniRailwayTracks>, winston::Shared_Ptr<MiniRailway>
 {
@@ -35,8 +36,8 @@ private:
     void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
 };
 
-enum class SignalTestRailwayTracks : unsigned int
-{
+//enum class SignalTestRailwayTracks : unsigned int
+BETTER_ENUM(SignalTestRailwayTracks, unsigned int, //{
     A,
     Turnout1,
     B,
@@ -64,7 +65,7 @@ enum class SignalTestRailwayTracks : unsigned int
     V,
     W,
     L0, L1, L2, L3, L4, L5, L6, L7, L8
-};
+);
 
 class SignalTestRailway : public winston::RailwayWithRails<SignalTestRailwayTracks>, winston::Shared_Ptr<SignalTestRailway>
 {
@@ -118,14 +119,13 @@ A-Turnout1-B-Turnout2-A
 
 */
 
-enum class RailwayWithSidingsTracks : unsigned int
-{
+BETTER_ENUM(RailwayWithSidingsTracks, unsigned int, //{
     A,
     Turnout1,
     B,
     C,
     Turnout2
-};
+);
 
 class RailwayWithSiding : public winston::RailwayWithRails<RailwayWithSidingsTracks>, winston::Shared_Ptr<RailwayWithSiding>
 {
@@ -158,8 +158,7 @@ public:
     };
 };
 
-enum class TimeSaverRailwayTracks : unsigned int
-{
+BETTER_ENUM(TimeSaverRailwayTracks, unsigned int, //{
     A,
     Turnout1,
     B,
@@ -170,7 +169,7 @@ enum class TimeSaverRailwayTracks : unsigned int
     Turnout5,
     D,
     E
-};
+);
 
 class TimeSaverRailway : public winston::RailwayWithRails<TimeSaverRailwayTracks>, winston::Shared_Ptr<TimeSaverRailway>
 {
@@ -205,8 +204,7 @@ private:
     void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
 };
 
-enum class Y2020RailwayTracks : unsigned int
-{
+BETTER_ENUM(Y2020RailwayTracks, unsigned int,
     Turnout1,
     Turnout2,
     Turnout3,
@@ -226,7 +224,7 @@ enum class Y2020RailwayTracks : unsigned int
     G1,
     G2,
     G3
-};
+);
 
 class Y2020Railway : public winston::RailwayWithRails<Y2020RailwayTracks>, winston::Shared_Ptr<Y2020Railway>
 {
@@ -276,8 +274,7 @@ private:
     void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
 };
 
-enum class Y2021RailwayTracks : unsigned int
-{
+BETTER_ENUM(Y2021RailwayTracks, unsigned int,
     Turnout1,
     Turnout2,
     Turnout3,
@@ -294,44 +291,44 @@ enum class Y2021RailwayTracks : unsigned int
     Turnout14,
     Turnout15,
     Turnout16,
-    A,
-    B,
-    C,
-    D,
-    E,
-    F,
-    G,
-    G1,
-    G2,
-    G3
-};
+    PBF1,
+    PBF1a,
+    PBF2,
+    PBF3,
+    GBF1,
+    GBF2a, GBF2b,
+    GBF3a, GBF3b,
+    N1,
+    N2,
+    B1, B2, B3, B4, B5, B6
+);
 
 class Y2021Railway : public winston::RailwayWithRails<Y2021RailwayTracks>, winston::Shared_Ptr<Y2021Railway>
 {
     /*
-     //====Turnout11=======================================\\
+     //====Turnout11======================B2===============\\
     //           \\                                         \\
-    ||  //====Turnout10==============Turnout9====Turnout8\\  \\
+    ||  //====Turnout10======B5======Turnout9====Turnout8\\  \\
     ||  ||                          //                \\  \\  \\
-    ||  ||                      Turnout10====N3====|   \\ Turnout7
-    ||  ||                         //                   \\  ||
-    ||  || |====N2====Turnout12==Turnout11              ||  ||
+    ||  ||                      Turnout12====N2====|   \\ Turnout7
+    ||  ||                           //                 \\  ||
+    ||  || |====GBF1====Turnout14==Turnout13            ||  ||
     ||  ||                 //         //                ||  ||
-    ||  ||              GBF1b        GBF2b              ||  ||
+    B3  B6              GBF2b        GBF3b              ||  ||
     ||  ||               ||           ||                ||  ||
-    ||  ||               ||     Turnout14               ||  ||
-    ||  ||               ||     //    ||                ||  ||
-    ||  ||              Turnout13     ||                ||  ||
+    ||  ||               ||     Turnout16               ||  ||
+    ||  ||               ||     //    ||                B4  B1
+    ||  ||              Turnout15     ||                ||  ||
     ||  ||               ||           ||                ||  ||
-    ||   \\             GBF1a        GBF2a              ||  ||
+    ||   \\             GBF2a        GBF3a              ||  ||
     ||    \\             ||           ||               //   ||
     ||     \\            --           --              //    ||
  Turnout1   \\         //====N1====|                 //    //
     ||  \\   \\       //                            //    //
     \\    Turnout2=Turnout3========PBF3============//    //
      \\======Turnout4========PBF2====================Turnout6
-                 \\                                    //
-    |====PBF5====Turnout5========PBF1=================//
+                  \\                                    //
+    |====PBF1a====Turnout5========PBF1=================//
     */
 
 public:
@@ -363,8 +360,7 @@ private:
     void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
 };
 
-enum class SignalRailwayTracks : unsigned int
-{
+BETTER_ENUM(SignalRailwayTracks, unsigned int,
     Turnout1,
     Turnout2,
     Turnout3,
@@ -380,7 +376,7 @@ enum class SignalRailwayTracks : unsigned int
     G5,
     G6,
     G7
-};
+);
 
 class SignalRailway : public winston::RailwayWithRails<SignalRailwayTracks>, winston::Shared_Ptr<SignalRailway>
 {

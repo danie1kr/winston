@@ -7,7 +7,7 @@ class TLC5947 : public winston::SignalDevice<T, bits>, public winston::Shared_Pt
 {
 	static_assert(bits <= sizeof(T) * 8, "too many bits for T");
 public:
-	TLC5947(const size_t devices, const size_t portsPerDevice, winston::SendDevice<T, bits>::Shared device)
+	TLC5947(const size_t devices, const size_t portsPerDevice, typename winston::SendDevice<T, bits>::Shared device)
 		: winston::SignalDevice<T, bits>(devices, portsPerDevice, device), data(devices * portsPerDevice * bits / 8, 0)
 	{
 

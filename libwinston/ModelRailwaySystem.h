@@ -1,7 +1,5 @@
 #pragma once
 
-#include <ranges>
-
 #include "HAL.h"
 #include "Railway.h"
 #include "SignalBox.h"
@@ -27,11 +25,15 @@ namespace winston
 
 			result = this->digitalCentralStation->connect();
 
-			for (auto& turnout : this->railway->turnouts())
+			this->railway->turnouts([=](const Tracks track, winston::Turnout::Shared turnout) {
+				this->digitalCentralStation->requestTurnoutInfo(turnout);
+				this->signalBox->setSignalsFor(turnout); 
+			});
+			/*for (auto& turnout : this->railway->turnouts())
 			{
 				this->digitalCentralStation->requestTurnoutInfo(turnout.second);
 				this->signalBox->setSignalsFor(turnout.second);
-			}
+			}*/
 			/*vector<int> is{0, 1, 2, 3, 4, 5, 6};
 			auto evens = views::filter(is, [](int i) { return 0 == i % 2; });
 			for (int i : evens)
@@ -111,6 +113,8 @@ namespace winston
 
 		// the railway
 		_Railway railway;
+		using Tracks = typename _Railway::element_type::Tracks;
+
 		SignalBox::Shared signalBox;
 		NullMutex nullMutex;
 

@@ -4,7 +4,7 @@ namespace winston
 {
 	Signal::Light Signal::Light::make(const Port port)
 	{
-		return { .port = port };
+		return { port };
 	}
 
 	Signal::Signal(const Callback callback, const Length distance)

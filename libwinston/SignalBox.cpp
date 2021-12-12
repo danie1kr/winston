@@ -53,7 +53,8 @@ namespace winston
 		const auto aspect = turnout->direction() == direction ? Signal::Aspect::Go : Signal::Aspect::Halt;
 		Track::Connection signalConnection = direction == Turnout::Direction::A_B ? Track::Connection::B : Track::Connection::C;
 		auto signalToSet = this->nextSignal(signalCurrent, true, signalConnection, true, true);
-		this->setSignalOn(signalCurrent, signalConnection, aspect);
+		if(signalToSet)
+			this->setSignalOn(signalCurrent, signalConnection, aspect);
 	}
 
 	void SignalBox::setSignalsFor(Turnout::Shared turnout)

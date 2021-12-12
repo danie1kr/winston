@@ -25,11 +25,11 @@
     <Filter Include="external\ftdi-ft232">
       <UniqueIdentifier>{3788dd8f-f7fa-4eb1-9d55-5eda0d44d8bd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="external\json11">
+      <UniqueIdentifier>{892d1d11-7833-40a9-9800-8c7d5af0d2c4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="winston-hal-stm32.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="winston-hal-x64.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -51,6 +51,9 @@
     <ClCompile Include="Kornweinheim.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="external\json11\json11.cpp">
+      <Filter>external\json11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\central-z21\Z21Const.h">
@@ -71,13 +74,7 @@
     <ClInclude Include="winston-hal-x64.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="json.hpp">
-      <Filter>external</Filter>
-    </ClInclude>
     <ClInclude Include="mio.hpp">
-      <Filter>external</Filter>
-    </ClInclude>
-    <ClInclude Include="external\magic_enum.hpp">
       <Filter>external</Filter>
     </ClInclude>
     <ClInclude Include="TLC5947_SignalDevice.h">
@@ -94,6 +91,9 @@
     </ClInclude>
     <ClInclude Include="Kornweinheim.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="external\json11\json11.hpp">
+      <Filter>external\json11</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

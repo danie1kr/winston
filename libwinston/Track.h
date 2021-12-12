@@ -52,7 +52,8 @@ namespace winston
 		void block(const Address address);
 		const Address block() const;
 
-		virtual bool traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const = 0;
+		virtual const bool traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const = 0;
+		virtual const bool canTraverse(const Connection entering) const = 0;
 
 		using TraversalCallback = std::function<bool(Track::Shared track, const Track::Connection connection)>;
 		enum class TraversalResult : unsigned int
@@ -78,15 +79,16 @@ namespace winston
 			{
 				if (_signalHandling == TraversalSignalHandling::ForwardDirection)
 				{// the signal faces us
-					signal = onto->signalFacing(connection);
+					auto facingConnection = onto->otherConnection(connection);
+					signal = onto->signalFacing(facingConnection);
 					if (signal)
 					{
 						start = onto;
-						connection = connection;
+						connection = facingConnection;
 						return TraversalResult::Signal;
 					}
 				}
-				if (visited.contains(onto))
+				if (visited.find(onto) != visited.end())
 					return TraversalResult::Looped;
 				if (onto->type() == Track::Type::Bumper)
 					return TraversalResult::Bumper;
@@ -101,6 +103,12 @@ namespace winston
 				if(callback)
 					callback(onto, connection);
 				connection = onto->whereConnects(current);
+				if(onto->type() == Track::Type::Turnout && !onto->canTraverse(connection))
+				{
+					start = current;
+					connection = connection;
+					return TraversalResult::OpenTurnout;
+				}
 				if (_signalHandling == TraversalSignalHandling::OppositeDirection)
 				{// the signal looks in the same way as we travel
 					signal = onto->signalGuarding(connection);
@@ -163,7 +171,8 @@ namespace winston
 
 		bool has(const Connection connection) const;
 		Track::Shared on(const Connection connection) const;
-		bool traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const;
+		const bool traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const;
+		const bool canTraverse(const Connection entering) const;
 		void collectAllConnections(std::set<Track::Shared>& tracks) const;
 		const Connection whereConnects(Track::Shared& other) const;
 		const Connection otherConnection(const Connection connection) const;
@@ -195,7 +204,8 @@ namespace winston
 
 		bool has(const Connection connection) const;
 		Track::Shared on(const Connection connection) const;
-		bool traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const;
+		const bool traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const;
+		const bool canTraverse(const Connection entering) const;
 
 		void collectAllConnections(std::set<Track::Shared>& tracks) const;
 		const Connection whereConnects(Track::Shared& other) const;
@@ -242,7 +252,8 @@ namespace winston
 		bool has(const Connection connection) const;
 		Track::Shared on(const Connection connection) const;
 
-		bool traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const;
+		const bool traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const;
+		const bool canTraverse(const Connection entering) const;
 		void collectAllConnections(std::set<Track::Shared>& tracks) const;
 		const Connection whereConnects(Track::Shared& other) const;
 		const Connection otherConnection(const Connection connection) const;

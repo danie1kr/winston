@@ -19,7 +19,7 @@ namespace winston {
 
 	const bool Block::contains(Track::Shared track) const
 	{
-		return this->_tracks.contains(track);
+		return this->_tracks.find(track) != this->_tracks.end();
 	}
 
 	const BlockEntrySet Block::entries() const
@@ -27,7 +27,7 @@ namespace winston {
 		BlockEntrySet set;
 		for (auto& track : this->_tracks)
 		{
-#define CHECK_ENTRY_AND_ADD(connection) { Track::Shared t = track->on(connection); if (!this->_tracks.contains(t)) set.insert(std::make_pair(track, connection));}
+#define CHECK_ENTRY_AND_ADD(connection) { Track::Shared t = track->on(connection); if (this->_tracks.find(t) == this->_tracks.end()) set.insert(std::make_pair(track, connection));}
 			switch (track->type())
 			{
 				// a bumper is always an entry

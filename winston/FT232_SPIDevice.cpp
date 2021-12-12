@@ -52,7 +52,7 @@ const winston::Result FT232_SPIDevice::init()
     channelConf.Pin = 0x00000000;/*FinalVal-FinalDir-InitVal-InitDir (for dir 0=in, 1=out)*/
     status = SPI_InitChannel(ftHandle, &channelConf);
 
-    return winston::Result::OK;
+    return status == FT_OK ? winston::Result::OK : winston::Result::ExternalHardwareFailed;
 }
 const winston::Result FT232_SPIDevice::send(const std::span<DataType> data)
 {
@@ -60,6 +60,7 @@ const winston::Result FT232_SPIDevice::send(const std::span<DataType> data)
         return winston::Result::OK;
 
     FT_STATUS status = FT_OK;
+    status = FT_WriteGPIO(ftHandle, 11000000 & (1 << this->xlat), 0);
     uint32 transfered = 0;
     uint8* dataPointer = (uint8*)&data.front();
     status = SPI_Write(ftHandle, dataPointer, (uint32)( data.size() * sizeof(DataType)), &transfered, SPI_TRANSFER_OPTIONS_SIZE_IN_BYTES |

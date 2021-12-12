@@ -66,8 +66,8 @@ void WebServerWSPP::on_http(ConnectionWSPP hdl)
     auto con = this->server.get_con_from_hdl(hdl);
     const auto response = this->onHTTP(hdl, con->get_resource());
 
-    for (auto const& [key, value]: response.headers)
-        con->append_header(key, value);
+    for (auto const& kv: response.headers)
+        con->append_header(kv.first, kv.second);
     con->set_status(websocketpp::http::status_code::value(response.status));
     con->set_body(response.body);
 }
@@ -100,7 +100,7 @@ size_t WebServerWSPP::maxMessageSize()
 
 static const std::string constWinstonStoragePath = "winston.storage";
 static std::string winstonStoragePath = constWinstonStoragePath;
-static const auto winstonStorageSize = 32 * 1024;
+static const auto winstonStorageSize = 128 * 1024;
 mio::mmap_sink winstonStorage;
 
 int handle_error(const std::error_code& error)
@@ -162,69 +162,71 @@ const winston::Result UDPSocketLWIP::send(const std::vector<unsigned char> data)
         return winston::Result::SendFailed;
     }
 }
-namespace winston::hal
+namespace winston
 {
-    void init()
-    {
-        { WSADATA wsaData; WSAStartup(MAKEWORD(1, 1), &wsaData); }
-
-        ensureStorageFile();
-        std::error_code error;
-        winstonStorage = mio::make_mmap_sink(winstonStoragePath, 0, mio::map_entire_file, error);
-        if (error) { handle_error(error); }
-    }
-
-    void text(const std::string& error)
-    {
-        std::cout << error << std::endl;
-    }
-
-    void fatal(const std::string text)
-    {
-        throw std::exception(text.c_str());
-        exit(-1);
-    }
-
-    void delay(const unsigned int ms)
-    {
-        Sleep(ms);
-    }
-    
-    unsigned long long now()
-    {
-        return GetTickCount64();
-    }
-
-    const uint8_t storageRead(const size_t address)
-    {
-        if (winstonStorage.size() > address)
-            return winstonStorage[address];
-        else
-            return 0;
-    }
-
-    void storageWrite(const size_t address, const uint8_t data)
-    {
-        if (winstonStorage.size() > address)
+    namespace hal {
+        void init()
         {
-            winstonStorage[address] = data;
-        }
-    }
+            { WSADATA wsaData; WSAStartup(MAKEWORD(1, 1), &wsaData); }
 
-    bool storageCommit()
-    {
-        std::error_code error;
-        winstonStorage.sync(error);
-        if (error)
+            ensureStorageFile();
+            std::error_code error;
+            winstonStorage = mio::make_mmap_sink(winstonStoragePath, 0, mio::map_entire_file, error);
+            if (error) { handle_error(error); }
+        }
+
+        void text(const std::string& error)
         {
-            handle_error(error);
-            return false;
+            std::cout << error << std::endl;
         }
-        return true;
-    }
 
-    bool send(const std::string& ip, const unsigned short& port, std::vector<unsigned char>& data)
-    {
-        return true;
+        void fatal(const std::string text)
+        {
+            throw std::exception(text.c_str());
+            exit(-1);
+        }
+
+        void delay(const unsigned int ms)
+        {
+            Sleep(ms);
+        }
+
+        unsigned long long now()
+        {
+            return GetTickCount64();
+        }
+
+        const uint8_t storageRead(const size_t address)
+        {
+            if (winstonStorage.size() > address)
+                return winstonStorage[address];
+            else
+                return 0;
+        }
+
+        void storageWrite(const size_t address, const uint8_t data)
+        {
+            if (winstonStorage.size() > address)
+            {
+                winstonStorage[address] = data;
+            }
+        }
+
+        bool storageCommit()
+        {
+            std::error_code error;
+            winstonStorage.sync(error);
+            if (error)
+            {
+                handle_error(error);
+                return false;
+            }
+            return true;
+        }
+
+        bool send(const std::string& ip, const unsigned short& port, std::vector<unsigned char>& data)
+        {
+            return true;
+        }
     }
 }

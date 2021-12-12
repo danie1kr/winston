@@ -8,7 +8,7 @@ namespace winston
 
 	void Railway::block(const Address address, const Trackset trackset)
 	{
-		if (this->_blocks.contains(address))
+		if (this->_blocks.find(address) != this->_blocks.end())
 			hal::fatal("block address exists already");
 
 		for (auto& track : trackset)

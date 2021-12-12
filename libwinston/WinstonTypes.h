@@ -1,10 +1,11 @@
 #pragma once
 
+#include "better_enum.hpp"
 #include <string>
 #include <array>
 #include <memory>
 #include <vector>
-#include <span>
+#include "span.hpp"
 
 namespace winston
 {
@@ -22,13 +23,14 @@ namespace winston
 		Finished
 	};
 
+	//BETTER_ENUM(Result, unsigned int, /*Red = 1, Green, Blue)
 	enum class Result
 	{
 		OK,
 		InternalError,
 		SendFailed,
 		ValidationFailed,
-		ExternalHardwareFailed,
+		ExternalHardwareFailed
 	};
 
 	enum class Features : unsigned int

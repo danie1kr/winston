@@ -13,6 +13,7 @@ public:
 
 	UDPSocketLWIP(const std::string ip, const unsigned short port);
 	const winston::Result send(const std::vector<unsigned char> data);
+	const winston::Result recv(std::vector<unsigned char>& data);
 private:
 
 	const winston::Result connect();

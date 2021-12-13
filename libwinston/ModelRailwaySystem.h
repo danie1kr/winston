@@ -16,8 +16,6 @@ namespace winston
 
 		void setup() {
 			Result result;
-			
-			winston::hal::init();
 
 			this->systemSetup();
 
@@ -95,6 +93,7 @@ namespace winston
 		}
 
 		bool loop() {
+			this->digitalCentralStation->tick();
 			return this->systemLoop();
 		};
 		using Railway = _Railway;

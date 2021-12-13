@@ -53,8 +53,8 @@ namespace winston
 		virtual size_t maxMessageSize() = 0;
 
 	protected:
-		std::map<unsigned int, _Connection> connections;
-
+		using Connections = std::map<unsigned int, _Connection>;
+		Connections connections;
 
 		unsigned int nextClientId = 1;
 		unsigned int newClientId() { return nextClientId++; };

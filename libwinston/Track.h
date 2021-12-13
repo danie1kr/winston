@@ -132,8 +132,6 @@ namespace winston
 			return traverse<TraversalSignalHandling::Ignore>(start, connection, signal);
 		}
 
-		using TraversalCallback = std::function<bool(Track::Shared track, const Track::Connection connection)>;
-
 		virtual void collectAllConnections(std::set<Track::Shared>& tracks) const = 0;
 		virtual const Connection whereConnects(Track::Shared& other) const = 0;
 		virtual const Connection otherConnection(const Connection connection) const = 0;

@@ -11,10 +11,11 @@
 
 #ifdef WINSTON_PLATFORM_WIN_x64
 #include "winston-hal-x64.h"
+#define WINSTON_WITH_WEBSOCKETS
 #endif
 
-#ifdef WINSTON_PLATFORM_STM32
-#include "winston-hal-stm32.h"
+#ifdef WINSTON_PLATFORM_TEENSY
+#include "winston-hal-teensy.h"
 #endif
 
 #include "external/central-z21/Z21.h"
@@ -53,6 +54,10 @@ private:
 
     winston::Railway::Callbacks railwayCallbacks();
 
+#ifdef WINSTON_WITH_WEBSOCKETS
+    /* websocket */
+    WebServerWSPP webServer;
+
     // Define a callback to handle incoming messages
     WebServerWSPP::HTTPResponse on_http(WebServerWSPP::Client client, std::string resource);
 
@@ -60,6 +65,7 @@ private:
 
     // Define a callback to handle incoming messages
     void on_message(WebServerWSPP::Client client, std::string message);
+#endif
 
     // setup our model railway system
     void systemSetup();
@@ -71,8 +77,6 @@ private:
 
     void populateLocomotiveShed();
 
-    /* websocket */
-    WebServerWSPP webServer;
 
     /* z21 */
     UDPSocketLWIP::Shared z21Socket;

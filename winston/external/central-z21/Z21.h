@@ -29,6 +29,7 @@ public:
     void processPacket(uint8_t *packet);
 
     const winston::Result connect();
+    const winston::Result tick();
 
     void requestTurnoutInfo(winston::Turnout::Shared turnout);
     void triggerTurnoutChangeTo(winston::Turnout::Shared turnout, winston::Turnout::Direction direction);

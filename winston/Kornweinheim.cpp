@@ -1,5 +1,6 @@
 #include "Kornweinheim.h"
 
+#ifdef WINSTON_WITH_WEBSOCKETS
 // send a turnout state via websocket
 void Kornweinheim::turnoutSendState(const unsigned int turnoutTrackId, const winston::Turnout::Direction dir)
 {
@@ -52,17 +53,19 @@ void Kornweinheim::locoSend(winston::Address address)
         locoSend(loco);
     }
 }
-
+#endif
 void Kornweinheim::initNetwork()
 {
     // z21
     z21Socket = UDPSocketLWIP::make(z21IP, z21Port);
 
+#ifdef WINSTON_WITH_WEBSOCKETS
     // webServer
     this->webServer.init(
         std::bind(&Kornweinheim::on_http, this, std::placeholders::_1, std::placeholders::_2),
         std::bind(&Kornweinheim::on_message, this, std::placeholders::_1, std::placeholders::_2),
         8080);
+#endif
 }
 
 winston::DigitalCentralStation::Callbacks Kornweinheim::z21Callbacks()
@@ -72,8 +75,6 @@ winston::DigitalCentralStation::Callbacks Kornweinheim::z21Callbacks()
     // what to do when the digital central station updated a turnout
     callbacks.turnoutUpdateCallback = [=](winston::Turnout::Shared turnout, const winston::Turnout::Direction direction) -> const winston::State
     {
-        //auto id = this->railway->trackIndex(turnout);
-        //turnoutSendState(id, direction);
         turnout->finalizeChangeTo(direction);
         return winston::State::Finished;
     };
@@ -140,6 +141,7 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
     return callbacks;
 }
 
+#ifdef WINSTON_WITH_WEBSOCKETS
 // Define a callback to handle incoming messages
 WebServerWSPP::HTTPResponse Kornweinheim::on_http(WebServerWSPP::Client client, std::string resource) {
     const std::string path_index("/");
@@ -462,6 +464,7 @@ void Kornweinheim::on_message(WebServerWSPP::Client client, std::string message)
         winston::hal::text(message);
     }
 }
+#endif
 
 // setup our model railway system
 void Kornweinheim::systemSetup() {
@@ -510,7 +513,10 @@ void Kornweinheim::systemSetupComplete()
 
 // accept new requests and loop over what the signal box has to do
 bool Kornweinheim::systemLoop() {
+
+#ifdef WINSTON_WITH_WEBSOCKETS
     this->webServer.step();
+#endif
     return this->signalBox->work();
 }
 

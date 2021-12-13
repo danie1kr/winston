@@ -1,55 +1,44 @@
 #include "../libwinston/HAL.h"
 #include "../libwinston/Util.h"
-#include <WinSock2.h>
-#include <WS2tcpip.h>
 
 #include <iostream>
 #include <fstream>
 
-#include "mio.hpp"
-#include "winston-hal-x64.h"
-
-#pragma comment(lib, "ws2_32.lib")
-
-using websocketpp::lib::placeholders::_1;
-using websocketpp::lib::placeholders::_2;
-
-WebServerWSPP::WebServerWSPP() : winston::WebServer<ConnectionWSPP>()
+#include "winston-hal-teensy.h"
+/*
+WebServerTeensy::WebServerTeensy() : winston::WebServer<Client>()
 {
 
 }
 
-void WebServerWSPP::init(OnHTTP onHTTP, OnMessage onMessage, unsigned int port)
+void WebServerTeensy::init(OnHTTP onHTTP, OnMessage onMessage, unsigned int port)
 {
     this->onHTTP = onHTTP;
     this->onMessage = onMessage;
-    this->server.init_asio();
-
-    this->server.set_http_handler(websocketpp::lib::bind(&WebServerWSPP::on_http, this, websocketpp::lib::placeholders::_1));
-    this->server.set_message_handler(websocketpp::lib::bind(&WebServerWSPP::on_msg, this, websocketpp::lib::placeholders::_1, websocketpp::lib::placeholders::_2));
-    this->server.set_open_handler(websocketpp::lib::bind(&WebServerWSPP::on_open, this, websocketpp::lib::placeholders::_1));
-    this->server.set_close_handler(websocketpp::lib::bind(&WebServerWSPP::on_close, this, websocketpp::lib::placeholders::_1));
-
     this->server.listen(port);
-
-    this->server.start_accept();
 }
 
-void WebServerWSPP::send(ConnectionWSPP& connection, const std::string &data)
+void WebServerTeensy::send(WebsocketsClient& connection, const std::string& data)
 {
-    this->server.send(connection, data, websocketpp::frame::opcode::text);
+    connection.send(data);;
 }
 
-void WebServerWSPP::step()
+void WebServerTeensy::step()
 {
+    // check for new client
+    WebsocketsClient newClient = server.accept();
+    if(newClient)
+        this->connections.insert({ this->newClientId(), newClient });
+
+    // ask one client for nonblocking updates
     this->server.poll_one();
 }
 
-ConnectionWSPP WebServerWSPP::getClient(unsigned int clientId)
+WebsocketsClient WebServerTeensy::getClient(unsigned int clientId)
 {
     return this->connections[clientId];
 }
-unsigned int WebServerWSPP::getClientId(ConnectionWSPP client)
+unsigned int WebServerTeensy::getClientId(WebsocketsClient client)
 {
     auto result = std::find_if(
         this->connections.begin(),
@@ -61,43 +50,43 @@ unsigned int WebServerWSPP::getClientId(ConnectionWSPP client)
     return 0;
 }
 
-void WebServerWSPP::on_http(ConnectionWSPP hdl)
+void WebServerTeensy::on_http(ConnectionWSPP hdl)
 {
     auto con = this->server.get_con_from_hdl(hdl);
     const auto response = this->onHTTP(hdl, con->get_resource());
 
-    for (auto const& kv: response.headers)
+    for (auto const& kv : response.headers)
         con->append_header(kv.first, kv.second);
     con->set_status(websocketpp::http::status_code::value(response.status));
     con->set_body(response.body);
 }
 
-void WebServerWSPP::on_msg(ConnectionWSPP hdl, websocketpp::server<websocketpp::config::asio>::message_ptr msg)
+void WebServerTeensy::on_msg(ConnectionWSPP hdl, websocketpp::server<websocketpp::config::asio>::message_ptr msg)
 {
     this->onMessage(hdl, msg->get_payload());
 }
 
-void WebServerWSPP::on_open(ConnectionWSPP hdl) {
+void WebServerTeensy::on_open(ConnectionWSPP hdl) {
     this->connections.insert({ this->newClientId(), hdl });
 }
 
-void WebServerWSPP::on_close(ConnectionWSPP hdl) {
+void WebServerTeensy::on_close(ConnectionWSPP hdl) {
     auto id = this->getClientId(hdl);
 
     if (id)
         this->connections.erase(id);
 }
 
-void WebServerWSPP::shutdown()
+void WebServerTeensy::shutdown()
 {
     this->server.stop();
 }
 
-size_t WebServerWSPP::maxMessageSize()
+size_t WebServerTeensy::maxMessageSize()
 {
     return this->server.get_max_message_size();
 }
-
+*/
 static const std::string constWinstonStoragePath = "winston.storage";
 static std::string winstonStoragePath = constWinstonStoragePath;
 static const auto winstonStorageSize = 128 * 1024;
@@ -125,81 +114,37 @@ void ensureStorageFile()
     }
 }
 
-UDPSocketLWIP::UDPSocketLWIP(const std::string ip, const unsigned short port) : winston::hal::UDPSocket(ip, port)
+UDPSocketLWIP::UDPSocketLWIP(const std::string ip, const unsigned short port) : winston::hal::UDPSocket(ip, port), ip(ip), port(port)
 {
-    this->addr.sin_family = AF_INET;
-    this->addr.sin_port = htons(port);
-    inet_pton(AF_INET, ip.c_str(), &this->addr.sin_addr.s_addr); 
-    
-    u_long nMode = 1; // 1: NON-BLOCKING
-    ioctlsocket(this->udpSocket, FIONBIO, &nMode);
-
-    this->connect();
-}
-
-const winston::Result UDPSocketLWIP::connect()
-{
-    closesocket(this->udpSocket);
-    this->udpSocket = socket(AF_INET, SOCK_DGRAM, 0);
-    this->state = State::Connecting;
-    return winston::Result::OK;
+    Udp.begin(port);
 }
 
 const winston::Result UDPSocketLWIP::send(const std::vector<unsigned char> data)
 {
     auto sz = (int)(data.size() * sizeof(unsigned char));
+    Udp.beginPacket(this->ip, this->port);
+    Udp.write(reinterpret_cast<const char*>(data.data()), sz);
+    Udp.endPacket();
 
-    auto result = sendto(this->udpSocket, reinterpret_cast<const char*>(data.data()), sz, 0, (SOCKADDR*)&this->addr, (int)sizeof(SOCKADDR_IN));
-
-    if (result == sz)
-    {
-        this->state = State::Connected;
-        return winston::Result::OK;
-    }
-    else
-    {
-        this->state = State::NotConnected;
-        if (result == -1)
-            this->connect();
-
-        return winston::Result::SendFailed;
-    }
-}
-
-const winston::Result UDPSocketLWIP::recv(std::vector<unsigned char>& data)
-{
-    sockaddr_in from;
-    int size = (int)sizeof(from);
-    data.resize(1000);
-    
-    fd_set fds;
-    int n;
-    struct timeval tv;
-
-    // Set up the file descriptor set.
-    FD_ZERO(&fds);
-    FD_SET(this->udpSocket, &fds);
-
-    // Set up the struct timeval for the timeout.
-    tv.tv_sec = 0;
-    tv.tv_usec = 50;
-
-    // Wait until timeout or data received.
-    if (select(this->udpSocket, &fds, NULL, NULL, &tv) > 0) {
-        int ret = recvfrom(this->udpSocket, reinterpret_cast<char*>(data.data()), data.size(), 0, reinterpret_cast<SOCKADDR*>(&from), &size);
-        if (ret < 0)
-            return winston::Result::ReceiveFailed;
-
-        // make the buffer zero terminated
-        data.resize(ret);
-    }
     return winston::Result::OK;
 }
+
 namespace winston
 {
     namespace hal {
         void init()
         {
+            // mac from teensy id
+            teensyMAC(mac);
+            // Connect to ethernet.
+            if (Ethernet.begin(mac))
+            {
+                Serial.println("Ethernet connected");
+            }
+            else {
+                Serial.println("Ethernet failed");
+            }
+
             { WSADATA wsaData; WSAStartup(MAKEWORD(1, 1), &wsaData); }
 
             ensureStorageFile();

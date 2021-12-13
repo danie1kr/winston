@@ -43,6 +43,20 @@ const winston::Result Z21::send(Z21Packet& packet)
     return result;
 }
 
+const winston::Result Z21::tick()
+{
+    if (this->socket->isConnected())
+    {
+        std::vector<unsigned char> data;
+        auto result = this->socket->recv(data);
+        if (data.size() > 0)
+            this->processPacket(data.data());
+        return result;
+    }
+    else
+        return winston::Result::OK;
+}
+
 const winston::Result Z21::getSerialNumber() {
     Z21Packet packet;
     packet.setHeader(4, Z21_LAN::GET_SERIAL_NUMBER);

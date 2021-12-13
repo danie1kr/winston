@@ -124,10 +124,11 @@ namespace winston
 			//return map;
 		}
 
+		/*
 		bool traverse(const Track::Connection from, Track::Shared& on, Track::Shared& onto) const
 		{
 			return on ? on->traverse(from, onto) : false;
-		}
+		}*/
 
 		inline constexpr Tracks trackEnum(size_t index) const
 		{
@@ -141,7 +142,8 @@ namespace winston
 */
 		inline constexpr unsigned int trackIndex(Track::Shared track) const
 		{
-			return trackEnum(track)._to_integral();
+			auto it = std::find(this->tracks.begin(), this->tracks.end(), track);
+			return (unsigned int)std::distance(this->tracks.begin(), it);
 		}
 
 		inline Track::Shared& track(Tracks index)

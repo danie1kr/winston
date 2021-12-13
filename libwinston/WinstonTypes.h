@@ -29,6 +29,7 @@ namespace winston
 		OK,
 		InternalError,
 		SendFailed,
+		ReceiveFailed,
 		ValidationFailed,
 		ExternalHardwareFailed
 	};

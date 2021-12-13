@@ -33,6 +33,7 @@ namespace winston
 
 			UDPSocket(const std::string ip, const unsigned short port);
 			virtual const Result send(const std::vector<unsigned char> data) = 0;
+			virtual const Result recv(std::vector<unsigned char>& data) = 0;
 
 			const bool isConnected();
 

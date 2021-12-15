@@ -109,11 +109,6 @@ int handle_error(const std::error_code& error)
     return error.value();
 }
 
-void setStoragePath(const std::string prefix)
-{
-    winstonStoragePath = std::string(prefix).append(".").append(constWinstonStoragePath);
-}
-
 void ensureStorageFile()
 {
     std::ifstream testIfExists(winstonStoragePath);
@@ -195,6 +190,7 @@ const winston::Result UDPSocketLWIP::recv(std::vector<unsigned char>& data)
     }
     return winston::Result::OK;
 }
+
 namespace winston
 {
     namespace hal {
@@ -227,6 +223,11 @@ namespace winston
         unsigned long long now()
         {
             return GetTickCount64();
+        }
+
+        void storageSetFilename(std::string filename)
+        {
+            winstonStoragePath = std::string(filename).append(".").append(constWinstonStoragePath);
         }
 
         const uint8_t storageRead(const size_t address)

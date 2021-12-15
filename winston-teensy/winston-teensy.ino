@@ -4,8 +4,7 @@
  Author:	daniel
 */
 
-#include <TeensyDebug.h>
-#include "winston.h"
+#include "winston-main.h"
 
 // the setup function runs once when you press reset or power the board
 void setup() {

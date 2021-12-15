@@ -41,7 +41,7 @@ namespace winston
 			mainSignal->aspect(aspect);
 			auto otherConnection = current->otherConnection(connection);
 			Signal::Shared preSignal;
-			auto result = Track::traverse<Track::TraversalSignalHandling::OppositeDirection>(current, otherConnection, preSignal);
+			/*auto result = */ Track::traverse<Track::TraversalSignalHandling::OppositeDirection>(current, otherConnection, preSignal);
 			if (preSignal)
 				preSignal->aspect(preSignalAspect);
 		}
@@ -85,6 +85,7 @@ namespace winston
 			case Track::TraversalResult::Bumper: 
 			case Track::TraversalResult::Looped: 
 			case Track::TraversalResult::Signal: aspect = Signal::Aspect::Go; break;
+			default:
 			case Track::TraversalResult::OpenTurnout: aspect = Signal::Aspect::Halt; break;
 			}
 			this->setSignalOn(signalCurrent, signalConnection, aspect);

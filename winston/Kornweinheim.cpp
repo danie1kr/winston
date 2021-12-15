@@ -1,9 +1,9 @@
 #include "Kornweinheim.h"
 
-#ifdef WINSTON_WITH_WEBSOCKETS
 // send a turnout state via websocket
 void Kornweinheim::turnoutSendState(const unsigned int turnoutTrackId, const winston::Turnout::Direction dir)
 {
+#ifdef WINSTON_WITH_WEBSOCKETS
     Json obj = Json::object {
         { "op", "turnoutState" },
         { "data", Json::object{
@@ -13,11 +13,13 @@ void Kornweinheim::turnoutSendState(const unsigned int turnoutTrackId, const win
         }
     };
     webServer.broadcast(obj.dump());
+#endif
 }
 
 // send a signal state via websocket
 void Kornweinheim::signalSendState(const unsigned int trackId, const winston::Track::Connection connection, const winston::Signal::Aspects aspects)
 {
+#ifdef WINSTON_WITH_WEBSOCKETS
     Json obj = Json::object {
         { "op", "signalState" },
         { "data", Json::object {
@@ -28,10 +30,12 @@ void Kornweinheim::signalSendState(const unsigned int trackId, const winston::Tr
         }
     };
     webServer.broadcast(obj.dump());
+#endif
 }
 
 void Kornweinheim::locoSend(winston::Locomotive::Shared& loco)
 {
+#ifdef WINSTON_WITH_WEBSOCKETS
     Json obj = Json::object{
         { "op", "loco" },
         { "data", Json::object {
@@ -44,20 +48,26 @@ void Kornweinheim::locoSend(winston::Locomotive::Shared& loco)
         }
     };
     webServer.broadcast(obj.dump());
+#endif
 }
 
 void Kornweinheim::locoSend(winston::Address address)
 {
+#ifdef WINSTON_WITH_WEBSOCKETS
     if (auto loco = this->get(address))
     {
         locoSend(loco);
     }
-}
 #endif
+}
 void Kornweinheim::initNetwork()
 {
     // z21
+#ifdef WINSTON_PLATFORM_TEENSY
+    z21Socket = UDPSocketTeensy::make(z21IP, z21Port);
+#else
     z21Socket = UDPSocketLWIP::make(z21IP, z21Port);
+#endif  
 
 #ifdef WINSTON_WITH_WEBSOCKETS
     // webServer

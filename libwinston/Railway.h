@@ -132,7 +132,7 @@ namespace winston
 
 		inline constexpr Tracks trackEnum(size_t index) const
 		{
-			return Tracks::_from_integral((unsigned int)index);
+			return Tracks::_from_integral_unchecked((unsigned int)index);
 		}
 		/*
 		inline constexpr unsigned int trackIndex(Tracks track) const
@@ -159,7 +159,7 @@ namespace winston
 		const Tracks trackEnum(Track::Shared& track) const
 		{
 			auto it = std::find(this->tracks.begin(), this->tracks.end(), track);
-			return Tracks::_from_integral((unsigned int)std::distance(this->tracks.begin(), it)); //this->trackEnum(std::distance(this->tracks.begin(), it));
+			return Tracks::_from_integral_unchecked((unsigned int)std::distance(this->tracks.begin(), it)); //this->trackEnum(std::distance(this->tracks.begin(), it));
 		}
 
 		inline Tracks track(Bumper::Shared& track)

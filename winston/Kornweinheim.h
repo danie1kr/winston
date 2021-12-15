@@ -15,7 +15,7 @@
 #endif
 
 #ifdef WINSTON_PLATFORM_TEENSY
-#include "winston-hal-teensy.h"
+#include "../winston-teensy/winston-hal-teensy.h"
 #endif
 
 #include "external/central-z21/Z21.h"
@@ -79,7 +79,11 @@ private:
 
 
     /* z21 */
+#ifdef WINSTON_PLATFORM_TEENSY
+    UDPSocketTeensy::Shared z21Socket;
+#else
     UDPSocketLWIP::Shared z21Socket;
+#endif    
     const std::string z21IP = { "192.168.0.100" };
     const unsigned short z21Port = 5000;
 

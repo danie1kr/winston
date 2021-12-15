@@ -46,6 +46,8 @@ namespace winston
 					return G1;
 				case Turnout::Direction::A_C:
 					return R10;
+				default:
+					return 0;
 				}
 
 				return 0;
@@ -58,6 +60,8 @@ namespace winston
 					return G1 + G12;
 				case Turnout::Direction::A_C:
 					return 2 * R20;
+				default:
+					return 0;
 				}
 
 				return 0;
@@ -70,6 +74,8 @@ namespace winston
 					return G14 + R2 + D8;
 				case Turnout::Direction::A_C:
 					return R2;
+				default:
+					return 0;
 				}
 
 				return 0;
@@ -82,6 +88,8 @@ namespace winston
 					return G14 + R3 + D8;
 				case Turnout::Direction::A_C:
 					return R3;
+				default:
+					return 0;
 				}
 
 				return 0;

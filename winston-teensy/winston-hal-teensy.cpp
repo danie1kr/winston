@@ -1,8 +1,15 @@
-#include "../libwinston/HAL.h"
-#include "../libwinston/Util.h"
+#include "HAL.h"
+#include "Util.h"
 
 #include <iostream>
 #include <fstream>
+
+#include <SD.h>
+#include <sdios.h>
+#include <SdFatConfig.h>
+#include <SdFat.h>
+
+#include <TeensyDebug.h>
 
 #include "winston-hal-teensy.h"
 /*
@@ -90,94 +97,193 @@ size_t WebServerTeensy::maxMessageSize()
 static const std::string constWinstonStoragePath = "winston.storage";
 static std::string winstonStoragePath = constWinstonStoragePath;
 static const auto winstonStorageSize = 128 * 1024;
-mio::mmap_sink winstonStorage;
 
-int handle_error(const std::error_code& error)
-{
-    winston::error(error.message());
-    return error.value();
-}
-
-void setStoragePath(const std::string prefix)
-{
-    winstonStoragePath = std::string(prefix).append(".").append(constWinstonStoragePath);
-}
+static SdFat sd;
+static SdFile winstonStorage;
 
 void ensureStorageFile()
 {
-    std::ifstream testIfExists(winstonStoragePath);
-    if (!testIfExists.good())
+    if (!sd.exists(winstonStoragePath.c_str()))
     {
-        std::ofstream file(winstonStoragePath);
+        auto file = sd.open(winstonStoragePath.c_str(), O_READ | O_WRITE | O_CREAT);
         std::string s(winstonStorageSize, 0);
-        file << s;
+        file.write(s.c_str(), s.length());
+        file.flush();
+        file.close();
     }
 }
 
-UDPSocketLWIP::UDPSocketLWIP(const std::string ip, const unsigned short port) : winston::hal::UDPSocket(ip, port), ip(ip), port(port)
+UDPSocketTeensy::UDPSocketTeensy(const std::string ip, const unsigned short port) : winston::hal::UDPSocket(ip, port), ip(ip), port(port)
 {
     Udp.begin(port);
 }
 
-const winston::Result UDPSocketLWIP::send(const std::vector<unsigned char> data)
+const winston::Result UDPSocketTeensy::send(const std::vector<unsigned char> data)
 {
     auto sz = (int)(data.size() * sizeof(unsigned char));
-    Udp.beginPacket(this->ip, this->port);
+    Udp.beginPacket(this->ip.c_str(), this->port);
     Udp.write(reinterpret_cast<const char*>(data.data()), sz);
     Udp.endPacket();
 
     return winston::Result::OK;
 }
 
+const winston::Result UDPSocketTeensy::recv(std::vector<unsigned char>& data)
+{
+    int packetSize = Udp.parsePacket();
+    if (packetSize) {
+        data.resize(packetSize);
+        Udp.read(data.data(), data.size());
+    }
+    return winston::Result::OK;
+}
+
+Arduino_SPIDevice::Arduino_SPIDevice(const Pin chipSelect, const unsigned int speed, const Pin xlat, SPIDataOrder order, SPIMode mode, const Pin clock, const Pin mosi, const Pin miso)
+    : SPIDevice<unsigned int, 12>(chipSelect, speed, order, mode, clock, mosi, miso), xlat(xlat), spiSettings(speed, Arduino_SPIDevice::BitOrder(order), Arduino_SPIDevice::DataMode(mode))
+{
+}
+
+constexpr uint8_t Arduino_SPIDevice::BitOrder(const SPIDataOrder order)
+{
+    return order == SPIDataOrder::LSBFirst ? LSBFIRST : MSBFIRST;
+}
+
+constexpr uint8_t Arduino_SPIDevice::DataMode(const SPIMode mode)
+{
+    switch (mode)
+    {
+    default:
+    case SPIMode::SPI_0: return SPI_MODE0;
+    case SPIMode::SPI_1: return SPI_MODE1;
+    case SPIMode::SPI_2: return SPI_MODE2;
+    case SPIMode::SPI_3: return SPI_MODE3;
+    }
+}
+
+const winston::Result Arduino_SPIDevice::init()
+{
+    SPI.begin();
+    return winston::Result::OK;
+}
+const winston::Result Arduino_SPIDevice::send(const std::span<DataType> data)
+{
+    if (this->skip)
+        return winston::Result::OK;
+
+    digitalWrite(this->xlat, 0);
+    SPI.beginTransaction(this->spiSettings);
+    SPI.transfer((unsigned char*)&data.front(), data.size() * sizeof(DataType));
+    SPI.endTransaction();
+    digitalWrite(this->xlat, 1);
+    digitalWrite(this->xlat, 0);
+
+    return winston::Result::OK;
+}
+
+constexpr uint32_t DHCPTimeOut = 10000;  // 10 seconds
+IPAddress staticIP{ 0, 0, 0, 0 };//{192, 168, 1, 101};
+IPAddress subnetMask{ 255, 255, 255, 0 };
+IPAddress gateway{ 192, 168, 1, 1 };
+
 namespace winston
 {
     namespace hal {
         void init()
         {
-            // mac from teensy id
-            teensyMAC(mac);
-            // Connect to ethernet.
-            if (Ethernet.begin(mac))
-            {
-                Serial.println("Ethernet connected");
+            Serial.begin(115200);
+            while (!Serial && millis() < 4000) {
+                // Wait for Serial to initialize
+            }
+            stdPrint = &Serial;  // Make printf work
+
+            if (!sd.begin(BUILTIN_SDCARD)) {
+                Serial.println("SD initialization failed!");
+                return;
+            }
+            sd.chdir();
+
+            // Listen for link changes, for demonstration
+            Ethernet.onLinkState([](bool state) {
+                printf("Ethernet: Link %s\n", state ? "ON" : "OFF");
+                });
+
+            // Listen for address changes
+            Ethernet.onAddressChanged([]() {
+                IPAddress ip = Ethernet.localIP();
+                bool hasIP = !(ip == INADDR_NONE);  // IPAddress has no operator!=()
+                if (hasIP) {
+                    printf("Ethernet: Address changed:\n");
+
+                    IPAddress ip = Ethernet.localIP();
+                    printf("    Local IP = %u.%u.%u.%u\n", ip[0], ip[1], ip[2], ip[3]);
+                    ip = Ethernet.subnetMask();
+                    printf("    Subnet   = %u.%u.%u.%u\n", ip[0], ip[1], ip[2], ip[3]);
+                    ip = Ethernet.gatewayIP();
+                    printf("    Gateway  = %u.%u.%u.%u\n", ip[0], ip[1], ip[2], ip[3]);
+                    ip = Ethernet.dnsServerIP();
+                    if (!(ip == INADDR_NONE)) {  // May happen with static IP
+                        printf("    DNS      = %u.%u.%u.%u\n", ip[0], ip[1], ip[2], ip[3]);
+                    }
+                }
+                else {
+                    printf("Ethernet: Address changed: No IP address\n");
+                }
+                });
+
+
+            if (staticIP == INADDR_NONE) {
+                printf("Starting Ethernet with DHCP...\n");
+                if (!Ethernet.begin()) {
+                    printf("Failed to start Ethernet\n");
+                    return;
+                }
+                if (!Ethernet.waitForLocalIP(DHCPTimeOut)) {
+                    printf("Failed to get IP address from DHCP\n");
+                    // We may still get an address later, after the timeout,
+                    // so continue instead of returning
+                }
             }
             else {
-                Serial.println("Ethernet failed");
+                printf("Starting Ethernet with static IP...\n");
+                Ethernet.begin(staticIP, subnetMask, gateway);
             }
 
-            { WSADATA wsaData; WSAStartup(MAKEWORD(1, 1), &wsaData); }
-
             ensureStorageFile();
-            std::error_code error;
-            winstonStorage = mio::make_mmap_sink(winstonStoragePath, 0, mio::map_entire_file, error);
-            if (error) { handle_error(error); }
         }
 
         void text(const std::string& error)
         {
-            std::cout << error << std::endl;
+            Serial.println(error.c_str());
         }
 
-        void fatal(const std::string text)
+        void fatal(const std::string err)
         {
-            throw std::exception(text.c_str());
+            text(err);
             exit(-1);
         }
 
         void delay(const unsigned int ms)
         {
-            Sleep(ms);
+            delay(ms);
         }
 
         unsigned long long now()
         {
-            return GetTickCount64();
+            return millis();
+        }
+
+        void storageSetFilename(std::string filename)
+        {
+            winstonStoragePath = std::string(filename).append(".").append(constWinstonStoragePath);
         }
 
         const uint8_t storageRead(const size_t address)
         {
             if (winstonStorage.size() > address)
-                return winstonStorage[address];
+            {
+                winstonStorage.seek(address);
+                return winstonStorage.read();
+            }
             else
                 return 0;
         }
@@ -186,24 +292,15 @@ namespace winston
         {
             if (winstonStorage.size() > address)
             {
-                winstonStorage[address] = data;
+                winstonStorage.seek(address);
+                winstonStorage.write(data);
+                //winstonStorage[address] = data;
             }
         }
 
         bool storageCommit()
         {
-            std::error_code error;
-            winstonStorage.sync(error);
-            if (error)
-            {
-                handle_error(error);
-                return false;
-            }
-            return true;
-        }
-
-        bool send(const std::string& ip, const unsigned short& port, std::vector<unsigned char>& data)
-        {
+            winstonStorage.sync();
             return true;
         }
     }

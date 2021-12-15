@@ -1,6 +1,21 @@
+#include <string>
+
 #include "../libwinston/better_enum.hpp"
 #include "Util.h"
 #include "HAL.h"
+
+#ifdef WINSTON_PLATFORM_TEENSY
+#include <sstream>
+namespace std
+{
+	template < typename T > std::string to_string(const T& n)
+	{
+		std::ostringstream stm;
+		stm << n;
+		return stm.str();
+	}
+}
+#endif
 
 namespace winston
 {

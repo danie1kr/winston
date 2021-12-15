@@ -3,8 +3,8 @@
 #include <string>
 #include "../libwinston/better_enum.hpp"
 
-#define BUMPER(track, ...) case Tracks::_enumerated::track: return winston::Bumper::make(#track, __VA_ARGS__); 
-#define RAIL(track, ...) case Tracks::_enumerated::track: return winston::Rail::make(#track, __VA_ARGS__); 
+#define BUMPER(track) case Tracks::_enumerated::track: return winston::Bumper::make(#track); 
+#define RAIL(track) case Tracks::_enumerated::track: return winston::Rail::make(#track); 
 #define TURNOUT(track, callback, ...) case Tracks::_enumerated::track: return winston::Turnout::make(#track, callback, __VA_ARGS__); 
 
 MiniRailway::MiniRailway(const Callbacks callbacks) : winston::RailwayWithRails<MiniRailwayTracks>(callbacks) {};

@@ -39,7 +39,7 @@
     <ClCompile Include="external\central-z21\Z21.cpp">
       <Filter>external\central-z21</Filter>
     </ClCompile>
-    <ClCompile Include="winston.cpp">
+    <ClCompile Include="winston-main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="railways.cpp">
@@ -65,7 +65,7 @@
     <ClInclude Include="external\central-z21\Z21.h">
       <Filter>external\central-z21</Filter>
     </ClInclude>
-    <ClInclude Include="winston.h">
+    <ClInclude Include="winston-main.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="railways.h">

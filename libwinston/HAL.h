@@ -14,6 +14,7 @@ namespace winston
 
 		extern void delay(const unsigned int ms);
 
+		extern void storageSetFilename(std::string filename);
 		extern const unsigned char storageRead(const size_t address);
 		extern void storageWrite(const size_t address, const uint8_t data);
 		extern bool storageCommit();
@@ -54,11 +55,11 @@ namespace winston
 			};
 			enum class SPIDataOrder
 			{
-				MSBFIRST, LSBFIRST
+				MSBFirst, LSBFirst
 			};
 
-			SPIDevice(const Pin chipSelect, const unsigned int speed, SPIDataOrder order = SPIDataOrder::MSBFIRST, SPIMode mode = SPIMode::SPI_0, const Pin clock = 0, const Pin mosi = 0, const Pin miso = 0) :
-				Device(), SendDevice<T, bits>(), chipSelect(chipSelect), speed(speed), order(order), mode(mode), clock(clock), miso(miso), mosi(mosi)
+			SPIDevice(const Pin chipSelect, const unsigned int speed, SPIDataOrder order = SPIDataOrder::MSBFirst, SPIMode mode = SPIMode::SPI_0, const Pin clock = 0, const Pin mosi = 0, const Pin miso = 0) :
+				Device(), SendDevice<T, bits>(), chipSelect(chipSelect), clock(clock), miso(miso), mosi(mosi), speed(speed), mode(mode), order(order)
 			{
 
 			}

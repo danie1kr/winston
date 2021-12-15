@@ -24,9 +24,8 @@ namespace winston {
 		using Shared_Ptr<Block>::make;
 	private:
 		BlockEntrySet blockEntrySet;
-		const Trackset _tracks;
-
 		const Address address;
+		const Trackset _tracks;
 	};
 
 	using Blockset = std::set<Block::Shared>;

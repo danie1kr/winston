@@ -30,6 +30,7 @@ namespace winston
 		const std::string& name();
 	private:
 
+		const Callbacks callbacks;
 		struct Details
 		{
 			Address address = { 0 };
@@ -39,8 +40,6 @@ namespace winston
 			unsigned char speed = { 0 };
 			uint32_t functions = { 0 };
 		} details;
-
-		const Callbacks callbacks;
 	};
 }
 

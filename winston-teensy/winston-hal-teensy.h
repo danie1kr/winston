@@ -1,24 +1,49 @@
 #pragma once
 
-#include "../libwinston/Signal.h"
-#include "../libwinston/HAL.h"
+#include "Signal.h"
+#include "HAL.h"
 
 #include <QNEthernet.h>
+#include <SPI.h>
 
-class UDPSocketLWIP : public winston::hal::UDPSocket, winston::Shared_Ptr<UDPSocketLWIP>
+using namespace qindesign::network;
+
+class UDPSocketTeensy : public winston::hal::UDPSocket, winston::Shared_Ptr<UDPSocketTeensy>
 {
 public:
-	using winston::Shared_Ptr<UDPSocketLWIP>::Shared;
-	using winston::Shared_Ptr<UDPSocketLWIP>::make;
+	using winston::Shared_Ptr<UDPSocketTeensy>::Shared;
+	using winston::Shared_Ptr<UDPSocketTeensy>::make;
 
-	UDPSocketLWIP(const std::string ip, const unsigned short port);
+	UDPSocketTeensy(const std::string ip, const unsigned short port);
 	const winston::Result send(const std::vector<unsigned char> data);
+	const winston::Result recv(std::vector<unsigned char>& data);
 private:
 
 	EthernetUDP Udp;
 	const std::string ip;
 	const unsigned short port;
 };
+
+class Arduino_SPIDevice : public winston::hal::SPIDevice<unsigned int, 12>, public winston::Shared_Ptr<Arduino_SPIDevice>
+{
+public:
+	Arduino_SPIDevice(const Pin chipSelect, const unsigned int speed, const Pin xlat, SPIDataOrder order = SPIDataOrder::MSBFirst, SPIMode mode = SPIMode::SPI_0, const Pin clock = 0, const Pin mosi = 0, const Pin miso = 0);
+
+	using winston::Shared_Ptr<Arduino_SPIDevice>::Shared;
+	using winston::Shared_Ptr<Arduino_SPIDevice>::make;
+
+	const winston::Result init();
+	const winston::Result send(const std::span<DataType> data);
+
+	static constexpr uint8_t BitOrder(const SPIDataOrder order);
+	static constexpr uint8_t DataMode(const SPIMode mode);
+
+private:
+	const Pin xlat;
+	SPISettings spiSettings;
+};
+
+using SignalSPIDevice = Arduino_SPIDevice;
 
 /*
 #include "../libwinston/WebServer.h"

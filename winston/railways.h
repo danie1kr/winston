@@ -402,7 +402,7 @@ public:
     using winston::Shared_Ptr<SignalRailway>::make;
 
 public:
-    class AddressTranslator : public winston::DigitalCentralStation::AddressTranslator, winston::Shared_Ptr<AddressTranslator>
+    class AddressTranslator : public winston::DigitalCentralStation::AddressTranslator, public winston::Shared_Ptr<AddressTranslator>
     {
     public:
         AddressTranslator(winston::Shared_Ptr<SignalRailway>::Shared railway);

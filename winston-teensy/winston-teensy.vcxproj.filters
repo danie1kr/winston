@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="libwinston-src">
+      <UniqueIdentifier>{60ceef75-fa03-4051-98c2-6d3a4295f896}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="winston-src">
+      <UniqueIdentifier>{fdc391cd-5ba0-4cc8-9045-121e20c1a8ac}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="winston-teensy.ino" />
@@ -21,20 +27,26 @@
     <ClInclude Include="__vm\.winston-teensy.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\winston\Kornweinheim.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\winston\railways.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\winston\TLC5947_SignalDevice.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\winston\winston.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="winston-hal-teensy.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\winston\Kornweinheim.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\winston\winston-main.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\winston\external\central-z21\Z21.h">
+      <Filter>winston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\winston\external\central-z21\Z21Const.h">
+      <Filter>winston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\winston\external\central-z21\Z21Packet.h">
+      <Filter>winston-src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -44,11 +56,59 @@
     <ClCompile Include="..\winston\railways.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\winston\winston.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="winston-hal-teensy.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libwinston\Block.cpp">
+      <Filter>libwinston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libwinston\Callback.cpp">
+      <Filter>libwinston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libwinston\Command.cpp">
+      <Filter>libwinston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libwinston\DigitalCentralStation.cpp">
+      <Filter>libwinston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libwinston\HAL.cpp">
+      <Filter>libwinston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libwinston\Library.cpp">
+      <Filter>libwinston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libwinston\Locomotive.cpp">
+      <Filter>libwinston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libwinston\Railway.cpp">
+      <Filter>libwinston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libwinston\Route.cpp">
+      <Filter>libwinston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libwinston\Signal.cpp">
+      <Filter>libwinston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libwinston\SignalBox.cpp">
+      <Filter>libwinston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libwinston\Track.cpp">
+      <Filter>libwinston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libwinston\Util.cpp">
+      <Filter>libwinston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libwinston\Winston.cpp">
+      <Filter>libwinston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\winston\winston-main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\winston\external\central-z21\Z21.cpp">
+      <Filter>winston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\winston\external\central-z21\Z21Packet.cpp">
+      <Filter>winston-src</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

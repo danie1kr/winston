@@ -153,9 +153,9 @@ namespace winston
 		friend class Turnout;
 
 	private:
-		const Length trackLength;
 		const std::string _name;
 		Address _block;
+		const Length trackLength;
 	};
 
 	using Trackset = std::set<Track::Shared>;
@@ -279,12 +279,12 @@ namespace winston
 	private:
 		Track::Shared connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa = true);
 		
+		Callback callback;
 		const TrackLengthCalculator trackLengthCalculator;
 
 		bool leftTurnout;
 		Direction dir;
 
-		Callback callback;
 		Track::Shared a, b, c;
 	};
 }

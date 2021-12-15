@@ -107,9 +107,9 @@ namespace winston
 
 		virtual void updateLights() = 0;
 
-		Aspects _aspect;
-		const Length _distance;
 		const Callback callback;
+		const Length _distance;
+		Aspects _aspect;
 	};
 
 	inline const bool operator&(const Signal::Aspect a, const Signal::Aspect b)
@@ -220,9 +220,9 @@ namespace winston
 	protected:
 		virtual const Result updateInternal(winston::Signal::Shared signal) = 0;
 		virtual const Result flushInternal() = 0;
-		size_t portsPerDevice;
-		size_t devices;
 		typename SendDevice<T, bits>::Shared device;
+		size_t devices;
+		size_t portsPerDevice;
 	private:
 		unsigned long long lastFlush;
 		unsigned long long lastUpdate;

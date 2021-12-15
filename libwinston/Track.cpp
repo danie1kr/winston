@@ -204,9 +204,11 @@ namespace winston
 		{
 		case Connection::A: this->signals[0] = signal; return; break;
 		case Connection::DeadEnd: this->signals[1] = signal; return; break;
+		default:
+			hal::fatal("cannot put signal");
+			return;
 		}
 
-		hal::fatal("cannot put signal");
 	}
 
 	Signal::Shared Bumper::signalGuarding(const Connection guarding)
@@ -331,9 +333,10 @@ namespace winston
 		{
 		case Connection::A: this->signals[0] = signal; return; break;
 		case Connection::B: this->signals[1] = signal; return; break;
+		default:
+			hal::fatal("cannot put signal");
 		}
 
-		hal::fatal("cannot put signal");
 	}
 
 	Signal::Shared Rail::signalGuarding(const Connection guarding)
@@ -400,6 +403,8 @@ namespace winston
 			case Connection::A: onto = a; return true; break;
 			case Connection::B: onto = b; return true; break;
 			case Connection::C: onto = c; return true; break;
+			default:
+				return false;
 			}
 		}
 		else

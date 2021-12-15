@@ -17,8 +17,8 @@ namespace winston
 		void obsolete() noexcept;
 		inline const unsigned long long age() const;
 	private:
-		unsigned long long created;
 		Payload payload;
+		unsigned long long created;
 		bool skip;
 	};
 }

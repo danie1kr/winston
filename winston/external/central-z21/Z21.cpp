@@ -355,7 +355,7 @@ void Z21::processPacket(uint8_t* data) {
             processXPacket(data);
             break;
         case Z21_LAN::GET_SERIAL_NUMBER:
-            this->callbacks.systemInfoCallback(header, "Serial Number", std::to_string(Z21Packet::getLEuint32(data, 4)));
+            this->callbacks.systemInfoCallback(header, "Serial Number", winston::build(Z21Packet::getLEuint32(data, 4)));
             //if (onSerialNumber != NULL)
             //    onSerialNumber();
             break;

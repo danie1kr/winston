@@ -73,10 +73,10 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\winston-teensy;C:\Users\daniel\Documents\Arduino\libraries\TeensyDebug\src;C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4;C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\avr;C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\debug;C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\util;C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include;C:\Program Files (x86)\Arduino\hardware\tools\arm\lib\gcc\arm-none-eabi\5.4.1\include;C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\c++\5.4.1;C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\c++\5.4.1\tr1;C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\c++\5.4.1\bits;C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\c++\5.4.1\arm-none-eabi;$(ProjectDir)..\winston;C:\Program Files (x86)\Arduino\hardware\teensy;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\winston-teensy;C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src;C:\Program Files (x86)\Arduino\hardware\teensy\avr\libraries\SPI;C:\Program Files (x86)\Arduino\hardware\teensy\avr\libraries\Entropy;C:\Program Files (x86)\Arduino\hardware\teensy\avr\libraries\SD\src;C:\Program Files (x86)\Arduino\hardware\teensy\avr\libraries\SdFat\src;C:\Users\daniel\Documents\Arduino\libraries\TeensyDebug\src;C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4;C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\avr;C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\debug;C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\util;C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include;C:\Program Files (x86)\Arduino\hardware\tools\arm\lib\gcc\arm-none-eabi\5.4.1\include;C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\c++\5.4.1;C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\c++\5.4.1\tr1;C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\c++\5.4.1\bits;C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\c++\5.4.1\arm-none-eabi;$(ProjectDir)..\libwinston;$(ProjectDir)..\winston\external\central-z21;$(ProjectDir)..\winston;C:\Program Files (x86)\Arduino\hardware\teensy;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <ForcedIncludeFiles>$(ProjectDir)__vm\.winston-teensy.vsarduino.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <IgnoreStandardIncludePath>true</IgnoreStandardIncludePath>
-      <PreprocessorDefinitions>__HARDWARE_imxrt1062__;__HARDWARE_IMXRT1062__;_VMDEBUG=1;TCB_SPAN_NAMESPACE_NAME=std;__IMXRT1062__;TEENSYDUINO=155;ARDUINO=108016;ARDUINO_TEENSY41;F_CPU=600000000;USB_DUAL_SERIAL;LAYOUT_US_ENGLISH;__cplusplus=201103L;_VMICRO_INTELLISENSE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>__HARDWARE_imxrt1062__;__HARDWARE_IMXRT1062__;_VMDEBUG=1;TCB_SPAN_NAMESPACE_NAME=std;WINSTON_PLATFORM_TEENSY;__IMXRT1062__;TEENSYDUINO=155;ARDUINO=108016;ARDUINO_TEENSY41;F_CPU=600000000;USB_DUAL_SERIAL;LAYOUT_US_ENGLISH;__cplusplus=201103L;_VMICRO_INTELLISENSE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -111,22 +111,35 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\winston\external\central-z21\Z21.h" />
+    <ClInclude Include="..\winston\external\central-z21\Z21Const.h" />
+    <ClInclude Include="..\winston\external\central-z21\Z21Packet.h" />
     <ClInclude Include="..\winston\Kornweinheim.h" />
     <ClInclude Include="..\winston\railways.h" />
-    <ClInclude Include="..\winston\TLC5947_SignalDevice.h" />
-    <ClInclude Include="..\winston\winston.h" />
+    <ClInclude Include="..\winston\winston-main.h" />
     <ClInclude Include="winston-hal-teensy.h" />
     <ClInclude Include="__vm\.winston-teensy.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\libwinston\libwinston.vcxproj">
-      <Project>{e2afe313-843b-4ee1-b7ac-988d2779b178}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
+    <ClCompile Include="..\libwinston\Block.cpp" />
+    <ClCompile Include="..\libwinston\Callback.cpp" />
+    <ClCompile Include="..\libwinston\Command.cpp" />
+    <ClCompile Include="..\libwinston\DigitalCentralStation.cpp" />
+    <ClCompile Include="..\libwinston\HAL.cpp" />
+    <ClCompile Include="..\libwinston\Library.cpp" />
+    <ClCompile Include="..\libwinston\Locomotive.cpp" />
+    <ClCompile Include="..\libwinston\Railway.cpp" />
+    <ClCompile Include="..\libwinston\Route.cpp" />
+    <ClCompile Include="..\libwinston\Signal.cpp" />
+    <ClCompile Include="..\libwinston\SignalBox.cpp" />
+    <ClCompile Include="..\libwinston\Track.cpp" />
+    <ClCompile Include="..\libwinston\Util.cpp" />
+    <ClCompile Include="..\libwinston\Winston.cpp" />
+    <ClCompile Include="..\winston\external\central-z21\Z21.cpp" />
+    <ClCompile Include="..\winston\external\central-z21\Z21Packet.cpp" />
     <ClCompile Include="..\winston\Kornweinheim.cpp" />
     <ClCompile Include="..\winston\railways.cpp" />
-    <ClCompile Include="..\winston\winston.cpp" />
+    <ClCompile Include="..\winston\winston-main.cpp" />
     <ClCompile Include="winston-hal-teensy.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
@@ -134,7 +147,7 @@
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties config.Debug_x0020_Realworld.customdebug_teensy41_debugger_type="universal" config.Debug.customdebug_teensy41_debugger_type="universal" VM_ADDITIONAL_PREPROC="TCB_SPAN_NAMESPACE_NAME=std;WINSTON_PLATFORM_TEENSY" />
+      <UserProperties config.Debug_x0020_Realworld.customdebug_teensy41_debugger_type="universal" config.Debug.customdebug_teensy41_debugger_type="universal" VM_ADDITIONAL_COMPILER_CPP_FLAGS="-frtti -I&quot;{build.project_path}&quot; -I&quot;{build.project_path}\..\libwinston&quot; -I&quot;{build.project_path}\..\winston&quot;" VM_ADDITIONAL_PREPROC="TCB_SPAN_NAMESPACE_NAME=std;WINSTON_PLATFORM_TEENSY" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

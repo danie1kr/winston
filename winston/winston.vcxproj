@@ -126,7 +126,7 @@
     <ClCompile Include="Kornweinheim.cpp" />
     <ClCompile Include="railways.cpp" />
     <ClCompile Include="winston-hal-x64.cpp" />
-    <ClCompile Include="winston.cpp" />
+    <ClCompile Include="winston-main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\libwinston\libwinston.vcxproj">
@@ -146,7 +146,7 @@
     <ClInclude Include="railways.h" />
     <ClInclude Include="TLC5947_SignalDevice.h" />
     <ClInclude Include="winston-hal-x64.h" />
-    <ClInclude Include="winston.h" />
+    <ClInclude Include="winston-main.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="external\central-z21\readme.md" />

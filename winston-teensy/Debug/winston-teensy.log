@@ -1,26 +1,28 @@
-﻿  Kornweinheim.cpp
-D:\proj\dev\uc\winston\winston\winston\Kornweinheim.cpp : warning C4117: macro name '__cplusplus' is reserved, '#define' ignored
+﻿  winston-hal-teensy.cpp
+D:\proj\dev\uc\winston\winston\winston-teensy\winston-hal-teensy.cpp : warning C4117: macro name '__cplusplus' is reserved, '#define' ignored
 D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(16,1): warning C4005: '__HARDWARE_imxrt1062__': macro redefinition
-D:\proj\dev\uc\winston\winston\winston\Kornweinheim.cpp : message : see previous definition of '__HARDWARE_imxrt1062__'
+D:\proj\dev\uc\winston\winston\winston-teensy\winston-hal-teensy.cpp : message : see previous definition of '__HARDWARE_imxrt1062__'
 D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(17,1): warning C4005: '__HARDWARE_IMXRT1062__': macro redefinition
-D:\proj\dev\uc\winston\winston\winston\Kornweinheim.cpp : message : see previous definition of '__HARDWARE_IMXRT1062__'
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(18,1): warning C4005: '__IMXRT1062__': macro redefinition
-D:\proj\dev\uc\winston\winston\winston\Kornweinheim.cpp : message : see previous definition of '__IMXRT1062__'
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(21,1): warning C4005: 'ARDUINO_TEENSY41': macro redefinition
-D:\proj\dev\uc\winston\winston\winston\Kornweinheim.cpp : message : see previous definition of 'ARDUINO_TEENSY41'
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(23,1): warning C4005: 'USB_DUAL_SERIAL': macro redefinition
-D:\proj\dev\uc\winston\winston\winston\Kornweinheim.cpp : message : see previous definition of 'USB_DUAL_SERIAL'
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(24,1): warning C4005: 'LAYOUT_US_ENGLISH': macro redefinition
-D:\proj\dev\uc\winston\winston\winston\Kornweinheim.cpp : message : see previous definition of 'LAYOUT_US_ENGLISH'
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(25,1): warning C4117: macro name '__cplusplus' is reserved, '#define' ignored
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(26,1): warning C4117: macro name '__cplusplus' is reserved, '#undef' ignored
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(27,1): warning C4117: macro name '__cplusplus' is reserved, '#define' ignored
+D:\proj\dev\uc\winston\winston\winston-teensy\winston-hal-teensy.cpp : message : see previous definition of '__HARDWARE_IMXRT1062__'
+D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(20,1): warning C4005: 'WINSTON_PLATFORM_TEENSY': macro redefinition
+D:\proj\dev\uc\winston\winston\winston-teensy\winston-hal-teensy.cpp : message : see previous definition of 'WINSTON_PLATFORM_TEENSY'
+D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(21,1): warning C4005: '__IMXRT1062__': macro redefinition
+D:\proj\dev\uc\winston\winston\winston-teensy\winston-hal-teensy.cpp : message : see previous definition of '__IMXRT1062__'
+D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(24,1): warning C4005: 'ARDUINO_TEENSY41': macro redefinition
+D:\proj\dev\uc\winston\winston\winston-teensy\winston-hal-teensy.cpp : message : see previous definition of 'ARDUINO_TEENSY41'
+D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(26,1): warning C4005: 'USB_DUAL_SERIAL': macro redefinition
+D:\proj\dev\uc\winston\winston\winston-teensy\winston-hal-teensy.cpp : message : see previous definition of 'USB_DUAL_SERIAL'
+D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(27,1): warning C4005: 'LAYOUT_US_ENGLISH': macro redefinition
+D:\proj\dev\uc\winston\winston\winston-teensy\winston-hal-teensy.cpp : message : see previous definition of 'LAYOUT_US_ENGLISH'
+D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(28,1): warning C4117: macro name '__cplusplus' is reserved, '#define' ignored
+D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(29,1): warning C4117: macro name '__cplusplus' is reserved, '#undef' ignored
+D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(30,1): warning C4117: macro name '__cplusplus' is reserved, '#define' ignored
 C:\Program Files (x86)\Arduino\hardware\tools\arm\lib\gcc\arm-none-eabi\5.4.1\include\stddef.h(216,23): error C2371: 'size_t': redefinition; different basic types
 D:\proj\dev\uc\winston\winston\winston-teensy\predefined C++ types (compiler internal)(16): message : see declaration of 'size_t'
 C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\machine\_default_types.h(35,21): error C2371: '__int8_t': redefinition; different basic types
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(68): message : see declaration of '__int8_t'
+D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(71): message : see declaration of '__int8_t'
 C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\machine\_default_types.h(36,23): error C2371: '__uint8_t': redefinition; different basic types
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(67): message : see declaration of '__uint8_t'
+D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(70): message : see declaration of '__uint8_t'
 C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\machine\_default_types.h(63,9): error C2059: syntax error: 'constant'
 C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\machine\_default_types.h(67,18): error C2059: syntax error: 'constant'
 C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\machine\_default_types.h(89,9): error C2059: syntax error: 'constant'
@@ -28,7 +30,7 @@ C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\machine\
 C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\machine\_default_types.h(200,9): error C2059: syntax error: 'constant'
 C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\machine\_default_types.h(204,18): error C2059: syntax error: 'constant'
 C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\sys\_stdint.h(36,20): error C2371: 'uint16_t': redefinition; different basic types
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(76): message : see declaration of 'uint16_t'
+D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(79): message : see declaration of 'uint16_t'
 C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(436,124): error C2059: syntax error: 'volatile'
 C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9814,6): error C2059: syntax error: 'volatile'
 C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9815,11): error C2290: C++ 'asm' syntax ignored. Use __asm.
@@ -49,106 +51,3 @@ C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\core_pins.h(230
 C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\core_pins.h(2327,13): error C3861: '__builtin_constant_p': identifier not found
 C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\c++\5.4.1\type_traits(32,9): warning C4068: unknown pragma 'GCC'
 C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\c++\5.4.1\bits\c++0x_warning.h(34,1): fatal error C1189: #error:  This file requires compiler and library support for the ISO C++ 2011 standard. This support must be enabled with the -std=c++11 or -std=gnu++11 compiler options.
-  railways.cpp
-D:\proj\dev\uc\winston\winston\winston\railways.cpp : warning C4117: macro name '__cplusplus' is reserved, '#define' ignored
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(16,1): warning C4005: '__HARDWARE_imxrt1062__': macro redefinition
-D:\proj\dev\uc\winston\winston\winston\railways.cpp : message : see previous definition of '__HARDWARE_imxrt1062__'
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(17,1): warning C4005: '__HARDWARE_IMXRT1062__': macro redefinition
-D:\proj\dev\uc\winston\winston\winston\railways.cpp : message : see previous definition of '__HARDWARE_IMXRT1062__'
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(18,1): warning C4005: '__IMXRT1062__': macro redefinition
-D:\proj\dev\uc\winston\winston\winston\railways.cpp : message : see previous definition of '__IMXRT1062__'
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(21,1): warning C4005: 'ARDUINO_TEENSY41': macro redefinition
-D:\proj\dev\uc\winston\winston\winston\railways.cpp : message : see previous definition of 'ARDUINO_TEENSY41'
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(23,1): warning C4005: 'USB_DUAL_SERIAL': macro redefinition
-D:\proj\dev\uc\winston\winston\winston\railways.cpp : message : see previous definition of 'USB_DUAL_SERIAL'
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(24,1): warning C4005: 'LAYOUT_US_ENGLISH': macro redefinition
-D:\proj\dev\uc\winston\winston\winston\railways.cpp : message : see previous definition of 'LAYOUT_US_ENGLISH'
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(25,1): warning C4117: macro name '__cplusplus' is reserved, '#define' ignored
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(26,1): warning C4117: macro name '__cplusplus' is reserved, '#undef' ignored
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(27,1): warning C4117: macro name '__cplusplus' is reserved, '#define' ignored
-C:\Program Files (x86)\Arduino\hardware\tools\arm\lib\gcc\arm-none-eabi\5.4.1\include\stddef.h(216,23): error C2371: 'size_t': redefinition; different basic types
-D:\proj\dev\uc\winston\winston\winston-teensy\predefined C++ types (compiler internal)(16): message : see declaration of 'size_t'
-C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\machine\_default_types.h(35,21): error C2371: '__int8_t': redefinition; different basic types
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(68): message : see declaration of '__int8_t'
-C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\machine\_default_types.h(36,23): error C2371: '__uint8_t': redefinition; different basic types
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(67): message : see declaration of '__uint8_t'
-C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\machine\_default_types.h(63,9): error C2059: syntax error: 'constant'
-C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\machine\_default_types.h(67,18): error C2059: syntax error: 'constant'
-C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\machine\_default_types.h(89,9): error C2059: syntax error: 'constant'
-C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\machine\_default_types.h(93,18): error C2059: syntax error: 'constant'
-C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\machine\_default_types.h(200,9): error C2059: syntax error: 'constant'
-C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\machine\_default_types.h(204,18): error C2059: syntax error: 'constant'
-C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\sys\_stdint.h(36,20): error C2371: 'uint16_t': redefinition; different basic types
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(76): message : see declaration of 'uint16_t'
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(436,124): error C2059: syntax error: 'volatile'
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9814,6): error C2059: syntax error: 'volatile'
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9815,11): error C2290: C++ 'asm' syntax ignored. Use __asm.
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9820,11): error C2290: C++ 'asm' syntax ignored. Use __asm.
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9821,11): error C2290: C++ 'asm' syntax ignored. Use __asm.
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9853,6): error C2059: syntax error: 'volatile'
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9854,11): error C2290: C++ 'asm' syntax ignored. Use __asm.
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9859,11): error C2290: C++ 'asm' syntax ignored. Use __asm.
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9860,11): error C2290: C++ 'asm' syntax ignored. Use __asm.
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9874,6): error C2059: syntax error: 'volatile'
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9875,11): error C2290: C++ 'asm' syntax ignored. Use __asm.
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9880,11): error C2290: C++ 'asm' syntax ignored. Use __asm.
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9881,11): error C2290: C++ 'asm' syntax ignored. Use __asm.
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\core_pins.h(1790,6): error C3861: '__builtin_constant_p': identifier not found
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\core_pins.h(2034,6): error C3861: '__builtin_constant_p': identifier not found
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\core_pins.h(2161,6): error C3861: '__builtin_constant_p': identifier not found
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\core_pins.h(2309,13): error C3861: '__builtin_constant_p': identifier not found
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\core_pins.h(2327,13): error C3861: '__builtin_constant_p': identifier not found
-C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\c++\5.4.1\type_traits(32,9): warning C4068: unknown pragma 'GCC'
-C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\c++\5.4.1\bits\c++0x_warning.h(34,1): fatal error C1189: #error:  This file requires compiler and library support for the ISO C++ 2011 standard. This support must be enabled with the -std=c++11 or -std=gnu++11 compiler options.
-  winston.cpp
-D:\proj\dev\uc\winston\winston\winston\winston.cpp : warning C4117: macro name '__cplusplus' is reserved, '#define' ignored
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(16,1): warning C4005: '__HARDWARE_imxrt1062__': macro redefinition
-D:\proj\dev\uc\winston\winston\winston\winston.cpp : message : see previous definition of '__HARDWARE_imxrt1062__'
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(17,1): warning C4005: '__HARDWARE_IMXRT1062__': macro redefinition
-D:\proj\dev\uc\winston\winston\winston\winston.cpp : message : see previous definition of '__HARDWARE_IMXRT1062__'
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(18,1): warning C4005: '__IMXRT1062__': macro redefinition
-D:\proj\dev\uc\winston\winston\winston\winston.cpp : message : see previous definition of '__IMXRT1062__'
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(21,1): warning C4005: 'ARDUINO_TEENSY41': macro redefinition
-D:\proj\dev\uc\winston\winston\winston\winston.cpp : message : see previous definition of 'ARDUINO_TEENSY41'
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(23,1): warning C4005: 'USB_DUAL_SERIAL': macro redefinition
-D:\proj\dev\uc\winston\winston\winston\winston.cpp : message : see previous definition of 'USB_DUAL_SERIAL'
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(24,1): warning C4005: 'LAYOUT_US_ENGLISH': macro redefinition
-D:\proj\dev\uc\winston\winston\winston\winston.cpp : message : see previous definition of 'LAYOUT_US_ENGLISH'
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(25,1): warning C4117: macro name '__cplusplus' is reserved, '#define' ignored
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(26,1): warning C4117: macro name '__cplusplus' is reserved, '#undef' ignored
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(27,1): warning C4117: macro name '__cplusplus' is reserved, '#define' ignored
-C:\Program Files (x86)\Arduino\hardware\tools\arm\lib\gcc\arm-none-eabi\5.4.1\include\stddef.h(216,23): error C2371: 'size_t': redefinition; different basic types
-D:\proj\dev\uc\winston\winston\winston-teensy\predefined C++ types (compiler internal)(16): message : see declaration of 'size_t'
-C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\machine\_default_types.h(35,21): error C2371: '__int8_t': redefinition; different basic types
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(68): message : see declaration of '__int8_t'
-C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\machine\_default_types.h(36,23): error C2371: '__uint8_t': redefinition; different basic types
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(67): message : see declaration of '__uint8_t'
-C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\machine\_default_types.h(63,9): error C2059: syntax error: 'constant'
-C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\machine\_default_types.h(67,18): error C2059: syntax error: 'constant'
-C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\machine\_default_types.h(89,9): error C2059: syntax error: 'constant'
-C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\machine\_default_types.h(93,18): error C2059: syntax error: 'constant'
-C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\machine\_default_types.h(200,9): error C2059: syntax error: 'constant'
-C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\machine\_default_types.h(204,18): error C2059: syntax error: 'constant'
-C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\sys\_stdint.h(36,20): error C2371: 'uint16_t': redefinition; different basic types
-D:\proj\dev\uc\winston\winston\winston-teensy\__vm\.winston-teensy.vsarduino.h(76): message : see declaration of 'uint16_t'
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(436,124): error C2059: syntax error: 'volatile'
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9814,6): error C2059: syntax error: 'volatile'
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9815,11): error C2290: C++ 'asm' syntax ignored. Use __asm.
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9820,11): error C2290: C++ 'asm' syntax ignored. Use __asm.
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9821,11): error C2290: C++ 'asm' syntax ignored. Use __asm.
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9853,6): error C2059: syntax error: 'volatile'
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9854,11): error C2290: C++ 'asm' syntax ignored. Use __asm.
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9859,11): error C2290: C++ 'asm' syntax ignored. Use __asm.
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9860,11): error C2290: C++ 'asm' syntax ignored. Use __asm.
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9874,6): error C2059: syntax error: 'volatile'
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9875,11): error C2290: C++ 'asm' syntax ignored. Use __asm.
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9880,11): error C2290: C++ 'asm' syntax ignored. Use __asm.
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\imxrt.h(9881,11): error C2290: C++ 'asm' syntax ignored. Use __asm.
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\core_pins.h(1790,6): error C3861: '__builtin_constant_p': identifier not found
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\core_pins.h(2034,6): error C3861: '__builtin_constant_p': identifier not found
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\core_pins.h(2161,6): error C3861: '__builtin_constant_p': identifier not found
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\core_pins.h(2309,13): error C3861: '__builtin_constant_p': identifier not found
-C:\Program Files (x86)\Arduino\hardware\teensy\avr\cores\teensy4\core_pins.h(2327,13): error C3861: '__builtin_constant_p': identifier not found
-C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\c++\5.4.1\type_traits(32,9): warning C4068: unknown pragma 'GCC'
-C:\Program Files (x86)\Arduino\hardware\tools\arm\arm-none-eabi\include\c++\5.4.1\bits\c++0x_warning.h(34,1): fatal error C1189: #error:  This file requires compiler and library support for the ISO C++ 2011 standard. This support must be enabled with the -std=c++11 or -std=gnu++11 compiler options.
-  Generating Code...

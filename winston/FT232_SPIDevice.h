@@ -10,7 +10,7 @@
 class FT232_SPIDevice : public winston::hal::SPIDevice<unsigned int, 12>, public winston::Shared_Ptr<FT232_SPIDevice>
 {
 public:
-	FT232_SPIDevice(const Pin chipSelect, const unsigned int speed, const Pin xlat, SPIDataOrder order = SPIDataOrder::MSBFIRST, SPIMode mode = SPIMode::SPI_0, const Pin clock = 0, const Pin mosi = 0, const Pin miso = 0);
+	FT232_SPIDevice(const Pin chipSelect, const unsigned int speed, const Pin xlat, SPIDataOrder order = SPIDataOrder::MSBFirst, SPIMode mode = SPIMode::SPI_0, const Pin clock = 0, const Pin mosi = 0, const Pin miso = 0);
 
 	using winston::Shared_Ptr<FT232_SPIDevice>::Shared;
 	using winston::Shared_Ptr<FT232_SPIDevice>::make;

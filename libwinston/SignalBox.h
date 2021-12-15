@@ -10,7 +10,7 @@
 
 namespace winston
 {
-	class SignalBox : public Shared_Ptr<SignalBox>, std::enable_shared_from_this<SignalBox>
+	class SignalBox : public Shared_Ptr<SignalBox>, public std::enable_shared_from_this<SignalBox>
 	{
 	public:
 

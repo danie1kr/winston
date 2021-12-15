@@ -15,13 +15,11 @@ namespace winston
 		virtual ~ModelRailwaySystem() { } ;
 
 		void setup() {
-			Result result;
-
 			this->systemSetup();
 
 			this->railway->init(_features & Features::Blocks);
 
-			result = this->digitalCentralStation->connect();
+			this->digitalCentralStation->connect();
 
 			this->railway->turnouts([=](const Tracks track, winston::Turnout::Shared turnout) {
 				this->digitalCentralStation->requestTurnoutInfo(turnout);

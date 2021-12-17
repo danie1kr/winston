@@ -1,0 +1,22 @@
+C:\Users\daniel\AppData\Local\Temp\VMBuilds\winston-teensy\teensy41\Release\railways.cpp.o: \
+ D:\proj\dev\uc\winston\winston\winston\railways.cpp \
+ D:\proj\dev\uc\winston\winston\winston\railways.h \
+ d:\proj\dev\uc\winston\winston\libwinston\better_enum.hpp \
+ d:\proj\dev\uc\winston\winston\libwinston\winston.h \
+ d:\proj\dev\uc\winston\winston\libwinston\WinstonTypes.h \
+ d:\proj\dev\uc\winston\winston\libwinston\span.hpp \
+ d:\proj\dev\uc\winston\winston\libwinston\Block.h \
+ d:\proj\dev\uc\winston\winston\libwinston\Track.h \
+ d:\proj\dev\uc\winston\winston\libwinston\Signal.h \
+ d:\proj\dev\uc\winston\winston\libwinston\HAL.h \
+ d:\proj\dev\uc\winston\winston\libwinston\Util.h \
+ d:\proj\dev\uc\winston\winston\libwinston\Callback.h \
+ d:\proj\dev\uc\winston\winston\libwinston\Command.h \
+ d:\proj\dev\uc\winston\winston\libwinston\DigitalCentralStation.h \
+ d:\proj\dev\uc\winston\winston\libwinston\Locomotive.h \
+ d:\proj\dev\uc\winston\winston\libwinston\SignalBox.h \
+ d:\proj\dev\uc\winston\winston\libwinston\Railway.h \
+ d:\proj\dev\uc\winston\winston\libwinston\Library.h \
+ d:\proj\dev\uc\winston\winston\libwinston\ModelRailwaySystem.h \
+ d:\proj\dev\uc\winston\winston\libwinston\Route.h \
+ d:\proj\dev\uc\winston\winston\libwinston\WebServer.h

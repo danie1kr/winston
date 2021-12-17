@@ -48,9 +48,6 @@
     <ClCompile Include="FT232_SPIDevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Kornweinheim.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="external\json11\json11.cpp">
       <Filter>external\json11</Filter>
     </ClCompile>

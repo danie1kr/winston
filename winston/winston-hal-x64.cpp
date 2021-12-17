@@ -14,7 +14,7 @@
 using websocketpp::lib::placeholders::_1;
 using websocketpp::lib::placeholders::_2;
 
-WebServerWSPP::WebServerWSPP() : winston::WebServer<ConnectionWSPP>()
+WebServerWSPP::WebServerWSPP() : winston::WebServerProto<ConnectionWSPP>()
 {
 
 }
@@ -35,7 +35,7 @@ void WebServerWSPP::init(OnHTTP onHTTP, OnMessage onMessage, unsigned int port)
     this->server.start_accept();
 }
 
-void WebServerWSPP::send(ConnectionWSPP& connection, const std::string &data)
+void WebServerWSPP::send(Client& connection, const std::string &data)
 {
     this->server.send(connection, data, websocketpp::frame::opcode::text);
 }
@@ -45,11 +45,11 @@ void WebServerWSPP::step()
     this->server.poll_one();
 }
 
-ConnectionWSPP WebServerWSPP::getClient(unsigned int clientId)
+WebServerWSPP::Client WebServerWSPP::getClient(unsigned int clientId)
 {
     return this->connections[clientId];
 }
-unsigned int WebServerWSPP::getClientId(ConnectionWSPP client)
+unsigned int WebServerWSPP::getClientId(Client client)
 {
     auto result = std::find_if(
         this->connections.begin(),
@@ -59,6 +59,14 @@ unsigned int WebServerWSPP::getClientId(ConnectionWSPP client)
     if (result != this->connections.end())
         this->connections.erase(result->first);
     return 0;
+}
+
+void WebServerWSPP::disconnect(Client client)
+{
+    auto id = this->getClientId(client);
+
+    if (id)
+        this->connections.erase(id);
 }
 
 void WebServerWSPP::on_http(ConnectionWSPP hdl)
@@ -78,14 +86,11 @@ void WebServerWSPP::on_msg(ConnectionWSPP hdl, websocketpp::server<websocketpp::
 }
 
 void WebServerWSPP::on_open(ConnectionWSPP hdl) {
-    this->connections.insert({ this->newClientId(), hdl });
+    this->newConnection(hdl);
 }
 
 void WebServerWSPP::on_close(ConnectionWSPP hdl) {
-    auto id = this->getClientId(hdl);
-
-    if (id)
-        this->connections.erase(id);
+    this->disconnect(hdl);
 }
 
 void WebServerWSPP::shutdown()
@@ -120,7 +125,7 @@ void ensureStorageFile()
     }
 }
 
-UDPSocketLWIP::UDPSocketLWIP(const std::string ip, const unsigned short port) : winston::hal::UDPSocket(ip, port)
+UDPSocketWinSock::UDPSocketWinSock(const std::string ip, const unsigned short port) : winston::hal::UDPSocket(ip, port)
 {
     this->addr.sin_family = AF_INET;
     this->addr.sin_port = htons(port);
@@ -132,7 +137,7 @@ UDPSocketLWIP::UDPSocketLWIP(const std::string ip, const unsigned short port) : 
     this->connect();
 }
 
-const winston::Result UDPSocketLWIP::connect()
+const winston::Result UDPSocketWinSock::connect()
 {
     closesocket(this->udpSocket);
     this->udpSocket = socket(AF_INET, SOCK_DGRAM, 0);
@@ -140,7 +145,7 @@ const winston::Result UDPSocketLWIP::connect()
     return winston::Result::OK;
 }
 
-const winston::Result UDPSocketLWIP::send(const std::vector<unsigned char> data)
+const winston::Result UDPSocketWinSock::send(const std::vector<unsigned char> data)
 {
     auto sz = (int)(data.size() * sizeof(unsigned char));
 
@@ -161,14 +166,13 @@ const winston::Result UDPSocketLWIP::send(const std::vector<unsigned char> data)
     }
 }
 
-const winston::Result UDPSocketLWIP::recv(std::vector<unsigned char>& data)
+const winston::Result UDPSocketWinSock::recv(std::vector<unsigned char>& data)
 {
     sockaddr_in from;
     int size = (int)sizeof(from);
     data.resize(1000);
     
     fd_set fds;
-    int n;
     struct timeval tv;
 
     // Set up the file descriptor set.
@@ -180,7 +184,7 @@ const winston::Result UDPSocketLWIP::recv(std::vector<unsigned char>& data)
     tv.tv_usec = 50;
 
     // Wait until timeout or data received.
-    if (select(this->udpSocket, &fds, NULL, NULL, &tv) > 0) {
+    if (select(0, &fds, NULL, NULL, &tv) > 0) {
         int ret = recvfrom(this->udpSocket, reinterpret_cast<char*>(data.data()), data.size(), 0, reinterpret_cast<SOCKADDR*>(&from), &size);
         if (ret < 0)
             return winston::Result::ReceiveFailed;

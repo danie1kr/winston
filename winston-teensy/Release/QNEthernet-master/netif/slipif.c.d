@@ -1,0 +1,25 @@
+C:\Users\daniel\AppData\Local\Temp\VMBuilds\winston-teensy\teensy41\Release\QNEthernet-master\netif\slipif.c.o: \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src\netif\slipif.c \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/netif/slipif.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/opt.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwipopts.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/debug.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/arch.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/arch/cc.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/netif.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/err.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/ip_addr.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/def.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/ip4_addr.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/ip6_addr.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/def.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/pbuf.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/stats.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/mem.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/memp.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/priv/memp_std.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/priv/memp_priv.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/priv/mem_priv.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/snmp.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/sys.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/sio.h

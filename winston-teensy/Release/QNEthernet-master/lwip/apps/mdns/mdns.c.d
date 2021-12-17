@@ -1,0 +1,35 @@
+C:\Users\daniel\AppData\Local\Temp\VMBuilds\winston-teensy\teensy41\Release\QNEthernet-master\lwip\apps\mdns\mdns.c.o: \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src\lwip\apps\mdns\mdns.c \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/apps/mdns.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/apps/mdns_opts.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/opt.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwipopts.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/debug.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/arch.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/arch/cc.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/netif.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/err.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/ip_addr.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/def.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/ip4_addr.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/ip6_addr.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/def.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/pbuf.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/stats.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/mem.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/memp.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/priv/memp_std.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/priv/memp_priv.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/priv/mem_priv.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/apps/mdns_priv.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/udp.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/ip.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/ip4.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/prot/ip4.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/ip6.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/prot/ip.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/prot/udp.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/prot/dns.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/prot/iana.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/timeouts.h \
+ C:\Users\daniel\Documents\Arduino\libraries\QNEthernet-master\src/lwip/igmp.h

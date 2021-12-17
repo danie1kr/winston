@@ -25,7 +25,12 @@
       "ProjectGuid": "c5f80730-f44f-4478-bdae-6634efc2ca88",
       "DisplayName": "winston-teensy",
       "ColorIndex": 3
+    },
+    "a7a2a36c-3c53-4ccb-b52e-425623e2dda5": {
+      "ProjectGuid": "a7a2a36c-3c53-4ccb-b52e-425623e2dda5",
+      "DisplayName": "Miscellaneous Files",
+      "ColorIndex": 4
     }
   },
-  "NextColorIndex": 4
+  "NextColorIndex": 5
 }

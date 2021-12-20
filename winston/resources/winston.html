@@ -753,7 +753,14 @@
                 viewport: { zoom: cy.zoom(), pan: cy.pan() },
                 cy: cy.$().jsons()
             }
-            send("storeRailwayLayout", JSON.stringify(layout));
+
+            let payload = JSON.stringify(layout);
+            let offset = 0;
+            let size = 0;
+            let chunkSize = 32000;
+            for(let i = 0; i < payload.length; i += chunkSize)
+                send("storeRailwayLayout", {layout: payload.substring(i, Math.min(i+chunkSize, payload.length)), offset: i, fullSize: payload.length});
+
         }
 
         function checkGraphIsomorphism(railway, layout)

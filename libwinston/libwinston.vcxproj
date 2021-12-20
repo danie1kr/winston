@@ -121,6 +121,7 @@
     <ClInclude Include="HAL.h" />
     <ClInclude Include="Library.h" />
     <ClInclude Include="Locomotive.h" />
+    <ClInclude Include="Log.h" />
     <ClInclude Include="ModelRailwaySystem.h" />
     <ClInclude Include="Route.h" />
     <ClInclude Include="span.hpp" />

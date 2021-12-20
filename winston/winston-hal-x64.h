@@ -34,7 +34,7 @@ using UDPSocket = UDPSocketWinSock;
 
 using ConnectionWSPP = websocketpp::connection_hdl;
 
-class WebServerWSPP : public winston::WebServerProto<ConnectionWSPP>
+class WebServerWSPP : public winston::WebServer<ConnectionWSPP>
 {
 public:
 	using Client = ConnectionWSPP;

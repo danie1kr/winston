@@ -7,7 +7,7 @@
 namespace winston
 {
 	template<class _Connection>
-	class WebServerProto
+	class WebServer
 	{
 	public:
 		struct HTTPResponse
@@ -20,11 +20,11 @@ namespace winston
 		using OnHTTP = std::function<HTTPResponse(_Connection client, std::string resource)>;
 		using OnMessage = std::function<void(_Connection client, std::string message)>;
 
-		WebServerProto()
+		WebServer()
 		{
 		}
 
-		virtual ~WebServerProto()
+		virtual ~WebServer()
 		{
 		}
 

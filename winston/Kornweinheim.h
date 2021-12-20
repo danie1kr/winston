@@ -3,6 +3,7 @@
 #include <functional>
 
 #include "../libwinston/Winston.h"
+#include "../libwinston/Log.h"
 
 #include "winston-main.h"
 #include "railways.h"
@@ -247,8 +248,18 @@ WebServer::HTTPResponse Kornweinheim::on_http(WebServer::Client client, std::str
     }
     else if (resource.compare(path_log) == 0)
     {
+        extern winston::Logger winston::logger;
         response.headers = { {"content-type", "text/html; charset=UTF-8"} };
-        response.body = "{}";
+        response.body = "<html><head>winston</head><body><table><tr><th>timestamp</th><th>level</th><th>log</th></tr>";
+        for (const auto& entry : winston::logger.entries())
+        {
+            response.body.append("<tr><td>")
+                .append(winston::build(entry.timestamp)).append("</td><td>")
+                .append(entry.level._to_string()).append("</td><td>")
+                .append(entry.text).append("</td><td></tr>");
+        }
+
+        response.body.append("</table></body></html>");
     }
     response.status = 200;
 
@@ -405,25 +416,36 @@ void Kornweinheim::on_message(WebServer::Client client, std::string message) {
     else if (std::string("\"storeRailwayLayout\"").compare(op) == 0)
     {
         unsigned int address = 0;
-        auto layout = data.string_value();
+        auto layout = data["layout"].string_value();
         auto length = layout.size();
+        auto offset = data["offset"].int_value();
+        auto fullSize = data["fullSize"].int_value();
 
-        winston::hal::storageWrite(address + 0, (length >> 0) & 0xFF);
-        winston::hal::storageWrite(address + 1, (length >> 8) & 0xFF);
-        winston::hal::storageWrite(address + 2, (length >> 16) & 0xFF);
-        winston::hal::storageWrite(address + 3, (length >> 24) & 0xFF);
-
-        address = 4;
+        if (offset == 0)
+        {
+            winston::hal::storageWrite(address + 0, (fullSize >> 0) & 0xFF);
+            winston::hal::storageWrite(address + 1, (fullSize >> 8) & 0xFF);
+            winston::hal::storageWrite(address + 2, (fullSize >> 16) & 0xFF);
+            winston::hal::storageWrite(address + 3, (fullSize >> 24) & 0xFF);
+            address = 4;
+        }
+        else
+        {
+            address = 4 + offset;
+        }
         for (auto s : layout)
             winston::hal::storageWrite(address++, s);
 
         winston::hal::storageCommit();
 
-        Json successObject = Json::object{
-            {"op", "storeRailwayLayoutSuccessful"},
-            {"data", true}
-        };
-        this->webServer.send(client, successObject.dump());
+        if (offset + length == fullSize)
+        {
+            Json successObject = Json::object{
+                {"op", "storeRailwayLayoutSuccessful"},
+                {"data", true}
+            };
+            this->webServer.send(client, successObject.dump());
+        }
     }
     else if (std::string("\"getRailwayLayout\"").compare(op) == 0)
     {
@@ -434,7 +456,7 @@ void Kornweinheim::on_message(WebServer::Client client, std::string message) {
             (winston::hal::storageRead(address + 3) << 24);
         address = 4;
 
-        const size_t sizePerMessage = size_t(0.7f * webServer.maxMessageSize());
+        const size_t sizePerMessage = size_t(0.7f * 32000);// webServer.maxMessageSize());
         size_t remaining = length;
         size_t offset = 0;
 

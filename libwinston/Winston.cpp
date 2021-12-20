@@ -1,8 +1,11 @@
 #include "Winston.h"
+#include "Log.h"
 #include "HAL.h"
 
 namespace winston
 {
+	Logger logger;
+
 	void error(std::string error)
 	{
 		hal::text("error: " + error);

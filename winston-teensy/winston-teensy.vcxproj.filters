@@ -59,9 +59,6 @@
     <ClCompile Include="..\winston\railways.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="winston-hal-teensy.hpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\libwinston\Block.cpp">
       <Filter>libwinston-src</Filter>
     </ClCompile>

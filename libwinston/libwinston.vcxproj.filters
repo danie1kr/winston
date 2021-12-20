@@ -75,6 +75,9 @@
     <ClInclude Include="better_enum.hpp">
       <Filter>external</Filter>
     </ClInclude>
+    <ClInclude Include="Log.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Signal.cpp">

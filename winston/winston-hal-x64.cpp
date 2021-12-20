@@ -1,5 +1,7 @@
 #include "../libwinston/HAL.h"
 #include "../libwinston/Util.h"
+#include "../libwinston/Log.h"
+
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 
@@ -14,7 +16,7 @@
 using websocketpp::lib::placeholders::_1;
 using websocketpp::lib::placeholders::_2;
 
-WebServerWSPP::WebServerWSPP() : winston::WebServerProto<ConnectionWSPP>()
+WebServerWSPP::WebServerWSPP() : winston::WebServer<ConnectionWSPP>()
 {
 
 }
@@ -208,14 +210,23 @@ namespace winston
             if (error) { handle_error(error); }
         }
 
-        void text(const std::string& error)
+        void text(const std::string& text)
         {
+            logger.log(text);
+            std::cout << text << std::endl;
+        }
+
+        void error(const std::string& error)
+        {
+            logger.log(error, Logger::Entry::Level::Error);
             std::cout << error << std::endl;
         }
 
-        void fatal(const std::string text)
+        void fatal(const std::string reason)
         {
-            throw std::exception(text.c_str());
+            logger.log(reason, Logger::Entry::Level::Fatal);
+            std::cout << reason << std::endl;
+            throw std::exception(reason.c_str());
             exit(-1);
         }
 
@@ -248,6 +259,8 @@ namespace winston
             {
                 winstonStorage[address] = data;
             }
+            else
+                error("storage too small for full layout");
         }
 
         bool storageCommit()

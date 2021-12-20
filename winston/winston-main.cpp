@@ -4,6 +4,7 @@
 #include "winston-main.h"
 
 Kornweinheim kwh;
+
 void winston_setup()
 {
 	winston::hal::storageSetFilename(Kornweinheim::name());
@@ -31,18 +32,6 @@ int main()
 {
     // setup
     winston_setup();
-
-#define PRINT_SIZE(t) winston::hal::text(std::string(std::string(#t) + std::string(": ") + std::to_string(sizeof(t))));
-    PRINT_SIZE(winston::Track);
-    PRINT_SIZE(winston::Track::Shared);
-    PRINT_SIZE(winston::Bumper);
-    PRINT_SIZE(winston::Bumper::Shared);
-    PRINT_SIZE(winston::Rail);
-    PRINT_SIZE(winston::Rail::Shared);
-    PRINT_SIZE(winston::Turnout);
-    PRINT_SIZE(winston::Turnout::Shared); 
-    PRINT_SIZE(winston::Signal::Shared);
-    PRINT_SIZE(winston::Signal::Shared);
 
     // and loop
     while (true)

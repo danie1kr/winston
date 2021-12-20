@@ -113,6 +113,9 @@ namespace winston
 		bool skip;
 	};
 
+	template<size_t _N>
+	class Log;
+
 	class Railway;
 
 	class SignalBox;

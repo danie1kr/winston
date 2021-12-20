@@ -10,7 +10,8 @@ namespace winston
 	{
 		extern unsigned long long now();
 		extern void text(const std::string& text);
-		extern void fatal(const std::string text);
+		extern void error(const std::string& error);
+		extern void fatal(const std::string reason);
 
 		extern void delay(const unsigned int ms);
 

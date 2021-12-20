@@ -13,6 +13,7 @@ using namespace websockets2_generic;
 
 #include "Signal.h"
 #include "HAL.h"
+#include "Log.h"
 
 #ifdef WINSTON_TEENSY_QNETHERNET
 #include <QNEthernet.h>
@@ -22,7 +23,6 @@ using namespace qindesign::network;
 #endif
 
 #include <SPI.h>
-
 
 class UDPSocketTeensy : public winston::hal::UDPSocket, winston::Shared_Ptr<UDPSocketTeensy>
 {
@@ -64,7 +64,7 @@ using SignalSPIDevice = Arduino_SPIDevice;
 
 #include "../libwinston/WebServer.h"
 
-class WebServerTeensy : public winston::WebServerProto<WebsocketsClient>
+class WebServerTeensy : public winston::WebServer<WebsocketsClient>
 {
 public:
 	using Client = WebsocketsClient;
@@ -104,7 +104,7 @@ using WebServer = WebServerTeensy;
 
 //#include "winston-hal-teensy.h"
 
-WebServerTeensy::WebServerTeensy() : winston::WebServerProto<Client>()
+WebServerTeensy::WebServerTeensy() : winston::WebServer<Client>()
 {
 
 }
@@ -390,9 +390,11 @@ namespace winston
 #endif
         }
 
-        void text(const std::string& error)
+        void text(const std::string& text)
         {
-            Serial.println(error.c_str());
+            extern winston::Logger logger;
+            logger.log(text);
+            Serial.println(text.c_str());
         }
 
         void fatal(const std::string err)

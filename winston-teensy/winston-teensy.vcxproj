@@ -142,7 +142,6 @@
     <ClCompile Include="..\winston\Kornweinheim.hpp" />
     <ClCompile Include="..\winston\railways.cpp" />
     <ClCompile Include="..\winston\winston-main.cpp" />
-    <ClCompile Include="winston-hal-teensy.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

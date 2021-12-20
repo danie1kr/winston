@@ -80,6 +80,16 @@ namespace winston
 		return std::to_string(first);
 	}
 
+	std::string build(const unsigned long first)
+	{
+		return std::to_string(first);
+	}
+
+	std::string build(const unsigned long long first)
+	{
+		return std::to_string(first);
+	}
+
 	std::string build(const unsigned char first)
 	{
 		return std::to_string(first);

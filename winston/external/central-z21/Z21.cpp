@@ -20,8 +20,8 @@
 
 #define NOT_IMPLEMENTED(func) winston::logger.warn(std::string("Z21: " ## func ## " not implemented"));
 
-Z21::Z21(winston::hal::UDPSocket::Shared& socket, winston::DigitalCentralStation::AddressTranslator::Shared& addressTranslator, winston::SignalBox::Shared& signalBox, winston::DigitalCentralStation::Callbacks callbacks)
-    : winston::DigitalCentralStation(addressTranslator, signalBox, callbacks), socket(socket)
+Z21::Z21(winston::hal::UDPSocket::Shared& socket, winston::DigitalCentralStation::TurnoutAddressTranslator::Shared& addressTranslator, const LocoAddressTranslator& locoAddressTranslator, winston::SignalBox::Shared& signalBox, winston::DigitalCentralStation::Callbacks callbacks)
+    : winston::DigitalCentralStation(addressTranslator, locoAddressTranslator, signalBox, callbacks), socket(socket)
 {
     this->onBroadcastFlags = [](uint32_t flags) { NOT_IMPLEMENTED("onBroadcastFlags"); };
 
@@ -456,13 +456,13 @@ void Z21::processPacket(uint8_t* data) {
 
 void Z21::requestTurnoutInfo(winston::Turnout::Shared turnout)
 {
-    const unsigned int address = this->addressTranslator->address(turnout);
+    const unsigned int address = this->turnoutAddressTranslator->address(turnout);
     this->getAccessoryInfo((const unsigned short)address);
 }
 
 void Z21::triggerTurnoutChangeTo(winston::Turnout::Shared turnout, winston::Turnout::Direction direction)
 {
-    const unsigned int address = this->addressTranslator->address(turnout);
+    const unsigned int address = this->turnoutAddressTranslator->address(turnout);
     this->setAccessory((const unsigned short)address, (direction == winston::Turnout::Direction::A_C ? Z21_Accessory_Pos::P0 : Z21_Accessory_Pos::P1), true, true);
     //winston::hal::delay(150);
     //this->setAccessory((const unsigned short)address, (direction == winston::Turnout::Direction::A_B ? Z21_Accessory_Pos::P0 : Z21_Accessory_Pos::P1), false, true);
@@ -490,7 +490,7 @@ void Z21::processXPacket(uint8_t* data) {
             {
                 uint16_t address = Z21Packet::getBEuint16(data, 5);
                 uint8_t accessoryState = Z21Packet::getByte(data, 7);
-                auto turnout = this->addressTranslator->turnout(address);// std::dynamic_pointer_cast<winston::Turnout>(railway->track(RailwayWithSiding::trackFromAddress(address)));
+                auto turnout = this->turnoutAddressTranslator->turnout(address);// std::dynamic_pointer_cast<winston::Turnout>(railway->track(RailwayWithSiding::trackFromAddress(address)));
                 if (accessoryState == Z21_Accessory_State::P0 || accessoryState == Z21_Accessory_State::P1)
                 {
                     auto direction = accessoryState == Z21_Accessory_State::P1 ? winston::Turnout::Direction::A_B : winston::Turnout::Direction::A_C;
@@ -579,7 +579,7 @@ void Z21::processLocoInfo(uint8_t* data) {
 
     //onLocoInfo(addr, busy, consist, transpond, forward, speed, functions);
 
-    this->callbacks.locomotiveUpdateCallback(this->addressTranslator->locomotive(addr), busy, forward, speed, functions);
+    this->callbacks.locomotiveUpdateCallback(this->locoAddressTranslator.locoFromAddress(addr), busy, forward, speed, functions);
 }
 
 void Z21::processBCPacket(uint8_t* data) {

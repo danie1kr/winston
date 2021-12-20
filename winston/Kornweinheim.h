@@ -137,7 +137,7 @@ void Kornweinheim::locoSend(winston::Locomotive::Shared& loco)
 
 void Kornweinheim::locoSend(winston::Address address)
 {
-    if (auto loco = this->get(address))
+    if (auto loco = this->locoFromAddress(address))
     {
         locoSend(loco);
     }
@@ -609,9 +609,9 @@ void Kornweinheim::systemSetup() {
     this->signalBox = winston::SignalBox::make(nullMutex);
 
     // the system specific digital central station
-    auto at = std::dynamic_pointer_cast<winston::DigitalCentralStation::AddressTranslator>(addressTranslator);
+    auto at = std::dynamic_pointer_cast<winston::DigitalCentralStation::TurnoutAddressTranslator>(addressTranslator);
     auto udp = std::dynamic_pointer_cast<winston::hal::UDPSocket>(this->z21Socket);
-    this->digitalCentralStation = Z21::make(udp, at, this->signalBox, z21Callbacks());
+    this->digitalCentralStation = Z21::make(udp, at, *this, this->signalBox, z21Callbacks());
 
 #ifdef RAILWAY_DEBUG_INJECTOR
     // a debug injector

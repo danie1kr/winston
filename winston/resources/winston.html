@@ -660,7 +660,7 @@
                 if(!allowLayoutEdit())
                     return;
                 let that = event.target;
-                cy.$("node.connection[track=" + that.data("track") + "]").each(function(e) {
+                cy.$("node.connection[track=" + that.data("track") + "], node.trackSplitNode[track=" + that.data("track") + "]").each(function(e) {
                     e.position({x: that.position().x + e.data("relativePosition").x, y: that.position().y + e.data("relativePosition").y});
                 });
             });
@@ -1039,8 +1039,15 @@
             {
                 let nodes = edge.connectedNodes();
                 let id = nodes[0].id() + "|" + nodes[1].id();
+                let nodePosition = {x: (nodes[0].position().x + nodes[1].position().x)/2.0, y: (nodes[0].position().y + nodes[1].position().y)/2.0 };
+                let parentTrack = nodes[0].data("track");
+                let parentTrackNode = cy.$("#" + parentTrack);
                 cy.add([
-                    { group: 'nodes', data: { id: id, track: nodes[0].data("track")}, position: {x: (nodes[0].position().x + nodes[1].position().x)/2.0, y: (nodes[0].position().y + nodes[1].position().y)/2.0 }, classes: "trackSplitNode"},
+                    { group: 'nodes', data: { id: id, 
+                                                track: nodes[0].data("track"),
+                                                relativePosition: {x: nodePosition.x - parentTrackNode.position().x, y: nodePosition.y - parentTrackNode.position().y}}, 
+                                                position: nodePosition, 
+                                                classes: "trackSplitNode"},
                     { group: 'edges', data: { id: nodes[0].id() + "-" + id, track: nodes[0].data("track"), source: nodes[0].id(), target: id }, classes: "track" },
                     { group: 'edges', data: { id: id + "-" + nodes[1].id(), track: nodes[1].data("track"), source: id, target: nodes[1].id() }, classes: "track" }
                 ]);
@@ -1054,13 +1061,13 @@
             if(!cy || !allowLayoutEdit())
                 return;
 
-            cy.$('node.trackNode:selected').each(function(node)
+            cy.$('node.trackSplitNode:selected').each(function(node)
             {
                 let edges = node.connectedEdges();
                 let neighbors = node.neighborhood("node");
                 let id = neighbors[0].id() + "-" + neighbors[1].id();
 
-                cy.add({group: "edges", data: {id: id, source: neighbors[0].id(), target: neighbors[1].id()}});
+                cy.add({group: "edges", data: {id: id, source: neighbors[0].id(), target: neighbors[1].id()}, classes: "track"});
 
                 edges.edges();
                 node.remove();

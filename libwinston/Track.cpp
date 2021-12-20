@@ -361,6 +361,7 @@ namespace winston
 		{
 		case Direction::A_B: return std::string("A_B");
 		case Direction::A_C: return std::string("A_C");
+		default:
 		case Direction::Changing: return std::string("Changing");
 		}
 	}

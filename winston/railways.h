@@ -142,13 +142,12 @@ private:
     void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
 
 public:
-    class AddressTranslator : public winston::DigitalCentralStation::AddressTranslator, winston::Shared_Ptr<AddressTranslator>
+    class AddressTranslator : public winston::DigitalCentralStation::TurnoutAddressTranslator, winston::Shared_Ptr<AddressTranslator>
     {
     public:
         AddressTranslator(winston::Shared_Ptr<RailwayWithSiding>::Shared railway);
-        virtual winston::Turnout::Shared turnout(const winston::Address address);
-        virtual winston::Locomotive::Shared locomotive(const winston::Address address);
-        virtual const winston::Address address(winston::Track::Shared track);
+        virtual winston::Turnout::Shared turnout(const winston::Address address) const;
+        virtual const winston::Address address(winston::Track::Shared track) const;
 
         using Shared_Ptr<AddressTranslator>::Shared;
         using Shared_Ptr<AddressTranslator>::make;
@@ -255,13 +254,12 @@ public:
     using winston::Shared_Ptr<Y2020Railway>::make;
 
 public:
-    class AddressTranslator : public winston::DigitalCentralStation::AddressTranslator, winston::Shared_Ptr<AddressTranslator>
+    class AddressTranslator : public winston::DigitalCentralStation::TurnoutAddressTranslator, winston::Shared_Ptr<AddressTranslator>
     {
     public:
         AddressTranslator(winston::Shared_Ptr<Y2020Railway>::Shared railway);
-        virtual winston::Turnout::Shared turnout(const winston::Address address);
-        virtual winston::Locomotive::Shared locomotive(const winston::Address address);
-        virtual const winston::Address address(winston::Track::Shared track);
+        virtual winston::Turnout::Shared turnout(const winston::Address address) const;
+        virtual const winston::Address address(winston::Track::Shared track) const;
 
         using Shared_Ptr<AddressTranslator>::Shared;
         using Shared_Ptr<AddressTranslator>::make;
@@ -341,19 +339,19 @@ public:
     using winston::Shared_Ptr<Y2021Railway>::make;
 
 public:
-    class AddressTranslator : public winston::DigitalCentralStation::AddressTranslator, winston::Shared_Ptr<AddressTranslator>
+    class AddressTranslator : public winston::DigitalCentralStation::TurnoutAddressTranslator, winston::Shared_Ptr<AddressTranslator>
     {
     public:
         AddressTranslator(winston::Shared_Ptr<Y2021Railway>::Shared railway);
-        virtual winston::Turnout::Shared turnout(const winston::Address address);
-        virtual winston::Locomotive::Shared locomotive(const winston::Address address);
-        virtual const winston::Address address(winston::Track::Shared track);
+        virtual winston::Turnout::Shared turnout(const winston::Address address) const;
+        virtual const winston::Address address(winston::Track::Shared track) const;
 
         using Shared_Ptr<AddressTranslator>::Shared;
         using Shared_Ptr<AddressTranslator>::make;
 
     private:
         winston::Shared_Ptr<Y2021Railway>::Shared railway;
+        std::vector<winston::Locomotive::Shared> locomotiveShed;
     };
 private:
     winston::Track::Shared define(const Tracks track);
@@ -402,13 +400,12 @@ public:
     using winston::Shared_Ptr<SignalRailway>::make;
 
 public:
-    class AddressTranslator : public winston::DigitalCentralStation::AddressTranslator, public winston::Shared_Ptr<AddressTranslator>
+    class AddressTranslator : public winston::DigitalCentralStation::TurnoutAddressTranslator, public winston::Shared_Ptr<AddressTranslator>
     {
     public:
         AddressTranslator(winston::Shared_Ptr<SignalRailway>::Shared railway);
-        virtual winston::Turnout::Shared turnout(const winston::Address address);
-        virtual winston::Locomotive::Shared locomotive(const winston::Address address);
-        virtual const winston::Address address(winston::Track::Shared track);
+        virtual winston::Turnout::Shared turnout(const winston::Address address) const;
+        virtual const winston::Address address(winston::Track::Shared track) const;
 
         using Shared_Ptr<AddressTranslator>::Shared;
         using Shared_Ptr<AddressTranslator>::make;

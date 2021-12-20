@@ -11,13 +11,18 @@ namespace winston
 	class DigitalCentralStation : public Shared_Ptr<DigitalCentralStation>
 	{
 	public:
-		class AddressTranslator : public Shared_Ptr<AddressTranslator>
+		class TurnoutAddressTranslator : public Shared_Ptr<TurnoutAddressTranslator>
 		{
 		public:
-			AddressTranslator();
-			virtual Turnout::Shared turnout(const Address address) = 0;
-			virtual Locomotive::Shared locomotive(const Address address) = 0;
-			virtual const Address address(winston::Track::Shared track) = 0;
+			virtual Turnout::Shared turnout(const Address address) const = 0;
+			virtual const Address address(winston::Track::Shared track) const = 0;
+		};
+
+		class LocoAddressTranslator
+		{
+		public:
+			virtual Locomotive::Shared locoFromAddress(const Address address) const = 0;
+			virtual const Address addressOfLoco(Locomotive::Shared loco) const = 0;
 		};
 
 		struct Callbacks : public Railway::Callbacks
@@ -54,7 +59,7 @@ namespace winston
 			DigitalCentralStation::Shared station;
 		};
 
-		DigitalCentralStation(AddressTranslator::Shared& addressTranslator, SignalBox::Shared& signalBox, const Callbacks callbacks);
+		DigitalCentralStation(TurnoutAddressTranslator::Shared& addressTranslator, const LocoAddressTranslator &locoAddressTranslator, SignalBox::Shared& signalBox, const Callbacks callbacks);
 		virtual ~DigitalCentralStation() = default;
 
 		virtual const winston::Result connect() = 0;
@@ -65,11 +70,11 @@ namespace winston
 		virtual void triggerLocoDrive(const Address address, const unsigned char speed, const bool forward) = 0;
 		virtual void triggerLocoFunction(const Address address, const uint32_t functions) = 0;
 
-
 		void turnoutUpdate(Turnout::Shared turnout, const Turnout::Direction direction);
 
 	protected:
-		AddressTranslator::Shared addressTranslator;
+		TurnoutAddressTranslator::Shared turnoutAddressTranslator;
+		const LocoAddressTranslator& locoAddressTranslator;
 		SignalBox::Shared signalBox;
 		const Callbacks callbacks;
 	};

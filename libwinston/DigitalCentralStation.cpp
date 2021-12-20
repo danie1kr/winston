@@ -2,8 +2,8 @@
 
 namespace winston
 {
-	DigitalCentralStation::DigitalCentralStation(AddressTranslator::Shared& addressTranslator, SignalBox::Shared& signalBox, const Callbacks callbacks)
-		: Shared_Ptr<DigitalCentralStation>(), addressTranslator(addressTranslator), signalBox(signalBox), callbacks(callbacks)
+	DigitalCentralStation::DigitalCentralStation(TurnoutAddressTranslator::Shared& turnoutAddressTranslator, const LocoAddressTranslator& locoAddressTranslator, SignalBox::Shared& signalBox, const Callbacks callbacks)
+		: Shared_Ptr<DigitalCentralStation>(), turnoutAddressTranslator(turnoutAddressTranslator), locoAddressTranslator(locoAddressTranslator), signalBox(signalBox), callbacks(callbacks)
 	{
 
 	}
@@ -22,10 +22,6 @@ namespace winston
 	void DigitalCentralStation::DebugInjector::injectLocoUpdate(Locomotive::Shared loco, bool busy, bool forward, unsigned char speed, uint32_t functions)
 	{
 		this->station->callbacks.locomotiveUpdateCallback(loco, busy, forward, speed, functions);
-	}
-
-	DigitalCentralStation::AddressTranslator::AddressTranslator() : Shared_Ptr<AddressTranslator>()
-	{
 	}
 
 	void DigitalCentralStation::turnoutUpdate(Turnout::Shared turnout, const Turnout::Direction direction)

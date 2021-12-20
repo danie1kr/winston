@@ -154,9 +154,9 @@ const std::string SignalTestRailway::name()
 }
 
 RailwayWithSiding::RailwayWithSiding(const Callbacks callbacks) : winston::RailwayWithRails<RailwayWithSidingsTracks>(callbacks) {};
-RailwayWithSiding::AddressTranslator::AddressTranslator(RailwayWithSiding::Shared railway) : winston::DigitalCentralStation::AddressTranslator(), Shared_Ptr<AddressTranslator>(), railway(railway) { };
+RailwayWithSiding::AddressTranslator::AddressTranslator(RailwayWithSiding::Shared railway) : winston::DigitalCentralStation::TurnoutAddressTranslator(), Shared_Ptr<AddressTranslator>(), railway(railway) { };
 
-winston::Turnout::Shared RailwayWithSiding::AddressTranslator::turnout(const winston::Address address)
+winston::Turnout::Shared RailwayWithSiding::AddressTranslator::turnout(const winston::Address address) const
 {
     switch (address)
     {
@@ -166,7 +166,7 @@ winston::Turnout::Shared RailwayWithSiding::AddressTranslator::turnout(const win
     }
 }
 
-const winston::Address RailwayWithSiding::AddressTranslator::address(winston::Track::Shared track)
+const winston::Address RailwayWithSiding::AddressTranslator::address(winston::Track::Shared track) const
 {
     switch (railway->trackEnum(track))
     {
@@ -175,11 +175,6 @@ const winston::Address RailwayWithSiding::AddressTranslator::address(winston::Tr
     case Tracks::Turnout2: return 1; break;
     }
     return 0;
-}
-
-winston::Locomotive::Shared RailwayWithSiding::AddressTranslator::locomotive(const winston::Address address)
-{
-    return nullptr;
 }
 
 winston::Track::Shared RailwayWithSiding::define(const Tracks track)
@@ -285,9 +280,9 @@ const std::string Y2020Railway::name()
     return std::string("Y2020Railway");
 }
 
-Y2020Railway::AddressTranslator::AddressTranslator(Y2020Railway::Shared railway) : winston::DigitalCentralStation::AddressTranslator(), Shared_Ptr<AddressTranslator>(), railway(railway) { };
+Y2020Railway::AddressTranslator::AddressTranslator(Y2020Railway::Shared railway) : winston::DigitalCentralStation::TurnoutAddressTranslator(), Shared_Ptr<AddressTranslator>(), railway(railway) { };
 
-winston::Turnout::Shared Y2020Railway::AddressTranslator::turnout(const winston::Address address)
+winston::Turnout::Shared Y2020Railway::AddressTranslator::turnout(const winston::Address address) const
 {
 	Tracks track = Tracks::Turnout1;
     switch (address)
@@ -306,12 +301,7 @@ winston::Turnout::Shared Y2020Railway::AddressTranslator::turnout(const winston:
     return std::dynamic_pointer_cast<winston::Turnout>(railway->track(track));
 }
 
-winston::Locomotive::Shared Y2020Railway::AddressTranslator::locomotive(const winston::Address address)
-{
-    return nullptr;
-}
-
-const winston::Address Y2020Railway::AddressTranslator::address(winston::Track::Shared track)
+const winston::Address Y2020Railway::AddressTranslator::address(winston::Track::Shared track) const
 {
     switch (railway->trackEnum(track))
     {
@@ -428,9 +418,9 @@ const std::string Y2021Railway::name()
     return std::string("Y2021Railway");
 }
 
-Y2021Railway::AddressTranslator::AddressTranslator(Y2021Railway::Shared railway) : winston::DigitalCentralStation::AddressTranslator(), Shared_Ptr<AddressTranslator>(), railway(railway) { };
+Y2021Railway::AddressTranslator::AddressTranslator(Y2021Railway::Shared railway) : winston::DigitalCentralStation::TurnoutAddressTranslator(), Shared_Ptr<AddressTranslator>(), railway(railway) { };
 
-winston::Turnout::Shared Y2021Railway::AddressTranslator::turnout(const winston::Address address)
+winston::Turnout::Shared Y2021Railway::AddressTranslator::turnout(const winston::Address address) const
 {
     Tracks track = Tracks::Turnout1;
     switch (address)
@@ -456,12 +446,7 @@ winston::Turnout::Shared Y2021Railway::AddressTranslator::turnout(const winston:
     return std::dynamic_pointer_cast<winston::Turnout>(railway->track(track));
 }
 
-winston::Locomotive::Shared Y2021Railway::AddressTranslator::locomotive(const winston::Address address)
-{
-    return nullptr;
-}
-
-const winston::Address Y2021Railway::AddressTranslator::address(winston::Track::Shared track)
+const winston::Address Y2021Railway::AddressTranslator::address(winston::Track::Shared track) const
 {
     switch (railway->trackEnum(track))
     {
@@ -630,9 +615,9 @@ const std::string SignalRailway::name()
     return std::string("SignalRailway");
 }
 
-SignalRailway::AddressTranslator::AddressTranslator(SignalRailway::Shared railway) : winston::DigitalCentralStation::AddressTranslator(), Shared_Ptr<AddressTranslator>(), railway(railway) { };
+SignalRailway::AddressTranslator::AddressTranslator(SignalRailway::Shared railway) : winston::DigitalCentralStation::TurnoutAddressTranslator(), Shared_Ptr<AddressTranslator>(), railway(railway) { };
 
-winston::Turnout::Shared SignalRailway::AddressTranslator::turnout(const winston::Address address)
+winston::Turnout::Shared SignalRailway::AddressTranslator::turnout(const winston::Address address) const
 {
     Tracks track = Tracks::Turnout1;
     switch (address)
@@ -647,12 +632,7 @@ winston::Turnout::Shared SignalRailway::AddressTranslator::turnout(const winston
     return std::dynamic_pointer_cast<winston::Turnout>(railway->track(track));
 }
 
-winston::Locomotive::Shared SignalRailway::AddressTranslator::locomotive(const winston::Address address)
-{
-    return nullptr;
-}
-
-const winston::Address SignalRailway::AddressTranslator::address(winston::Track::Shared track)
+const winston::Address SignalRailway::AddressTranslator::address(winston::Track::Shared track) const
 {
     switch (railway->trackEnum(track))
     {

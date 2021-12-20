@@ -9,7 +9,7 @@
 namespace winston
 {
 	template<typename _Railway, class _AddressTranslator, class _DigitalCentralStation, Features _features = Features::None>
-	class ModelRailwaySystem
+	class ModelRailwaySystem : public DigitalCentralStation::LocoAddressTranslator
 	{
 	public:
 		ModelRailwaySystem() { };
@@ -74,13 +74,18 @@ namespace winston
 			return _Railway::element_type::name();
 		}
 
-		Locomotive::Shared get(const Address address)
+		Locomotive::Shared locoFromAddress(const Address address) const
 		{
 			auto it = std::find_if(this->locomotiveShed.begin(), this->locomotiveShed.end(), [address](const auto& loco) { return loco->address() == address; });
 			if (it == this->locomotiveShed.end())
 				return nullptr;
 			else
 				return *it;
+		}
+
+		const Address addressOfLoco(Locomotive::Shared loco) const
+		{
+			return loco->address();
 		}
 
 		inline const State turnoutChangeTo(winston::Turnout::Shared turnout, winston::Turnout::Direction direction)

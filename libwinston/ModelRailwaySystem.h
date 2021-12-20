@@ -3,6 +3,7 @@
 #include "HAL.h"
 #include "Railway.h"
 #include "SignalBox.h"
+#include "Log.h"
 #include "DigitalCentralStation.h"
 
 namespace winston
@@ -22,9 +23,19 @@ namespace winston
 			this->digitalCentralStation->connect();
 
 			this->railway->turnouts([=](const Tracks track, winston::Turnout::Shared turnout) {
-				this->digitalCentralStation->requestTurnoutInfo(turnout);
-				this->signalBox->setSignalsFor(turnout); 
-			});
+				
+				this->signalBox->order(winston::Command::make([this, turnout](const unsigned long long& created) -> const winston::State
+					{
+						this->digitalCentralStation->requestTurnoutInfo(turnout);
+						winston::hal::delay(150);
+						return winston::State::Finished;
+					}));
+			}); 
+			this->signalBox->order(winston::Command::make([](const unsigned long long& created) -> const winston::State
+				{
+					logger.log("Init tasks complete");
+					return winston::State::Finished;
+				}));
 			/*for (auto& turnout : this->railway->turnouts())
 			{
 				this->digitalCentralStation->requestTurnoutInfo(turnout.second);

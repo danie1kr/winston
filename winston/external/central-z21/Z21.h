@@ -42,6 +42,8 @@ public:
 private:
     const winston::Result send(Z21Packet &packet);
 
+    void notImplemented(std::string command);
+
 protected:
     void processXPacket(uint8_t *packet);
     void processBCPacket(uint8_t *packet);
@@ -51,19 +53,19 @@ public:
 // add your handler
 
 // Z21 Version Info
-    void (*onSerialNumber)(uint32_t serial);
-    void (*onHardwareInfo)(uint32_t hardware, uint32_t firmware);
-    void (*onFirmwareVersion)(uint8_t major, uint8_t minor);
-    void (*onGetVersion)(uint8_t xbus, uint8_t station);
+    //void (*onSerialNumber)(uint32_t serial);
+    //void (*onHardwareInfo)(uint32_t hardware, uint32_t firmware);
+    //void (*onFirmwareVersion)(uint8_t major, uint8_t minor);
+    //void (*onGetVersion)(uint8_t xbus, uint8_t station);
 
 // Z21 Runtime Info
     void (*onBroadcastFlags)(uint32_t flags);                           // See: const in class Z21_Broadcast
 
     void (*onBCStopped)();
-    void (*onTrackPowerOff)();
-    void (*onTrackPowerOn)();
-    void (*onTrackProgrammingMode)();
-    void (*onTrackShortCircuit)();
+    //void (*onTrackPowerOff)();
+    //void (*onTrackPowerOn)();
+    //void (*onTrackProgrammingMode)();
+    //void (*onTrackShortCircuit)();
     void (*onStatusChanged)(uint8_t status);                            // See: const in class Z21_Status
     void (*onSystemStateDataChanged)(uint16_t mainCurrent,              // mA
                                      uint16_t progCurrent,              // mA
@@ -76,14 +78,14 @@ public:
     void (*onUnknownCommand)();
 
 // Layout Info
-    void (*onLocoInfo)(uint16_t address,
+    /*void (*onLocoInfo)(uint16_t address,
                        bool  busy,
                        bool  consist,
                        bool  transpond,
                        bool  forward,
                        uint8_t  speed,                                  // In 128 speed range
                        uint32_t functions);                             // See: const in class Z21_Function::BIT_FXX
-
+    */
     //void (*onAccessoryInfo)(uint16_t address, uint8_t accessoryState);  // See: const in class Z21_ACCESSORY_STATE_XXX
     //std::function<void(uint16_t address, uint8_t accessoryState)> onAccessoryInfo;
     void (*onLocoMode)     (uint16_t address, uint8_t decoderMode);     // See: const in class Z21_Decoder_Mode

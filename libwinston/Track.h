@@ -237,6 +237,7 @@ namespace winston
 			A_C,
 			Changing
 		};
+		static const std::string DirectionToString(const Direction direction);
 
 		using Callback = const std::function<State(Track::Shared turnout, Direction direction)>;
 

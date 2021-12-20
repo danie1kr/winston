@@ -70,17 +70,20 @@ namespace winston
 	
 	std::string build();
 	std::string build(const std::string first);
-	std::string build(const unsigned int first);
-	std::string build(const unsigned long first);
-	std::string build(const unsigned long long first);
 	std::string build(const int first);
+	std::string build(const unsigned int first);
 	std::string build(const long first);
+	std::string build(const unsigned long first);
+	std::string build(const long long first);
+	std::string build(const unsigned long long first);
+	std::string build(const short first);
+	std::string build(const unsigned short first);
 	std::string build(const unsigned char first);
 	std::string build(const char* first);
 	std::string build(const winston::Result first);
 	
 	template <typename _First, typename... _Args>
-		std::string build(const _First first, const _Args&&... args)
+		std::string build(const _First first, _Args&&... args)
 	{
 		return build(first) + build(args...);
 	}

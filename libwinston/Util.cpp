@@ -64,13 +64,22 @@ namespace winston
 	{
 		return first;
 	}
+	std::string build(const int first)
+	{
+		return std::to_string(first);
+	}
 
 	std::string build(const unsigned int first)
 	{
 		return std::to_string(first);
 	}
 
-	std::string build(const int first)
+	std::string build(const short first)
+	{
+		return std::to_string(first);
+	}
+
+	std::string build(const unsigned short first)
 	{
 		return std::to_string(first);
 	}
@@ -81,6 +90,11 @@ namespace winston
 	}
 
 	std::string build(const unsigned long first)
+	{
+		return std::to_string(first);
+	}
+
+	std::string build(const long long first)
 	{
 		return std::to_string(first);
 	}

@@ -355,6 +355,16 @@ namespace winston
 		onB = this->b;
 	}
 
+	const std::string Turnout::DirectionToString(const Direction direction)
+	{
+		switch (direction)
+		{
+		case Direction::A_B: return std::string("A_B");
+		case Direction::A_C: return std::string("A_C");
+		case Direction::Changing: return std::string("Changing");
+		}
+	}
+
 	Turnout::Turnout(const std::string name, const Callback callback, const bool leftTurnout)
 		: Track(name), Shared_Ptr<Turnout>(), callback(callback), trackLengthCalculator(nullptr), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c()
 	{

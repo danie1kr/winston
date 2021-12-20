@@ -14,12 +14,46 @@
 
 #include "../../../libwinston/Winston.h"
 #include "../../../libwinston/HAL.h"
+#include "../../../libwinston/Log.h"
 
 #include <memory>
+
+#define NOT_IMPLEMENTED(func) winston::logger.warn(std::string("Z21: " ## func ## " not implemented"));
 
 Z21::Z21(winston::hal::UDPSocket::Shared& socket, winston::DigitalCentralStation::AddressTranslator::Shared& addressTranslator, winston::SignalBox::Shared& signalBox, winston::DigitalCentralStation::Callbacks callbacks)
     : winston::DigitalCentralStation(addressTranslator, signalBox, callbacks), socket(socket)
 {
+    this->onBroadcastFlags = [](uint32_t flags) { NOT_IMPLEMENTED("onBroadcastFlags"); };
+
+    this->onBCStopped = []() { NOT_IMPLEMENTED("onBCStopped"); };
+    this->onStatusChanged = [](uint8_t status) { NOT_IMPLEMENTED("onStatusChanged"); };
+    this->onSystemStateDataChanged = [](uint16_t mainCurrent,              // mA
+        uint16_t progCurrent,              // mA
+        uint16_t mainCurrentFiltered,      // mA
+        uint16_t temperature,              // °C
+        uint16_t voltageSupply,            // mV
+        uint16_t voltageVCC,               // mV
+        uint8_t  status,                   // See: const in class Z21_Status
+        uint8_t  statisEX) { NOT_IMPLEMENTED("onSystemStateDataChanged"); };
+    this->onUnknownCommand = []() { NOT_IMPLEMENTED("onUnknownCommand"); };
+    this->onLocoMode = [](uint16_t address, uint8_t decoderMode) { NOT_IMPLEMENTED("onLocoMode"); };
+    this->onAccessoryMode = [](uint16_t address, uint8_t decoderMode) { NOT_IMPLEMENTED("onAccessoryMode"); };
+
+    // Programming
+    this->onCVResult = [](uint16_t cvAddress, uint8_t value) { NOT_IMPLEMENTED("onCVResult"); };
+
+    this->onCVAccessFailed = []() { NOT_IMPLEMENTED("onCVAccessFailed"); };
+    this->onCVAccessFailedShortCircuit = []() { NOT_IMPLEMENTED("onCVAccessFailedShortCircuit"); };
+
+
+    // Other Networks
+    this->onRailComDataChanged = [](uint8_t* data, uint16_t length) { NOT_IMPLEMENTED("onRailComDataChanged"); };
+    this->onRBusDataChanged = [](uint8_t groupId, uint8_t* data, uint16_t length) { NOT_IMPLEMENTED("onRBusDataChanged"); };
+    this->onLoconetRX = [](uint8_t* data, uint16_t length) { NOT_IMPLEMENTED("onLoconetRX"); };
+    this->onLoconetTX = [](uint8_t* data, uint16_t length) { NOT_IMPLEMENTED("onLoconetTX"); };
+    this->onLoconetFromLAN = [](uint8_t* data, uint16_t length) { NOT_IMPLEMENTED("onLoconetFromLAN"); };
+    this->onLoconetDispatchAddress = [](uint16_t address, uint8_t result) { NOT_IMPLEMENTED("onLoconetDispatchAddress"); };
+    this->onLoconetDetector = [](uint8_t request, uint16_t address, uint8_t* data, uint16_t length) { NOT_IMPLEMENTED("onLoconetDetector"); };
 
 }
 
@@ -45,7 +79,7 @@ const winston::Result Z21::send(Z21Packet& packet)
 
 const winston::Result Z21::tick()
 {
-    if (this->socket->isConnected())
+//    if (this->socketListen->isConnected())
     {
         std::vector<unsigned char> data;
         auto result = this->socket->recv(data);
@@ -53,8 +87,8 @@ const winston::Result Z21::tick()
             this->processPacket(data.data());
         return result;
     }
-    else
-        return winston::Result::OK;
+    //else
+      //  return winston::Result::OK;
 }
 
 const winston::Result Z21::getSerialNumber() {
@@ -429,7 +463,9 @@ void Z21::requestTurnoutInfo(winston::Turnout::Shared turnout)
 void Z21::triggerTurnoutChangeTo(winston::Turnout::Shared turnout, winston::Turnout::Direction direction)
 {
     const unsigned int address = this->addressTranslator->address(turnout);
-    this->setAccessory((const unsigned short)address, (direction == winston::Turnout::Direction::A_B ? Z21_Accessory_Pos::P0 : Z21_Accessory_Pos::P1), true, true);
+    this->setAccessory((const unsigned short)address, (direction == winston::Turnout::Direction::A_C ? Z21_Accessory_Pos::P0 : Z21_Accessory_Pos::P1), true, true);
+    //winston::hal::delay(150);
+    //this->setAccessory((const unsigned short)address, (direction == winston::Turnout::Direction::A_B ? Z21_Accessory_Pos::P0 : Z21_Accessory_Pos::P1), false, true);
 }
 
 void Z21::triggerLocoDrive(const winston::Address address, const unsigned char speed, const bool forward)
@@ -455,8 +491,16 @@ void Z21::processXPacket(uint8_t* data) {
                 uint16_t address = Z21Packet::getBEuint16(data, 5);
                 uint8_t accessoryState = Z21Packet::getByte(data, 7);
                 auto turnout = this->addressTranslator->turnout(address);// std::dynamic_pointer_cast<winston::Turnout>(railway->track(RailwayWithSiding::trackFromAddress(address)));
-                auto direction = accessoryState == 0 ? winston::Turnout::Direction::A_B : winston::Turnout::Direction::A_C;
-                this->turnoutUpdate(turnout, direction);
+                if (accessoryState == Z21_Accessory_State::P0 || accessoryState == Z21_Accessory_State::P1)
+                {
+                    auto direction = accessoryState == Z21_Accessory_State::P1 ? winston::Turnout::Direction::A_B : winston::Turnout::Direction::A_C;
+                    this->turnoutUpdate(turnout, direction);
+                    winston::logger.log(winston::build("Z21: Turnout ", address, " in state ", winston::Turnout::DirectionToString(direction) ));
+                }
+                else
+                {
+                    winston::logger.err(winston::build("Z21: Turnout ", address, " in illegal state ", accessoryState));
+                }
                 
                 
                 /*if (this->turnoutUpdate)

@@ -80,8 +80,8 @@ private:
     /* z21 */
     UDPSocket::Shared z21Socket;
 
-    const std::string z21IP = { "192.168.0.100" };
-    const unsigned short z21Port = 5000;
+    const std::string z21IP = { "192.168.188.100" };
+    const unsigned short z21Port = 21105;
 
     /* Signal Device */
     SignalSPIDevice::Shared signalSPIDevice;
@@ -157,6 +157,26 @@ void Kornweinheim::initNetwork()
 winston::DigitalCentralStation::Callbacks Kornweinheim::z21Callbacks()
 {
     winston::DigitalCentralStation::Callbacks callbacks;
+
+    //
+    callbacks.systemInfoCallback = [=](const size_t id, const std::string name, const std::string content) {
+        winston::logger.log(winston::build("Z21: ", name, ": ", content));
+    };
+
+    //
+    callbacks.trackPowerStatusCallback = [=](const bool powerOn) {
+        winston::logger.log(std::string("Z21: Power is ") + std::string(powerOn ? "on" : "off"));
+    };
+
+    // 
+    callbacks.programmingTrackStatusCallback = [=] (const bool programmingOn) {
+        winston::logger.log(std::string("Z21: Programming is ") + std::string(programmingOn ? "on" : "off"));
+    };
+
+    // 
+    callbacks.shortCircuitDetectedCallback = [=]() {
+        winston::logger.log("Z21: Short circuit detected!");
+    };
 
     // what to do when the digital central station updated a turnout
     callbacks.turnoutUpdateCallback = [=](winston::Turnout::Shared turnout, const winston::Turnout::Direction direction) -> const winston::State
@@ -638,5 +658,6 @@ void Kornweinheim::populateLocomotiveShed()
     this->addLocomotive(callbacks, 4, "BR 106");
     this->addLocomotive(callbacks, 5, "BR 64");
     this->addLocomotive(callbacks, 6, "E 11");
+    this->addLocomotive(callbacks, 7, "BR 218");
 }
 

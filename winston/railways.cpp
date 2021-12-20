@@ -436,20 +436,22 @@ winston::Turnout::Shared Y2021Railway::AddressTranslator::turnout(const winston:
     switch (address)
     {
     default:
-    case 1: track = Tracks::Turnout1; break;
-    case 2: track = Tracks::Turnout2; break;
-    case 3: track = Tracks::Turnout3; break;
-    case 4: track = Tracks::Turnout4; break;
-    case 5: track = Tracks::Turnout5; break;
-    case 6: track = Tracks::Turnout6; break;
-    case 7: track = Tracks::Turnout7; break;
-    case 8: track = Tracks::Turnout8; break;
-    case 9: track = Tracks::Turnout9; break;
-    case 10: track = Tracks::Turnout10; break;
-    case 11: track = Tracks::Turnout11; break;
-    case 12: track = Tracks::Turnout12; break;
-    case 13: track = Tracks::Turnout13; break;
-    case 14: track = Tracks::Turnout14; break;
+    case 0: track = Tracks::Turnout1; break;
+    case 1: track = Tracks::Turnout2; break;
+    case 2: track = Tracks::Turnout3; break;
+    case 3: track = Tracks::Turnout4; break;
+    case 4: track = Tracks::Turnout5; break;
+    case 5: track = Tracks::Turnout6; break;
+    case 6: track = Tracks::Turnout7; break;
+    case 7: track = Tracks::Turnout8; break;
+    case 8: track = Tracks::Turnout9; break;
+    case 9: track = Tracks::Turnout10; break;
+    case 10: track = Tracks::Turnout11; break;
+    case 11: track = Tracks::Turnout12; break;
+    case 12: track = Tracks::Turnout13; break;
+    case 13: track = Tracks::Turnout14; break;
+    case 14: track = Tracks::Turnout15; break;
+    case 15: track = Tracks::Turnout16; break;
     }
     return std::dynamic_pointer_cast<winston::Turnout>(railway->track(track));
 }
@@ -464,20 +466,22 @@ const winston::Address Y2021Railway::AddressTranslator::address(winston::Track::
     switch (railway->trackEnum(track))
     {
     default:
-    case Tracks::Turnout1: return 1; break;
-    case Tracks::Turnout2: return 2; break;
-    case Tracks::Turnout3: return 3; break;
-    case Tracks::Turnout4: return 4; break;
-    case Tracks::Turnout5: return 5; break;
-    case Tracks::Turnout6: return 6; break;
-    case Tracks::Turnout7: return 7; break;
-    case Tracks::Turnout8: return 8; break;
-    case Tracks::Turnout9: return 9; break;
-    case Tracks::Turnout10: return 10; break;
-    case Tracks::Turnout11: return 11; break;
-    case Tracks::Turnout12: return 12; break;
-    case Tracks::Turnout13: return 13; break;
-    case Tracks::Turnout14: return 14; break;
+    case Tracks::Turnout1: return 0; break;
+    case Tracks::Turnout2: return 1; break;
+    case Tracks::Turnout3: return 2; break;
+    case Tracks::Turnout4: return 3; break;
+    case Tracks::Turnout5: return 4; break;
+    case Tracks::Turnout6: return 5; break;
+    case Tracks::Turnout7: return 6; break;
+    case Tracks::Turnout8: return 7; break;
+    case Tracks::Turnout9: return 8; break;
+    case Tracks::Turnout10: return 9; break;
+    case Tracks::Turnout11: return 10; break;
+    case Tracks::Turnout12: return 11; break;
+    case Tracks::Turnout13: return 12; break;
+    case Tracks::Turnout14: return 13; break;
+    case Tracks::Turnout15: return 14; break;
+    case Tracks::Turnout16: return 15; break;
     }
     return 0;
 }

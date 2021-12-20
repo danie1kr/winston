@@ -194,6 +194,8 @@ const winston::Result UDPSocketWinSock::recv(std::vector<unsigned char>& data)
         // make the buffer zero terminated
         data.resize(ret);
     }
+    else
+        data.resize(0);
     return winston::Result::OK;
 }
 
@@ -212,20 +214,17 @@ namespace winston
 
         void text(const std::string& text)
         {
-            logger.log(text);
             std::cout << text << std::endl;
         }
 
         void error(const std::string& error)
         {
-            logger.log(error, Logger::Entry::Level::Error);
-            std::cout << error << std::endl;
+            logger.err(error);
         }
 
         void fatal(const std::string reason)
         {
             logger.log(reason, Logger::Entry::Level::Fatal);
-            std::cout << reason << std::endl;
             throw std::exception(reason.c_str());
             exit(-1);
         }

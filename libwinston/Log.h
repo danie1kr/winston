@@ -39,7 +39,18 @@ namespace winston
 		{
 			if (this->_log.size() > _N)
 				this->_log.pop_front();
+			hal::text(text);
 			this->_log.emplace_back(timestamp, level, text);
+		}
+
+		inline void err(std::string text, typename Entry::Level level = Entry::Level::Info, unsigned long long timestamp = winston::hal::now())
+		{
+			this->log(text, Entry::Level::Error);
+		}
+
+		inline void warn(std::string text, typename Entry::Level level = Entry::Level::Info, unsigned long long timestamp = winston::hal::now())
+		{
+			this->log(text, Entry::Level::Warning);
 		}
 
 		const std::deque<Entry> entries() const

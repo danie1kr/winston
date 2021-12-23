@@ -392,14 +392,17 @@ namespace winston
 
         void text(const std::string& text)
         {
-            extern winston::Logger logger;
-            logger.log(text);
             Serial.println(text.c_str());
         }
 
-        void fatal(const std::string err)
+        void error(const std::string& error)
         {
-            text(err);
+            logger.err(error);
+        }
+
+        void fatal(const std::string reason)
+        {
+            logger.log(reason, Logger::Entry::Level::Fatal);
             exit(-1);
         }
 

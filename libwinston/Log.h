@@ -18,7 +18,7 @@ namespace winston
 		Fatal
 	);
 
-	template<size_t _N>
+	template<size_t _WINSTON_LOG_SIZE>
 	class Log
 	{
 	public:
@@ -37,7 +37,7 @@ namespace winston
 
 		void log(std::string text, typename Entry::Level level = Entry::Level::Info, unsigned long long timestamp = winston::hal::now())
 		{
-			if (this->_log.size() > _N)
+			if (this->_log.size() > _WINSTON_LOG_SIZE)
 				this->_log.pop_front();
 			hal::text(text);
 			this->_log.emplace_back(timestamp, level, text);

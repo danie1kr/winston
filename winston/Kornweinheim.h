@@ -38,12 +38,12 @@ class Kornweinheim : public winston::ModelRailwaySystem<RAILWAY_CLASS::Shared, R
 private:
 
     // send a turnout state via websocket
-    void turnoutSendState(const unsigned int turnoutTrackId, const winston::Turnout::Direction dir);
+    void turnoutSendState(const std::string turnoutTrackId, const winston::Turnout::Direction dir);
 
     // send a signal state via websocket
-    void signalSendState(const unsigned int trackId, const winston::Track::Connection connection, const winston::Signal::Aspects aspects);
+    void signalSendState(const std::string trackId, const winston::Track::Connection connection, const winston::Signal::Aspects aspects);
 
-    void locoSend(winston::Locomotive::Shared& loco);
+    void locoSend(winston::Locomotive& loco);
 
     void locoSend(winston::Address address);
 
@@ -91,12 +91,12 @@ private:
 //#include "Kornweinheim.h"
 
 // send a turnout state via websocket
-void Kornweinheim::turnoutSendState(const unsigned int turnoutTrackId, const winston::Turnout::Direction dir)
+void Kornweinheim::turnoutSendState(const std::string turnoutTrackId, const winston::Turnout::Direction dir)
 {
     Json obj = Json::object{
         { "op", "turnoutState" },
         { "data", Json::object{
-            { "id", (int)turnoutTrackId },
+            { "id", turnoutTrackId },
             { "state", (int)dir }
             }
         }
@@ -105,12 +105,12 @@ void Kornweinheim::turnoutSendState(const unsigned int turnoutTrackId, const win
 }
 
 // send a signal state via websocket
-void Kornweinheim::signalSendState(const unsigned int trackId, const winston::Track::Connection connection, const winston::Signal::Aspects aspects)
+void Kornweinheim::signalSendState(const std::string trackId, const winston::Track::Connection connection, const winston::Signal::Aspects aspects)
 {
     Json obj = Json::object{
         { "op", "signalState" },
         { "data", Json::object {
-            { "parentTrack", (int)trackId },
+            { "parentTrack", trackId },
             { "guarding", winston::Track::ConnectionToString(connection) },
             { "aspects", (int)aspects }
             }
@@ -119,16 +119,16 @@ void Kornweinheim::signalSendState(const unsigned int trackId, const winston::Tr
     webServer.broadcast(obj.dump());
 }
 
-void Kornweinheim::locoSend(winston::Locomotive::Shared& loco)
+void Kornweinheim::locoSend(winston::Locomotive& loco)
 {
     Json obj = Json::object{
         { "op", "loco" },
         { "data", Json::object {
-            { "address", loco->address() },
-            { "name", loco->name().c_str() },
-            { "light", loco->light() },
-            { "forward", loco->forward() },
-            { "speed", loco->speed() }
+            { "address", loco.address() },
+            { "name", loco.name().c_str() },
+            { "light", loco.light() },
+            { "forward", loco.forward() },
+            { "speed", loco.speed() }
         }
         }
     };
@@ -139,7 +139,7 @@ void Kornweinheim::locoSend(winston::Address address)
 {
     if (auto loco = this->locoFromAddress(address))
     {
-        locoSend(loco);
+        locoSend(*loco);
     }
 }
 void Kornweinheim::initNetwork()
@@ -185,10 +185,10 @@ winston::DigitalCentralStation::Callbacks Kornweinheim::z21Callbacks()
         return winston::State::Finished;
     };
 
-    callbacks.locomotiveUpdateCallback = [=](winston::Locomotive::Shared loco, bool busy, bool  forward, unsigned char  speed, uint32_t functions)
+    callbacks.locomotiveUpdateCallback = [=](winston::Locomotive& loco, bool busy, bool  forward, unsigned char  speed, uint32_t functions)
     {
-        loco->update(busy, forward, speed, functions);
-        locoSend(loco->address());
+        loco.update(busy, forward, speed, functions);
+        locoSend(loco);
     };
 
     return callbacks;
@@ -227,16 +227,14 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
         this->signalBox->setSignalsFor(turnout);
 
         // tell the ui what happens
-        auto id = this->railway->trackIndex(turnout);
-        turnoutSendState(id, direction);
+        turnoutSendState(turnout->name(), direction);
         return winston::State::Finished;
     };
 
     callbacks.signalUpdateCallback = [=](winston::Track::Shared track, winston::Track::Connection connection, const winston::Signal::Aspects aspects) -> const winston::State
     {
         // send to web socket server
-        auto id = this->railway->trackIndex(track);
-        signalSendState(id, connection, aspects);
+        signalSendState(track->name(), connection, aspects);
 
         // update physical light
         this->signalDevice->update(track->signalGuarding(connection));
@@ -268,7 +266,7 @@ WebServer::HTTPResponse Kornweinheim::on_http(WebServer::Client client, std::str
     }
     else if (resource.compare(path_log) == 0)
     {
-        extern winston::Logger winston::logger;
+        //extern winston::Logger winston::logger;
         response.headers = { {"content-type", "text/html; charset=UTF-8"} };
         response.body = "<html><head>winston</head><body><table><tr><th>timestamp</th><th>level</th><th>log</th></tr>";
         for (const auto& entry : winston::logger.entries())
@@ -307,7 +305,7 @@ void Kornweinheim::on_message(WebServer::Client client, std::string message) {
 
     if (std::string("\"doTurnoutToggle\"").compare(op) == 0)
     {
-        unsigned int id = (unsigned int)data["id"].int_value();
+        auto id = data["id"].string_value();
         auto turnout = std::dynamic_pointer_cast<winston::Turnout>(railway->track(id));
         auto requestDir = winston::Turnout::otherDirection(turnout->direction());
         signalBox->order(winston::Command::make([this, id, turnout, requestDir](const unsigned long long& created) -> const winston::State
@@ -330,13 +328,13 @@ void Kornweinheim::on_message(WebServer::Client client, std::string message) {
     }
     else if (std::string("\"getTurnoutState\"").compare(op) == 0)
     {
-        unsigned int id = (unsigned int)data["id"].int_value();
+        auto id = data["id"].string_value();
         auto turnout = std::dynamic_pointer_cast<winston::Turnout>(railway->track(id));
-        this->turnoutSendState(id, turnout->direction());
+        this->turnoutSendState(turnout->name(), turnout->direction());
     }
     else if (std::string("\"getSignalState\"").compare(op) == 0)
     {
-        unsigned int id = (unsigned int)data["parentTrack"].int_value();
+        auto id = data["parentTrack"].string_value();
         std::string guarding = data["guarding"].string_value();
 
         auto connection = winston::Track::ConnectionFromString(guarding);
@@ -362,7 +360,7 @@ void Kornweinheim::on_message(WebServer::Client client, std::string message) {
                 bumper->connections(a);
 
                 Json::object track = Json::object();
-                track["a"] = (int)railway->trackIndex(a);
+                track["a"] = a->name();
                 track["name"] = bumper->name();
                 tracks.push_back(track);
 
@@ -377,8 +375,8 @@ void Kornweinheim::on_message(WebServer::Client client, std::string message) {
                 rail->connections(a, b);
 
                 Json::object track = Json::object();
-                track["a"] = (int)railway->trackIndex(a);
-                track["b"] = (int)railway->trackIndex(b);
+                track["a"] = a->name();
+                track["b"] = b->name();
                 track["name"] = rail->name();
                 tracks.push_back(track);
 
@@ -394,9 +392,9 @@ void Kornweinheim::on_message(WebServer::Client client, std::string message) {
                 turnout->connections(a, b, c);
 
                 Json::object track = Json::object();
-                track["a"] = (int)railway->trackIndex(a);
-                track["b"] = (int)railway->trackIndex(b);
-                track["c"] = (int)railway->trackIndex(c);
+                track["a"] = a->name();
+                track["b"] = b->name();
+                track["c"] = c->name();
                 track["name"] = turnout->name();
                 tracks.push_back(track);
 
@@ -438,8 +436,8 @@ void Kornweinheim::on_message(WebServer::Client client, std::string message) {
         unsigned int address = 0;
         auto layout = data["layout"].string_value();
         auto length = layout.size();
-        auto offset = data["offset"].int_value();
-        auto fullSize = data["fullSize"].int_value();
+        auto offset = (size_t)data["offset"].int_value();
+        auto fullSize = (size_t)data["fullSize"].int_value();
 
         if (offset == 0)
         {
@@ -458,7 +456,7 @@ void Kornweinheim::on_message(WebServer::Client client, std::string message) {
 
         winston::hal::storageCommit();
 
-        if (offset + length == fullSize)
+        if (offset == fullSize - length)
         {
             Json successObject = Json::object{
                 {"op", "storeRailwayLayoutSuccessful"},

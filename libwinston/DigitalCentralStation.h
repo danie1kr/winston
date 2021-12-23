@@ -1,5 +1,6 @@
 #pragma once
 
+#include "optional.hpp"
 #include "Util.h"
 #include "WinstonTypes.h"
 #include "Track.h"
@@ -21,13 +22,13 @@ namespace winston
 		class LocoAddressTranslator
 		{
 		public:
-			virtual Locomotive::Shared locoFromAddress(const Address address) const = 0;
-			virtual const Address addressOfLoco(Locomotive::Shared loco) const = 0;
+			virtual tl::optional<Locomotive&> locoFromAddress(const Address address) = 0;
+			virtual const Address addressOfLoco(const Locomotive& loco) const = 0;
 		};
 
 		struct Callbacks : public Railway::Callbacks
 		{
-			using LocomotiveUpdateCallback = std::function<void(Locomotive::Shared loco,
+			using LocomotiveUpdateCallback = std::function<void(Locomotive& loco,
 				bool  busy,
 			//	boolean  doubleTracktion,
 			//	boolean  transpond,
@@ -54,18 +55,19 @@ namespace winston
 		public:
 			DebugInjector(DigitalCentralStation::Shared& station);
 			void injectTurnoutUpdate(Turnout::Shared turnout, const Turnout::Direction direction);
-			void injectLocoUpdate(Locomotive::Shared loco, bool busy, bool forward, unsigned char speed, uint32_t functions);
+			void injectLocoUpdate(Locomotive& loco, bool busy, bool forward, unsigned char speed, uint32_t functions);
 		private:
 			DigitalCentralStation::Shared station;
 		};
 
-		DigitalCentralStation(TurnoutAddressTranslator::Shared& addressTranslator, const LocoAddressTranslator &locoAddressTranslator, SignalBox::Shared& signalBox, const Callbacks callbacks);
+		DigitalCentralStation(TurnoutAddressTranslator::Shared& addressTranslator, LocoAddressTranslator &locoAddressTranslator, SignalBox::Shared& signalBox, const Callbacks callbacks);
 		virtual ~DigitalCentralStation() = default;
 
 		virtual const winston::Result connect() = 0;
 		virtual const winston::Result tick() = 0;
 
-		virtual void requestTurnoutInfo(winston::Turnout::Shared turnout) = 0;
+		virtual void requestTurnoutInfo(Turnout::Shared turnout) = 0;
+		virtual void requestLocoInfo(const Locomotive& loco) = 0;
 		virtual void triggerTurnoutChangeTo(winston::Turnout::Shared turnout, winston::Turnout::Direction direction) = 0;
 		virtual void triggerLocoDrive(const Address address, const unsigned char speed, const bool forward) = 0;
 		virtual void triggerLocoFunction(const Address address, const uint32_t functions) = 0;
@@ -74,7 +76,7 @@ namespace winston
 
 	protected:
 		TurnoutAddressTranslator::Shared turnoutAddressTranslator;
-		const LocoAddressTranslator& locoAddressTranslator;
+		LocoAddressTranslator& locoAddressTranslator;
 		SignalBox::Shared signalBox;
 		const Callbacks callbacks;
 	};

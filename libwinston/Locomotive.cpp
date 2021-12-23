@@ -47,7 +47,7 @@ namespace winston
 		this->details.functions = functions;
 	}
 
-	const Address& Locomotive::address()
+	const Address& Locomotive::address() const
 	{
 		return this->details.address;
 	}

@@ -78,6 +78,9 @@
     <ClInclude Include="Log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="optional.hpp">
+      <Filter>external</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Signal.cpp">

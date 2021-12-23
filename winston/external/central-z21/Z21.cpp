@@ -18,9 +18,9 @@
 
 #include <memory>
 
-#define NOT_IMPLEMENTED(func) winston::logger.warn(std::string("Z21: " ## func ## " not implemented"));
+#define NOT_IMPLEMENTED(func) winston::logger.warn(winston::build("Z21: ", func, " not implemented"));
 
-Z21::Z21(winston::hal::UDPSocket::Shared& socket, winston::DigitalCentralStation::TurnoutAddressTranslator::Shared& addressTranslator, const LocoAddressTranslator& locoAddressTranslator, winston::SignalBox::Shared& signalBox, winston::DigitalCentralStation::Callbacks callbacks)
+Z21::Z21(winston::hal::UDPSocket::Shared& socket, winston::DigitalCentralStation::TurnoutAddressTranslator::Shared& addressTranslator, LocoAddressTranslator& locoAddressTranslator, winston::SignalBox::Shared& signalBox, winston::DigitalCentralStation::Callbacks callbacks)
     : winston::DigitalCentralStation(addressTranslator, locoAddressTranslator, signalBox, callbacks), socket(socket)
 {
     this->onBroadcastFlags = [](uint32_t flags) { NOT_IMPLEMENTED("onBroadcastFlags"); };
@@ -460,6 +460,12 @@ void Z21::requestTurnoutInfo(winston::Turnout::Shared turnout)
     this->getAccessoryInfo((const unsigned short)address);
 }
 
+void Z21::requestLocoInfo(const winston::Locomotive& loco)
+{
+    const unsigned int address = this->locoAddressTranslator.addressOfLoco(loco);
+    this->getLocoInfo(address);
+}
+
 void Z21::triggerTurnoutChangeTo(winston::Turnout::Shared turnout, winston::Turnout::Direction direction)
 {
     const unsigned int address = this->turnoutAddressTranslator->address(turnout);
@@ -578,8 +584,8 @@ void Z21::processLocoInfo(uint8_t* data) {
     functions |= (XDB7 << 21);              //F21 - F28
 
     //onLocoInfo(addr, busy, consist, transpond, forward, speed, functions);
-
-    this->callbacks.locomotiveUpdateCallback(this->locoAddressTranslator.locoFromAddress(addr), busy, forward, speed, functions);
+    if (auto loco = this->locoAddressTranslator.locoFromAddress(addr))
+        this->callbacks.locomotiveUpdateCallback(*loco, busy, forward, speed, functions);
 }
 
 void Z21::processBCPacket(uint8_t* data) {

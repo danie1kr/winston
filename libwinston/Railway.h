@@ -146,6 +146,16 @@ namespace winston
 			return (unsigned int)std::distance(this->tracks.begin(), it);
 		}
 
+		inline Track::Shared track(std::string name)
+		{
+			auto it = std::find_if(this->tracks.begin(), this->tracks.end(),
+				[name](const auto& track) {return name.compare(track->name()) == 0; });
+			if (it != this->tracks.end())
+				return *it;
+			else
+				return nullptr;
+		}
+
 		inline Track::Shared& track(Tracks index)
 		{
 			return this->tracks[static_cast<size_t>(index)];

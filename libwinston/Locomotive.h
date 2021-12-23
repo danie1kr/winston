@@ -26,7 +26,7 @@ namespace winston
 		void drive(const bool forward, const unsigned char speed);
 		void stop();
 		void update(const bool busy, const bool forward, const unsigned char speed, const uint32_t functions);
-		const Address& address();
+		const Address& address() const;
 		const std::string& name();
 	private:
 

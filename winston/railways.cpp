@@ -483,6 +483,7 @@ winston::Track::Shared Y2021Railway::define(const Tracks track)
         BUMPER(PBF1a);
         RAIL(PBF1);
         RAIL(PBF2);
+        RAIL(PBF2a);
         RAIL(PBF3);
         RAIL(GBF2b);
         RAIL(GBF3b);
@@ -522,6 +523,7 @@ void Y2021Railway::connect(std::array<winston::Track::Shared, tracksCount()>& tr
 #define LOCAL_TRACK(var)  auto var = this->track(Tracks::var);
     LOCAL_TRACK(PBF1a);
     LOCAL_TRACK(PBF1);
+    LOCAL_TRACK(PBF2a);
     LOCAL_TRACK(PBF2);
     LOCAL_TRACK(PBF3);
     LOCAL_TRACK(GBF1);
@@ -559,7 +561,8 @@ void Y2021Railway::connect(std::array<winston::Track::Shared, tracksCount()>& tr
     const auto C = winston::Track::Connection::C;
 
     // outer loop
-    Turnout1->connect(B, Turnout4, A)
+    Turnout1->connect(B, PBF2a, A)
+        ->connect(B, Turnout4, A)
         ->connect(B, PBF2, A)
         ->connect(B, Turnout6, C)
         ->connect(A, B1, A)

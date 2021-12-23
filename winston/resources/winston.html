@@ -351,7 +351,7 @@
             let id = data.id;
             let direction = data.state;
 
-            let turnout = cy.nodes(".turnout[track=" + id + "]").data("direction", direction);
+            let turnout = cy.nodes(".turnout[track=\"" + id + "\"]").data("direction", direction);
             turnoutUpdate(turnout);
         }
 
@@ -365,8 +365,8 @@
             if(!allowWinstonSubmit())
                 return;
 
-            let id = parseInt(track);
-            cy.nodes(".turnout[track=" + id + "]").off("click");
+            let id = track;//parseInt(track);
+            cy.nodes(".turnout[track=\"" + id + "\"]").off("click");
 
             if(direction !== TurnoutState_Changing)
                 send("doTurnoutToggle", {id: id});
@@ -376,7 +376,7 @@
         {
             if(!allowWinstonSubmit())
                 return;
-            send("getTurnoutState", {id: parseInt(track)});
+            send("getTurnoutState", {id: track});
         }
 
         function signalRequestStatus(guarding, parentTrack)
@@ -660,7 +660,7 @@
                 if(!allowLayoutEdit())
                     return;
                 let that = event.target;
-                cy.$("node.connection[track=" + that.data("track") + "], node.trackSplitNode[track=" + that.data("track") + "]").each(function(e) {
+                cy.$("node.connection[track=\"" + that.data("track") + "\"], node.trackSplitNode[track=\"" + that.data("track") + "\"]").each(function(e) {
                     e.position({x: that.position().x + e.data("relativePosition").x, y: that.position().y + e.data("relativePosition").y});
                 });
             });
@@ -669,7 +669,7 @@
                 if(!allowLayoutEdit())
                     return;
                 let that = event.target;
-                let parentPosition = cy.$("node.trackNode[track=" + that.data("track") + "]").position();
+                let parentPosition = cy.$("node.trackNode[track=\"" + that.data("track") + "\"]").position();
                 that.data("relativePosition", {x: that.position().x - parentPosition.x, y: that.position().y - parentPosition.y});
 
                 that.neighborhood(".signal").each(function(e) {
@@ -681,7 +681,7 @@
                 if(!allowLayoutEdit())
                     return;
                 let that = event.target;
-                let parentPosition = cy.$("node.connection." + that.data("guarding") + "[track=" + that.data("parentTrack") + "]").position();
+                let parentPosition = cy.$("node.connection." + that.data("guarding") + "[track=\"" + that.data("parentTrack") + "\"]").position();
                 that.data("relativePosition", {x: that.position().x - parentPosition.x, y: that.position().y - parentPosition.y});
             });
 
@@ -742,6 +742,15 @@
                 else
                 {
                     alert("railway and layout mismatch!");
+                    /*cy.destroy();
+                    cy = cytoscapeCreate();
+                    cy.add(layout.cy);
+                    cy = cytoscapeUpdateRailway(cy, railway);
+                    cy = cytoscapeUpdateSignals(cy, signals);
+                    cy = cytoscapeUpdateBlocks(cy, blocks);
+                    cy = cytoscapePostAdd(cy);
+
+                    cy.viewport({zoom: layout.viewport.zoom, pan: layout.viewport.pan});*/
                 }
             }
         }
@@ -774,7 +783,7 @@
             let success = true;
             _.each(railway, function(track, i) {
 
-                let layoutTrack = cyLayout.$(".trackNode[name=" + i + "]");
+                let layoutTrack = cyLayout.$(".trackNode[name=\"" + track.name + "\"]");
 
                 let localSuccess = layoutTrack !== undefined && layoutTrack.length > 0 &&
                             layoutTrack.data("connections").a === track.a &&
@@ -830,6 +839,24 @@
             traverse($edge);
         }
 
+        function cytoscapeUpdateRailway(cy, railway)
+        {
+            _.each(railway, function(track, i) {
+                let layoutTrack = cy.$(".trackNode[name=\"" + track.name + "\"]");
+
+                let localSuccess = layoutTrack !== undefined && layoutTrack.length > 0 &&
+                            layoutTrack.data("connections").a === track.a &&
+                            layoutTrack.data("connections").b === track.b &&
+                            layoutTrack.data("connections").c === track.c;
+
+                if(!localSuccess)
+                {
+                    console.log(layoutTrack.data("name"), track, i);
+                }
+            });
+            return cy;
+        }
+
         function cytoscapeUpdateSignals(cy, signals)
         {
             let nodes = [];
@@ -841,7 +868,7 @@
                 let track = signal.parentTrack;
                 let guarding = signal.guarding;
 
-                let parentPosition = cy.$("node.connection." + guarding + "[track=" + track + "]").position();
+                let parentPosition = cy.$("node.connection." + guarding + "[track=\"" + track + "\"]").position();
 
                 let existing = cy.$("node.signal[parentTrack=" + track + "][guarding=\"" + guarding + "\"]");
                 if(existing.length > 0)
@@ -868,7 +895,7 @@
         function cytoscapeUpdateBlocks(cy, blocks) {
             _.each(blocks, function (block, i) {
                 _.each(block.tracks, function (track, j) {
-                    cy.$("[track=" + track + "]").forEach(function(ele, i, eles) { 
+                    cy.$("[track=\"" + track + "\"]").forEach(function(ele, i, eles) { 
                         ele.data("block", block.address);
                         ele.data("blockColor", "#red");
                     });
@@ -900,7 +927,7 @@
 
                 function connect(that, connection, connectionName)
                 {
-                    let other = data.tracks[connection];
+                    let other = _.find(data.tracks, t => t.name === connection);
 
                     let thatNode = _.find(nodes, function(n) { return n.data.track === that;});
                     let otherNode = _.find(nodes, function(n) { return n.data.track === connection;});
@@ -930,6 +957,7 @@
                 let a = track.a;
                 let b = track.b;
                 let c = track.c;
+                let id = track.name;
 
                 let type = 0;
                 if(c !== undefined)
@@ -939,36 +967,36 @@
 
                 if(type === 2)
                 {
-                    nodes.push({group: 'nodes', data: {id: i, displayName: track.name, name: i, track: i, connections: {a: a, b: b, c: c}, direction: 1, type: "turnout", relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "trackNode turnout"});
-                    nodes.push({group: 'nodes', data: {id: i + "a", name: i + "a", track: i, relativePosition: {x: -20, y: 0}}, position: {x: i*100-20, y: 0}, classes: "turnoutConnection connection a"});
-                    nodes.push({group: 'nodes', data: {id: i + "b", name: i + "b", track: i, relativePosition: {x: 20, y: 0}}, position: {x: i*100+20, y: 0}, classes: "turnoutConnection connection b"});
-                    nodes.push({group: 'nodes', data: {id: i + "c", name: i + "c", track: i, relativePosition: {x: 20, y: 20}}, position: {x: i*100+20, y: 20}, classes: "turnoutConnection connection c"});
+                    nodes.push({group: 'nodes', data: {id: id, displayName: track.name, name: id, track: id, connections: {a: a, b: b, c: c}, direction: 1, type: "turnout", relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "trackNode turnout"});
+                    nodes.push({group: 'nodes', data: {id: id + "a", name: id + "a", track: id, relativePosition: {x: -20, y: 0}}, position: {x: i*100-20, y: 0}, classes: "turnoutConnection connection a"});
+                    nodes.push({group: 'nodes', data: {id: id + "b", name: id + "b", track: id, relativePosition: {x: 20, y: 0}}, position: {x: i*100+20, y: 0}, classes: "turnoutConnection connection b"});
+                    nodes.push({group: 'nodes', data: {id: id + "c", name: id + "c", track: id, relativePosition: {x: 20, y: 20}}, position: {x: i*100+20, y: 20}, classes: "turnoutConnection connection c"});
                 
-                    edges.push({group: 'edges', data: {source: i, target: i+"a", track: i, connection: "a"}, classes: "internal"});
-                    edges.push({group: 'edges', data: {source: i, target: i+"b", track: i, connection: "b"}, classes: "internal"});
-                    edges.push({group: 'edges', data: {source: i, target: i+"c", track: i, connection: "c"}, classes: "internal"});
+                    edges.push({group: 'edges', data: {source: id, target: id+"a", track: id, connection: "a"}, classes: "track"});
+                    edges.push({group: 'edges', data: {source: id, target: id+"b", track: id, connection: "b"}, classes: "internal"});
+                    edges.push({group: 'edges', data: {source: id, target: id+"c", track: id, connection: "c"}, classes: "internal"});
                 }
                 else if(type === 1)
                 {
-                    nodes.push({ group: 'nodes', data: { id: i, displayName: track.name, name: i, track: i, connections: {a: a, b: b, c: c}, type: "rail", relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "trackNode rail"});
-                    nodes.push({group: 'nodes', data: {id: i + "a", name: i + "a", track: i, relativePosition: {x: -20, y: 0}}, position: {x: i*100-20, y: 0}, classes: "railConnection connection a"});
-                    nodes.push({group: 'nodes', data: {id: i + "b", name: i + "b", track: i, relativePosition: {x: 20, y: 0}}, position: {x: i*100+20, y: 0}, classes: "railConnection connection b"});
+                    nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, connections: {a: a, b: b, c: c}, type: "rail", relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "trackNode rail"});
+                    nodes.push({group: 'nodes', data: {id: id + "a", name: id + "a", track: id, relativePosition: {x: -20, y: 0}}, position: {x: i*100-20, y: 0}, classes: "railConnection connection a"});
+                    nodes.push({group: 'nodes', data: {id: id + "b", name: id + "b", track: id, relativePosition: {x: 20, y: 0}}, position: {x: i*100+20, y: 0}, classes: "railConnection connection b"});
                 
-                    edges.push({group: 'edges', data: {source: i, target: i+"a", track: i, connection: "a"}, classes: "track"});
-                    edges.push({group: 'edges', data: {source: i, target: i+"b", track: i, connection: "b"}, classes: "track"});
+                    edges.push({group: 'edges', data: {source: id, target: id+"a", track: id, connection: "a"}, classes: "track"});
+                    edges.push({group: 'edges', data: {source: id, target: id+"b", track: id, connection: "b"}, classes: "track"});
                 }
                 else
                 {
-                    nodes.push({ group: 'nodes', data: { id: i, displayName: track.name, name: i, track: i, connections: {a: a, b: b, c: c}, type: "bumper", relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "trackNode bumper"});
-                    nodes.push({group: 'nodes', data: {id: i + "a", name: i + "a", track: i, relativePosition: {x: -20, y: 0}}, position: {x: i*100-20, y: 0}, classes: "bumperConnection connection a"});
-                    edges.push({group: 'edges', data: {source: i, target: i+"a", track: i, connection: "a"}, classes: "track"});
+                    nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, connections: {a: a, b: b, c: c}, type: "bumper", relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "trackNode bumper"});
+                    nodes.push({group: 'nodes', data: {id: id + "a", name: id + "a", track: id, relativePosition: {x: -20, y: 0}}, position: {x: i*100-20, y: 0}, classes: "bumperConnection connection a"});
+                    edges.push({group: 'edges', data: {source: id, target: id+"a", track: id, connection: "a"}, classes: "track"});
                 }
 
-                console.log("added track " + i);
+                console.log("added track " + id);
 
-                if(a !== undefined) connect(i, a, "a");
-                if(b !== undefined) connect(i, b, "b");
-                if(c !== undefined) connect(i, c, "c");
+                if(a !== undefined) connect(id, a, "a");
+                if(b !== undefined) connect(id, b, "b");
+                if(c !== undefined) connect(id, c, "c");
             });
 
             cy = cytoscapeCreate();
@@ -1086,7 +1114,7 @@
                 let neighbor = node.openNeighborhood("node.connection");
                 let track = neighbor.data("track");
 
-                cy.$('node.trackNode[track=' + track + ']').each(function(n) {
+                cy.$('node.trackNode[track=\"' + track + '\"]').each(function(n) {
                     n.position({x: node.position().x + 40, y: node.position().y}).emit("position");    
                 });
             });

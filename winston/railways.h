@@ -292,6 +292,7 @@ BETTER_ENUM(Y2021RailwayTracks, unsigned int,
     PBF1,
     PBF1a,
     PBF2,
+    PBF2a,
     PBF3,
     GBF1,
     GBF2a, GBF2b,
@@ -324,7 +325,7 @@ class Y2021Railway : public winston::RailwayWithRails<Y2021RailwayTracks>, winst
  Turnout1   \\         //====N1====|                 //    //
     ||  \\   \\       //                            //    //
     \\    Turnout2=Turnout3========PBF3============//    //
-     \\======Turnout4========PBF2====================Turnout6
+     PBF2a====Turnout4========PBF2====================Turnout6
                   \\                                    //
     |====PBF1a====Turnout5========PBF1=================//
     */

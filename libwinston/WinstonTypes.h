@@ -31,7 +31,8 @@ namespace winston
 		SendFailed,
 		ReceiveFailed,
 		ValidationFailed,
-		ExternalHardwareFailed
+		ExternalHardwareFailed,
+		NotFound
 	};
 
 	enum class Features : unsigned int
@@ -113,7 +114,7 @@ namespace winston
 		bool skip;
 	};
 
-	template<size_t _N>
+	template<size_t>
 	class Log;
 
 	class Railway;

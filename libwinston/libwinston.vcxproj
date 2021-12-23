@@ -123,6 +123,7 @@
     <ClInclude Include="Locomotive.h" />
     <ClInclude Include="Log.h" />
     <ClInclude Include="ModelRailwaySystem.h" />
+    <ClInclude Include="optional.hpp" />
     <ClInclude Include="Route.h" />
     <ClInclude Include="span.hpp" />
     <ClInclude Include="Track.h" />

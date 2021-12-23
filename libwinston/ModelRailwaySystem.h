@@ -30,7 +30,18 @@ namespace winston
 						winston::hal::delay(150);
 						return winston::State::Finished;
 					}));
-			}); 
+			});
+
+			for(const auto &loco : this->locomotiveShed ) {
+
+				this->signalBox->order(winston::Command::make([this, loco](const unsigned long long& created) -> const winston::State
+					{
+						this->digitalCentralStation->requestLocoInfo(loco);
+						winston::hal::delay(150);
+						return winston::State::Finished;
+					}));
+			}
+
 			this->signalBox->order(winston::Command::make([](const unsigned long long& created) -> const winston::State
 				{
 					logger.log("Init tasks complete");
@@ -74,18 +85,18 @@ namespace winston
 			return _Railway::element_type::name();
 		}
 
-		Locomotive::Shared locoFromAddress(const Address address) const
+		tl::optional<Locomotive&> locoFromAddress(const Address address)
 		{
-			auto it = std::find_if(this->locomotiveShed.begin(), this->locomotiveShed.end(), [address](const auto& loco) { return loco->address() == address; });
+			auto it = std::find_if(this->locomotiveShed.begin(), this->locomotiveShed.end(), [address](const auto& loco) { return loco.address() == address; });
 			if (it == this->locomotiveShed.end())
-				return nullptr;
+				return tl::nullopt;
 			else
 				return *it;
 		}
 
-		const Address addressOfLoco(Locomotive::Shared loco) const
+		const Address addressOfLoco(const Locomotive& loco) const
 		{
-			return loco->address();
+			return loco.address();
 		}
 
 		inline const State turnoutChangeTo(winston::Turnout::Shared turnout, winston::Turnout::Direction direction)
@@ -120,8 +131,8 @@ namespace winston
 
 		void addLocomotive(const winston::Locomotive::Callbacks callbacks, const Address address, std::string name)
 		{
-			auto loco = Locomotive::make(callbacks, address, name);
-			this->locomotiveShed.push_back(loco);
+			//auto loco = Locomotive();
+			this->locomotiveShed.emplace_back(callbacks, address, name);
 		}
 
 		// the railway
@@ -137,7 +148,7 @@ namespace winston
 		DigitalCentralStation::DebugInjector::Shared stationDebugInjector;
 
 		// the locos
-		std::vector<Locomotive::Shared> locomotiveShed;
+		std::vector<Locomotive> locomotiveShed;
 	};
 }
 

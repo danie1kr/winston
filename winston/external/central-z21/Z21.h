@@ -25,13 +25,14 @@
 class Z21 : public winston::DigitalCentralStation, winston::Shared_Ptr<Z21> {
 public:
     Z21() = delete;
-    Z21(winston::hal::UDPSocket::Shared& socket, winston::DigitalCentralStation::TurnoutAddressTranslator::Shared& addressTranslator, const LocoAddressTranslator& locoAddressTranslator, winston::SignalBox::Shared& signalBox, winston::DigitalCentralStation::Callbacks callbacks);
+    Z21(winston::hal::UDPSocket::Shared& socket, winston::DigitalCentralStation::TurnoutAddressTranslator::Shared& addressTranslator, LocoAddressTranslator& locoAddressTranslator, winston::SignalBox::Shared& signalBox, winston::DigitalCentralStation::Callbacks callbacks);
     void processPacket(uint8_t *packet);
 
     const winston::Result connect();
     const winston::Result tick();
 
     void requestTurnoutInfo(winston::Turnout::Shared turnout);
+    void requestLocoInfo(const winston::Locomotive& loco);
     void triggerTurnoutChangeTo(winston::Turnout::Shared turnout, winston::Turnout::Direction direction);
     void triggerLocoDrive(const winston::Address address, const unsigned char speed, const bool forward);
     void triggerLocoFunction(const winston::Address address, const uint32_t functions);

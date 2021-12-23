@@ -570,7 +570,7 @@ void Y2021Railway::connect(std::array<winston::Track::Shared, tracksCount()>& tr
         ->connect(B, B2, A)
         ->connect(B, Turnout11, B)
         ->connect(A, B3, A)
-        ->connect(B, Turnout1, A);
+        ->connect(B, KS(0), Turnout1, A);
 
     // inner loop
     Turnout2->connect(A, Turnout3, A)
@@ -581,10 +581,10 @@ void Y2021Railway::connect(std::array<winston::Track::Shared, tracksCount()>& tr
         ->connect(B, B5, A)
         ->connect(B, Turnout10, A)
         ->connect(B, B6, A)
-        ->connect(B, Turnout2, C);
+        ->connect(B, KS(0), Turnout2, C);
 
     // lower track
-    PBF1a->connect(A, Turnout5, B)
+    PBF1a->connect(A, KS(0), Turnout5, B)
         ->connect(A, PBF1, A)
         ->connect(B, Turnout6, B);
 
@@ -597,19 +597,19 @@ void Y2021Railway::connect(std::array<winston::Track::Shared, tracksCount()>& tr
     Turnout15->connect(C, Turnout16, C);
 
     // nebengleise
-    Turnout3->connect(C, N1, A);
-    Turnout12->connect(B, N2, A);
+    Turnout3->connect(C, N1, A, KS(0));
+    Turnout12->connect(B, N2, A, KS(0));
 
     // GBF
    Turnout12->connect(A, Turnout13, A)
         ->connect(B, Turnout14, A)
-        ->connect(B, GBF1, A);
-   Turnout13->connect(C, GBF3b, A)
-       ->connect(B, Turnout16, A)
-       ->connect(B, GBF3a, A);
-   Turnout14->connect(C, GBF2b, A)
-       ->connect(B, Turnout15, B)
-       ->connect(A, GBF2a, A);
+        ->connect(B, GBF1, A, KS(0));
+   Turnout13->connect(C, GBF3b, A, KS(0))
+       ->connect(B, KS(0), Turnout16, A)
+       ->connect(B, GBF3a, A, KS(0));
+   Turnout14->connect(C, GBF2b, A, KS(0))
+       ->connect(B, KS(0), Turnout15, B)
+       ->connect(A, GBF2a, A, KS(0));
 }
 
 SignalRailway::SignalRailway(const Callbacks callbacks) : winston::RailwayWithRails<SignalRailwayTracks>(callbacks) {};

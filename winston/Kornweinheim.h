@@ -289,7 +289,7 @@ void Kornweinheim::writeAttachedSignal(Json::array& signals, winston::Track::Sha
     auto signal = track->signalGuarding(connection);
     if (signal)
         signals.push_back(Json::object{
-            { "parentTrack", (int)railway->trackIndex(track)} ,
+            { "parentTrack", track->name()} ,
             { "guarding", winston::Track::ConnectionToString(connection)},
             { "pre", signal->preSignal()},
             { "main", signal->mainSignal() }
@@ -414,7 +414,7 @@ void Kornweinheim::on_message(WebServer::Client client, std::string message) {
 
             Json::array blockTracks = Json::array();
             for (auto& track : bl->tracks())
-                blockTracks.push_back((int)this->railway->trackIndex(track));
+                blockTracks.push_back(track->name());
             b["tracks"] = blockTracks;
             blocks.push_back(b);
         }

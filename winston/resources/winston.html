@@ -742,15 +742,15 @@
                 else
                 {
                     alert("railway and layout mismatch!");
-                    /*cy.destroy();
+                /*    cy.destroy();
                     cy = cytoscapeCreate();
                     cy.add(layout.cy);
-                    cy = cytoscapeUpdateRailway(cy, railway);
+                    cy = cytoscapeUpdateRailway(cy, data.tracks);
                     cy = cytoscapeUpdateSignals(cy, signals);
                     cy = cytoscapeUpdateBlocks(cy, blocks);
-                    cy = cytoscapePostAdd(cy);
+                    cy = cytoscapePostAdd(cy);*/
 
-                    cy.viewport({zoom: layout.viewport.zoom, pan: layout.viewport.pan});*/
+                    cy.viewport({zoom: layout.viewport.zoom, pan: layout.viewport.pan});
                 }
             }
         }
@@ -792,7 +792,7 @@
 
                 if(!localSuccess)
                 {
-                    console.log(layoutTrack, track, i);
+                    console.log(track.name, layoutTrack, track, i);
                 }
 
                 success &&= localSuccess;
@@ -844,6 +844,12 @@
             _.each(railway, function(track, i) {
                 let layoutTrack = cy.$(".trackNode[name=\"" + track.name + "\"]");
 
+                // added track in railway list
+                if(layoutTrack === undefined)
+                {
+                    addTrackToLayout(cy.nodes(), cy.edges(), railway.tracks, track, i);
+                }
+
                 let localSuccess = layoutTrack !== undefined && layoutTrack.length > 0 &&
                             layoutTrack.data("connections").a === track.a &&
                             layoutTrack.data("connections").b === track.b &&
@@ -870,7 +876,7 @@
 
                 let parentPosition = cy.$("node.connection." + guarding + "[track=\"" + track + "\"]").position();
 
-                let existing = cy.$("node.signal[parentTrack=" + track + "][guarding=\"" + guarding + "\"]");
+                let existing = cy.$("node.signal[parentTrack=\"" + track + "\"][guarding=\"" + guarding + "\"]");
                 if(existing.length > 0)
                 {
                     existing.removeClass("unverified");
@@ -878,7 +884,7 @@
                 else
                 {
                     nodes.push({group: 'nodes', data: {id: track + "_signal_" + guarding, guarding: guarding, parentTrack: track, relativePosition: {x: 0, y: 20}}, position: {x: parentPosition.x, y: parentPosition.y + 20}, classes: "signal"});
-                    edges.push({group: 'edges', data: {source: track + "_signal_" + guarding, target: track + guarding}, classes: "signalConnector"});
+                    edges.push({group: 'edges', data: {source: track + "_signal_" + guarding, target: track + "_" + guarding}, classes: "signalConnector"});
                 }
             });
 
@@ -905,6 +911,82 @@
             return cy;
         }
 
+        function addTrackToLayout(edges, nodes, tracks, track, xPos)
+        {
+            function connect(that, connection, connectionName)
+            {
+                let other = _.find(tracks, t => t.name === connection);
+
+                let thatNode = _.find(nodes, function(n) { return n.data.track === that;});
+                let otherNode = _.find(nodes, function(n) { return n.data.track === connection;});
+
+                if(thatNode === undefined || otherNode === undefined)
+                    return;
+
+                let from = that + "_" + connectionName;//(thatNode.data.type !== "bumper"/* && connectionName !== "a"*/ ? connectionName : "");
+
+                function connectToOther(otherConnectionName)
+                {
+                    if(other[otherConnectionName] === that)
+                    {
+                        let to = connection + "_" + otherConnectionName; // (otherNode.data.direction !== undefined /*&& otherConnectionName !== "a"*/ ? otherConnectionName : "");
+                        let id = from + "-" + to;
+
+                        edges.push({group: 'edges', data: {id: id, name: id, source: from, target: to}, classes: ""});
+                    }
+                }
+
+                connectToOther("a");
+                connectToOther("b");
+                connectToOther("c");
+            }
+
+
+            let a = track.a;
+            let b = track.b;
+            let c = track.c;
+            let id = track.name;
+
+            let type = 0;
+            if(c !== undefined)
+                type = 2;
+            else if(b !== undefined)
+                type = 1;
+
+            if(type === 2)
+            {
+                nodes.push({group: 'nodes', data: {id: id, displayName: track.name, name: id, track: id, connections: {a: a, b: b, c: c}, direction: 1, type: "turnout", relativePosition: {x: 0, y: 0}}, position: {x: xPos, y: 0}, classes: "trackNode turnout"});
+                nodes.push({group: 'nodes', data: {id: id + "_a", name: id + "_a", track: id, relativePosition: {x: -20, y: 0}}, position: {x: xPos-20, y: 0}, classes: "turnoutConnection connection a"});
+                nodes.push({group: 'nodes', data: {id: id + "_b", name: id + "_b", track: id, relativePosition: {x: 20, y: 0}}, position: {x: xPos+20, y: -20}, classes: "turnoutConnection connection b"});
+                nodes.push({group: 'nodes', data: {id: id + "_c", name: id + "_c", track: id, relativePosition: {x: 20, y: 20}}, position: {x: xPos+20, y: 20}, classes: "turnoutConnection connection c"});
+
+                edges.push({group: 'edges', data: {source: id, target: id+"_a", track: id, connection: "a"}, classes: "track"});
+                edges.push({group: 'edges', data: {source: id, target: id+"_b", track: id, connection: "b"}, classes: "internal"});
+                edges.push({group: 'edges', data: {source: id, target: id+"_c", track: id, connection: "c"}, classes: "internal"});
+            }
+            else if(type === 1)
+            {
+                nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, connections: {a: a, b: b, c: c}, type: "rail", relativePosition: {x: 0, y: 0}}, position: {x: xPos, y: 0}, classes: "trackNode rail"});
+                nodes.push({group: 'nodes', data: {id: id + "_a", name: id + "_a", track: id, relativePosition: {x: -20, y: 0}}, position: {x: xPos-20, y: 0}, classes: "railConnection connection a"});
+                nodes.push({group: 'nodes', data: {id: id + "_b", name: id + "_b", track: id, relativePosition: {x: 20, y: 0}}, position: {x: xPos+20, y: 0}, classes: "railConnection connection b"});
+
+                edges.push({group: 'edges', data: {source: id, target: id+"_a", track: id, connection: "a"}, classes: "track"});
+                edges.push({group: 'edges', data: {source: id, target: id+"_b", track: id, connection: "b"}, classes: "track"});
+            }
+            else
+            {
+                nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, connections: {a: a, b: b, c: c}, type: "bumper", relativePosition: {x: 0, y: 0}}, position: {x: xPos, y: 0}, classes: "trackNode bumper"});
+                nodes.push({group: 'nodes', data: {id: id + "_a", name: id + "_a", track: id, relativePosition: {x: -20, y: 0}}, position: {x: xPos-20, y: 0}, classes: "bumperConnection connection a"});
+                edges.push({group: 'edges', data: {source: id, target: id+"_a", track: id, connection: "a"}, classes: "track"});
+            }
+
+            console.log("added track " + id);
+
+            if(a !== undefined) connect(id, a, "a");
+            if(b !== undefined) connect(id, b, "b");
+            if(c !== undefined) connect(id, c, "c");
+        }
+
         function buildRailwayGraph(data)
         {
             function classFromType(type)
@@ -924,6 +1006,8 @@
             blocks = data.blocks;
 
             _.each(data.tracks, function(track, i) {
+                addTrackToLayout(edges, nodes, data.tracks, track, i*100);
+                /*
 
                 function connect(that, connection, connectionName)
                 {
@@ -935,13 +1019,13 @@
                     if(thatNode === undefined || otherNode === undefined)
                         return;
 
-                    let from = that + connectionName;//(thatNode.data.type !== "bumper"/* && connectionName !== "a"*/ ? connectionName : "");
+                    let from = that + connectionName;//(thatNode.data.type !== "bumper"/* && connectionName !== "a"* ? connectionName : "");
 
                     function connectToOther(otherConnectionName)
                     {
                         if(other[otherConnectionName] === that)
                         {
-                            let to = connection + otherConnectionName; // (otherNode.data.direction !== undefined /*&& otherConnectionName !== "a"*/ ? otherConnectionName : "");
+                            let to = connection + otherConnectionName; // (otherNode.data.direction !== undefined /*&& otherConnectionName !== "a"* ? otherConnectionName : "");
                             let id = from + "-" + to;
                             
                             edges.push({group: 'edges', data: {id: id, name: id, source: from, target: to}, classes: ""});
@@ -996,7 +1080,7 @@
 
                 if(a !== undefined) connect(id, a, "a");
                 if(b !== undefined) connect(id, b, "b");
-                if(c !== undefined) connect(id, c, "c");
+                if(c !== undefined) connect(id, c, "c");*/
             });
 
             cy = cytoscapeCreate();
@@ -1114,7 +1198,7 @@
                 let neighbor = node.openNeighborhood("node.connection");
                 let track = neighbor.data("track");
 
-                cy.$('node.trackNode[track=\"' + track + '\"]').each(function(n) {
+                cy.$('node.trackNode[track="' + track + '"]').each(function(n) {
                     n.position({x: node.position().x + 40, y: node.position().y}).emit("position");    
                 });
             });

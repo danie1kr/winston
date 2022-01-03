@@ -26,6 +26,11 @@
 #include <cstdio>
 #include <limits>
 
+#ifdef __GNUC__ 
+#pragma GCC push_options
+#pragma GCC optimize("Os")
+#endif
+
 namespace json11 {
 
 static const int max_depth = 200;
@@ -787,4 +792,7 @@ bool Json::has_shape(const shape & types, string & err) const {
     return true;
 }
 
-} // namespace json11
+} // namespace json11 
+#ifdef __GNUC__ 
+#pragma GCC pop_options
+#endif

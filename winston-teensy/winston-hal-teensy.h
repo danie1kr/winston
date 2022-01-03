@@ -1,5 +1,9 @@
 #pragma once
 
+#include "Signal.h"
+#include "HAL.h"
+#include "Log.h"
+
 //#define WINSTON_TEENSY_QNETHERNET
 
 #define WEBSOCKETS_USE_ETHERNET     true
@@ -11,9 +15,6 @@
 #include <WebSockets2_Generic.h>
 using namespace websockets2_generic;
 
-#include "Signal.h"
-#include "HAL.h"
-#include "Log.h"
 
 #ifdef WINSTON_TEENSY_QNETHERNET
 #include <QNEthernet.h>

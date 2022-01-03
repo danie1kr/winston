@@ -49,12 +49,36 @@ namespace winston
 
 	void SignalBox::setSignalsFor(Turnout::Shared turnout, const Turnout::Direction direction)
 	{
+		// very simple strategy setting the signal only according to turnout direction
+
+		// better: get aspect from situation later in path: red for open turnout, green otherwise
+		// see below
 		Track::Shared signalCurrent = turnout;
-		const auto aspect = turnout->direction() == direction ? Signal::Aspect::Go : Signal::Aspect::Halt;
 		Track::Connection signalConnection = direction == Turnout::Direction::A_B ? Track::Connection::B : Track::Connection::C;
 		auto signalToSet = this->nextSignal(signalCurrent, true, signalConnection, true, true);
-		if(signalToSet)
+
+		if (signalToSet)
+		{
+			auto aspect = Signal::Aspect::Halt;
+			if (turnout->direction() == direction)
+			{
+				Track::Shared current = turnout;
+				auto connection = Track::Connection::A;
+				Signal::Shared signal;
+				auto result = Track::traverse<Track::TraversalSignalHandling::ForwardDirection>(current, connection, signal);
+
+				switch (result)
+				{
+				case Track::TraversalResult::Bumper:
+				case Track::TraversalResult::Looped:
+				case Track::TraversalResult::Signal: aspect = Signal::Aspect::Go; break;
+				default:
+				case Track::TraversalResult::OpenTurnout: aspect = Signal::Aspect::Halt; break;
+				}
+			}// else halt == default
+
 			this->setSignalOn(signalCurrent, signalConnection, aspect);
+		}
 	}
 
 	void SignalBox::setSignalsFor(Turnout::Shared turnout)

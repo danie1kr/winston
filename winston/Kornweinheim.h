@@ -228,6 +228,8 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
 
         // tell the ui what happens
         turnoutSendState(turnout->name(), direction);
+        winston::logger.info("Turnout ", turnout->name(), " set to direction ", winston::Turnout::DirectionToString(direction));
+
         return winston::State::Finished;
     };
 
@@ -238,6 +240,7 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
 
         // update physical light
         this->signalDevice->update(track->signalGuarding(connection));
+        winston::logger.info("Signal at ", track->name(), "|", winston::Track::ConnectionToString(connection), " set to ", aspects);
 
         return winston::State::Finished;
     };

@@ -27,7 +27,9 @@ namespace winston
 				this->signalBox->order(winston::Command::make([this, turnout](const unsigned long long& created) -> const winston::State
 					{
 						this->digitalCentralStation->requestTurnoutInfo(turnout);
-						winston::hal::delay(150);
+						winston::hal::delay(50);
+						this->signalBox->setSignalsFor(turnout);
+						winston::hal::delay(100);
 						return winston::State::Finished;
 					}));
 			});

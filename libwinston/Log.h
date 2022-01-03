@@ -43,12 +43,32 @@ namespace winston
 			this->_log.emplace_back(timestamp, level, text);
 		}
 
-		inline void err(std::string text, typename Entry::Level level = Entry::Level::Info, unsigned long long timestamp = winston::hal::now())
+		template <typename ...Params>
+		void info(Params&&... params)
+		{
+			this->info(winston::build(std::forward<Params>(params)...));
+		}
+		inline void info(std::string text)
+		{
+			this->log(text, Entry::Level::Info);
+		}
+
+		template <typename ...Params>
+		void err(Params&&... params)
+		{
+			this->log(winston::build(std::forward<Params>(params)...), Entry::Level::Error);
+		}
+		inline void err(std::string text)
 		{
 			this->log(text, Entry::Level::Error);
 		}
 
-		inline void warn(std::string text, typename Entry::Level level = Entry::Level::Info, unsigned long long timestamp = winston::hal::now())
+		template <typename ...Params>
+		void warn(Params&&... params)
+		{
+			this->log(winston::build(std::forward<Params>(params)...), Entry::Level::Warning);
+		}
+		inline void warn(std::string text)
 		{
 			this->log(text, Entry::Level::Warning);
 		}

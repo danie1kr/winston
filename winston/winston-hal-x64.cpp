@@ -187,7 +187,7 @@ const winston::Result UDPSocketWinSock::recv(std::vector<unsigned char>& data)
 
     // Wait until timeout or data received.
     if (select(0, &fds, NULL, NULL, &tv) > 0) {
-        int ret = recvfrom(this->udpSocket, reinterpret_cast<char*>(data.data()), data.size(), 0, reinterpret_cast<SOCKADDR*>(&from), &size);
+        int ret = recvfrom(this->udpSocket, reinterpret_cast<char*>(data.data()), (int)data.size(), 0, reinterpret_cast<SOCKADDR*>(&from), &size);
         if (ret < 0)
             return winston::Result::ReceiveFailed;
 

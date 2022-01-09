@@ -436,7 +436,7 @@ void Kornweinheim::on_message(WebServer::Client client, std::string message) {
     }
     else if (std::string("\"storeRailwayLayout\"").compare(op) == 0)
     {
-        unsigned int address = 0;
+        size_t address = 0;
         auto layout = data["layout"].string_value();
         auto length = layout.size();
         auto offset = (size_t)data["offset"].int_value();

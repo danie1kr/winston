@@ -29,7 +29,7 @@ namespace winstontests
 		}
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(spiDirect)
-		//	TEST_IGNORE()
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 		TEST_METHOD(spiDirect)
 		{
@@ -100,7 +100,7 @@ namespace winstontests
 		}
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(viaTLC)
-		//	TEST_IGNORE()
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 		TEST_METHOD(viaTLC)
 		{

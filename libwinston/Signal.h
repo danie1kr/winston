@@ -181,12 +181,12 @@ namespace winston
 	using SignalV = SignalInstance<Signal::AspectsV, 2>;
 	using SignalHV = SignalInstance<Signal::AspectsHV, 4>;
 
-	template<typename T, unsigned int bits = 8*sizeof(T)>
-	class SignalDevice : public Shared_Ptr<SignalDevice<T, bits>>
+	template<typename T>
+	class SignalDevice : public Shared_Ptr<SignalDevice<T>>
 	{
-		static_assert(bits <= sizeof(T) * 8, "too many bits for T");
+		//static_assert(bits <= sizeof(T) * 8, "too many bits for T");
 	public:
-		SignalDevice(const size_t devices, const size_t portsPerDevice, typename SendDevice<T, bits>::Shared device)
+		SignalDevice(const size_t devices, const size_t portsPerDevice, typename SendDevice<T>::Shared device)
 			: device(device), devices(devices), portsPerDevice(portsPerDevice)
 		{
 
@@ -215,12 +215,12 @@ namespace winston
 			});
 		}
 
-		using Shared_Ptr<SignalDevice<T, bits>>::Shared;
-		using Shared_Ptr<SignalDevice<T, bits>>::make;
+		using Shared_Ptr<SignalDevice<T>>::Shared;
+		using Shared_Ptr<SignalDevice<T>>::make;
 	protected:
 		virtual const Result updateInternal(winston::Signal::Shared signal) = 0;
 		virtual const Result flushInternal() = 0;
-		typename SendDevice<T, bits>::Shared device;
+		typename SendDevice<T>::Shared device;
 		size_t devices;
 		size_t portsPerDevice;
 	private:

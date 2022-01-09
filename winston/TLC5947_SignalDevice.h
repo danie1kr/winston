@@ -2,19 +2,21 @@
 
 #include "../libwinston/Winston.h"
 
-template<typename T, unsigned int bits = 8 * sizeof(T)>
-class TLC5947 : public winston::SignalDevice<T, bits>, public winston::Shared_Ptr<TLC5947<T, bits>>
+template<typename T>
+class TLC5947 : public winston::SignalDevice<T>, public winston::Shared_Ptr<TLC5947<T>>
 {
-	static_assert(bits <= sizeof(T) * 8, "too many bits for T");
+	//static_assert(bits <= sizeof(T) * 8, "too many bits for T");
 public:
-	TLC5947(const size_t devices, const size_t portsPerDevice, typename winston::SendDevice<T, bits>::Shared device)
-		: winston::SignalDevice<T, bits>(devices, portsPerDevice, device), data(devices * portsPerDevice * bits / 8, 0)
+	const size_t bits = 12;
+
+	TLC5947(const size_t devices, const size_t portsPerDevice, typename winston::SendDevice<T>::Shared device)
+		: winston::SignalDevice<T>(devices, portsPerDevice, device), data((devices * portsPerDevice * bits / 8) / sizeof(T), 0)
 	{
 
 	}
 
-	using winston::Shared_Ptr<TLC5947<T, bits>>::Shared;
-	using winston::Shared_Ptr<TLC5947<T, bits>>::make;
+	using winston::Shared_Ptr<TLC5947<T>>::Shared;
+	using winston::Shared_Ptr<TLC5947<T>>::make;
 private:
 
 	const winston::Result updateInternal(winston::Signal::Shared signal)
@@ -30,13 +32,19 @@ private:
 		return this->device->send(data);
 	}
 
-	void setPort(const size_t dev, const size_t port, T value)
+	void setPort(const size_t dev, const size_t port, unsigned int value)
 	{
-		if (dev > this->devices || port >= this->portsPerDevice)
+		if (dev >= this->devices || port >= this->portsPerDevice)
 			return;
-		size_t n = (bits * (dev * this->portsPerDevice + port)) / 8;
+		//size_t n = (bits * (dev * this->portsPerDevice + port)) / 8;
+		//size_t slots = (bits * (this->devices * this->portsPerDevice)) / 8;
+		//size_t n = slots - 1 - (bits * (dev * this->portsPerDevice + port)) / 8 - 1;
+		//size_t n = (bits * ((this->devices - 1 - dev) * this->portsPerDevice + (this->portsPerDevice - 1 - port))) / 8;
+		
+		size_t slots = this->devices * this->portsPerDevice;
+		size_t n = (bits * (slots - 1 - ((dev) * this->portsPerDevice + (port)))) / 8;
 		unsigned char bytes[2] = { 0, 0 };
-		if (port % 2 == 0)
+		if (port % 2 != 0)
 		{
 			// value = 0123456789AB
 			// byte0 = 01234567
@@ -61,4 +69,4 @@ private:
 	std::vector<T> data;
 };
 
-using TLC5947_SignalDevice = TLC5947<unsigned int, 12>;
+using TLC5947_SignalDevice = TLC5947<unsigned char>;

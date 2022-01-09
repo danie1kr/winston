@@ -1,7 +1,7 @@
 #include "FT232_SPIDevice.h"
 
-FT232_SPIDevice::FT232_SPIDevice(const Pin chipSelect, const unsigned int speed, const Pin xlat, SPIDataOrder order, SPIMode mode, const Pin clock, const Pin mosi, const Pin miso)
-    : SPIDevice<unsigned int, 12>(chipSelect, speed, order, mode, clock, mosi, miso), xlat(xlat)
+FT232_SPIDevice::FT232_SPIDevice(const Pin chipSelect, const unsigned int speed, SPIDataOrder order, SPIMode mode, const Pin clock, const Pin mosi, const Pin miso)
+    : SPIDevice<unsigned char>(chipSelect, speed, order, mode, clock, mosi, miso)
 {
 }
 
@@ -43,12 +43,7 @@ const winston::Result FT232_SPIDevice::init()
         winston::hal::fatal("chip select pin not in range 3-7");
     }
 
-    if(this->xlat == this->chipSelect)
-        winston::hal::fatal("xlat pin is chip select pin which is illegal");
-    if(this->xlat < 4 || this->xlat > 7)
-        winston::hal::fatal("xlat pin not in range 4-7");
-
-    channelConf.configOptions = configMode | configCS;// | SPI_CONFIG_OPTION_CS_ACTIVELOW;
+    channelConf.configOptions = configMode | configCS | SPI_CONFIG_OPTION_CS_ACTIVELOW;
     channelConf.Pin = 0x00000000;/*FinalVal-FinalDir-InitVal-InitDir (for dir 0=in, 1=out)*/
     status = SPI_InitChannel(ftHandle, &channelConf);
 
@@ -60,14 +55,10 @@ const winston::Result FT232_SPIDevice::send(const std::span<DataType> data)
         return winston::Result::OK;
 
     FT_STATUS status = FT_OK;
-    status = FT_WriteGPIO(ftHandle, 11000000 & (1 << this->xlat), 0);
     uint32 transfered = 0;
     uint8* dataPointer = (uint8*)&data.front();
-    status = SPI_Write(ftHandle, dataPointer, (uint32)( data.size() * sizeof(DataType)), &transfered, SPI_TRANSFER_OPTIONS_SIZE_IN_BYTES |
+    status = SPI_Write(ftHandle, dataPointer, (uint32)(data.size() * sizeof(DataType)), &transfered, SPI_TRANSFER_OPTIONS_SIZE_IN_BYTES |
         SPI_TRANSFER_OPTIONS_CHIPSELECT_ENABLE | SPI_TRANSFER_OPTIONS_CHIPSELECT_DISABLE);
-
-    status = FT_WriteGPIO(ftHandle, 11000000 & (1 << this->xlat), (1 << this->xlat));
-    status = FT_WriteGPIO(ftHandle, 11000000 & (1 << this->xlat), 0);
 
     return status == FT_OK ? winston::Result::OK : winston::Result::ExternalHardwareFailed;
 }

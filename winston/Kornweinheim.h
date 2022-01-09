@@ -621,7 +621,7 @@ void Kornweinheim::systemSetup() {
 #endif
 
     // signals
-    this->signalSPIDevice = SignalSPIDevice::make(3, 20000000, 4);
+    this->signalSPIDevice = SignalSPIDevice::make(3, 20000000);
     this->signalSPIDevice->init();
     this->signalSPIDevice->skipSend(true);
     this->signalDevice = TLC5947_SignalDevice::make(1, 24, this->signalSPIDevice);

@@ -44,11 +44,11 @@ namespace winston
 		};
 
 
-		template<typename T, unsigned int bits = 8 * sizeof(T)>
-		class SPIDevice : public Device, public SendDevice<T, bits>, public Shared_Ptr<SPIDevice<T, bits>>
+		template<typename T>
+		class SPIDevice : public Device, public SendDevice<T>, public Shared_Ptr<SPIDevice<T>>
 		{
 		public:
-			using SendDevice<T, bits>::DataType;
+			using SendDevice<T>::DataType;
 			using Pin = unsigned int;
 			enum class SPIMode
 			{
@@ -60,13 +60,13 @@ namespace winston
 			};
 
 			SPIDevice(const Pin chipSelect, const unsigned int speed, SPIDataOrder order = SPIDataOrder::MSBFirst, SPIMode mode = SPIMode::SPI_0, const Pin clock = 0, const Pin mosi = 0, const Pin miso = 0) :
-				Device(), SendDevice<T, bits>(), chipSelect(chipSelect), clock(clock), miso(miso), mosi(mosi), speed(speed), mode(mode), order(order)
+				Device(), SendDevice<T>(), chipSelect(chipSelect), clock(clock), miso(miso), mosi(mosi), speed(speed), mode(mode), order(order)
 			{
 
 			}
 
-			using Shared_Ptr<SPIDevice<T, bits>>::Shared;
-			using Shared_Ptr<SPIDevice<T, bits>>::make;
+			using Shared_Ptr<SPIDevice<T>>::Shared;
+			using Shared_Ptr<SPIDevice<T>>::make;
 		protected:
 			const Pin chipSelect, clock, miso, mosi;
 			const unsigned int speed;

@@ -96,8 +96,8 @@ namespace winston
 		using Shared_Ptr<Device>::make;
 	};
 
-	template<typename T, unsigned int bits = 8 * sizeof(T)>
-	class SendDevice : public Shared_Ptr<SendDevice<T, bits>>
+	template<typename T>
+	class SendDevice : public Shared_Ptr<SendDevice<T>>
 	{
 	public:
 		using DataType = T;
@@ -108,8 +108,8 @@ namespace winston
 			this->skip = skip;
 		}
 
-		using Shared_Ptr<SendDevice<T, bits>>::Shared;
-		using Shared_Ptr<SendDevice<T, bits>>::make;
+		using Shared_Ptr<SendDevice<T>>::Shared;
+		using Shared_Ptr<SendDevice<T>>::make;
 	protected:
 		bool skip;
 	};

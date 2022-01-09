@@ -33,6 +33,12 @@
     <ClCompile Include="winston-tests-signaldevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="winston-tests-spi-tlc5947-signal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\winston\FT232_SPIDevice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\winston\winston-hal-x64.h">
@@ -41,5 +47,9 @@
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\libwinston\NatvisFile.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\winston\external\ftdi-232\libMPSSE.lib" />
+    <Library Include="..\winston\external\ftdi-232\libMPSSE-dbg.lib" />
   </ItemGroup>
 </Project>

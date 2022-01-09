@@ -95,5 +95,7 @@ namespace winston
 
 	//inline const Result checkResultAndComplain(const Result result, std::string message);
 
+	unsigned char reverse(unsigned char b);
+
 	extern Callback::Shared nop;
 }

@@ -12,7 +12,7 @@ public:
 	TLC5947(const size_t devices, const size_t portsPerDevice, typename winston::SendDevice<T>::Shared device)
 		: winston::SignalDevice<T>(devices, portsPerDevice, device), data((devices * portsPerDevice * bits / 8) / sizeof(T), 0)
 	{
-
+		// todo: disable /oe at startup until fully initialized
 	}
 
 	using winston::Shared_Ptr<TLC5947<T>>::Shared;

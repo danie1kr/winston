@@ -1,9 +1,13 @@
 #pragma once
 
+#include <Arduino.h>
+
 #include "Signal.h"
 #include "HAL.h"
 #include "Log.h"
 
+#define WINSTON_WITHOUT_WEBSOCKET
+#define WINSTON_WITH_TEENSYDEBUG
 //#define WINSTON_TEENSY_QNETHERNET
 
 #define WEBSOCKETS_USE_ETHERNET     true
@@ -12,9 +16,11 @@
 #else
 #define USE_NATIVE_ETHERNET         true
 #endif
+
+#ifndef WINSTON_WITHOUT_WEBSOCKET
 #include <WebSockets2_Generic.h>
 using namespace websockets2_generic;
-
+#endif
 
 #ifdef WINSTON_TEENSY_QNETHERNET
 #include <QNEthernet.h>
@@ -42,10 +48,10 @@ private:
 };
 using UDPSocket = UDPSocketTeensy;
 
-class Arduino_SPIDevice : public winston::hal::SPIDevice<unsigned int, 12>, public winston::Shared_Ptr<Arduino_SPIDevice>
+class Arduino_SPIDevice : public winston::hal::SPIDevice<unsigned char>, public winston::Shared_Ptr<Arduino_SPIDevice>
 {
 public:
-	Arduino_SPIDevice(const Pin chipSelect, const unsigned int speed, const Pin xlat, SPIDataOrder order = SPIDataOrder::MSBFirst, SPIMode mode = SPIMode::SPI_0, const Pin clock = 0, const Pin mosi = 0, const Pin miso = 0);
+	Arduino_SPIDevice(const Pin chipSelect, const unsigned int speed, SPIDataOrder order = SPIDataOrder::MSBFirst, SPIMode mode = SPIMode::SPI_0, const Pin clock = 0, const Pin mosi = 0, const Pin miso = 0);
 
 	using winston::Shared_Ptr<Arduino_SPIDevice>::Shared;
 	using winston::Shared_Ptr<Arduino_SPIDevice>::make;
@@ -57,12 +63,12 @@ public:
 	static constexpr uint8_t DataMode(const SPIMode mode);
 
 private:
-	const Pin xlat;
 	SPISettings spiSettings;
 };
 
 using SignalSPIDevice = Arduino_SPIDevice;
 
+#ifndef WINSTON_WITHOUT_WEBSOCKET
 #include "../libwinston/WebServer.h"
 
 class WebServerTeensy : public winston::WebServer<WebsocketsClient>
@@ -87,6 +93,7 @@ private:
 	WebsocketsServer server;
 };
 using WebServer = WebServerTeensy;
+#endif
 
 #include "HAL.h"
 #include "Util.h"
@@ -96,15 +103,15 @@ using WebServer = WebServerTeensy;
 #include <algorithm>
 
 
-#include <Arduino.h>
 
 #include <SD.h>
 #include <SdFatConfig.h>
 #include <SdFat.h>
+#ifdef WINSTON_WITH_TEENSYDEBUG
 #include <TeensyDebug.h>
+#endif
 
-//#include "winston-hal-teensy.h"
-
+#ifndef WINSTON_WITHOUT_WEBSOCKET
 WebServerTeensy::WebServerTeensy() : winston::WebServer<Client>()
 {
 
@@ -214,6 +221,7 @@ size_t WebServerTeensy::maxMessageSize()
 {
     return 1024;
 }
+#endif
 
 static const std::string constWinstonStoragePath = "winston.storage";
 static std::string winstonStoragePath = constWinstonStoragePath;
@@ -259,8 +267,8 @@ const winston::Result UDPSocketTeensy::recv(std::vector<unsigned char>& data)
     return winston::Result::OK;
 }
 
-Arduino_SPIDevice::Arduino_SPIDevice(const Pin chipSelect, const unsigned int speed, const Pin xlat, SPIDataOrder order, SPIMode mode, const Pin clock, const Pin mosi, const Pin miso)
-    : SPIDevice<unsigned int, 12>(chipSelect, speed, order, mode, clock, mosi, miso), xlat(xlat), spiSettings(speed, Arduino_SPIDevice::BitOrder(order), Arduino_SPIDevice::DataMode(mode))
+Arduino_SPIDevice::Arduino_SPIDevice(const Pin chipSelect, const unsigned int speed, SPIDataOrder order, SPIMode mode, const Pin clock, const Pin mosi, const Pin miso)
+    : SPIDevice<unsigned char>(chipSelect, speed, order, mode, clock, mosi, miso), spiSettings(speed, Arduino_SPIDevice::BitOrder(order), Arduino_SPIDevice::DataMode(mode))
 {
 }
 
@@ -291,12 +299,12 @@ const winston::Result Arduino_SPIDevice::send(const std::span<DataType> data)
     if (this->skip)
         return winston::Result::OK;
 
-    digitalWrite(this->xlat, 0);
+    //digitalWrite(this->xlat, 0);
     SPI.beginTransaction(this->spiSettings);
     SPI.transfer((unsigned char*)&data.front(), data.size() * sizeof(DataType));
     SPI.endTransaction();
-    digitalWrite(this->xlat, 1);
-    digitalWrite(this->xlat, 0);
+    //digitalWrite(this->xlat, 1);
+    //digitalWrite(this->xlat, 0);
 
     return winston::Result::OK;
 }
@@ -326,11 +334,15 @@ namespace winston
             while (!Serial && millis() < 4000) {
                 // Wait for Serial to initialize
             }
-            //stdPrint = &Serial;  // Make printf work
+            text("Winston Teensy Init Hello");
+
+#ifdef WINSTON_WITH_TEENSYDEBUG
+            debug.begin(SerialUSB1);
+#endif
 
             if (!sd.begin(BUILTIN_SDCARD)) {
-                Serial.println("SD initialization failed!");
-                return;
+                error("SD initialization failed!");
+                //return;
             }
             sd.chdir();
             ensureStorageFile();
@@ -385,7 +397,7 @@ namespace winston
             uint8_t mac[6];
             teensyMAC(mac);
             if (!Ethernet.begin(mac)) {
-                printf("Failed to start Ethernet\n");
+                error("Failed to start Ethernet\n");
                 return;
             }
 #endif

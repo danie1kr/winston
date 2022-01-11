@@ -55,6 +55,7 @@ private:
 
     winston::Railway::Callbacks railwayCallbacks();
 
+#ifndef WINSTON_WITHOUT_WEBSOCKET
     /* websocket */
     WebServer webServer;
 
@@ -65,7 +66,7 @@ private:
 
     // Define a callback to handle incoming messages
     void on_message(WebServer::Client client, std::string message);
-
+#endif
     // setup our model railway system
     void systemSetup();
 
@@ -88,8 +89,7 @@ private:
     TLC5947_SignalDevice::Shared signalDevice;
 };
 
-//#include "Kornweinheim.h"
-
+#ifndef WINSTON_WITHOUT_WEBSOCKET
 // send a turnout state via websocket
 void Kornweinheim::turnoutSendState(const std::string turnoutTrackId, const winston::Turnout::Direction dir)
 {
@@ -142,16 +142,19 @@ void Kornweinheim::locoSend(winston::Address address)
         locoSend(*loco);
     }
 }
+#endif
 void Kornweinheim::initNetwork()
 {
     // z21
     z21Socket = UDPSocket::make(z21IP, z21Port);
 
+#ifndef WINSTON_WITHOUT_WEBSOCKET
     // webServer
     this->webServer.init(
         std::bind(&Kornweinheim::on_http, this, std::placeholders::_1, std::placeholders::_2),
         std::bind(&Kornweinheim::on_message, this, std::placeholders::_1, std::placeholders::_2),
         8080);
+#endif
 }
 
 winston::DigitalCentralStation::Callbacks Kornweinheim::z21Callbacks()
@@ -188,7 +191,11 @@ winston::DigitalCentralStation::Callbacks Kornweinheim::z21Callbacks()
     callbacks.locomotiveUpdateCallback = [=](winston::Locomotive& loco, bool busy, bool  forward, unsigned char  speed, uint32_t functions)
     {
         loco.update(busy, forward, speed, functions);
+
+
+#ifndef WINSTON_WITHOUT_WEBSOCKET
         locoSend(loco);
+#endif    
     };
 
     return callbacks;
@@ -226,8 +233,10 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
         // tell the signal box to update the signals
         this->signalBox->setSignalsFor(turnout);
 
+#ifndef WINSTON_WITHOUT_WEBSOCKET
         // tell the ui what happens
         turnoutSendState(turnout->name(), direction);
+#endif
         winston::logger.info("Turnout ", turnout->name(), " set to direction ", winston::Turnout::DirectionToString(direction));
 
         return winston::State::Finished;
@@ -235,8 +244,10 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
 
     callbacks.signalUpdateCallback = [=](winston::Track::Shared track, winston::Track::Connection connection, const winston::Signal::Aspects aspects) -> const winston::State
     {
+#ifndef WINSTON_WITHOUT_WEBSOCKET
         // send to web socket server
         signalSendState(track->name(), connection, aspects);
+#endif
 
         // update physical light
         this->signalDevice->update(track->signalGuarding(connection));
@@ -248,6 +259,7 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
     return callbacks;
 }
 
+#ifndef WINSTON_WITHOUT_WEBSOCKET
 // Define a callback to handle incoming messages
 WebServer::HTTPResponse Kornweinheim::on_http(WebServer::Client client, std::string resource) {
     const std::string path_index("/");
@@ -597,6 +609,7 @@ void Kornweinheim::on_message(WebServer::Client client, std::string message) {
         winston::hal::text(message);
     }
 }
+#endif
 
 // setup our model railway system
 void Kornweinheim::systemSetup() {
@@ -646,7 +659,7 @@ void Kornweinheim::systemSetupComplete()
 // accept new requests and loop over what the signal box has to do
 bool Kornweinheim::systemLoop() {
 
-#ifdef WINSTON_WITH_WEBSOCKETS
+#ifndef WINSTON_WITHOUT_WEBSOCKET
     this->webServer.step();
 #endif
     return this->signalBox->work();

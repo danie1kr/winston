@@ -101,7 +101,7 @@ namespace winston
 			std::unordered_map<Tracks, Bumper::Shared> map;
 			for (size_t i = 0; i < tracksCount(); ++i)
 				if(this->tracks[i]->type() == Track::Type::Bumper)
-					map[this->trackEnum(i)] = std::dynamic_pointer_cast<Bumper>(this->tracks[i]);
+					map[this->trackEnum(i)] = std::static_pointer_cast<Bumper>(this->tracks[i]);
 			return map;
 		}
 
@@ -110,7 +110,7 @@ namespace winston
 			std::unordered_map<Tracks, Rail::Shared> map;
 			for (size_t i = 0; i < tracksCount(); ++i)
 				if (this->tracks[i]->type() == Track::Type::Rail)
-					map[this->trackEnum(i)] = std::dynamic_pointer_cast<Rail>(this->tracks[i]);
+					map[this->trackEnum(i)] = std::static_pointer_cast<Rail>(this->tracks[i]);
 			return map;
 		}
 
@@ -119,8 +119,8 @@ namespace winston
 //			std::unordered_map<Tracks, Turnout::Shared> map;
 			for (size_t i = 0; i < tracksCount(); ++i)
 				if (this->tracks[i]->type() == Track::Type::Turnout)
-					callback(this->trackEnum(i), std::dynamic_pointer_cast<Turnout>(this->tracks[i]));
-					//map[this->trackEnum(i)] = std::dynamic_pointer_cast<Turnout>(this->tracks[i]);
+					callback(this->trackEnum(i), std::static_pointer_cast<Turnout>(this->tracks[i]));
+					//map[this->trackEnum(i)] = std::static_pointer_cast<Turnout>(this->tracks[i]);
 			//return map;
 		}
 
@@ -174,19 +174,19 @@ namespace winston
 
 		inline Tracks track(Bumper::Shared& track)
 		{
-			auto s = std::dynamic_pointer_cast<Track>(track);
+			auto s = std::static_pointer_cast<Track>(track);
 			return this->track(s);
 		}
 		
 		inline Tracks track(Rail::Shared& track)
 		{
-			auto s = std::dynamic_pointer_cast<Track>(track);
+			auto s = std::static_pointer_cast<Track>(track);
 			return this->track(s);
 		}
 
 		inline Tracks track(Turnout::Shared& track)
 		{
-			auto s = std::dynamic_pointer_cast<Track>(track);
+			auto s = std::static_pointer_cast<Track>(track);
 			return this->track(s);
 		}
 	private:

@@ -321,7 +321,7 @@ void Kornweinheim::on_message(WebServer::Client client, std::string message) {
     if (std::string("\"doTurnoutToggle\"").compare(op) == 0)
     {
         auto id = data["id"].string_value();
-        auto turnout = std::dynamic_pointer_cast<winston::Turnout>(railway->track(id));
+        auto turnout = std::static_pointer_cast<winston::Turnout>(railway->track(id));
         auto requestDir = winston::Turnout::otherDirection(turnout->direction());
         signalBox->order(winston::Command::make([this, id, turnout, requestDir](const unsigned long long& created) -> const winston::State
             {
@@ -344,7 +344,7 @@ void Kornweinheim::on_message(WebServer::Client client, std::string message) {
     else if (std::string("\"getTurnoutState\"").compare(op) == 0)
     {
         auto id = data["id"].string_value();
-        auto turnout = std::dynamic_pointer_cast<winston::Turnout>(railway->track(id));
+        auto turnout = std::static_pointer_cast<winston::Turnout>(railway->track(id));
         this->turnoutSendState(turnout->name(), turnout->direction());
     }
     else if (std::string("\"getSignalState\"").compare(op) == 0)
@@ -370,7 +370,7 @@ void Kornweinheim::on_message(WebServer::Client client, std::string message) {
             {
             case winston::Track::Type::Bumper:
             {
-                winston::Bumper::Shared bumper = std::dynamic_pointer_cast<winston::Bumper>(track);
+                winston::Bumper::Shared bumper = std::static_pointer_cast<winston::Bumper>(track);
                 winston::Track::Shared a;
                 bumper->connections(a);
 
@@ -385,7 +385,7 @@ void Kornweinheim::on_message(WebServer::Client client, std::string message) {
             }
             case winston::Track::Type::Rail:
             {
-                winston::Rail::Shared rail = std::dynamic_pointer_cast<winston::Rail>(track);
+                winston::Rail::Shared rail = std::static_pointer_cast<winston::Rail>(track);
                 winston::Track::Shared a, b;
                 rail->connections(a, b);
 
@@ -402,7 +402,7 @@ void Kornweinheim::on_message(WebServer::Client client, std::string message) {
             }
             case winston::Track::Type::Turnout:
             {
-                winston::Turnout::Shared turnout = std::dynamic_pointer_cast<winston::Turnout>(track);
+                winston::Turnout::Shared turnout = std::static_pointer_cast<winston::Turnout>(track);
                 winston::Track::Shared a, b, c;
                 turnout->connections(a, b, c);
 
@@ -623,13 +623,13 @@ void Kornweinheim::systemSetup() {
     this->signalBox = winston::SignalBox::make(nullMutex);
 
     // the system specific digital central station
-    auto at = std::dynamic_pointer_cast<winston::DigitalCentralStation::TurnoutAddressTranslator>(addressTranslator);
-    auto udp = std::dynamic_pointer_cast<winston::hal::UDPSocket>(this->z21Socket);
+    auto at = std::static_pointer_cast<winston::DigitalCentralStation::TurnoutAddressTranslator>(addressTranslator);
+    auto udp = std::static_pointer_cast<winston::hal::UDPSocket>(this->z21Socket);
     this->digitalCentralStation = Z21::make(udp, at, *this, this->signalBox, z21Callbacks());
 
 #ifdef RAILWAY_DEBUG_INJECTOR
     // a debug injector
-    auto dcs = std::dynamic_pointer_cast<winston::DigitalCentralStation>(this->digitalCentralStation);
+    auto dcs = std::static_pointer_cast<winston::DigitalCentralStation>(this->digitalCentralStation);
     this->stationDebugInjector = winston::DigitalCentralStation::DebugInjector::make(dcs);
 #endif
 

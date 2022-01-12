@@ -6,8 +6,9 @@
 #include "HAL.h"
 #include "Log.h"
 
-#define WINSTON_WITHOUT_WEBSOCKET
+//#define WINSTON_WITHOUT_WEBSOCKET
 #define WINSTON_WITH_TEENSYDEBUG
+#define WINSTON_WITH_SDFAT
 //#define WINSTON_TEENSY_QNETHERNET
 
 #define WEBSOCKETS_USE_ETHERNET     true
@@ -17,10 +18,21 @@
 #define USE_NATIVE_ETHERNET         true
 #endif
 
+#pragma GCC push_options
+//#pragma GCC optimize ("Os")
+//#define WINSTON_WEBSOCKETS_WebSockets2_Generic
+#define WINSTON_WEBSOCKETS_ArduinoWebsockets
 #ifndef WINSTON_WITHOUT_WEBSOCKET
+#ifdef WINSTON_WEBSOCKETS_ArduinoWebsockets
+#include <ArduinoWebsockets.h>
+using namespace websockets;
+#endif
+#ifdef WINSTON_WEBSOCKETS_WebSockets2_Generic
 #include <WebSockets2_Generic.h>
 using namespace websockets2_generic;
 #endif
+#endif
+#pragma GCC pop_options
 
 #ifdef WINSTON_TEENSY_QNETHERNET
 #include <QNEthernet.h>
@@ -103,10 +115,12 @@ using WebServer = WebServerTeensy;
 #include <algorithm>
 
 
-
+#ifdef WINSTON_WITH_SDFAT
 #include <SD.h>
 #include <SdFatConfig.h>
 #include <SdFat.h>
+#endif
+
 #ifdef WINSTON_WITH_TEENSYDEBUG
 #include <TeensyDebug.h>
 #endif
@@ -227,11 +241,14 @@ static const std::string constWinstonStoragePath = "winston.storage";
 static std::string winstonStoragePath = constWinstonStoragePath;
 static const auto winstonStorageSize = 128 * 1024;
 
-static SdFat sd;
-static SdFile winstonStorage;
+#ifdef WINSTON_WITH_SDFAT
+static SdExFat sd;
+static ExFile winstonStorage;
+#endif
 
 void ensureStorageFile()
 {
+#ifdef WINSTON_WITH_SDFAT
     if (!sd.exists(winstonStoragePath.c_str()))
     {
         auto file = sd.open(winstonStoragePath.c_str(), O_READ | O_WRITE | O_CREAT);
@@ -240,6 +257,7 @@ void ensureStorageFile()
         file.flush();
         file.close();
     }
+#endif
 }
 
 UDPSocketTeensy::UDPSocketTeensy(const std::string ip, const unsigned short port) : winston::hal::UDPSocket(ip, port), ip(ip), port(port)
@@ -340,12 +358,14 @@ namespace winston
             debug.begin(SerialUSB1);
 #endif
 
+#ifdef WINSTON_WITH_SDFAT
             if (!sd.begin(BUILTIN_SDCARD)) {
                 error("SD initialization failed!");
                 //return;
             }
             sd.chdir();
             ensureStorageFile();
+#endif
 
 #ifdef WINSTON_TEENSY_QNETHERNET
             // Listen for link changes, for demonstration
@@ -436,28 +456,34 @@ namespace winston
 
         const uint8_t storageRead(const size_t address)
         {
+#ifdef WINSTON_WITH_SDFAT
             if (winstonStorage.size() > address)
             {
                 winstonStorage.seek(address);
                 return winstonStorage.read();
             }
             else
+#endif
                 return 0;
         }
 
         void storageWrite(const size_t address, const uint8_t data)
         {
+#ifdef WINSTON_WITH_SDFAT
             if (winstonStorage.size() > address)
             {
                 winstonStorage.seek(address);
                 winstonStorage.write(data);
                 //winstonStorage[address] = data;
             }
+#endif
         }
 
         bool storageCommit()
         {
+#ifdef WINSTON_WITH_SDFAT
             winstonStorage.sync();
+#endif
             return true;
         }
     }

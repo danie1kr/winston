@@ -7,6 +7,7 @@
 #define RAIL(track) case Tracks::_enumerated::track: return winston::Rail::make(#track); 
 #define TURNOUT(track, callback, ...) case Tracks::_enumerated::track: return winston::Turnout::make(#track, callback, __VA_ARGS__); 
 
+#ifndef WINSTON_PLATFORM_TEENSY
 MiniRailway::MiniRailway(const Callbacks callbacks) : winston::RailwayWithRails<MiniRailwayTracks>(callbacks) {};
 
 winston::Track::Shared MiniRailway::define(const Tracks track)
@@ -16,7 +17,7 @@ winston::Track::Shared MiniRailway::define(const Tracks track)
         BUMPER(B);
         BUMPER(C);
     case Tracks::Turnout1:
-        return winston::Turnout::make(std::string("Turnout1"), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
+        return winston::Turnout::make(std::string("Turnout1"), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::static_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
     default:
         winston::hal::fatal(std::string("track ") + std::string(track._to_string()) + std::string("not in switch"));
         return winston::Bumper::make();
@@ -75,9 +76,9 @@ winston::Track::Shared SignalTestRailway::define(const Tracks track)
     RAIL(L5);
     RAIL(L6);
     RAIL(L7);
-    TURNOUT(Turnout1, [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); });
-    TURNOUT(Turnout2, [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); });
-    TURNOUT(Turnout3, [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); });
+    TURNOUT(Turnout1, [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::static_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); });
+    TURNOUT(Turnout2, [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::static_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); });
+    TURNOUT(Turnout3, [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::static_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); });
     default:
         winston::hal::fatal(std::string("track ") + std::string(track._to_string()) + std::string("not in switch"));
         return winston::Bumper::make();
@@ -161,8 +162,8 @@ winston::Turnout::Shared RailwayWithSiding::AddressTranslator::turnout(const win
     switch (address)
     {
     default:
-    case 0: return std::dynamic_pointer_cast<winston::Turnout>(railway->track(Tracks::Turnout1)); break;
-    case 1: return std::dynamic_pointer_cast<winston::Turnout>(railway->track(Tracks::Turnout2)); break;
+    case 0: return std::static_pointer_cast<winston::Turnout>(railway->track(Tracks::Turnout1)); break;
+    case 1: return std::static_pointer_cast<winston::Turnout>(railway->track(Tracks::Turnout2)); break;
     }
 }
 
@@ -187,7 +188,7 @@ winston::Track::Shared RailwayWithSiding::define(const Tracks track)
         return winston::Rail::make();
     case Tracks::Turnout1:
     case Tracks::Turnout2:
-        return winston::Turnout::make(std::string(""), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, track == +Tracks::Turnout2);
+        return winston::Turnout::make(std::string(""), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::static_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, track == +Tracks::Turnout2);
     default:
         winston::hal::fatal(std::string("track ") + std::string(track._to_string()) + std::string("not in switch"));
         return winston::Bumper::make();
@@ -229,10 +230,10 @@ winston::Track::Shared TimeSaverRailway::define(const Tracks track)
     case Tracks::Turnout1:
     case Tracks::Turnout3:
     case Tracks::Turnout4:
-        return winston::Turnout::make(std::string(""), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, true);
+        return winston::Turnout::make(std::string(""), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::static_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, true);
     case Tracks::Turnout2:
     case Tracks::Turnout5:
-        return winston::Turnout::make(std::string(""), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
+        return winston::Turnout::make(std::string(""), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::static_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
     default:
         winston::hal::fatal(std::string("track ") + std::string(track._to_string()) + std::string("not in switch"));
         return winston::Bumper::make();
@@ -298,7 +299,7 @@ winston::Turnout::Shared Y2020Railway::AddressTranslator::turnout(const winston:
     case 7: track = Tracks::Turnout8; break;
     case 8: track = Tracks::Turnout9; break;
     }
-    return std::dynamic_pointer_cast<winston::Turnout>(railway->track(track));
+    return std::static_pointer_cast<winston::Turnout>(railway->track(track));
 }
 
 const winston::Address Y2020Railway::AddressTranslator::address(winston::Track::Shared track) const
@@ -337,7 +338,7 @@ winston::Track::Shared Y2020Railway::define(const Tracks track)
         return winston::Rail::make();
     case Tracks::Turnout1:
     case Tracks::Turnout2:
-        return winston::Turnout::make(std::string(""), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
+        return winston::Turnout::make(std::string(""), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::static_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
     case Tracks::Turnout3:
     case Tracks::Turnout4:
     case Tracks::Turnout5:
@@ -345,7 +346,7 @@ winston::Track::Shared Y2020Railway::define(const Tracks track)
     case Tracks::Turnout7:
     case Tracks::Turnout8:
     case Tracks::Turnout9:
-        return winston::Turnout::make(std::string(""), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, true);
+        return winston::Turnout::make(std::string(""), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::static_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, true);
     default:
         winston::hal::fatal(std::string("track ") + std::string(track._to_string()) + std::string("not in switch"));
         return winston::Bumper::make();
@@ -411,6 +412,7 @@ void Y2020Railway::connect(std::array<winston::Track::Shared, tracksCount()>& tr
     attachSignalY2020(g2, winston::SignalKS, winston::Track::Connection::A);
     attachSignalY2020(g3, winston::SignalKS, winston::Track::Connection::B);
 }
+#endif
 
 Y2021Railway::Y2021Railway(const Callbacks callbacks) : winston::RailwayWithRails<Y2021RailwayTracks>(callbacks) {};
 const std::string Y2021Railway::name()
@@ -443,7 +445,7 @@ winston::Turnout::Shared Y2021Railway::AddressTranslator::turnout(const winston:
     case 14: track = Tracks::Turnout15; break;
     case 15: track = Tracks::Turnout16; break;
     }
-    return std::dynamic_pointer_cast<winston::Turnout>(railway->track(track));
+    return std::static_pointer_cast<winston::Turnout>(railway->track(track));
 }
 
 const winston::Address Y2021Railway::AddressTranslator::address(winston::Track::Shared track) const
@@ -499,7 +501,7 @@ winston::Track::Shared Y2021Railway::define(const Tracks track)
     case Tracks::Turnout9:
     case Tracks::Turnout12:
     case Tracks::Turnout14:
-        return winston::Turnout::make(std::string(track._to_string()), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
+        return winston::Turnout::make(std::string(track._to_string()), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::static_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
     case Tracks::Turnout2:
     case Tracks::Turnout4:
     case Tracks::Turnout5:
@@ -510,7 +512,7 @@ winston::Track::Shared Y2021Railway::define(const Tracks track)
     case Tracks::Turnout13:
     case Tracks::Turnout15:
     case Tracks::Turnout16:
-        return winston::Turnout::make(std::string(track._to_string()), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, true);
+        return winston::Turnout::make(std::string(track._to_string()), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::static_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, true);
     default:
         winston::hal::fatal(std::string("track ") + std::string(track._to_string()) + std::string("not in switch"));
         return winston::Bumper::make();
@@ -612,6 +614,7 @@ void Y2021Railway::connect(std::array<winston::Track::Shared, tracksCount()>& tr
        ->connect(A, GBF2a, A, KS(0));
 }
 
+#ifndef WINSTON_PLATFORM_TEENSY
 SignalRailway::SignalRailway(const Callbacks callbacks) : winston::RailwayWithRails<SignalRailwayTracks>(callbacks) {};
 const std::string SignalRailway::name()
 {
@@ -632,7 +635,7 @@ winston::Turnout::Shared SignalRailway::AddressTranslator::turnout(const winston
     case 3: track = Tracks::Turnout4; break;
     case 4: track = Tracks::Turnout5; break;
     }
-    return std::dynamic_pointer_cast<winston::Turnout>(railway->track(track));
+    return std::static_pointer_cast<winston::Turnout>(railway->track(track));
 }
 
 const winston::Address SignalRailway::AddressTranslator::address(winston::Track::Shared track) const
@@ -675,11 +678,11 @@ winston::Track::Shared SignalRailway::define(const Tracks track)
     case Tracks::G6:
     case Tracks::G7:
         return winston::Rail::make();*/
-    case Tracks::Turnout1: return winston::Turnout::make(std::string("Turnout1"), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
-    case Tracks::Turnout2: return winston::Turnout::make(std::string("Turnout2"), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
-    case Tracks::Turnout3: return winston::Turnout::make(std::string("Turnout3"), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, true);
-    case Tracks::Turnout4: return winston::Turnout::make(std::string("Turnout4"), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, true);
-    case Tracks::Turnout5: return winston::Turnout::make(std::string("Turnout5"), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::dynamic_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, true);
+    case Tracks::Turnout1: return winston::Turnout::make(std::string("Turnout1"), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::static_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
+    case Tracks::Turnout2: return winston::Turnout::make(std::string("Turnout2"), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::static_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
+    case Tracks::Turnout3: return winston::Turnout::make(std::string("Turnout3"), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::static_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, true);
+    case Tracks::Turnout4: return winston::Turnout::make(std::string("Turnout4"), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::static_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, true);
+    case Tracks::Turnout5: return winston::Turnout::make(std::string("Turnout5"), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::static_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, true);
     default:
         winston::hal::fatal(std::string("track ") + std::string(track._to_string()) + std::string("not in switch"));
         return winston::Bumper::make();
@@ -750,3 +753,4 @@ void SignalRailway::connect(std::array<winston::Track::Shared, tracksCount()>& t
     //attachSignal(g7, winston::SignalKS, winston::Track::Connection::A);
     //attachSignalSR(g7, winston::SignalKS, winston::Track::Connection::B);
 }
+#endif

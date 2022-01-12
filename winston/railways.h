@@ -4,6 +4,7 @@
 #include "../libwinston/better_enum.hpp"
 #include "../libwinston/Winston.h"
 
+#ifndef WINSTON_PLATFORM_TEENSY
 //enum class MiniRailwayTracks : unsigned int
 BETTER_ENUM(MiniRailwayTracks, unsigned int, //{
     A,
@@ -35,7 +36,9 @@ private:
     winston::Track::Shared define(const Tracks track);
     void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
 };
+#endif
 
+#ifndef WINSTON_PLATFORM_TEENSY
 //enum class SignalTestRailwayTracks : unsigned int
 BETTER_ENUM(SignalTestRailwayTracks, unsigned int, //{
     A,
@@ -107,7 +110,9 @@ private:
     winston::Track::Shared define(const Tracks track);
     void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
 };
+#endif
 
+#ifndef WINSTON_PLATFORM_TEENSY
 /*
     /--A--\
     |     |
@@ -156,7 +161,9 @@ public:
         winston::Shared_Ptr<RailwayWithSiding>::Shared railway;
     };
 };
+#endif
 
+#ifndef WINSTON_PLATFORM_TEENSY
 BETTER_ENUM(TimeSaverRailwayTracks, unsigned int, //{
     A,
     Turnout1,
@@ -202,7 +209,9 @@ private:
     winston::Track::Shared define(const Tracks track);
     void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
 };
+#endif
 
+#ifndef WINSTON_PLATFORM_TEENSY
 BETTER_ENUM(Y2020RailwayTracks, unsigned int,
     Turnout1,
     Turnout2,
@@ -271,6 +280,7 @@ private:
     winston::Track::Shared define(const Tracks track);
     void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
 };
+#endif
 
 BETTER_ENUM(Y2021RailwayTracks, unsigned int,
     Turnout1,
@@ -358,7 +368,7 @@ private:
     winston::Track::Shared define(const Tracks track);
     void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
 };
-
+#ifndef WINSTON_PLATFORM_TEENSY
 BETTER_ENUM(SignalRailwayTracks, unsigned int,
     Turnout1,
     Turnout2,
@@ -418,3 +428,4 @@ private:
     winston::Track::Shared define(const Tracks track);
     void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
 };
+#endif

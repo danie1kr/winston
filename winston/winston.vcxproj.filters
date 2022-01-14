@@ -92,6 +92,9 @@
     <ClInclude Include="external\json11\json11.hpp">
       <Filter>external\json11</Filter>
     </ClInclude>
+    <ClInclude Include="external\ArduinoJson-v6.19.0.hpp">
+      <Filter>external</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\winston.html">

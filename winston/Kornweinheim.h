@@ -8,9 +8,8 @@
 #include "winston-main.h"
 #include "railways.h"
 
-#include "external/json11/json11.hpp"
-//#include "external/ArduinoJson-v6.19.0.hpp"
-
+//#define WINSTON_JSON_11
+#define WINSTON_JSON_ARDUINO
 #ifdef WINSTON_PLATFORM_WIN_x64
 #include "winston-hal-x64.h"
 #define WINSTON_WITH_WEBSOCKETS
@@ -18,6 +17,26 @@
 
 #ifdef WINSTON_PLATFORM_TEENSY
 #include "../winston-teensy/winston-hal-teensy.h"
+#endif
+
+#ifdef WINSTON_JSON_11
+#include "external/json11/json11.hpp"
+using namespace json11;
+#endif
+#ifdef __GNUC__ 
+#pragma GCC push_options
+#pragma GCC optimize("Os")
+#endif
+#ifdef WINSTON_JSON_ARDUINO
+#define ARDUINOJSON_ENABLE_STD_STREAM 0
+#define ARDUINOJSON_ENABLE_ARDUINO_STRING 0
+#define ARDUINOJSON_ENABLE_ARDUINO_STREAM 0
+#define ARDUINOJSON_ENABLE_ARDUINO_PRINT 0
+#include "external/ArduinoJson-v6.19.0.hpp"
+#ifdef __GNUC__ 
+#pragma GCC pop_options
+#endif
+using namespace ArduinoJson;
 #endif
 
 #include "external/central-z21/Z21.h"
@@ -32,7 +51,6 @@ constexpr auto RAILWAY_DEBUG_INJECTOR_DELAY = 1000;
 //#define RAILWAY_CLASS SignalRailway
 #define RAILWAY_CLASS Y2021Railway
 
-using namespace json11;
 
 class Kornweinheim : public winston::ModelRailwaySystem<RAILWAY_CLASS::Shared, RAILWAY_CLASS::AddressTranslator::Shared, Z21::Shared>
 {
@@ -63,7 +81,13 @@ private:
     // Define a callback to handle incoming messages
     WebServer::HTTPResponse on_http(WebServer::HTTPClient &client, const std::string &resource);
 
-    void writeAttachedSignal(Json::array& signals, winston::Track::Shared track, const winston::Track::Connection connection);
+    void writeAttachedSignal(
+#ifdef WINSTON_JSON_11
+        Json::array& signals,
+#elif defined(WINSTON_JSON_ARDUINO)
+        JsonArray& signals,
+#endif
+        winston::Track::Shared track, const winston::Track::Connection connection);
 
     // Define a callback to handle incoming messages
     void on_message(WebServer::Client &client, const std::string &message);
@@ -94,6 +118,7 @@ private:
 // send a turnout state via websocket
 void Kornweinheim::turnoutSendState(const std::string turnoutTrackId, const winston::Turnout::Direction dir)
 {
+#ifdef WINSTON_JSON_11
     Json obj = Json::object{
         { "op", "turnoutState" },
         { "data", Json::object{
@@ -103,11 +128,22 @@ void Kornweinheim::turnoutSendState(const std::string turnoutTrackId, const wins
         }
     };
     webServer.broadcast(obj.dump());
+#elif defined(WINSTON_JSON_ARDUINO)
+    DynamicJsonDocument obj(200);
+    obj["op"] = "turnoutState";
+    auto data = obj.createNestedObject("data");
+    data["id"] = turnoutTrackId;
+    data["state"] = (int)dir;
+    std::string json("");
+    serializeJson(obj, json);
+    webServer.broadcast(json);
+#endif
 }
 
 // send a signal state via websocket
 void Kornweinheim::signalSendState(const std::string trackId, const winston::Track::Connection connection, const winston::Signal::Aspects aspects)
 {
+#ifdef WINSTON_JSON_11
     Json obj = Json::object{
         { "op", "signalState" },
         { "data", Json::object {
@@ -118,10 +154,22 @@ void Kornweinheim::signalSendState(const std::string trackId, const winston::Tra
         }
     };
     webServer.broadcast(obj.dump());
+#elif defined(WINSTON_JSON_ARDUINO)
+    DynamicJsonDocument obj(200);
+    obj["op"] = "signalState";
+    auto data = obj.createNestedObject("data");
+    data["parentTrack"] = trackId;
+    data["guarding"] = winston::Track::ConnectionToString(connection);
+    data["aspects"] = (int)aspects;
+    std::string json("");
+    serializeJson(obj, json);
+    webServer.broadcast(json);
+#endif
 }
 
 void Kornweinheim::locoSend(winston::Locomotive& loco)
 {
+#ifdef WINSTON_JSON_11
     Json obj = Json::object{
         { "op", "loco" },
         { "data", Json::object {
@@ -134,6 +182,19 @@ void Kornweinheim::locoSend(winston::Locomotive& loco)
         }
     };
     webServer.broadcast(obj.dump());
+#elif defined(WINSTON_JSON_ARDUINO)
+    DynamicJsonDocument obj(1024);
+    obj["op"] = "loco";
+    auto data = obj.createNestedObject("data");
+    data["address"] = loco.address();
+    data["name"] = loco.name().c_str();
+    data["light"] = loco.light();
+    data["forward"] = loco.forward();
+    data["speed"] = loco.speed();
+    std::string json("");
+    serializeJson(obj, json);
+    webServer.broadcast(json);
+#endif
 }
 
 void Kornweinheim::locoSend(winston::Address address)
@@ -300,9 +361,16 @@ WebServer::HTTPResponse Kornweinheim::on_http(WebServer::HTTPClient &client, con
     return response;
 }
 
-void Kornweinheim::writeAttachedSignal(Json::array& signals, winston::Track::Shared track, const winston::Track::Connection connection)
+void Kornweinheim::writeAttachedSignal(
+#ifdef WINSTON_JSON_11
+    Json::array& signals,
+#elif defined(WINSTON_JSON_ARDUINO)
+    JsonArray& signals,
+#endif
+    winston::Track::Shared track, const winston::Track::Connection connection)
 {
     auto signal = track->signalGuarding(connection);
+#ifdef WINSTON_JSON_11
     if (signal)
         signals.push_back(Json::object{
             { "parentTrack", track->name()} ,
@@ -310,18 +378,42 @@ void Kornweinheim::writeAttachedSignal(Json::array& signals, winston::Track::Sha
             { "pre", signal->preSignal()},
             { "main", signal->mainSignal() }
             });
+#elif defined(WINSTON_JSON_ARDUINO)
+    if (signal)
+    {
+        auto data = signals.createNestedObject();
+        data["parentTrack"] = track->name();
+        data["guarding"] = winston::Track::ConnectionToString(connection);
+        data["pre"] = signal->preSignal();
+        data["main"] = signal->mainSignal();
+    }
+#endif
 }
 
 // Define a callback to handle incoming messages
 void Kornweinheim::on_message(WebServer::Client &client, const std::string &message) {
+#ifdef WINSTON_JSON_11
     std::string jsonParseError;
     Json m = Json::parse(message, jsonParseError);
     std::string op = m["op"].dump();
     Json data = m["data"];
+#elif defined(WINSTON_JSON_ARDUINO)
+    DynamicJsonDocument msg(32*1024);
+    deserializeJson(msg, message);
+    JsonObject obj = msg.as<JsonObject>();
+    std::string op("\"");
+    op.append(obj["op"].as<std::string>());
+    op.append("\"");
+    JsonObject data = obj["data"];
+#endif
 
     if (std::string("\"doTurnoutToggle\"").compare(op) == 0)
     {
+#ifdef WINSTON_JSON_11
         auto id = data["id"].string_value();
+#elif defined(WINSTON_JSON_ARDUINO)
+        std::string id = data["id"];
+#endif
         auto turnout = std::static_pointer_cast<winston::Turnout>(railway->track(id));
         auto requestDir = winston::Turnout::otherDirection(turnout->direction());
         signalBox->order(winston::Command::make([this, id, turnout, requestDir](const unsigned long long& created) -> const winston::State
@@ -344,14 +436,23 @@ void Kornweinheim::on_message(WebServer::Client &client, const std::string &mess
     }
     else if (std::string("\"getTurnoutState\"").compare(op) == 0)
     {
+#ifdef WINSTON_JSON_11
         auto id = data["id"].string_value();
+#elif defined(WINSTON_JSON_ARDUINO)
+        std::string id = data["id"];
+#endif
         auto turnout = std::static_pointer_cast<winston::Turnout>(railway->track(id));
         this->turnoutSendState(turnout->name(), turnout->direction());
     }
     else if (std::string("\"getSignalState\"").compare(op) == 0)
     {
+#ifdef WINSTON_JSON_11
         auto id = data["parentTrack"].string_value();
-        std::string guarding = data["guarding"].string_value();
+        auto guarding = data["guarding"].string_value();
+#elif defined(WINSTON_JSON_ARDUINO)
+        std::string id = data["parentTrack"];
+        std::string guarding = data["guarding"];
+#endif
 
         auto connection = winston::Track::ConnectionFromString(guarding);
         auto signal = this->railway->track(id)->signalGuarding(connection);
@@ -360,9 +461,18 @@ void Kornweinheim::on_message(WebServer::Client &client, const std::string &mess
     }
     else if (std::string("\"getRailway\"").compare(op) == 0)
     {
+#ifdef WINSTON_JSON_11
         auto tracks = Json::array();
         auto signals = Json::array();
         auto blocks = Json::array();
+#elif defined(WINSTON_JSON_ARDUINO)
+        DynamicJsonDocument railwayMessage(32*1024);
+        railwayMessage["op"] = "railway";
+        auto data = railwayMessage.createNestedObject("data");
+        auto tracks = data.createNestedArray("tracks");
+        auto signals = data.createNestedArray("signals");
+        auto blocks = data.createNestedArray("blocks");
+#endif
 
         for (unsigned int i = 0; i < railway->tracksCount(); ++i)
         {
@@ -375,10 +485,16 @@ void Kornweinheim::on_message(WebServer::Client &client, const std::string &mess
                 winston::Track::Shared a;
                 bumper->connections(a);
 
+#ifdef WINSTON_JSON_11
                 Json::object track = Json::object();
                 track["a"] = a->name();
                 track["name"] = bumper->name();
                 tracks.push_back(track);
+#elif defined(WINSTON_JSON_ARDUINO)
+                auto track = tracks.createNestedObject();
+                track["a"] = a->name();
+                track["name"] = bumper->name();
+#endif
 
                 writeAttachedSignal(signals, bumper, winston::Track::Connection::A);
 
@@ -390,11 +506,18 @@ void Kornweinheim::on_message(WebServer::Client &client, const std::string &mess
                 winston::Track::Shared a, b;
                 rail->connections(a, b);
 
+#ifdef WINSTON_JSON_11
                 Json::object track = Json::object();
                 track["a"] = a->name();
                 track["b"] = b->name();
                 track["name"] = rail->name();
                 tracks.push_back(track);
+#elif defined(WINSTON_JSON_ARDUINO)
+                auto track = tracks.createNestedObject();
+                track["a"] = a->name();
+                track["b"] = b->name();
+                track["name"] = rail->name();
+#endif
 
                 writeAttachedSignal(signals, rail, winston::Track::Connection::A);
                 writeAttachedSignal(signals, rail, winston::Track::Connection::B);
@@ -407,12 +530,20 @@ void Kornweinheim::on_message(WebServer::Client &client, const std::string &mess
                 winston::Track::Shared a, b, c;
                 turnout->connections(a, b, c);
 
+#ifdef WINSTON_JSON_11
                 Json::object track = Json::object();
                 track["a"] = a->name();
                 track["b"] = b->name();
                 track["c"] = c->name();
                 track["name"] = turnout->name();
                 tracks.push_back(track);
+#elif defined(WINSTON_JSON_ARDUINO)
+                auto track = tracks.createNestedObject();
+                track["a"] = a->name();
+                track["b"] = b->name();
+                track["c"] = c->name();
+                track["name"] = turnout->name();
+#endif
 
                 writeAttachedSignal(signals, turnout, winston::Track::Connection::A);
                 writeAttachedSignal(signals, turnout, winston::Track::Connection::B);
@@ -424,6 +555,7 @@ void Kornweinheim::on_message(WebServer::Client &client, const std::string &mess
 
         for (auto& block : this->railway->blocks())
         {
+#ifdef WINSTON_JSON_11
             Json::object b = Json::object();
             b["address"] = block.first;
             auto bl = block.second;
@@ -433,8 +565,18 @@ void Kornweinheim::on_message(WebServer::Client &client, const std::string &mess
                 blockTracks.push_back(track->name());
             b["tracks"] = blockTracks;
             blocks.push_back(b);
+#elif defined(WINSTON_JSON_ARDUINO)
+            auto b = blocks.createNestedObject();
+            b["address"] = block.first;
+            auto bl = block.second;
+
+            auto blockTracks = b.createNestedArray("tracks");
+            for (auto& track : bl->tracks())
+                blockTracks.add(track->name());
+#endif
         }
 
+#ifdef WINSTON_JSON_11
         Json railwayMessage = Json::object({
             {"op", "railway"},
             {"data", Json::object{
@@ -446,15 +588,25 @@ void Kornweinheim::on_message(WebServer::Client &client, const std::string &mess
             });
 
         this->webServer.send(client, railwayMessage.dump());
+#elif defined(WINSTON_JSON_ARDUINO)
+        std::string json("");
+        serializeJson(railwayMessage, json);
+        this->webServer.send(client, json);
+#endif
     }
     else if (std::string("\"storeRailwayLayout\"").compare(op) == 0)
     {
-        size_t address = 0;
+#ifdef WINSTON_JSON_11
         auto layout = data["layout"].string_value();
-        auto length = layout.size();
         auto offset = (size_t)data["offset"].int_value();
         auto fullSize = (size_t)data["fullSize"].int_value();
-
+#elif defined(WINSTON_JSON_ARDUINO)
+        std::string layout = data["layout"];
+        size_t offset = (size_t)data["offset"];
+        size_t fullSize = (size_t)data["fullSize"];
+#endif
+        size_t address = 0;
+        auto length = layout.size();
         if (offset == 0)
         {
             winston::hal::storageWrite(address + 0, (fullSize >> 0) & 0xFF);
@@ -474,11 +626,20 @@ void Kornweinheim::on_message(WebServer::Client &client, const std::string &mess
 
         if (offset == fullSize - length)
         {
+#ifdef WINSTON_JSON_11
             Json successObject = Json::object{
                 {"op", "storeRailwayLayoutSuccessful"},
                 {"data", true}
             };
             this->webServer.send(client, successObject.dump());
+#elif defined(WINSTON_JSON_ARDUINO)
+            DynamicJsonDocument obj(200);
+            obj["op"] = "storeRailwayLayoutSuccessful";
+            obj["data"] = true;
+            std::string json("");
+            serializeJson(obj, json);
+            this->webServer.send(client, json);
+#endif
         }
     }
     else if (std::string("\"getRailwayLayout\"").compare(op) == 0)
@@ -501,7 +662,7 @@ void Kornweinheim::on_message(WebServer::Client &client, const std::string &mess
 
             for (size_t i = 0; i < sent; ++i)
                 layout[i] = winston::hal::storageRead(address + offset + i);
-
+#ifdef WINSTON_JSON_11
             Json successObject = Json::object{
                 {"op", "layout"},
                 {"data", Json::object{
@@ -510,6 +671,19 @@ void Kornweinheim::on_message(WebServer::Client &client, const std::string &mess
                     {"layout", layout}
                 }}
             };
+            this->webServer.send(client, successObject.dump());
+#elif defined(WINSTON_JSON_ARDUINO)
+            DynamicJsonDocument obj(sizePerMessage + 1024);
+            obj["op"] = "layout";
+            auto data = obj.createNestedObject("data");
+            data["offset"] = (int)offset;
+            data["fullSize"] = (int)length;
+            data["layout"] = layout;
+            std::string json("");
+            serializeJson(obj, json);
+            this->webServer.send(client, json);
+#endif
+
             /*this->webServer.send(client, successObject.dump());
             JSON successObject = JSON::Make(JSON::Class::Object);
             successObject["op"] = "layout";
@@ -518,7 +692,6 @@ void Kornweinheim::on_message(WebServer::Client &client, const std::string &mess
             data["fullSize"] = (unsigned int)length;
             data["layout"] = layout.c_str();
             successObject["data"] = data;*/
-            this->webServer.send(client, successObject.dump());
 
             offset += sent;
             remaining -= sent;
@@ -609,8 +782,8 @@ void Kornweinheim::on_message(WebServer::Client &client, const std::string &mess
         winston::hal::text("Received unknown message: ");
         winston::hal::text(message);
     }
-}
 #endif
+}
 
 // setup our model railway system
 void Kornweinheim::systemSetup() {

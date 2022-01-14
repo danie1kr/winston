@@ -137,6 +137,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="external\ArduinoJson-v6.19.0.hpp" />
     <ClInclude Include="external\central-z21\Z21.h" />
     <ClInclude Include="external\central-z21\Z21Const.h" />
     <ClInclude Include="external\central-z21\Z21Packet.h" />

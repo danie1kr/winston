@@ -42,9 +42,6 @@
     <ClInclude Include="..\winston\external\central-z21\Z21Packet.h">
       <Filter>winston-src</Filter>
     </ClInclude>
-    <ClInclude Include="..\winston\external\json11\json11.hpp">
-      <Filter>winston-src</Filter>
-    </ClInclude>
     <ClInclude Include="..\libwinston\Block.h">
       <Filter>libwinston-src</Filter>
     </ClInclude>
@@ -159,9 +156,6 @@
       <Filter>winston-src</Filter>
     </ClCompile>
     <ClCompile Include="..\winston\external\central-z21\Z21Packet.cpp">
-      <Filter>winston-src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\winston\external\json11\json11.cpp">
       <Filter>winston-src</Filter>
     </ClCompile>
   </ItemGroup>

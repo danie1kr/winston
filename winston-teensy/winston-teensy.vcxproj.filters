@@ -27,13 +27,7 @@
     <ClInclude Include="__vm\.winston-teensy.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\winston\railways.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="winston-hal-teensy.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\winston\Kornweinheim.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\winston\winston-main.h">
@@ -50,6 +44,66 @@
     </ClInclude>
     <ClInclude Include="..\winston\external\json11\json11.hpp">
       <Filter>winston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libwinston\Block.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libwinston\Callback.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libwinston\Command.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libwinston\DigitalCentralStation.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libwinston\HAL.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libwinston\Library.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libwinston\Locomotive.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libwinston\Log.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libwinston\ModelRailwaySystem.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libwinston\Railway.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\winston\railways.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libwinston\Route.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libwinston\Signal.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libwinston\SignalBox.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libwinston\Track.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libwinston\Util.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libwinston\WebServer.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libwinston\Winston.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libwinston\WinstonTypes.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\winston\Kornweinheim.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -110,5 +164,8 @@
     <ClCompile Include="..\winston\external\json11\json11.cpp">
       <Filter>winston-src</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="board.txt" />
   </ItemGroup>
 </Project>

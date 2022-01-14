@@ -1,0 +1,11 @@
+# winston-teensy build property overrides
+#
+
+# Alter or remove Optimization for Hardware Debugging
+# Can be used in Conjunction with Project Properties > Configuration Defines
+
+# Default is -Og
+# ide.compiler_flags_debug=-Og
+
+# Remove added flags by setting to blank:
+ide.compiler_flags_debug=

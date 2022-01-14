@@ -9,6 +9,7 @@
 #include "railways.h"
 
 #include "external/json11/json11.hpp"
+//#include "external/ArduinoJson-v6.19.0.hpp"
 
 #ifdef WINSTON_PLATFORM_WIN_x64
 #include "winston-hal-x64.h"
@@ -55,17 +56,17 @@ private:
 
     winston::Railway::Callbacks railwayCallbacks();
 
-#ifndef WINSTON_WITHOUT_WEBSOCKET
+#ifdef WINSTON_WITH_WEBSOCKET
     /* websocket */
     WebServer webServer;
 
     // Define a callback to handle incoming messages
-    WebServer::HTTPResponse on_http(WebServer::Client client, std::string resource);
+    WebServer::HTTPResponse on_http(WebServer::HTTPClient &client, const std::string &resource);
 
     void writeAttachedSignal(Json::array& signals, winston::Track::Shared track, const winston::Track::Connection connection);
 
     // Define a callback to handle incoming messages
-    void on_message(WebServer::Client client, std::string message);
+    void on_message(WebServer::Client &client, const std::string &message);
 #endif
     // setup our model railway system
     void systemSetup();
@@ -89,7 +90,7 @@ private:
     TLC5947_SignalDevice::Shared signalDevice;
 };
 
-#ifndef WINSTON_WITHOUT_WEBSOCKET
+#ifdef WINSTON_WITH_WEBSOCKET
 // send a turnout state via websocket
 void Kornweinheim::turnoutSendState(const std::string turnoutTrackId, const winston::Turnout::Direction dir)
 {
@@ -148,7 +149,7 @@ void Kornweinheim::initNetwork()
     // z21
     z21Socket = UDPSocket::make(z21IP, z21Port);
 
-#ifndef WINSTON_WITHOUT_WEBSOCKET
+#ifdef WINSTON_WITH_WEBSOCKET
     // webServer
     this->webServer.init(
         std::bind(&Kornweinheim::on_http, this, std::placeholders::_1, std::placeholders::_2),
@@ -193,7 +194,7 @@ winston::DigitalCentralStation::Callbacks Kornweinheim::z21Callbacks()
         loco.update(busy, forward, speed, functions);
 
 
-#ifndef WINSTON_WITHOUT_WEBSOCKET
+#ifdef WINSTON_WITH_WEBSOCKET
         locoSend(loco);
 #endif    
     };
@@ -233,7 +234,7 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
         // tell the signal box to update the signals
         this->signalBox->setSignalsFor(turnout);
 
-#ifndef WINSTON_WITHOUT_WEBSOCKET
+#ifdef WINSTON_WITH_WEBSOCKET
         // tell the ui what happens
         turnoutSendState(turnout->name(), direction);
 #endif
@@ -244,7 +245,7 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
 
     callbacks.signalUpdateCallback = [=](winston::Track::Shared track, winston::Track::Connection connection, const winston::Signal::Aspects aspects) -> const winston::State
     {
-#ifndef WINSTON_WITHOUT_WEBSOCKET
+#ifdef WINSTON_WITH_WEBSOCKET
         // send to web socket server
         signalSendState(track->name(), connection, aspects);
 #endif
@@ -259,9 +260,9 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
     return callbacks;
 }
 
-#ifndef WINSTON_WITHOUT_WEBSOCKET
+#ifdef WINSTON_WITH_WEBSOCKET
 // Define a callback to handle incoming messages
-WebServer::HTTPResponse Kornweinheim::on_http(WebServer::Client client, std::string resource) {
+WebServer::HTTPResponse Kornweinheim::on_http(WebServer::HTTPClient &client, const std::string &resource) {
     const std::string path_index("/");
     const std::string path_railway("/railway");
     const std::string path_log("/log");
@@ -312,7 +313,7 @@ void Kornweinheim::writeAttachedSignal(Json::array& signals, winston::Track::Sha
 }
 
 // Define a callback to handle incoming messages
-void Kornweinheim::on_message(WebServer::Client client, std::string message) {
+void Kornweinheim::on_message(WebServer::Client &client, const std::string &message) {
     std::string jsonParseError;
     Json m = Json::parse(message, jsonParseError);
     std::string op = m["op"].dump();
@@ -659,7 +660,7 @@ void Kornweinheim::systemSetupComplete()
 // accept new requests and loop over what the signal box has to do
 bool Kornweinheim::systemLoop() {
 
-#ifndef WINSTON_WITHOUT_WEBSOCKET
+#ifdef WINSTON_WITH_WEBSOCKET
     this->webServer.step();
 #endif
     return this->signalBox->work();

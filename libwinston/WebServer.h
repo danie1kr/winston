@@ -6,7 +6,7 @@
 
 namespace winston
 {
-	template<class _Connection>
+	template<class _WebSocketConnection, class _HTTPConnection = _WebSocketConnection>
 	class WebServer
 	{
 	public:
@@ -17,8 +17,8 @@ namespace winston
 			unsigned int status;
 		};
 
-		using OnHTTP = std::function<HTTPResponse(_Connection client, std::string resource)>;
-		using OnMessage = std::function<void(_Connection client, std::string message)>;
+		using OnHTTP = std::function<HTTPResponse(_HTTPConnection &client, const std::string &resource)>;
+		using OnMessage = std::function<void(_WebSocketConnection &client, const std::string &message)>;
 
 		WebServer()
 		{
@@ -39,14 +39,14 @@ namespace winston
 			this->send(this->connections[client], data);
 		}
 
-		virtual void send(_Connection& connection, const std::string& data) = 0;
-		virtual _Connection getClient(unsigned int clientId) = 0;
-		virtual unsigned int getClientId(_Connection client) = 0;
-		virtual void newConnection(_Connection client)
+		virtual void send(_WebSocketConnection& connection, const std::string& data) = 0;
+		virtual _WebSocketConnection getClient(unsigned int clientId) = 0;
+		virtual unsigned int getClientId(_WebSocketConnection client) = 0;
+		virtual void newConnection(_WebSocketConnection client)
 		{
 			this->connections.insert({ this->newClientId(), client });
 		}
-		virtual void disconnect(_Connection client) = 0;
+		virtual void disconnect(_WebSocketConnection client) = 0;
 		unsigned int clients()
 		{
 			return this->connections.size();
@@ -58,7 +58,7 @@ namespace winston
 		virtual size_t maxMessageSize() = 0;
 
 	protected:
-		using Connections = std::map<unsigned int, _Connection>;
+		using Connections = std::map<unsigned int, _WebSocketConnection>;
 		Connections connections;
 
 		unsigned int nextClientId = 1;

@@ -38,6 +38,7 @@ class WebServerWSPP : public winston::WebServer<ConnectionWSPP>
 {
 public:
 	using Client = ConnectionWSPP;
+	using HTTPClient = ConnectionWSPP;
 
 	WebServerWSPP();
 	virtual ~WebServerWSPP() = default;

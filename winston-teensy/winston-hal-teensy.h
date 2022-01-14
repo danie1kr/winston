@@ -6,7 +6,8 @@
 #include "HAL.h"
 #include "Log.h"
 
-//#define WINSTON_WITHOUT_WEBSOCKET
+#define WINSTON_WITH_WEBSOCKET
+#define WINSTON_WITH_HTTP
 #define WINSTON_WITH_TEENSYDEBUG
 #define WINSTON_WITH_SDFAT
 //#define WINSTON_TEENSY_QNETHERNET
@@ -18,11 +19,9 @@
 #define USE_NATIVE_ETHERNET         true
 #endif
 
-#pragma GCC push_options
-//#pragma GCC optimize ("Os")
 //#define WINSTON_WEBSOCKETS_WebSockets2_Generic
 #define WINSTON_WEBSOCKETS_ArduinoWebsockets
-#ifndef WINSTON_WITHOUT_WEBSOCKET
+#ifdef WINSTON_WITH_WEBSOCKET
 #ifdef WINSTON_WEBSOCKETS_ArduinoWebsockets
 #include <ArduinoWebsockets.h>
 using namespace websockets;
@@ -32,7 +31,6 @@ using namespace websockets;
 using namespace websockets2_generic;
 #endif
 #endif
-#pragma GCC pop_options
 
 #ifdef WINSTON_TEENSY_QNETHERNET
 #include <QNEthernet.h>
@@ -42,6 +40,19 @@ using namespace qindesign::network;
 #endif
 
 #include <SPI.h>
+
+namespace winston
+{
+    namespace hal {
+        void text(const __FlashStringHelper* fsh);
+        void error(const __FlashStringHelper* fsh);
+        void fatal(const __FlashStringHelper* fsh);
+    }
+};
+constexpr const __FlashStringHelper* operator "" _s(const char in[], size_t len)
+{
+    return ((const __FlashStringHelper*)(in));
+}
 
 class UDPSocketTeensy : public winston::hal::UDPSocket, winston::Shared_Ptr<UDPSocketTeensy>
 {
@@ -80,13 +91,14 @@ private:
 
 using SignalSPIDevice = Arduino_SPIDevice;
 
-#ifndef WINSTON_WITHOUT_WEBSOCKET
+#ifdef WINSTON_WITH_WEBSOCKET
 #include "../libwinston/WebServer.h"
 
-class WebServerTeensy : public winston::WebServer<WebsocketsClient>
+class WebServerTeensy : public winston::WebServer<WebsocketsClient, EthernetClient>
 {
 public:
-	using Client = WebsocketsClient;
+	using Client = WebsocketsClient; 
+    using HTTPClient = EthernetClient;
 
 	WebServerTeensy();
 	virtual ~WebServerTeensy() = default;
@@ -103,6 +115,7 @@ private:
 	void advanceConnectionIterator();
 	Connections::iterator it;
 	WebsocketsServer server;
+    EthernetServer httpServer;
 };
 using WebServer = WebServerTeensy;
 #endif
@@ -110,12 +123,8 @@ using WebServer = WebServerTeensy;
 #include "HAL.h"
 #include "Util.h"
 
-#include <iostream>
-#include <fstream>
-#include <algorithm>
-
-
 #ifdef WINSTON_WITH_SDFAT
+#define SDFAT_FILE_TYPE 2 //exfat only
 #include <SD.h>
 #include <SdFatConfig.h>
 #include <SdFat.h>
@@ -125,10 +134,9 @@ using WebServer = WebServerTeensy;
 #include <TeensyDebug.h>
 #endif
 
-#ifndef WINSTON_WITHOUT_WEBSOCKET
-WebServerTeensy::WebServerTeensy() : winston::WebServer<Client>()
+#ifdef WINSTON_WITH_WEBSOCKET
+WebServerTeensy::WebServerTeensy() : winston::WebServer<Client, HTTPClient>()
 {
-
 }
 
 void WebServerTeensy::init(OnHTTP onHTTP, OnMessage onMessage, unsigned int port)
@@ -146,6 +154,57 @@ void WebServerTeensy::send(Client& connection, const std::string& data)
 
 void WebServerTeensy::step()
 {
+    if (auto httpClient = this->httpServer.available())
+    {
+        // An http request ends with a blank line.
+        bool currentLineIsBlank = true;
+        bool firstLine = true;
+        std::string line(""), resource("");
+
+        while (httpClient.connected()) {
+            if (httpClient.available()) {
+                char c = httpClient.read();
+
+                if (firstLine)
+                {
+                    line += c;
+                }
+                
+                if (c == '\n' && currentLineIsBlank) {
+                    // If we've gotten to the end of the line (received a newline
+                    // character) and the line is blank, the http request has ended,
+                    // so we can send a reply.
+                    auto reply = this->onHTTP(httpClient, resource);
+                    break;
+                }
+                else if (c == '\n') {
+                    // Starting a new line.
+                    if (firstLine)
+                    {
+                        firstLine = false;
+
+                        std::string method("");
+                        size_t i = 0;
+                        for (;i < line.length() && line[i] != ' '; ++i)
+                            method += line[i];
+                        if (method.compare("GET"))
+                            break;
+                        ++i;
+
+                        for (; i < line.length() && line[i] != ' '; ++i)
+                            resource += line[i];
+                        line.erase();
+                    }
+                    currentLineIsBlank = true;
+                }
+                else if (c != '\r') {
+                    // Read a character on the current line.
+                    currentLineIsBlank = false;
+                }
+            }
+        }
+        httpClient.stop();
+    }
     if (server.poll())
     {
         // check for new client
@@ -153,9 +212,10 @@ void WebServerTeensy::step()
         if (connection.available())
         {
             this->newConnection(connection);
-            connection.onMessage([=](WebsocketsMessage message)
+            connection.onMessage([=, &connection](WebsocketsMessage message)
                 {
-                    this->onMessage(connection, std::string(message.data().c_str()));
+                    const auto msg = std::string(message.data().c_str());
+                    this->onMessage(connection, msg);
                 });
 
             connection.onEvent([=](WebsocketsEvent event, String data)
@@ -167,9 +227,10 @@ void WebServerTeensy::step()
                 });
         }
 
-        if (this->connections.size() == 0)
-            return;
+        
     }
+    if (this->connections.size() == 0)
+        return;
     this->advanceConnectionIterator();
     auto& client = this->it->second;
     client.poll();
@@ -352,7 +413,7 @@ namespace winston
             while (!Serial && millis() < 4000) {
                 // Wait for Serial to initialize
             }
-            text("Winston Teensy Init Hello");
+            text("Winston Teensy Init Hello"_s);
 
 #ifdef WINSTON_WITH_TEENSYDEBUG
             debug.begin(SerialUSB1);
@@ -360,7 +421,7 @@ namespace winston
 
 #ifdef WINSTON_WITH_SDFAT
             if (!sd.begin(BUILTIN_SDCARD)) {
-                error("SD initialization failed!");
+                error("SD initialization failed!"_s);
                 //return;
             }
             sd.chdir();
@@ -417,10 +478,27 @@ namespace winston
             uint8_t mac[6];
             teensyMAC(mac);
             if (!Ethernet.begin(mac)) {
-                error("Failed to start Ethernet\n");
+                error("Failed to start Ethernet\n"_s);
                 return;
             }
 #endif
+        }
+
+        const std::string __FlashStorageStringtoStd(const __FlashStringHelper* fsh)
+        {
+            PGM_P p = reinterpret_cast<PGM_P>(fsh);
+            std::string ret;
+            while (1) {
+                unsigned char c = pgm_read_byte(p++);
+                if (c == 0) break;
+                ret += c;
+            }
+            return ret;
+        }
+
+        void text(const __FlashStringHelper* fsh)
+        {
+            text(__FlashStorageStringtoStd(fsh));
         }
 
         void text(const std::string& text)
@@ -428,11 +506,20 @@ namespace winston
             Serial.println(text.c_str());
         }
 
+        void error(const __FlashStringHelper* fsh)
+        {
+            logger.err(__FlashStorageStringtoStd(fsh));
+        }
         void error(const std::string& error)
         {
             logger.err(error);
         }
 
+        void fatal(const __FlashStringHelper* fsh)
+        {
+            logger.log(__FlashStorageStringtoStd(fsh), Logger::Entry::Level::Fatal);
+            exit(-1);
+        }
         void fatal(const std::string reason)
         {
             logger.log(reason, Logger::Entry::Level::Fatal);

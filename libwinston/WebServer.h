@@ -6,7 +6,7 @@
 
 namespace winston
 {
-	template<class _WebSocketConnection, class _HTTPConnection = _WebSocketConnection>
+	template<class _WebSocketConnection>
 	class WebServer
 	{
 	public:
@@ -60,7 +60,7 @@ namespace winston
 			return this->connections.size();
 		}
 
-		virtual void init(OnHTTP onHTTP, OnMessage onMessage, unsigned int port) = 0;
+		virtual void init(OnHTTP onHTTP, OnMessage onMessage, unsigned int port) { };
 		virtual void step() = 0;
 		virtual void shutdown() = 0;
 		virtual size_t maxMessageSize() = 0;

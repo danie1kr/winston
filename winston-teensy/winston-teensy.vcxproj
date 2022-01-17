@@ -169,8 +169,10 @@
     <ClCompile Include="..\libwinston\Winston.cpp" />
     <ClCompile Include="..\winston\external\central-z21\Z21.cpp" />
     <ClCompile Include="..\winston\external\central-z21\Z21Packet.cpp" />
+    <ClCompile Include="..\winston\Kornweinheim.cpp" />
     <ClCompile Include="..\winston\railways.cpp" />
     <ClCompile Include="..\winston\winston-main.cpp" />
+    <ClCompile Include="winston-hal-teensy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="board.txt" />

@@ -100,13 +100,10 @@
       <Filter>libwinston-src</Filter>
     </ClInclude>
     <ClInclude Include="..\winston\Kornweinheim.h">
-      <Filter>Header Files</Filter>
+      <Filter>winston-src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\winston\railways.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\libwinston\Block.cpp">
       <Filter>libwinston-src</Filter>
     </ClCompile>
@@ -149,13 +146,22 @@
     <ClCompile Include="..\libwinston\Winston.cpp">
       <Filter>libwinston-src</Filter>
     </ClCompile>
-    <ClCompile Include="..\winston\winston-main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\winston\external\central-z21\Z21.cpp">
       <Filter>winston-src</Filter>
     </ClCompile>
     <ClCompile Include="..\winston\external\central-z21\Z21Packet.cpp">
+      <Filter>winston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="winston-hal-teensy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\winston\Kornweinheim.cpp">
+      <Filter>winston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\winston\railways.cpp">
+      <Filter>winston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\winston\winston-main.cpp">
       <Filter>winston-src</Filter>
     </ClCompile>
   </ItemGroup>

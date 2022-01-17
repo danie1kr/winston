@@ -51,6 +51,9 @@
     <ClCompile Include="external\json11\json11.cpp">
       <Filter>external\json11</Filter>
     </ClCompile>
+    <ClCompile Include="Kornweinheim.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\central-z21\Z21Const.h">

@@ -5,6 +5,8 @@
 #include "../libwinston/HAL.h"
 #include "FT232_SPIDevice.h"
 
+const char* operator "" _s(const char* in, size_t len);
+
 class UDPSocketWinSock : public winston::hal::UDPSocket, winston::Shared_Ptr<UDPSocketWinSock>
 {
 public:

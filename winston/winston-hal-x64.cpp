@@ -16,6 +16,10 @@
 using websocketpp::lib::placeholders::_1;
 using websocketpp::lib::placeholders::_2;
 
+const char* operator "" _s(const char* in, size_t len)
+{
+    return in;
+}
 
 WebServerWSPP::HTTPConnectionWSPP::HTTPConnectionWSPP(HTTPClient& connection) 
     : HTTPConnection(), connection(connection) 

@@ -28,6 +28,7 @@ using namespace json11;
 #pragma GCC optimize("Os")
 #endif
 #ifdef WINSTON_JSON_ARDUINO
+#define ARDUINOJSON_ENABLE_STD_STRING 1
 #define ARDUINOJSON_ENABLE_STD_STREAM 0
 #define ARDUINOJSON_ENABLE_ARDUINO_STRING 0
 #define ARDUINOJSON_ENABLE_ARDUINO_STREAM 0
@@ -79,7 +80,7 @@ private:
     WebServer webServer;
 
     // Define a callback to handle incoming messages
-    WebServer::HTTPResponse on_http(WebServer::HTTPClient &client, const std::string &resource);
+    void on_http(WebServer::HTTPConnection& connection, const std::string& resource);
 
     void writeAttachedSignal(
 #ifdef WINSTON_JSON_11
@@ -323,42 +324,40 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
 
 #ifdef WINSTON_WITH_WEBSOCKET
 // Define a callback to handle incoming messages
-WebServer::HTTPResponse Kornweinheim::on_http(WebServer::HTTPClient &client, const std::string &resource) {
+void Kornweinheim::on_http(WebServer::HTTPConnection &connection, const std::string &resource) {
     const std::string path_index("/");
     const std::string path_railway("/railway");
     const std::string path_log("/log");
 
     const std::string header_html("\r\ncontent-type: text/html; charset=UTF-8\r\n");
     const std::string header_json("\r\ncontent-type: application/json; charset=UTF-8\r\n");
-    WebServer::HTTPResponse response;
     if (resource.compare(path_index) == 0)
     {
-        response.headers = { {"content-type", "text/html; charset=UTF-8"} };
-        response.body = "<html>winston</html>";
+        connection.status(200);
+        connection.header("content-type", "text/html; charset=UTF-8");
+        connection.body("<html>winston</html>");
     }
     else if (resource.compare(path_railway) == 0)
     {
-        response.headers = { {"content-type", "application/json; charset=UTF-8"} };
-        response.body = "{}";
+        connection.status(200);
+        connection.header("content-type", "application/json; charset=UTF-8");
+        connection.body("<html>winston</html>");
     }
     else if (resource.compare(path_log) == 0)
     {
-        //extern winston::Logger winston::logger;
-        response.headers = { {"content-type", "text/html; charset=UTF-8"} };
-        response.body = "<html><head>winston</head><body><table><tr><th>timestamp</th><th>level</th><th>log</th></tr>";
+        connection.status(200);
+        connection.header("content-type", "text/html; charset=UTF-8");
+        connection.body("<html><head>winston</head><body><table><tr><th>timestamp</th><th>level</th><th>log</th></tr>");
         for (const auto& entry : winston::logger.entries())
         {
-            response.body.append("<tr><td>")
-                .append(winston::build(entry.timestamp)).append("</td><td>")
-                .append(entry.level._to_string()).append("</td><td>")
-                .append(entry.text).append("</td><td></tr>");
+            connection.body("<tr><td>");
+            connection.body(winston::build(entry.timestamp)); connection.body("</td><td>");
+            connection.body(entry.level._to_string()); connection.body("</td><td>");
+            connection.body(entry.text); connection.body("</td><td>");
         }
 
-        response.body.append("</table></body></html>");
+        connection.body("</table></body></html>");
     }
-    response.status = 200;
-
-    return response;
 }
 
 void Kornweinheim::writeAttachedSignal(
@@ -602,8 +601,8 @@ void Kornweinheim::on_message(WebServer::Client &client, const std::string &mess
         auto fullSize = (size_t)data["fullSize"].int_value();
 #elif defined(WINSTON_JSON_ARDUINO)
         std::string layout = data["layout"];
-        size_t offset = (size_t)data["offset"];
-        size_t fullSize = (size_t)data["fullSize"];
+        size_t offset = (size_t)((unsigned int)data["offset"]);
+        size_t fullSize = (size_t)((unsigned int)data["fullSize"]);
 #endif
         size_t address = 0;
         auto length = layout.size();

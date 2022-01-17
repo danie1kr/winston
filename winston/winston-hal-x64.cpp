@@ -16,6 +16,29 @@
 using websocketpp::lib::placeholders::_1;
 using websocketpp::lib::placeholders::_2;
 
+
+WebServerWSPP::HTTPConnectionWSPP::HTTPConnectionWSPP(HTTPClient& connection) 
+    : HTTPConnection(), connection(connection) 
+{
+};
+
+bool WebServerWSPP::HTTPConnectionWSPP::status(const unsigned int HTTPStatus)
+{
+    this->connection->set_status(websocketpp::http::status_code::value(HTTPStatus));
+    return true;
+}
+bool WebServerWSPP::HTTPConnectionWSPP::header(const std::string& key, const std::string& value)
+{
+    this->connection->append_header(key, value);
+    return true;
+}
+bool WebServerWSPP::HTTPConnectionWSPP::body(const std::string& content)
+{
+    fullBody.append(content);
+    this->connection->set_body(fullBody);
+    return true;
+}
+
 WebServerWSPP::WebServerWSPP() : winston::WebServer<ConnectionWSPP>()
 {
 
@@ -74,12 +97,18 @@ void WebServerWSPP::disconnect(Client client)
 void WebServerWSPP::on_http(ConnectionWSPP hdl)
 {
     auto con = this->server.get_con_from_hdl(hdl);
+    HTTPConnectionWSPP connection(con);
+    this->onHTTP(connection, con->get_resource());
+
+    /*
+    auto con = this->server.get_con_from_hdl(hdl);
     const auto response = this->onHTTP(hdl, con->get_resource());
 
     for (auto const& kv: response.headers)
         con->append_header(kv.first, kv.second);
     con->set_status(websocketpp::http::status_code::value(response.status));
     con->set_body(response.body);
+    */
 }
 
 void WebServerWSPP::on_msg(ConnectionWSPP hdl, websocketpp::server<websocketpp::config::asio>::message_ptr msg)

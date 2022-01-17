@@ -10,14 +10,22 @@ namespace winston
 	class WebServer
 	{
 	public:
-		struct HTTPResponse
+		/*struct HTTPResponse
 		{
 			std::map<const std::string, const std::string> headers;
 			std::string body;
 			unsigned int status;
+		};*/
+
+		class HTTPConnection
+		{
+		public:
+			virtual bool status(const unsigned int HTTPStatus) = 0;
+			virtual bool header(const std::string& key, const std::string& value) = 0;
+			virtual bool body(const std::string& content) = 0;
 		};
 
-		using OnHTTP = std::function<HTTPResponse(_HTTPConnection &client, const std::string &resource)>;
+		using OnHTTP = std::function<void(HTTPConnection &client, const std::string &resource)>;
 		using OnMessage = std::function<void(_WebSocketConnection &client, const std::string &message)>;
 
 		WebServer()

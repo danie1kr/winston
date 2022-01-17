@@ -38,7 +38,19 @@ class WebServerWSPP : public winston::WebServer<ConnectionWSPP>
 {
 public:
 	using Client = ConnectionWSPP;
-	using HTTPClient = ConnectionWSPP;
+	using HTTPClient = websocketpp::server<websocketpp::config::asio>::connection_ptr;
+
+	class HTTPConnectionWSPP : public HTTPConnection
+	{
+	public:
+		HTTPConnectionWSPP(HTTPClient& connection);
+		bool status(const unsigned int HTTPStatus);
+		bool header(const std::string& key, const std::string& value);
+		bool body(const std::string& content);
+	private:
+		HTTPClient& connection;
+		std::string fullBody;
+	};
 
 	WebServerWSPP();
 	virtual ~WebServerWSPP() = default;

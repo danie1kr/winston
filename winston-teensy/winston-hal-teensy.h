@@ -100,6 +100,26 @@ public:
 	using Client = WebsocketsClient; 
     using HTTPClient = EthernetClient;
 
+    class HTTPConnectionTeensy : public HTTPConnection
+    {
+    public:
+        HTTPConnectionTeensy(HTTPClient& connection);
+        bool status(const unsigned int HTTPStatus);
+        bool header(const std::string& key, const std::string& value);
+        bool body(const std::string& content);
+    private:
+        HTTPClient& connection;
+        unsigned char guard;
+        
+        enum class State : unsigned char
+        {
+            NEW = 0,
+            STATUS = 0b1,
+            HEADER = 0b10,
+            BODY = 0b100
+        };
+    };
+
 	WebServerTeensy();
 	virtual ~WebServerTeensy() = default;
 	virtual void init(OnHTTP onHTTP, OnMessage onMessage, unsigned int port);
@@ -135,6 +155,42 @@ using WebServer = WebServerTeensy;
 #endif
 
 #ifdef WINSTON_WITH_WEBSOCKET
+
+WebServerTeensy::HTTPConnectionTeensy::HTTPConnectionTeensy(HTTPClient& connection)
+    : connection(connection), guard((unsigned char)HTTPConnectionTeensy::State::NEW)
+{
+
+}
+
+bool WebServerTeensy::HTTPConnectionTeensy::status(const unsigned int HTTPStatus)
+{
+    if (this->guard & (unsigned char)HTTPConnectionTeensy::State::STATUS)
+        return false;
+    std::string line(winston::build("HTTP/1.1 ", HTTPStatus, " OK", "\r\n"));
+    this->connection.write(line.c_str());
+    this->guard &= (unsigned char)HTTPConnectionTeensy::State::STATUS;
+    return true;
+}
+
+bool WebServerTeensy::HTTPConnectionTeensy::header(const std::string& key, const std::string& value)
+{
+    if (!(this->guard & (unsigned char)HTTPConnectionTeensy::State::STATUS) || (this->guard & (unsigned char)HTTPConnectionTeensy::State::BODY))
+        return false;
+    std::string line(winston::build(key, ": ", value, "\r\n"));
+    this->connection.write(line.c_str());
+    this->guard &= (unsigned char)HTTPConnectionTeensy::State::HEADER;
+    return true;
+}
+
+bool WebServerTeensy::HTTPConnectionTeensy::body(const std::string& content)
+{
+    if (!(this->guard & (unsigned char)HTTPConnectionTeensy::State::HEADER))
+        return false;
+    this->connection.write(content.c_str());
+    this->guard &= (unsigned char)HTTPConnectionTeensy::State::BODY;
+    return true;
+}
+
 WebServerTeensy::WebServerTeensy() : winston::WebServer<Client, HTTPClient>()
 {
 }
@@ -144,7 +200,8 @@ void WebServerTeensy::init(OnHTTP onHTTP, OnMessage onMessage, unsigned int port
     this->onHTTP = onHTTP;
     this->onMessage = onMessage;
     this->it = this->connections.begin();
-    this->server.listen(port);
+    this->server.listen(port+1);
+    this->httpServer.begin(port);
 }
 
 void WebServerTeensy::send(Client& connection, const std::string& data)
@@ -174,7 +231,8 @@ void WebServerTeensy::step()
                     // If we've gotten to the end of the line (received a newline
                     // character) and the line is blank, the http request has ended,
                     // so we can send a reply.
-                    auto reply = this->onHTTP(httpClient, resource);
+                    HTTPConnectionTeensy connection(httpClient);
+                    this->onHTTP(connection, resource);
                     break;
                 }
                 else if (c == '\n') {
@@ -417,6 +475,7 @@ namespace winston
 
 #ifdef WINSTON_WITH_TEENSYDEBUG
             debug.begin(SerialUSB1);
+            delay(10000);
 #endif
 
 #ifdef WINSTON_WITH_SDFAT
@@ -528,7 +587,7 @@ namespace winston
 
         void delay(const unsigned int ms)
         {
-            delay(ms);
+            ::delay(ms);
         }
 
         unsigned long long now()

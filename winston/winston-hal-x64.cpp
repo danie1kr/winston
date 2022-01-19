@@ -1,3 +1,4 @@
+#include "../libwinston/Winston.h"
 #include "../libwinston/HAL.h"
 #include "../libwinston/Util.h"
 #include "../libwinston/Log.h"
@@ -50,6 +51,9 @@ WebServerWSPP::WebServerWSPP() : winston::WebServer<ConnectionWSPP>()
 
 void WebServerWSPP::init(OnHTTP onHTTP, OnMessage onMessage, unsigned int port)
 {
+    if (!winston::runtimeNetwork())
+        return;
+
     this->onHTTP = onHTTP;
     this->onMessage = onMessage;
     this->server.init_asio();
@@ -71,14 +75,17 @@ void WebServerWSPP::send(Client& connection, const std::string &data)
 
 void WebServerWSPP::step()
 {
+    if (!winston::runtimeNetwork())
+        return;
+
     this->server.poll_one();
 }
 
-WebServerWSPP::Client WebServerWSPP::getClient(unsigned int clientId)
+WebServerWSPP::Client& WebServerWSPP::getClient(const unsigned int clientId)
 {
     return this->connections[clientId];
 }
-unsigned int WebServerWSPP::getClientId(Client client)
+const unsigned int WebServerWSPP::getClientId(Client client)
 {
     auto result = std::find_if(
         this->connections.begin(),
@@ -133,7 +140,7 @@ void WebServerWSPP::shutdown()
     this->server.stop();
 }
 
-size_t WebServerWSPP::maxMessageSize()
+const size_t WebServerWSPP::maxMessageSize()
 {
     return this->server.get_max_message_size();
 }
@@ -174,6 +181,9 @@ UDPSocketWinSock::UDPSocketWinSock(const std::string ip, const unsigned short po
 
 const winston::Result UDPSocketWinSock::connect()
 {
+    if (!winston::runtimeNetwork())
+        return winston::Result::NotInitialized;
+
     closesocket(this->udpSocket);
     this->udpSocket = socket(AF_INET, SOCK_DGRAM, 0);
     this->state = State::Connecting;
@@ -237,12 +247,19 @@ namespace winston
     namespace hal {
         void init()
         {
-            { WSADATA wsaData; WSAStartup(MAKEWORD(1, 1), &wsaData); }
+            {
+                WSADATA wsaData;
+                if (!WSAStartup(MAKEWORD(1, 1), &wsaData))
+                    runtimeEnableNetwork();
+            }
 
             ensureStorageFile();
             std::error_code error;
             winstonStorage = mio::make_mmap_sink(winstonStoragePath, 0, mio::map_entire_file, error);
-            if (error) { handle_error(error); }
+            if (error) 
+                handle_error(error);
+            else
+                runtimeEnablePersistence();
         }
 
         void text(const std::string& text)
@@ -279,7 +296,7 @@ namespace winston
 
         const uint8_t storageRead(const size_t address)
         {
-            if (winstonStorage.size() > address)
+            if(runtimePersistence() && winstonStorage.size() > address)
                 return winstonStorage[address];
             else
                 return 0;
@@ -287,7 +304,7 @@ namespace winston
 
         void storageWrite(const size_t address, const uint8_t data)
         {
-            if (winstonStorage.size() > address)
+            if (runtimePersistence() && winstonStorage.size() > address)
             {
                 winstonStorage[address] = data;
             }
@@ -297,6 +314,9 @@ namespace winston
 
         bool storageCommit()
         {
+            if (!runtimePersistence())
+                return false;
+
             std::error_code error;
             winstonStorage.sync(error);
             if (error)

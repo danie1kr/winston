@@ -1,6 +1,6 @@
 // winston-simulator.cpp : This file contains the 'main' function. Program execution begins and ends there.
 
-#include "Kornweinheim.h"
+#include "Kornweinheim.hpp"
 #include "winston-main.h"
 
 Kornweinheim kwh;

@@ -48,11 +48,13 @@ namespace winston
 		}
 
 		virtual void send(_WebSocketConnection& connection, const std::string& data) = 0;
-		virtual _WebSocketConnection getClient(unsigned int clientId) = 0;
-		virtual unsigned int getClientId(_WebSocketConnection client) = 0;
-		virtual void newConnection(_WebSocketConnection client)
+		virtual _WebSocketConnection& getClient(unsigned int clientId) = 0;
+		virtual const unsigned int getClientId(_WebSocketConnection client) = 0;
+		virtual const unsigned int newConnection(_WebSocketConnection& client)
 		{
-			this->connections.insert({ this->newClientId(), client });
+			const unsigned int id = this->newClientId();
+			this->connections.emplace(id, client);
+			return id;
 		}
 		virtual void disconnect(_WebSocketConnection client) = 0;
 		unsigned int clients()
@@ -63,7 +65,7 @@ namespace winston
 		virtual void init(OnHTTP onHTTP, OnMessage onMessage, unsigned int port) { };
 		virtual void step() = 0;
 		virtual void shutdown() = 0;
-		virtual size_t maxMessageSize() = 0;
+		virtual const size_t maxMessageSize() = 0;
 
 	protected:
 		using Connections = std::map<unsigned int, _WebSocketConnection>;

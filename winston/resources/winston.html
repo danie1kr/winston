@@ -228,12 +228,15 @@
         let socketState = SocketClosed;
         let socket = null;
 
-        const SocketReconnectTimeout = 10*1000;
+        const SocketReconnectTimeout = 10 * 1000;
+
+        let URLsp = new URLSearchParams(window.location.search);
+        $("#ip").val(URLsp.get('ipport') || "127.0.0.1:8080");
 
         function connect()
         {
             socketState = SocketConnecting;
-            socket = new WebSocket("ws://127.0.0.1:8080");
+            socket = new WebSocket("ws://" + $("#ip").val());
 
             socket.onmessage = function (event) {
                 parse(JSON.parse(event.data));
@@ -987,113 +990,129 @@
             if(c !== undefined) connect(id, c, "c");
         }
 
-        function buildRailwayGraph(data)
+        let railwayString = "";
+        let railwayStringSizeReceived = 0;
+        function buildRailwayGraph(dataMsg)
         {
-            function classFromType(type)
-            {
-                switch(type)
-                {
-                    case 0: return "bumper";
-                    case 1: return "rail";
-                    case 2: return "turnout";
-                }
-            }
+            let offset = dataMsg.offset;
+            let fullSize = dataMsg.fullSize;
+            let partialRailway = dataMsg.railway;
 
-            let nodes = [];
-            let edges = [];
-            railway = data.tracks;
-            signals = data.signals;
-            blocks = data.blocks;
+            railwayStringSizeReceived += partialRailway.length;
 
-            _.each(data.tracks, function(track, i) {
-                addTrackToLayout(edges, nodes, data.tracks, track, i*100);
-                /*
+            if (railwayString.length < fullSize)
+                railwayString = new Array(fullSize + 1).join(" ");
 
-                function connect(that, connection, connectionName)
-                {
-                    let other = _.find(data.tracks, t => t.name === connection);
+            railwayString = [railwayString.slice(0, offset), partialRailway, railwayString.slice(offset + partialRailway.length)].join('');
 
-                    let thatNode = _.find(nodes, function(n) { return n.data.track === that;});
-                    let otherNode = _.find(nodes, function(n) { return n.data.track === connection;});
+            if (railwayStringSizeReceived === fullSize) {
 
-                    if(thatNode === undefined || otherNode === undefined)
-                        return;
+                let data = JSON.parse(railwayString);
 
-                    let from = that + connectionName;//(thatNode.data.type !== "bumper"/* && connectionName !== "a"* ? connectionName : "");
-
-                    function connectToOther(otherConnectionName)
-                    {
-                        if(other[otherConnectionName] === that)
-                        {
-                            let to = connection + otherConnectionName; // (otherNode.data.direction !== undefined /*&& otherConnectionName !== "a"* ? otherConnectionName : "");
-                            let id = from + "-" + to;
-                            
-                            edges.push({group: 'edges', data: {id: id, name: id, source: from, target: to}, classes: ""});
-                        }
+                function classFromType(type) {
+                    switch (type) {
+                        case 0: return "bumper";
+                        case 1: return "rail";
+                        case 2: return "turnout";
                     }
-
-                    connectToOther("a");
-                    connectToOther("b");
-                    connectToOther("c");
                 }
 
+                let nodes = [];
+                let edges = [];
+                railway = data.tracks;
+                signals = data.signals;
+                blocks = data.blocks;
 
-                let a = track.a;
-                let b = track.b;
-                let c = track.c;
-                let id = track.name;
+                _.each(data.tracks, function (track, i) {
+                    addTrackToLayout(edges, nodes, data.tracks, track, i * 100);
+                    /*
+    
+                    function connect(that, connection, connectionName)
+                    {
+                        let other = _.find(data.tracks, t => t.name === connection);
+    
+                        let thatNode = _.find(nodes, function(n) { return n.data.track === that;});
+                        let otherNode = _.find(nodes, function(n) { return n.data.track === connection;});
+    
+                        if(thatNode === undefined || otherNode === undefined)
+                            return;
+    
+                        let from = that + connectionName;//(thatNode.data.type !== "bumper"/* && connectionName !== "a"* ? connectionName : "");
+    
+                        function connectToOther(otherConnectionName)
+                        {
+                            if(other[otherConnectionName] === that)
+                            {
+                                let to = connection + otherConnectionName; // (otherNode.data.direction !== undefined /*&& otherConnectionName !== "a"* ? otherConnectionName : "");
+                                let id = from + "-" + to;
+                                
+                                edges.push({group: 'edges', data: {id: id, name: id, source: from, target: to}, classes: ""});
+                            }
+                        }
+    
+                        connectToOther("a");
+                        connectToOther("b");
+                        connectToOther("c");
+                    }
+    
+    
+                    let a = track.a;
+                    let b = track.b;
+                    let c = track.c;
+                    let id = track.name;
+    
+                    let type = 0;
+                    if(c !== undefined)
+                        type = 2;
+                    else if(b !== undefined)
+                        type = 1;
+    
+                    if(type === 2)
+                    {
+                        nodes.push({group: 'nodes', data: {id: id, displayName: track.name, name: id, track: id, connections: {a: a, b: b, c: c}, direction: 1, type: "turnout", relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "trackNode turnout"});
+                        nodes.push({group: 'nodes', data: {id: id + "a", name: id + "a", track: id, relativePosition: {x: -20, y: 0}}, position: {x: i*100-20, y: 0}, classes: "turnoutConnection connection a"});
+                        nodes.push({group: 'nodes', data: {id: id + "b", name: id + "b", track: id, relativePosition: {x: 20, y: 0}}, position: {x: i*100+20, y: 0}, classes: "turnoutConnection connection b"});
+                        nodes.push({group: 'nodes', data: {id: id + "c", name: id + "c", track: id, relativePosition: {x: 20, y: 20}}, position: {x: i*100+20, y: 20}, classes: "turnoutConnection connection c"});
+                    
+                        edges.push({group: 'edges', data: {source: id, target: id+"a", track: id, connection: "a"}, classes: "track"});
+                        edges.push({group: 'edges', data: {source: id, target: id+"b", track: id, connection: "b"}, classes: "internal"});
+                        edges.push({group: 'edges', data: {source: id, target: id+"c", track: id, connection: "c"}, classes: "internal"});
+                    }
+                    else if(type === 1)
+                    {
+                        nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, connections: {a: a, b: b, c: c}, type: "rail", relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "trackNode rail"});
+                        nodes.push({group: 'nodes', data: {id: id + "a", name: id + "a", track: id, relativePosition: {x: -20, y: 0}}, position: {x: i*100-20, y: 0}, classes: "railConnection connection a"});
+                        nodes.push({group: 'nodes', data: {id: id + "b", name: id + "b", track: id, relativePosition: {x: 20, y: 0}}, position: {x: i*100+20, y: 0}, classes: "railConnection connection b"});
+                    
+                        edges.push({group: 'edges', data: {source: id, target: id+"a", track: id, connection: "a"}, classes: "track"});
+                        edges.push({group: 'edges', data: {source: id, target: id+"b", track: id, connection: "b"}, classes: "track"});
+                    }
+                    else
+                    {
+                        nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, connections: {a: a, b: b, c: c}, type: "bumper", relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "trackNode bumper"});
+                        nodes.push({group: 'nodes', data: {id: id + "a", name: id + "a", track: id, relativePosition: {x: -20, y: 0}}, position: {x: i*100-20, y: 0}, classes: "bumperConnection connection a"});
+                        edges.push({group: 'edges', data: {source: id, target: id+"a", track: id, connection: "a"}, classes: "track"});
+                    }
+    
+                    console.log("added track " + id);
+    
+                    if(a !== undefined) connect(id, a, "a");
+                    if(b !== undefined) connect(id, b, "b");
+                    if(c !== undefined) connect(id, c, "c");*/
+                });
 
-                let type = 0;
-                if(c !== undefined)
-                    type = 2;
-                else if(b !== undefined)
-                    type = 1;
+                cy = cytoscapeCreate();
+                cy.add(nodes);
+                cy.add(edges);
+                cy = cytoscapeUpdateSignals(cy, data.signals);
+                cy = cytoscapeUpdateBlocks(cy, data.blocks);
+                cy = cytoscapePostAdd(cy);
 
-                if(type === 2)
-                {
-                    nodes.push({group: 'nodes', data: {id: id, displayName: track.name, name: id, track: id, connections: {a: a, b: b, c: c}, direction: 1, type: "turnout", relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "trackNode turnout"});
-                    nodes.push({group: 'nodes', data: {id: id + "a", name: id + "a", track: id, relativePosition: {x: -20, y: 0}}, position: {x: i*100-20, y: 0}, classes: "turnoutConnection connection a"});
-                    nodes.push({group: 'nodes', data: {id: id + "b", name: id + "b", track: id, relativePosition: {x: 20, y: 0}}, position: {x: i*100+20, y: 0}, classes: "turnoutConnection connection b"});
-                    nodes.push({group: 'nodes', data: {id: id + "c", name: id + "c", track: id, relativePosition: {x: 20, y: 20}}, position: {x: i*100+20, y: 20}, classes: "turnoutConnection connection c"});
-                
-                    edges.push({group: 'edges', data: {source: id, target: id+"a", track: id, connection: "a"}, classes: "track"});
-                    edges.push({group: 'edges', data: {source: id, target: id+"b", track: id, connection: "b"}, classes: "internal"});
-                    edges.push({group: 'edges', data: {source: id, target: id+"c", track: id, connection: "c"}, classes: "internal"});
-                }
-                else if(type === 1)
-                {
-                    nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, connections: {a: a, b: b, c: c}, type: "rail", relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "trackNode rail"});
-                    nodes.push({group: 'nodes', data: {id: id + "a", name: id + "a", track: id, relativePosition: {x: -20, y: 0}}, position: {x: i*100-20, y: 0}, classes: "railConnection connection a"});
-                    nodes.push({group: 'nodes', data: {id: id + "b", name: id + "b", track: id, relativePosition: {x: 20, y: 0}}, position: {x: i*100+20, y: 0}, classes: "railConnection connection b"});
-                
-                    edges.push({group: 'edges', data: {source: id, target: id+"a", track: id, connection: "a"}, classes: "track"});
-                    edges.push({group: 'edges', data: {source: id, target: id+"b", track: id, connection: "b"}, classes: "track"});
-                }
+                if (allowLayoutLoading)
+                    send("getRailwayLayout", {});
                 else
-                {
-                    nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, connections: {a: a, b: b, c: c}, type: "bumper", relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "trackNode bumper"});
-                    nodes.push({group: 'nodes', data: {id: id + "a", name: id + "a", track: id, relativePosition: {x: -20, y: 0}}, position: {x: i*100-20, y: 0}, classes: "bumperConnection connection a"});
-                    edges.push({group: 'edges', data: {source: id, target: id+"a", track: id, connection: "a"}, classes: "track"});
-                }
-
-                console.log("added track " + id);
-
-                if(a !== undefined) connect(id, a, "a");
-                if(b !== undefined) connect(id, b, "b");
-                if(c !== undefined) connect(id, c, "c");*/
-            });
-
-            cy = cytoscapeCreate();
-            cy.add(nodes);
-            cy.add(edges);
-            cy = cytoscapeUpdateSignals(cy, data.signals);
-            cy = cytoscapeUpdateBlocks(cy, data.blocks);
-            cy = cytoscapePostAdd(cy);
-
-            if(allowLayoutLoading)
-                send("getRailwayLayout", {});
-            else
-                allowLayoutLoading = true;
+                    allowLayoutLoading = true;
+            }
         }
 
         function error(data)
@@ -1214,6 +1233,9 @@
             // socket.send(JSON.stringify([msg,data]));
             // socket.send(JSON.stringify({type: type, room: room, device: device, value: value}));
 
+            let URLsp = new URLSearchParams(window.location.search);
+            $("#ip").val(URLsp.get('ipport') || "127.0.0.1:8080");
+        
             $railway = $("#railway");
             $("#splitEdge").on('click', cySplitEdge);
             $("#deleteTrackNode").on('click', cyDeleteTrackNode);

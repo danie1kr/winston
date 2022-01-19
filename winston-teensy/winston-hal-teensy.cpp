@@ -12,10 +12,10 @@ namespace winston
 #include "Util.h"
 
 #ifdef WINSTON_WITH_SDFAT
-#define SDFAT_FILE_TYPE 2 //exfat only
+//#define SDFAT_FILE_TYPE 2 //exfat only
 #include <SD.h>
-#include <SdFatConfig.h>
-#include <SdFat.h>
+//#include <SdFatConfig.h>
+//#include <SdFat.h>
 #endif
 
 #ifdef WINSTON_WITH_TEENSYDEBUG
@@ -25,7 +25,7 @@ namespace winston
 #ifdef WINSTON_WITH_WEBSOCKET
 
 WebServerTeensy::HTTPConnectionTeensy::HTTPConnectionTeensy(HTTPClient& connection)
-    : connection(connection), guard((unsigned char)HTTPConnectionTeensy::State::NEW)
+    : connection(connection), guard((unsigned char)HTTPConnectionTeensy::State::NEW), bufferPopulated(0)
 {
 
 }
@@ -34,9 +34,10 @@ bool WebServerTeensy::HTTPConnectionTeensy::status(const unsigned int HTTPStatus
 {
     if (this->guard & (unsigned char)HTTPConnectionTeensy::State::STATUS)
         return false;
-    std::string line(winston::build("HTTP/1.1 ", HTTPStatus, " OK", "\r\n"));
+    std::string line(winston::build("HTTP/1.1 ", HTTPStatus, " OK\r\n"));
     this->connection.write(line.c_str());
-    this->guard &= (unsigned char)HTTPConnectionTeensy::State::STATUS;
+    Serial.print(line.c_str());
+    this->guard |= (unsigned char)HTTPConnectionTeensy::State::STATUS;
     return true;
 }
 
@@ -46,7 +47,8 @@ bool WebServerTeensy::HTTPConnectionTeensy::header(const std::string& key, const
         return false;
     std::string line(winston::build(key, ": ", value, "\r\n"));
     this->connection.write(line.c_str());
-    this->guard &= (unsigned char)HTTPConnectionTeensy::State::HEADER;
+    Serial.print(line.c_str());
+    this->guard |= (unsigned char)HTTPConnectionTeensy::State::HEADER;
     return true;
 }
 
@@ -54,8 +56,14 @@ bool WebServerTeensy::HTTPConnectionTeensy::body(const std::string& content)
 {
     if (!(this->guard & (unsigned char)HTTPConnectionTeensy::State::HEADER))
         return false;
+    if (!(this->guard & (unsigned char)HTTPConnectionTeensy::State::BODY))
+    {
+        this->connection.write("\r\n");
+        Serial.print("\r\n");
+    }
     this->connection.write(content.c_str());
-    this->guard &= (unsigned char)HTTPConnectionTeensy::State::BODY;
+    Serial.print(content.c_str());
+    this->guard |= (unsigned char)HTTPConnectionTeensy::State::BODY;
     return true;
 }
 
@@ -64,23 +72,57 @@ bool WebServerTeensy::HTTPConnectionTeensy::header(const __FlashStringHelper* ke
     if (!(this->guard & (unsigned char)HTTPConnectionTeensy::State::STATUS) || (this->guard & (unsigned char)HTTPConnectionTeensy::State::BODY))
         return false;
 
-    auto target = [=](uint8_t c) { return connection.write(c); };
+    auto target = [=](uint8_t c) { 
+        Serial.write(c);
+        return connection.write(c); 
+    };
 
     winston::hal::stream(key, target);
     this->connection.write(": ");
+    Serial.write(": ");
     winston::hal::stream(value, target);
     this->connection.write("\r\n");
+    Serial.write("\r\n");
 
-    this->guard &= (unsigned char)HTTPConnectionTeensy::State::HEADER;
+    this->guard |= (unsigned char)HTTPConnectionTeensy::State::HEADER;
     return true;
 }
 bool WebServerTeensy::HTTPConnectionTeensy::body(const __FlashStringHelper* content)
 {
     if (!(this->guard & (unsigned char)HTTPConnectionTeensy::State::HEADER))
         return false;
-    auto target = [=](uint8_t c) { return connection.write(c); };
+    if (!(this->guard & (unsigned char)HTTPConnectionTeensy::State::BODY))
+    {
+        this->connection.write("\r\n");
+        Serial.print("\r\n");
+    }
+    //*
+    auto target = [=](uint8_t c) {
+        Serial.write(c);
+        return connection.write(c);
+    };
     winston::hal::stream(content, target);
-    this->guard &= (unsigned char)HTTPConnectionTeensy::State::BODY;
+    /*/
+
+    auto target = [=](uint8_t c) {
+        buffer[bufferPopulated++] = c;
+        if (bufferPopulated == 512)
+        {
+            connection.write(buffer, bufferPopulated);
+            Serial.write(buffer, bufferPopulated);
+            bufferPopulated = 0;
+        }
+        return 1;
+    };
+    winston::hal::stream(content, target);
+    if (bufferPopulated > 0)
+    {
+        connection.write(buffer, bufferPopulated);
+        Serial.write(buffer, bufferPopulated);
+    }
+    */
+
+    this->guard |= (unsigned char)HTTPConnectionTeensy::State::BODY;
     return true;
 }
 
@@ -90,6 +132,9 @@ WebServerTeensy::WebServerTeensy() : winston::WebServer<Client>()
 
 void WebServerTeensy::init(OnHTTP onHTTP, OnMessage onMessage, unsigned int port)
 {
+    if (!winston::runtimeNetwork())
+        return;
+
     this->onHTTP = onHTTP;
     this->onMessage = onMessage;
     this->it = this->connections.begin();
@@ -104,6 +149,9 @@ void WebServerTeensy::send(Client& connection, const std::string& data)
 
 void WebServerTeensy::step()
 {
+    if (!winston::runtimeNetwork())
+        return;
+
     if (auto httpClient = this->httpServer.available())
     {
         // An http request ends with a blank line.
@@ -254,18 +302,20 @@ static std::string winstonStoragePath = constWinstonStoragePath;
 static const auto winstonStorageSize = 128 * 1024;
 
 #ifdef WINSTON_WITH_SDFAT
-static SdExFat sd;
-static ExFile winstonStorage;
+static FsFile winstonStorage;
 #endif
 
 void ensureStorageFile()
 {
 #ifdef WINSTON_WITH_SDFAT
-    if (!sd.exists(winstonStoragePath.c_str()))
+    if (!winston::runtimePersistence())
+        return;
+
+    if (!SD.exists(winstonStoragePath.c_str()))
     {
-        auto file = sd.open(winstonStoragePath.c_str(), O_READ | O_WRITE | O_CREAT);
-        std::string s(winstonStorageSize, 0);
-        file.write(s.c_str(), s.length());
+        auto file = SD.open(winstonStoragePath.c_str(), FILE_WRITE);
+        for(size_t i = 0; i < winstonStorageSize; ++i)
+            file.write('0');
         file.flush();
         file.close();
     }
@@ -339,11 +389,6 @@ const winston::Result Arduino_SPIDevice::send(const std::span<DataType> data)
     return winston::Result::OK;
 }
 
-constexpr uint32_t DHCPTimeOut = 10000;  // 10 seconds
-IPAddress staticIP{ 0, 0, 0, 0 };//{192, 168, 1, 101};
-IPAddress subnetMask{ 255, 255, 255, 0 };
-IPAddress gateway{ 192, 168, 1, 1 };
-
 void teensyMAC(uint8_t* mac) { // there are 2 MAC addresses each 48bit 
     uint32_t m1 = HW_OCOTP_MAC1;
     uint32_t m2 = HW_OCOTP_MAC0;
@@ -361,79 +406,33 @@ namespace winston
         void init()
         {
             Serial.begin(115200);
-            while (!Serial && millis() < 4000) {
+            while (!Serial) { // && millis() < 2000) {
                 // Wait for Serial to initialize
             }
             text("Winston Teensy Init Hello"_s);
 
 #ifdef WINSTON_WITH_TEENSYDEBUG
             debug.begin(SerialUSB1);
-            delay(10000);
 #endif
 
 #ifdef WINSTON_WITH_SDFAT
-            if (!sd.begin(BUILTIN_SDCARD)) {
-                error("SD initialization failed!"_s);
-                //return;
+            if (!SD.begin(BUILTIN_SDCARD)) {
+                SD.sdfs.printSdError(&Serial);
             }
-            sd.chdir();
+            else
+                winston::runtimeEnablePersistence();
+            SD.sdfs.chdir();
             ensureStorageFile();
 #endif
-
-#ifdef WINSTON_TEENSY_QNETHERNET
-            // Listen for link changes, for demonstration
-            Ethernet.onLinkState([](bool state) {
-                printf("Ethernet: Link %s\n", state ? "ON" : "OFF");
-                });
-
-            // Listen for address changes
-            Ethernet.onAddressChanged([]() {
-                IPAddress ip = Ethernet.localIP();
-                bool hasIP = !(ip == INADDR_NONE);  // IPAddress has no operator!=()
-                if (hasIP) {
-                    printf("Ethernet: Address changed:\n");
-
-                    IPAddress ip = Ethernet.localIP();
-                    printf("    Local IP = %u.%u.%u.%u\n", ip[0], ip[1], ip[2], ip[3]);
-                    ip = Ethernet.subnetMask();
-                    printf("    Subnet   = %u.%u.%u.%u\n", ip[0], ip[1], ip[2], ip[3]);
-                    ip = Ethernet.gatewayIP();
-                    printf("    Gateway  = %u.%u.%u.%u\n", ip[0], ip[1], ip[2], ip[3]);
-                    ip = Ethernet.dnsServerIP();
-                    if (!(ip == INADDR_NONE)) {  // May happen with static IP
-                        printf("    DNS      = %u.%u.%u.%u\n", ip[0], ip[1], ip[2], ip[3]);
-                    }
-                }
-                else {
-                    printf("Ethernet: Address changed: No IP address\n");
-                }
-                });
-
-
-            if (staticIP == INADDR_NONE) {
-                printf("Starting Ethernet with DHCP...\n");
-                if (!Ethernet.begin()) {
-                    printf("Failed to start Ethernet\n");
-                    return;
-                }
-                if (!Ethernet.waitForLocalIP(DHCPTimeOut)) {
-                    printf("Failed to get IP address from DHCP\n");
-                    // We may still get an address later, after the timeout,
-                    // so continue instead of returning
-                }
-            }
-            else {
-                printf("Starting Ethernet with static IP...\n");
-                Ethernet.begin(staticIP, subnetMask, gateway);
-            }
-#else
             uint8_t mac[6];
             teensyMAC(mac);
             if (!Ethernet.begin(mac)) {
                 error("Failed to start Ethernet\n"_s);
-                return;
             }
-#endif
+            else
+                winston::runtimeEnableNetwork();
+
+            logRuntimeStatus();
         }
 
         const std::string __FlashStorageStringtoStd(const __FlashStringHelper* fsh)
@@ -508,6 +507,9 @@ namespace winston
         const uint8_t storageRead(const size_t address)
         {
 #ifdef WINSTON_WITH_SDFAT
+            if (!winston::runtimePersistence())
+                return 0;
+
             if (winstonStorage.size() > address)
             {
                 winstonStorage.seek(address);
@@ -521,11 +523,13 @@ namespace winston
         void storageWrite(const size_t address, const uint8_t data)
         {
 #ifdef WINSTON_WITH_SDFAT
+            if (!winston::runtimePersistence())
+                return;
+
             if (winstonStorage.size() > address)
             {
                 winstonStorage.seek(address);
                 winstonStorage.write(data);
-                //winstonStorage[address] = data;
             }
 #endif
         }
@@ -533,6 +537,8 @@ namespace winston
         bool storageCommit()
         {
 #ifdef WINSTON_WITH_SDFAT
+            if (!winston::runtimePersistence())
+                return true;
             winstonStorage.sync();
 #endif
             return true;

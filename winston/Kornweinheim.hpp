@@ -225,28 +225,31 @@ void Kornweinheim::on_http(WebServer::HTTPConnection& connection, const std::str
     {
         connection.status(200);
         connection.header("content-type"_s, "text/html; charset=UTF-8"_s);
-        connection.body("<html>winston</html>"_s);
+        connection.header("Connection"_s, "close"_s);
+        connection.body("<html>winston</html>\r\n"_s);
     }
     else if (resource.compare(path_railway) == 0)
     {
         connection.status(200);
         connection.header("content-type"_s, "application/json; charset=UTF-8"_s);
-        connection.body("<html>winston</html>"_s);
+        connection.header("Connection"_s, "close"_s);
+        connection.body("<html>winston</html>\r\n"_s);
     }
     else if (resource.compare(path_log) == 0)
     {
         connection.status(200);
         connection.header("content-type"_s, "text/html; charset=UTF-8"_s);
+        connection.header("Connection"_s, "close"_s);
         connection.body("<html><head>winston</head><body><table><tr><th>timestamp</th><th>level</th><th>log</th></tr>"_s);
         for (const auto& entry : winston::logger.entries())
         {
-            connection.body("<tr><td>"_s);
-            connection.body(winston::build(entry.timestamp)); connection.body("</td><td>"_s);
-            connection.body(entry.level._to_string()); connection.body("</td><td>"_s);
-            connection.body(entry.text); connection.body("</td></tr>"_s);
+            connection.body("<tr><td>");
+            connection.body(winston::build(entry.timestamp)); connection.body("</td><td>");
+            connection.body(entry.level._to_string()); connection.body("</td><td>");
+            connection.body(entry.text); connection.body("</td></tr>\r\n");
         }
 
-        connection.body("</table></body></html>"_s);
+        connection.body("</table></body></html>\r\n"_s);
     }
 }
 
@@ -355,12 +358,10 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
         auto signals = Json::array();
         auto blocks = Json::array();
 #elif defined(WINSTON_JSON_ARDUINO)
-        DynamicJsonDocument railwayMessage(32 * 1024);
-        railwayMessage["op"] = "railway";
-        auto data = railwayMessage.createNestedObject("data");
-        auto tracks = data.createNestedArray("tracks");
-        auto signals = data.createNestedArray("signals");
-        auto blocks = data.createNestedArray("blocks");
+        DynamicJsonDocument railwayContent(32 * 1024);
+        auto tracks = railwayContent.createNestedArray("tracks");
+        auto signals = railwayContent.createNestedArray("signals");
+        auto blocks = railwayContent.createNestedArray("blocks");
 #endif
 
         for (unsigned int i = 0; i < railway->tracksCount(); ++i)
@@ -478,9 +479,27 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
 
         this->webServer.send(client, railwayMessage.dump());
 #elif defined(WINSTON_JSON_ARDUINO)
-        std::string json("");
-        serializeJson(railwayMessage, json);
-        this->webServer.send(client, json);
+        std::string railwayContentJson("");
+        serializeJson(railwayContent, railwayContentJson);
+
+        const size_t chunkSize = 512;// this->webServer.maxMessageSize();
+        
+        for (size_t i = 0; i < railwayContentJson.length(); i += chunkSize)
+        {
+            DynamicJsonDocument railwayMessage(chunkSize + 256);
+            railwayMessage["op"] = "railway";
+            auto data = railwayMessage.createNestedObject("data");
+            data["fullSize"] = (unsigned int)railwayContentJson.length();
+            data["offset"] = (unsigned int)i;
+
+            auto part = railwayContentJson.substr(i, chunkSize);
+            data["railway"] = part;
+
+            std::string json("");
+            serializeJson(railwayMessage, json);
+            //Serial.write(json.c_str());
+            this->webServer.send(client, json);
+        }
 #endif
     }
     else if (std::string("\"storeRailwayLayout\"").compare(op) == 0)

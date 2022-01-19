@@ -32,6 +32,7 @@ namespace winston
 		ReceiveFailed,
 		ValidationFailed,
 		ExternalHardwareFailed,
+		NotInitialized,
 		NotFound
 	};
 
@@ -113,6 +114,45 @@ namespace winston
 	protected:
 		bool skip;
 	};
+	class RuntimeHardwareState
+	{
+	private:
+		using StateType = unsigned char;
+	public:
+		enum class Type : StateType
+		{
+			Railway			= 1,
+			Persistence		= 2,
+			Network			= 3,
+			SPI				= 4
+		};
+		RuntimeHardwareState();
+
+		inline void enable(const Type what)
+		{
+			this->state |= 1 << (RuntimeHardwareState::StateType)what;
+		}
+		inline void disable(const Type what)
+		{
+			this->state &= ~(1UL << (RuntimeHardwareState::StateType)what);
+		}
+		inline bool enabled(const Type what) const
+		{
+			return (this->state >> (RuntimeHardwareState::StateType)what) & 1U;
+		}
+	private:
+		StateType state;
+	};
+	extern RuntimeHardwareState runtimeHardwareState;
+#define RUNTIME_LAMBDAS(what) \
+	auto runtime##what = []() { return runtimeHardwareState.enabled(RuntimeHardwareState::Type::what); }; \
+	auto runtimeEnable##what = []() { runtimeHardwareState.enable(RuntimeHardwareState::Type::what); };
+
+	RUNTIME_LAMBDAS(SPI);
+	RUNTIME_LAMBDAS(Persistence);
+	RUNTIME_LAMBDAS(Network);
+	RUNTIME_LAMBDAS(Railway);
+	void logRuntimeStatus();
 
 	template<size_t>
 	class Log;

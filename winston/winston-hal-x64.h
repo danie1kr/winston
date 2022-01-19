@@ -60,10 +60,10 @@ public:
 	virtual void send(Client& connection, const std::string &data);
 	virtual void step();
 	virtual void shutdown();
-	virtual Client getClient(unsigned int clientId);
-	virtual unsigned int getClientId(Client client);
+	virtual Client& getClient(const unsigned int clientId);
+	virtual const unsigned int getClientId(Client client);
 	virtual void disconnect(Client client);
-	virtual size_t maxMessageSize();
+	virtual const size_t maxMessageSize();
 private:
 
 	void on_http(Client hdl);

@@ -127,7 +127,7 @@
     <ClCompile Include="external\central-z21\Z21Packet.cpp" />
     <ClCompile Include="external\json11\json11.cpp" />
     <ClCompile Include="FT232_SPIDevice.cpp" />
-    <ClCompile Include="Kornweinheim.cpp" />
+    <ClInclude Include="Kornweinheim.hpp" />
     <ClCompile Include="railways.cpp" />
     <ClCompile Include="winston-hal-x64.cpp" />
     <ClCompile Include="winston-main.cpp" />

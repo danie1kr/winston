@@ -15,7 +15,7 @@
 #define _VSARDUINO_H_
 #define __HARDWARE_imxrt1062__
 #define __HARDWARE_IMXRT1062__
-#define _VMDEBUG 1
+#define RAILWAY_DEBUG_INJECTOR
 #define TCB_SPAN_NAMESPACE_NAME std
 #define WINSTON_PLATFORM_TEENSY
 #define TL_NAMESPACE std

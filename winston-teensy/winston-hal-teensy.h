@@ -2,29 +2,21 @@
 
 #include <Arduino.h>
 
+#include "Winston.h"
 #include "Signal.h"
 #include "HAL.h"
 #include "Log.h"
 
-#define WINSTON_WITH_WEBSOCKET
 #define WINSTON_WITH_HTTP
 #define WINSTON_WITH_TEENSYDEBUG
 #define WINSTON_WITH_SDFAT
-//#define WINSTON_TEENSY_QNETHERNET
-
+/*
+#define WINSTON_WITH_WEBSOCKET
 #define WEBSOCKETS_USE_ETHERNET     true
-#ifdef WINSTON_TEENSY_QNETHERNET
-#define USE_QN_ETHERNET				true
-#else
 #define USE_NATIVE_ETHERNET         true
-#endif
 
-#ifdef WINSTON_TEENSY_QNETHERNET
-#define ARDUINO_WEBSOCKETS_QNETHERNET
-#endif
-
-//#define WINSTON_WEBSOCKETS_WebSockets2_Generic
-#define WINSTON_WEBSOCKETS_ArduinoWebsockets
+#define WINSTON_WEBSOCKETS_WebSockets2_Generic
+//#define WINSTON_WEBSOCKETS_ArduinoWebsockets
 #ifdef WINSTON_WITH_WEBSOCKET
 #ifdef WINSTON_WEBSOCKETS_ArduinoWebsockets
 #include <ArduinoWebsockets.h>
@@ -35,14 +27,8 @@ using namespace websockets;
 using namespace websockets2_generic;
 #endif
 #endif
-
-#ifdef WINSTON_TEENSY_QNETHERNET
-#include <QNEthernet.h>
-using namespace qindesign::network;
-#else
+*/
 #include <NativeEthernet.h>
-#endif
-
 #include <SPI.h>
 
 namespace winston
@@ -99,10 +85,8 @@ private:
 };
 
 using SignalSPIDevice = Arduino_SPIDevice;
-
+/*
 #ifdef WINSTON_WITH_WEBSOCKET
-#include "../libwinston/WebServer.h"
-
 class WebServerTeensy : public winston::WebServer<WebsocketsClient>
 {
 public:
@@ -129,6 +113,9 @@ public:
             HEADER = 0b10,
             BODY = 0b100
         };
+
+        size_t bufferPopulated;
+        unsigned char buffer[512];
     };
     using HTTPConnection = HTTPConnectionTeensy;
     using OnHTTP = std::function<void(HTTPConnection& client, const std::string& resource)>;
@@ -152,4 +139,4 @@ private:
     OnHTTP onHTTP;
 };
 using WebServer = WebServerTeensy;
-#endif
+#endif*/

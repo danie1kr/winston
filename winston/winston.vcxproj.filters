@@ -51,9 +51,6 @@
     <ClCompile Include="external\json11\json11.cpp">
       <Filter>external\json11</Filter>
     </ClCompile>
-    <ClCompile Include="Kornweinheim.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\central-z21\Z21Const.h">
@@ -97,6 +94,9 @@
     </ClInclude>
     <ClInclude Include="external\ArduinoJson-v6.19.0.hpp">
       <Filter>external</Filter>
+    </ClInclude>
+    <ClInclude Include="Kornweinheim.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

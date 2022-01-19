@@ -5,10 +5,18 @@
 namespace winston
 {
 	Logger logger;
+	RuntimeHardwareState runtimeHardwareState;
 
-	void error(std::string error)
+	RuntimeHardwareState::RuntimeHardwareState() : state(0) { };
+
+	void logRuntimeStatus()
 	{
-		hal::text("error: " + error);
+#define RHS_Print(what) logger.info(#what ": o", runtimePersistence() ? "n" : "ff");
+		logger.info("Winston Runtime Status");
+		RHS_Print(Persistence);
+		RHS_Print(Network);
+		RHS_Print(SPI);
+		RHS_Print(Railway);
 	}
 
 	Port::Port() :

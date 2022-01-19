@@ -17,6 +17,7 @@
 
 #ifdef WINSTON_PLATFORM_TEENSY
 #include "../winston-teensy/winston-hal-teensy.h"
+#include "../winston-teensy/winston-hal-teensy-webserver.hpp"
 #endif
 
 #ifdef WINSTON_JSON_11

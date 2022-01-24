@@ -4,8 +4,6 @@
 #include "HAL.h"
 #include "Util.h"
 
-#include "better_enum.hpp"
-
 namespace winston
 {
 	Track::Track(const std::string name, Length trackLength) : Shared_Ptr<Track>(), _name(name), _block(0), trackLength(trackLength)

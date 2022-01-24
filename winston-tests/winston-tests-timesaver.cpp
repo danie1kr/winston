@@ -39,8 +39,7 @@ namespace winstontests
             auto t2 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->track(TimeSaverRailway::Tracks::Turnout2));
 
             winston::Track::Shared onto, onto2;
-            winston::NullMutex nullMutex;
-            auto signalBox = winston::SignalBox::make(nullMutex);
+            auto signalBox = winston::SignalBox::make();
 
             auto direction = winston::Turnout::Direction::A_C;
             t1->finalizeChangeTo(direction);
@@ -63,15 +62,14 @@ namespace winstontests
             auto t2 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->track(TimeSaverRailway::Tracks::Turnout2));
 
             winston::Track::Shared onto, onto2;
-            winston::NullMutex nullMutex;
             auto tr = std::dynamic_pointer_cast<winston::Railway>(testRailway);
-            auto signalBox = winston::SignalBox::make(tr, nullMutex);
+            auto signalBox = winston::SignalBox::make(tr);
 
             //signalBox->notify(winston::EventTurnoutStartToggle::make(cb, t1));
             //signalBox->notify(winston::EventTurnoutStartToggle::make(cb, t2));
 
-            signalBox->order(winston::Command::make([t1](const unsigned long long& created) -> const winston::State { return t1->startToggle(); }));
-            signalBox->order(winston::Command::make([t2](const unsigned long long& created) -> const winston::State { return t2->startToggle(); }));
+            signalBox->order(winston::Command::make([t1](const TimePoint &created) -> const winston::State { return t1->startToggle(); }));
+            signalBox->order(winston::Command::make([t2](const TimePoint &created) -> const winston::State { return t2->startToggle(); }));
 
 
             signalBox->work();

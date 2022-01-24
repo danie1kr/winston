@@ -1,5 +1,5 @@
+
 #include "railways.h"
-#include <stdexcept>
 #include <string>
 #include "../libwinston/better_enum.hpp"
 
@@ -24,7 +24,7 @@ winston::Track::Shared MiniRailway::define(const Tracks track)
     }
 }
 
-void MiniRailway::connect(std::array<winston::Track::Shared, tracksCount()>& tracks)
+void MiniRailway::connect()
 {
     this->track(Tracks::A)->connect(winston::Track::Connection::A, this->track(Tracks::Turnout1), winston::Track::Connection::A)
         ->connect(winston::Track::Connection::B, this->track(Tracks::B), winston::Track::Connection::A);
@@ -85,7 +85,7 @@ winston::Track::Shared SignalTestRailway::define(const Tracks track)
     }
 }
 
-void SignalTestRailway::connect(std::array<winston::Track::Shared, tracksCount()>& tracks)
+void SignalTestRailway::connect()
 {
     this->track(Tracks::A)->connect(winston::Track::Connection::A, this->track(Tracks::Turnout1), winston::Track::Connection::A)
         ->connect(winston::Track::Connection::B, this->track(Tracks::B), winston::Track::Connection::A);
@@ -195,7 +195,7 @@ winston::Track::Shared RailwayWithSiding::define(const Tracks track)
     }
 }
 
-void RailwayWithSiding::connect(std::array<winston::Track::Shared, tracksCount()> & tracks)
+void RailwayWithSiding::connect()
 {
     auto a = this->track(Tracks::A);
     auto b = this->track(Tracks::B);
@@ -240,7 +240,7 @@ winston::Track::Shared TimeSaverRailway::define(const Tracks track)
     }
 }
 
-void TimeSaverRailway::connect(std::array<winston::Track::Shared, tracksCount()>& tracks)
+void TimeSaverRailway::connect()
 {
     // counter-wise orientation
     auto a = this->track(Tracks::A);
@@ -354,7 +354,7 @@ winston::Track::Shared Y2020Railway::define(const Tracks track)
 
 }
 
-void Y2020Railway::connect(std::array<winston::Track::Shared, tracksCount()>& tracks)
+void Y2020Railway::connect()
 {
     auto a = this->track(Tracks::A);
     auto b = this->track(Tracks::B);
@@ -473,7 +473,7 @@ const winston::Address Y2021Railway::AddressTranslator::address(winston::Track::
     return 0;
 }
 
-winston::Track::Shared Y2021Railway::define(const Tracks track)
+FLASHMEM winston::Track::Shared Y2021Railway::define(const Tracks track)
 {
     switch (track)
     {
@@ -520,7 +520,7 @@ winston::Track::Shared Y2021Railway::define(const Tracks track)
 
 }
 
-void Y2021Railway::connect(std::array<winston::Track::Shared, tracksCount()>& tracks)
+FLASHMEM void Y2021Railway::connect()// std::array<winston::Track::Shared, tracksCount()>& tracks)
 {
 #define LOCAL_TRACK(var)  auto var = this->track(Tracks::var);
     LOCAL_TRACK(PBF1a);
@@ -690,7 +690,7 @@ winston::Track::Shared SignalRailway::define(const Tracks track)
 
 }
 
-void SignalRailway::connect(std::array<winston::Track::Shared, tracksCount()>& tracks)
+void SignalRailway::connect()
 {
     auto a = this->track(Tracks::A);
     auto b = this->track(Tracks::B);

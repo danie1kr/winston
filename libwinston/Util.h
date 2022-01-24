@@ -1,30 +1,14 @@
 #pragma once
 
 #include <string>
+#include <deque>
 #include <memory>
+#include <chrono>
 
 #include "Callback.h"
 
 namespace winston
 {
-	class Mutex
-	{
-	public:
-		Mutex();
-		virtual bool lock();
-		virtual void unlock();
-
-	private:
-		bool locked;
-	};
-
-	class NullMutex : public Mutex
-	{
-	public:
-		bool lock();
-		void unlock();
-	};
-
 	extern void error(const std::string &error);
 
     // https://github.com/friedmud/unique_ptr_cast
@@ -81,6 +65,7 @@ namespace winston
 	std::string build(const unsigned char first);
 	std::string build(const char* first);
 	std::string build(const winston::Result first);
+	std::string build(const winston::TimePoint first);
 	
 	template <typename _First, typename... _Args>
 		std::string build(const _First first, _Args&&... args)
@@ -98,4 +83,45 @@ namespace winston
 	unsigned char reverse(unsigned char b);
 
 	extern Callback::Shared nop;
+
+#define WINSTON_JOURNAL_SIZE	32
+	class StopwatchJournal
+	{
+	public:
+		struct Event
+		{
+			Event(StopwatchJournal& swj, const std::string name);
+			virtual ~Event();
+
+		private:
+			const std::string name;
+			StopwatchJournal& swj;
+			TimePoint start;
+		};
+
+		struct Entry
+		{
+			Entry(const size_t duration, const std::string name);
+
+			const std::string name;
+			const size_t duration;
+		};
+
+		struct Statistics
+		{
+			size_t avg, min, max, stddev;
+			std::vector<Entry> top;
+			Statistics();
+		};
+
+		StopwatchJournal(const std::string name);
+
+		const Statistics stats(const size_t withTop = 0) const;
+		const std::string toString(const size_t withTop = 0) const;
+		void add(Duration duration, std::string text);
+
+	private:
+		const std::string name;
+		std::deque<Entry> journal;
+	};
 }

@@ -204,15 +204,19 @@ namespace winston
 			return this->flushInternal();
 		}
 
-		Command::Shared flushCommand(const unsigned long long waitPeriod = 40)
+		Command::Shared flushCommand(const Duration waitPeriod = std::chrono::milliseconds(40))
 		{
-			return Command::make([=](const unsigned long long& created) -> const State 
+			return Command::make([=](const TimePoint& created) -> const State
 			{
 				auto now = hal::now();
-				if (now - lastFlush > waitPeriod && lastUpdate > lastFlush)
+				if ((now - lastFlush) > waitPeriod && lastUpdate > lastFlush)
+				{
 					this->flush();
-				return State::Running;
-			});
+					return State::Running;
+				}
+				else
+					return State::Delay;
+			}, __PRETTY_FUNCTION__);
 		}
 
 		using Shared_Ptr<SignalDevice<T>>::Shared;
@@ -224,7 +228,7 @@ namespace winston
 		size_t devices;
 		size_t portsPerDevice;
 	private:
-		unsigned long long lastFlush;
-		unsigned long long lastUpdate;
+		TimePoint lastFlush;
+		TimePoint lastUpdate;
 	};
 }

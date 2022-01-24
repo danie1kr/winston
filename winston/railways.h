@@ -1,5 +1,11 @@
 #pragma once
 
+#ifdef WINSTON_PLATFORM_TEENSY
+#include "pgmspace.h"
+#else
+#define FLASHMEM
+#endif
+
 #include <array>
 #include "../libwinston/better_enum.hpp"
 #include "../libwinston/Winston.h"
@@ -34,7 +40,7 @@ public:
 
 private:
     winston::Track::Shared define(const Tracks track);
-    void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
+    void connect();
 };
 #endif
 
@@ -108,7 +114,7 @@ public:
 
 private:
     winston::Track::Shared define(const Tracks track);
-    void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
+    void connect();
 };
 #endif
 
@@ -144,7 +150,7 @@ public:
     using winston::Shared_Ptr<RailwayWithSiding>::make;
 private:
     winston::Track::Shared define(const Tracks track);
-    void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
+    void connect();
 
 public:
     class AddressTranslator : public winston::DigitalCentralStation::TurnoutAddressTranslator, winston::Shared_Ptr<AddressTranslator>
@@ -207,7 +213,7 @@ public:
     using winston::Shared_Ptr<TimeSaverRailway>::make;
 private:
     winston::Track::Shared define(const Tracks track);
-    void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
+    void connect();
 };
 #endif
 
@@ -278,7 +284,7 @@ public:
     };
 private:
     winston::Track::Shared define(const Tracks track);
-    void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
+    void connect();
 };
 #endif
 
@@ -366,7 +372,7 @@ public:
     };
 private:
     winston::Track::Shared define(const Tracks track);
-    void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
+    void connect();
 };
 #ifndef WINSTON_PLATFORM_TEENSY
 BETTER_ENUM(SignalRailwayTracks, unsigned int,
@@ -426,6 +432,6 @@ public:
     };
 private:
     winston::Track::Shared define(const Tracks track);
-    void connect(std::array < winston::Track::Shared, tracksCount()>& tracks);
+    void connect();
 };
 #endif

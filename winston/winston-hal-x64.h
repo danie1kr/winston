@@ -5,6 +5,11 @@
 #include "../libwinston/HAL.h"
 #include "FT232_SPIDevice.h"
 
+#define FLASHMEM
+#define PROGMEM
+#define EXTMEM
+#define DMAMEM
+
 const char* operator "" _s(const char* in, size_t len);
 
 class UDPSocketWinSock : public winston::hal::UDPSocket, winston::Shared_Ptr<UDPSocketWinSock>

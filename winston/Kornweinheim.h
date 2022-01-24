@@ -4,6 +4,7 @@
 
 #include "../libwinston/Winston.h"
 #include "../libwinston/Log.h"
+#include "../libwinston/Util.h"
 
 #include "winston-main.h"
 #include "railways.h"
@@ -46,7 +47,7 @@ using namespace ArduinoJson;
 
 constexpr auto FRAME_SLEEP = 50;
 
-constexpr auto RAILWAY_DEBUG_INJECTOR_DELAY = 1000;
+constexpr auto WINSTON_RAILWAY_DEBUG_INJECTOR_DELAY = 1000;
 //#define RAILWAY_CLASS RailwayWithSiding
 //#define RAILWAY_CLASS TimeSaverRailway
 //#define RAILWAY_CLASS Y2020Railway

@@ -1,5 +1,6 @@
 
 #include "Kornweinheim.h"
+#include <chrono>
 
 #ifdef WINSTON_WITH_WEBSOCKET
 // send a turnout state via websocket
@@ -92,7 +93,7 @@ void Kornweinheim::locoSend(winston::Address address)
     }
 }
 #endif
-void Kornweinheim::initNetwork()
+FLASHMEM void Kornweinheim::initNetwork()
 {
     // z21
     z21Socket = UDPSocket::make(z21IP, z21Port);
@@ -161,19 +162,19 @@ winston::Locomotive::Callbacks Kornweinheim::locoCallbacks()
     winston::Locomotive::Callbacks callbacks;
 
     callbacks.drive = [=](const winston::Address address, const unsigned char speed, const bool forward) {
-        this->signalBox->order(winston::Command::make([this, address, speed, forward](const unsigned long long& created) -> const winston::State
+        this->signalBox->order(winston::Command::make([this, address, speed, forward](const winston::TimePoint &created) -> const winston::State
             {
                 this->digitalCentralStation->triggerLocoDrive(address, speed, forward);
                 return winston::State::Finished;
-            }));
+            }, __PRETTY_FUNCTION__));
     };
 
     callbacks.functions = [=](const winston::Address address, const uint32_t functions) {
-        this->signalBox->order(winston::Command::make([this, address, functions](const unsigned long long& created) -> const winston::State
+        this->signalBox->order(winston::Command::make([this, address, functions](const winston::TimePoint &created) -> const winston::State
             {
                 this->digitalCentralStation->triggerLocoFunction(address, functions);
                 return winston::State::Finished;
-            }));
+            }, __PRETTY_FUNCTION__));
     };
 
     return callbacks;
@@ -245,7 +246,7 @@ void Kornweinheim::on_http(WebServer::HTTPConnection& connection, const std::str
         {
             connection.body("<tr><td>");
             connection.body(winston::build(entry.timestamp)); connection.body("</td><td>");
-            connection.body(entry.level._to_string()); connection.body("</td><td>");
+            connection.body(entry.levelName()); connection.body("</td><td>");
             connection.body(entry.text); connection.body("</td></tr>\r\n");
         }
 
@@ -308,23 +309,23 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
 #endif
         auto turnout = std::static_pointer_cast<winston::Turnout>(railway->track(id));
         auto requestDir = winston::Turnout::otherDirection(turnout->direction());
-        signalBox->order(winston::Command::make([this, id, turnout, requestDir](const unsigned long long& created) -> const winston::State
+        signalBox->order(winston::Command::make([this, id, turnout, requestDir](const winston::TimePoint &created) -> const winston::State
             {
-#ifdef RAILWAY_DEBUG_INJECTOR
-                signalBox->order(winston::Command::make([this, turnout, requestDir](const unsigned long long& created) -> const winston::State
+#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
+                signalBox->order(winston::Command::make([this, turnout, requestDir](const winston::TimePoint &created) -> const winston::State
                     {
-                        if (winston::hal::now() - created > RAILWAY_DEBUG_INJECTOR_DELAY)
+                        if ((winston::hal::now() - created) / std::chrono::milliseconds(1) > WINSTON_RAILWAY_DEBUG_INJECTOR_DELAY)
                         {
                             this->stationDebugInjector->injectTurnoutUpdate(turnout, requestDir);
                             return winston::State::Finished;
                         }
-                        return winston::State::Running;
-                    }));
+                        return winston::State::Delay;
+                        }, __PRETTY_FUNCTION__));
 #endif
                 // tell the central station to trigger the turnout switch
                 // update internal representation. will inform the UI in its callback, too
                 return this->turnoutChangeTo(turnout, requestDir);
-            }));
+            }, __PRETTY_FUNCTION__));
     }
     else if (std::string("\"getTurnoutState\"").compare(op) == 0)
     {
@@ -634,45 +635,45 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
                 unsigned char speed128 = (unsigned char)(speed & 0xFF);
                 if (loco->light() != light)
                 {
-                    signalBox->order(winston::Command::make([this, loco, light](const unsigned long long& created) -> const winston::State
+                    signalBox->order(winston::Command::make([this, loco, light](const TimePoint &created) -> const winston::State
                         {
-#ifdef RAILWAY_DEBUG_INJECTOR
-                            signalBox->order(winston::Command::make([this, loco, light](const unsigned long long& created) -> const winston::State
+#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
+                            signalBox->order(winston::Command::make([this, loco, light](const TimePoint &created) -> const winston::State
                                 {
-                                    if (winston::hal::now() - created > RAILWAY_DEBUG_INJECTOR_DELAY)
+                                    if (winston::hal::now() - created > WINSTON_RAILWAY_DEBUG_INJECTOR_DELAY)
                                     {
                                         this->stationDebugInjector->injectLocoUpdate(loco, false, loco->forward(), loco->speed(), light ? 1 : 0);
                                         return winston::State::Finished;
                                     }
                                     return winston::State::Running;
-                                }));
+                                }, __PRETTY_FUNCTION__));
 #endif
                             return this->locoFunction(loco->address(), light ? 1 : 0);
-                        }));
+                        }, __PRETTY_FUNCTION__));
                 }
 
                 if (loco->forward() != forward || loco->speed() != speed128)
                 {
-                    signalBox->order(winston::Command::make([this, loco, speed128, forward](const unsigned long long& created) -> const winston::State
+                    signalBox->order(winston::Command::make([this, loco, speed128, forward](const TimePoint &created) -> const winston::State
                         {
-#ifdef RAILWAY_DEBUG_INJECTOR
-                            signalBox->order(winston::Command::make([this, loco, speed128, forward](const unsigned long long& created) -> const winston::State
+#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
+                            signalBox->order(winston::Command::make([this, loco, speed128, forward](const TimePoint &created) -> const winston::State
                                 {
-                                    if (winston::hal::now() - created > RAILWAY_DEBUG_INJECTOR_DELAY)
+                                    if (winston::hal::now() - created > WINSTON_RAILWAY_DEBUG_INJECTOR_DELAY)
                                     {
                                         this->stationDebugInjector->injectLocoUpdate(loco, false, forward, speed128, loco->light() ? 1 : 0);
                                         return winston::State::Finished;
                                     }
                                     return winston::State::Running;
-                                }));
+                                }, __PRETTY_FUNCTION__));
 #endif
                             return this->locoDrive(loco->address(), speed128, forward);
-                        }));
+                        }, __PRETTY_FUNCTION__));
                 }
             }
         }*/
     }
-#ifdef RAILWAY_DEBUG_INJECTOR
+#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
     else if (op.find(std::string("\"emu_z21_inject\"")) == 0)
     {
         if (std::string("\"emu_z21_inject_occupied\"").compare(op) == 0)
@@ -690,11 +691,11 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
         winston::hal::text("Received unknown message: ");
         winston::hal::text(message);
     }
-#endif
 }
+#endif
 
 // setup our model railway system
-void Kornweinheim::systemSetup() {
+FLASHMEM void Kornweinheim::systemSetup() {
     this->initNetwork();
 
     // the user defined railway and its address translator
@@ -702,14 +703,14 @@ void Kornweinheim::systemSetup() {
     this->addressTranslator = RAILWAY_CLASS::AddressTranslator::make(railway);
 
     // the internal signal box
-    this->signalBox = winston::SignalBox::make(nullMutex);
+    this->signalBox = winston::SignalBox::make();
 
     // the system specific digital central station
     auto at = std::static_pointer_cast<winston::DigitalCentralStation::TurnoutAddressTranslator>(addressTranslator);
     auto udp = std::static_pointer_cast<winston::hal::UDPSocket>(this->z21Socket);
     this->digitalCentralStation = Z21::make(udp, at, *this, this->signalBox, z21Callbacks());
 
-#ifdef RAILWAY_DEBUG_INJECTOR
+#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
     // a debug injector
     auto dcs = std::static_pointer_cast<winston::DigitalCentralStation>(this->digitalCentralStation);
     this->stationDebugInjector = winston::DigitalCentralStation::DebugInjector::make(dcs);
@@ -722,9 +723,9 @@ void Kornweinheim::systemSetup() {
     this->signalDevice = TLC5947_SignalDevice::make(1, 24, this->signalSPIDevice);
 };
 
-void Kornweinheim::systemSetupComplete()
+FLASHMEM void Kornweinheim::systemSetupComplete()
 {
-#ifdef RAILWAY_DEBUG_INJECTOR
+#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
     //for (auto& kv : this->railway->turnouts())
     //auto turnouts = this->railway->turnouts();
     this->railway->turnouts([=](const Tracks track, winston::Turnout::Shared turnout) {
@@ -735,19 +736,28 @@ void Kornweinheim::systemSetupComplete()
 #endif
     this->signalSPIDevice->skipSend(false);
     this->signalDevice->flush();
-    this->signalBox->order(this->signalDevice->flushCommand(40));
+    this->signalBox->order(this->signalDevice->flushCommand());
 }
 
 // accept new requests and loop over what the signal box has to do
-bool Kornweinheim::systemLoop() {
-
+bool Kornweinheim::systemLoop()
+{
 #ifdef WINSTON_WITH_WEBSOCKET
-    this->webServer.step();
+    {
+
+#ifdef WINSTON_STATISTICS
+        winston::StopwatchJournal::Event tracer(this->stopWatchJournal, "webServer");
+#endif
+        this->webServer.step();
+    }
+#endif
+#ifdef WINSTON_STATISTICS
+    winston::StopwatchJournal::Event tracer(this->stopWatchJournal, "signalBox");
 #endif
     return this->signalBox->work();
 }
 
-void Kornweinheim::populateLocomotiveShed()
+FLASHMEM void Kornweinheim::populateLocomotiveShed()
 {
     auto callbacks = locoCallbacks();
     this->addLocomotive(callbacks, 3, "BR 114");

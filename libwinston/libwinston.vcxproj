@@ -133,6 +133,7 @@
     <ClInclude Include="Util.h" />
     <ClInclude Include="WebServer.h" />
     <ClInclude Include="Winston.h" />
+    <ClInclude Include="WinstonConfig.h" />
     <ClInclude Include="WinstonTypes.h" />
   </ItemGroup>
   <ItemGroup>

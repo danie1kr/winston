@@ -1,5 +1,6 @@
 #pragma once
 
+#include "WinstonConfig.h"
 #include "WinstonTypes.h"
 #include "Block.h"
 #include "Callback.h"

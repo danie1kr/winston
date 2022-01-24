@@ -26,6 +26,9 @@ namespace winston
 
 	void DigitalCentralStation::turnoutUpdate(Turnout::Shared turnout, const Turnout::Direction direction)
 	{
-		this->signalBox->order(Command::make([turnout, direction](const unsigned long long& created) -> const State { return turnout->finalizeChangeTo(direction);  }));
+		this->signalBox->order(Command::make([turnout, direction](const TimePoint &created) -> const State 
+			{ 
+				return turnout->finalizeChangeTo(direction);  
+			}, __PRETTY_FUNCTION__));
 	}
 };

@@ -1,14 +1,15 @@
 #pragma once
 
+#ifdef WINSTON_PLATFORM_TEENSY
+#include "pgmspace.h"
+#else
+#define FLASHMEM
+#endif
+
 #include <vector>
 #include <array>
 #include <algorithm>
-#include <bitset>
 #include <memory>
-#include <set>
-#include <queue>
-
-#include "better_enum.hpp"
 
 #include "WinstonTypes.h"
 #include "Util.h"
@@ -54,11 +55,11 @@ namespace winston
 
 		using Tracks = _TracksClass;
 
-		Result init(bool blocks = false)
+		FLASHMEM Result init(bool blocks = false)
 		{
 			for (Tracks track : Tracks::_values())//for (size_t track = 0; track < tracksCount(); ++track)
 				this->tracks[track] = define(track);// static_cast<Tracks>(track));
-			connect(this->tracks);
+			connect();
 			if (!blocks)
 			{
 				Trackset set;
@@ -73,7 +74,7 @@ namespace winston
 		}
 
 		virtual winston::Track::Shared define(const Tracks track) = 0;
-		virtual void connect(std::array < winston::Track::Shared, tracksCount()>& tracks) = 0;
+		virtual void connect() = 0;// std::array < winston::Track::Shared, tracksCount()>& tracks) = 0;
 
 		template<typename _Track, typename ..._args>
 		Track::Shared& add(Tracks track, _args && ...args) {
@@ -190,7 +191,7 @@ namespace winston
 			return this->track(s);
 		}
 	private:
-		Result validate()
+		FLASHMEM Result validate()
 		{
 			bool passed = true;
 

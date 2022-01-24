@@ -2,13 +2,18 @@
 
 #include <string>
 #include <vector>
+#include <chrono>
 #include "WinstonTypes.h"
+
+#if !defined(__PRETTY_FUNCTION__) && !defined(__GNUC__)
+#define __PRETTY_FUNCTION__ __FUNCSIG__
+#endif
 
 namespace winston
 {
 	namespace hal
 	{
-		extern unsigned long long now();
+		extern TimePoint now();
 		extern void text(const std::string& text);
 		extern void error(const std::string& error);
 		extern void fatal(const std::string reason);

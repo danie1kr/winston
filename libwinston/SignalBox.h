@@ -20,7 +20,7 @@ namespace winston
 			Count
 		};
 
-		SignalBox(Mutex& mutex);
+		SignalBox();
 
 		Railway::Callbacks::TurnoutUpdateCallback injectTurnoutSignalHandling(Railway::Callbacks::TurnoutUpdateCallback callback);
 
@@ -32,14 +32,18 @@ namespace winston
 		
 		void order(Command::Shared command);
 		bool work();
-
 		using Shared_Ptr<SignalBox>::Shared;
 		using Shared_Ptr<SignalBox>::make;
 	private:
 
 		static Signal::Shared nextSignal(Track::Shared& track, const bool guarding, Track::Connection& leaving, const bool main, const bool includingFirst);
-
 		std::queue<Command::Shared> commands;
-		Mutex& mutex;
+
+#ifdef WINSTON_STATISTICS
+	public:
+		const std::string statistics(const size_t withTop = 0) const;
+	private:
+		StopwatchJournal stopwatchJournal;
+#endif
 	};
 }

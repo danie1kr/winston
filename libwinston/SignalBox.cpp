@@ -1,15 +1,16 @@
-#include <typeinfo>
-#include <typeindex>
 #include <unordered_set>
 
+#include "Winston.h"
 #include "SignalBox.h"
 #include "HAL.h"
 #include "Railway.h"
 
 namespace winston
 {
-	SignalBox::SignalBox(Mutex& mutex)
-		: mutex(mutex)
+	SignalBox::SignalBox() 
+#ifdef WINSTON_STATISTICS
+		: stopwatchJournal("SignalBox")
+#endif
 	{
 	}
 
@@ -87,11 +88,11 @@ namespace winston
 		// B_guarding = leave turnout at B, find first pre signal if 
 
 		// the direction
-		this->order(Command::make([this, turnout](const unsigned long long& created) -> const winston::State { this->setSignalsFor(turnout, turnout->direction()); return State::Finished; }));
+		this->order(Command::make([this, turnout](const TimePoint &created) -> const winston::State { this->setSignalsFor(turnout, turnout->direction()); return State::Finished; }, __PRETTY_FUNCTION__));
 		// the closed direction
-		this->order(Command::make([this, turnout](const unsigned long long& created) -> const winston::State { this->setSignalsFor(turnout, turnout->otherDirection(turnout->direction())); return State::Finished; }));
+		this->order(Command::make([this, turnout](const TimePoint &created) -> const winston::State { this->setSignalsFor(turnout, turnout->otherDirection(turnout->direction())); return State::Finished; }, __PRETTY_FUNCTION__));
 		// backwards on entry
-		this->order(Command::make([this, turnout](const unsigned long long& created) -> const winston::State { 
+		this->order(Command::make([this, turnout](const TimePoint &created) -> const winston::State { 
 
 
 			Track::Shared signalCurrent = turnout;
@@ -116,7 +117,7 @@ namespace winston
 
 			return State::Finished; 
 
-		}));
+		}, __PRETTY_FUNCTION__));
 	}
 	
 	Signal::Shared SignalBox::nextSignal(Track::Shared& track, const bool guarding, Track::Connection& leaving, const bool main, const bool includingFirst)
@@ -168,6 +169,12 @@ namespace winston
 		return nullptr;
 	}
 
+#ifdef WINSTON_STATISTICS
+	const std::string SignalBox::statistics(const size_t withTop) const
+	{
+		return this->stopwatchJournal.toString(withTop);
+	}
+#endif
 
 	void SignalBox::order(Command::Shared command)
 	{
@@ -176,22 +183,24 @@ namespace winston
 
 	bool SignalBox::work()
 	{
-		if (this->mutex.lock())
+		if (this->commands.size() > 0)
 		{
-			if (this->commands.size() > 0)
-			{
-				auto command = std::move(this->commands.front());
-				this->commands.pop();
-				this->mutex.unlock();
+			auto command = std::move(this->commands.front());
+			this->commands.pop();
 
-				if (command->execute() == State::Running)
-				{
-					while (!this->mutex.lock());
-					this->commands.push(std::move(command));
-					this->mutex.unlock();
-				}
-			}
-			return true;
+#ifdef WINSTON_STATISTICS
+			auto now = hal::now();
+#endif
+			auto state = command->execute();
+
+#ifdef WINSTON_STATISTICS
+			if (state != State::Delay)
+				this->stopwatchJournal.add(hal::now() - now, command->name());
+#endif
+			if (state == State::Running || state == State::Delay)
+				this->commands.push(std::move(command));
+
+			return state == State::Running || state == State::Finished;
 		}
 		return false;
 	}

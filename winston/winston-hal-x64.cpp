@@ -226,7 +226,7 @@ const winston::Result UDPSocketWinSock::recv(std::vector<unsigned char>& data)
 
     // Set up the struct timeval for the timeout.
     tv.tv_sec = 0;
-    tv.tv_usec = 50;
+    tv.tv_usec = 0; // anything > 0 is at least 14ms
 
     // Wait until timeout or data received.
     if (select(0, &fds, NULL, NULL, &tv) > 0) {
@@ -284,9 +284,9 @@ namespace winston
             Sleep(ms);
         }
 
-        unsigned long long now()
+        TimePoint now()
         {
-            return GetTickCount64();
+            return std::chrono::system_clock::now();
         }
 
         void storageSetFilename(std::string filename)

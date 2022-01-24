@@ -1,11 +1,18 @@
+
 #include "Command.h"
 #include "HAL.h"
 
 namespace winston
 {
-	Command::Command(Payload payload)
+	Command::Command(Payload payload, const std::string name)
 		: payload(payload), created(hal::now()), skip(false)
+#ifdef WINSTON_STATISTICS
+		, _name(name)
+#endif
 	{
+#ifndef WINSTON_STATISTICS
+		(void)name;
+#endif
 
 	}
 
@@ -21,8 +28,15 @@ namespace winston
 		return this->payload(this->created);
 	}
 
-	const unsigned long long Command::age() const
+	const Duration Command::age() const
 	{
 		return hal::now() - this->created;
 	}
+
+#ifdef WINSTON_STATISTICS
+	const std::string& Command::name() const
+	{
+		return this->_name;
+	}
+#endif
 }

@@ -11,6 +11,8 @@ namespace winston
 #include "HAL.h"
 #include "Util.h"
 
+#undef WINSTON_WITH_WEBSOCKET
+
 #ifdef WINSTON_WITH_SDFAT
 //#define SDFAT_FILE_TYPE 2 //exfat only
 #include <SD.h>
@@ -494,9 +496,21 @@ namespace winston
             ::delay(ms);
         }
 
-        unsigned long long now()
+        extern "C" {
+            // This must exist to keep the linker happy but is never called.
+            int _gettimeofday(struct timeval* tv, void* tzvp)
+            {
+                Serial.println("_gettimeofday dummy");
+                uint64_t t = micros(); // uptime in microseconds
+                tv->tv_sec = t / 1000000;  // convert to seconds
+                tv->tv_usec = t % 1000000;  // get remaining microseconds
+                return 0;  // return non-zero for error
+            } // end _gettimeofday()
+        }
+
+        std::chrono::system_clock::time_point now()
         {
-            return millis();
+            return std::chrono::system_clock::now();
         }
 
         void storageSetFilename(std::string filename)

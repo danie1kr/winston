@@ -13,7 +13,6 @@
 #define __Z21_H__
 
 // no more <Arduino.h>
-#include <stdint.h>
 #include <functional>
 
 #include "../../../libwinston/HAL.h"

@@ -8,8 +8,6 @@
 #include "HAL.h"
 #include "Log.h"
 
-
-#define WINSTON_WITH_WEBSOCKET
 #define WEBSOCKETS_USE_ETHERNET     true
 #define USE_NATIVE_ETHERNET         true
 

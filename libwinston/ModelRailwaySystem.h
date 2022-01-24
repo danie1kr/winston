@@ -1,5 +1,11 @@
 #pragma once
 
+#ifdef WINSTON_PLATFORM_TEENSY
+#include "pgmspace.h"
+#else
+#define FLASHMEM
+#endif
+
 #include "HAL.h"
 #include "Railway.h"
 #include "SignalBox.h"
@@ -12,10 +18,14 @@ namespace winston
 	class ModelRailwaySystem : public DigitalCentralStation::LocoAddressTranslator
 	{
 	public:
-		ModelRailwaySystem() { };
+		ModelRailwaySystem()
+#ifdef WINSTON_STATISTICS
+			: stopWatchJournal("MRS") 
+#endif
+		{ };
 		virtual ~ModelRailwaySystem() { } ;
 
-		void setup() {
+		FLASHMEM void setup() {
 			this->systemSetup();
 
 			this->railway->init(_features & Features::Blocks);
@@ -24,31 +34,31 @@ namespace winston
 
 			this->railway->turnouts([=](const Tracks track, winston::Turnout::Shared turnout) {
 				
-				this->signalBox->order(winston::Command::make([this, turnout](const unsigned long long& created) -> const winston::State
+				this->signalBox->order(winston::Command::make([this, turnout](const TimePoint &created) -> const winston::State
 					{
 						this->digitalCentralStation->requestTurnoutInfo(turnout);
 						winston::hal::delay(50);
 						this->signalBox->setSignalsFor(turnout);
 						winston::hal::delay(100);
 						return winston::State::Finished;
-					}));
+					}, __PRETTY_FUNCTION__));
 			});
 
 			for(const auto &loco : this->locomotiveShed ) {
 
-				this->signalBox->order(winston::Command::make([this, loco](const unsigned long long& created) -> const winston::State
+				this->signalBox->order(winston::Command::make([this, loco](const TimePoint &created) -> const winston::State
 					{
 						this->digitalCentralStation->requestLocoInfo(loco);
 						winston::hal::delay(150);
 						return winston::State::Finished;
-					}));
+					}, __PRETTY_FUNCTION__));
 			}
 
-			this->signalBox->order(winston::Command::make([](const unsigned long long& created) -> const winston::State
+			this->signalBox->order(winston::Command::make([](const TimePoint &created) -> const winston::State
 				{
 					logger.log("Init tasks complete");
 					return winston::State::Finished;
-				}));
+				}, __PRETTY_FUNCTION__));
 			/*for (auto& turnout : this->railway->turnouts())
 			{
 				this->digitalCentralStation->requestTurnoutInfo(turnout.second);
@@ -119,12 +129,25 @@ namespace winston
 			return winston::State::Finished;
 		}
 
-		bool loop() {
-			this->digitalCentralStation->tick();
+		bool loop()
+		{
+			{
+#ifdef WINSTON_STATISTICS
+				StopwatchJournal::Event tracer(this->stopWatchJournal, "digitalCentralStation loop");
+#endif
+				this->digitalCentralStation->tick();
+			}
 			return this->systemLoop();
 		};
 		using Railway = _Railway;
 
+#ifdef WINSTON_STATISTICS
+		const std::string statistics(const size_t withTop = 0) const { return this->stopWatchJournal.toString(withTop); }
+		const std::string statisticsSignalBox(const size_t withTop = 0) const { return this->signalBox->statistics(withTop); }
+
+	protected:
+		StopwatchJournal stopWatchJournal;
+#endif
 	protected:
 		virtual void systemSetup() = 0;
 		virtual void systemSetupComplete() = 0;
@@ -142,7 +165,6 @@ namespace winston
 		using Tracks = typename _Railway::element_type::Tracks;
 
 		SignalBox::Shared signalBox;
-		NullMutex nullMutex;
 
 		// the z21 digital central station
 		_DigitalCentralStation digitalCentralStation;

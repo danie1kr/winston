@@ -1,11 +1,19 @@
 #pragma once
 
+#ifdef __GNUC__ 
+#pragma GCC push_options
+#pragma GCC optimize("Os")
+#endif
 #include "better_enum.hpp"
 #include <string>
 #include <array>
-#include <memory>
 #include <vector>
 #include "span.hpp"
+#ifdef __GNUC__ 
+#pragma GCC pop_options
+#endif
+#include <memory>
+#include <chrono>
 
 namespace winston
 {
@@ -20,10 +28,10 @@ namespace winston
 	{
 		Running,
 		Skipped,
+		Delay,
 		Finished
 	};
 
-	//BETTER_ENUM(Result, unsigned int, /*Red = 1, Green, Blue)
 	enum class Result
 	{
 		OK,
@@ -186,4 +194,7 @@ namespace winston
 	class Payload;
 
 	using Length = unsigned int;
+
+	using TimePoint = std::chrono::system_clock::time_point;
+	using Duration = TimePoint::duration;
 }

@@ -2,8 +2,6 @@
 
 #include <deque>
 #include <string>
-#include "span.hpp"
-#include "better_enum.hpp"
 
 #ifndef WINSTON_LOG_SIZE
 #define WINSTON_LOG_SIZE 64
@@ -11,12 +9,13 @@
 
 namespace winston
 {
-	BETTER_ENUM(LogLevel, unsigned int,
+	enum class LogLevel : unsigned char
+	{
 		Info,
 		Warning,
 		Error,
 		Fatal
-	);
+	};
 
 	template<size_t _WINSTON_LOG_SIZE>
 	class Log
@@ -25,17 +24,31 @@ namespace winston
 
 		struct Entry {
 			using Level = LogLevel;
-			unsigned long long timestamp;
-			Level level;
-			std::string text;
+			const TimePoint timestamp;
+			const Level level;
+			const std::string text;
 
-			Entry( unsigned long long timestamp, typename Entry::Level level, std::string text)
+			Entry(const TimePoint timestamp, const typename Entry::Level level, std::string text)
 				: timestamp(timestamp), level(level), text(std::move(text))
 			{
 			};
+
+			const std::string levelName() const
+			{
+#define WINSTON_LOG_LEVEL_ENTRY_CASE(l)	case LogLevel::l: return #l;
+				switch (this->level)
+				{
+					WINSTON_LOG_LEVEL_ENTRY_CASE(Info);
+					WINSTON_LOG_LEVEL_ENTRY_CASE(Warning);
+					WINSTON_LOG_LEVEL_ENTRY_CASE(Error);
+					WINSTON_LOG_LEVEL_ENTRY_CASE(Fatal);
+				}
+#undef WINSTON_LOG_LEVEL_ENTRY_CASE
+				return "???";
+			}
 		};
 
-		void log(std::string text, typename Entry::Level level = Entry::Level::Info, unsigned long long timestamp = winston::hal::now())
+		void log(std::string text, typename Entry::Level level = Entry::Level::Info, const TimePoint timestamp = winston::hal::now())
 		{
 			if (this->_log.size() > _WINSTON_LOG_SIZE)
 				this->_log.pop_front();

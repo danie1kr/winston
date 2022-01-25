@@ -286,7 +286,7 @@ void WebServerTeensy::shutdown()
 
 size_t WebServerTeensy::maxMessageSize()
 {
-    return 1024;
+    return 2048;
 }
 #endif
 
@@ -295,7 +295,7 @@ static std::string winstonStoragePath = constWinstonStoragePath;
 static const auto winstonStorageSize = 128 * 1024;
 
 #ifdef WINSTON_WITH_SDFAT
-static FsFile winstonStorage;
+static File winstonStorage;
 #endif
 
 void ensureStorageFile()
@@ -312,6 +312,8 @@ void ensureStorageFile()
         file.flush();
         file.close();
     }
+
+    winstonStorage = SD.open(winstonStoragePath.c_str(), FILE_WRITE_BEGIN);
 #endif
 }
 
@@ -365,6 +367,8 @@ constexpr uint8_t Arduino_SPIDevice::DataMode(const SPIMode mode)
 const winston::Result Arduino_SPIDevice::init()
 {
     SPI.begin();
+    pinMode(this->chipSelect, OUTPUT);
+    digitalWrite(this->chipSelect, HIGH);
     return winston::Result::OK;
 }
 const winston::Result Arduino_SPIDevice::send(const std::span<DataType> data)
@@ -372,12 +376,11 @@ const winston::Result Arduino_SPIDevice::send(const std::span<DataType> data)
     if (this->skip)
         return winston::Result::OK;
 
-    //digitalWrite(this->xlat, 0);
+    digitalWrite(this->chipSelect, LOW);
     SPI.beginTransaction(this->spiSettings);
     SPI.transfer((unsigned char*)&data.front(), data.size() * sizeof(DataType));
     SPI.endTransaction();
-    //digitalWrite(this->xlat, 1);
-    //digitalWrite(this->xlat, 0);
+    digitalWrite(this->chipSelect, HIGH);
 
     return winston::Result::OK;
 }
@@ -536,7 +539,7 @@ namespace winston
 #ifdef WINSTON_WITH_SDFAT
             if (!winston::runtimePersistence())
                 return true;
-            winstonStorage.sync();
+            winstonStorage.flush();
 #endif
             return true;
         }

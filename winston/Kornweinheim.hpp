@@ -559,7 +559,7 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
             (winston::hal::storageRead(address + 3) << 24);
         address = 4;
 
-        const size_t sizePerMessage = size_t(0.7f * 32000);// webServer.maxMessageSize());
+        const size_t sizePerMessage = size_t(0.7f * webServer.maxMessageSize());
         size_t remaining = length;
         size_t offset = 0;
 
@@ -716,7 +716,11 @@ void Kornweinheim::systemSetup() {
 #endif
 
     // signals
+#ifdef WINSTON_PLATFORM_TEENSY
+    this->signalSPIDevice = SignalSPIDevice::make(10, 20000000);
+#else
     this->signalSPIDevice = SignalSPIDevice::make(3, 20000000);
+#endif
     this->signalSPIDevice->init();
     this->signalSPIDevice->skipSend(true);
     this->signalDevice = TLC5947_SignalDevice::make(1, 24, this->signalSPIDevice);

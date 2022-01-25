@@ -7,6 +7,10 @@ Kornweinheim kwh;
 
 void winston_setup()
 {
+
+    int led = 13;
+    pinMode(led, OUTPUT);
+    digitalWrite(led, HIGH);
 	winston::hal::storageSetFilename(Kornweinheim::name());
     winston::hal::init();
 	winston::hal::text("Hello from Winston!"_s);
@@ -18,7 +22,9 @@ void winston_setup()
 
 
 	// setup
+    digitalWrite(led, LOW);
     kwh.setup();
+    digitalWrite(led, HIGH);
 }
 
 #ifdef WINSTON_STATISTICS

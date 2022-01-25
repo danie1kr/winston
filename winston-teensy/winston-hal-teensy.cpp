@@ -495,13 +495,13 @@ namespace winston
         {
             ::delay(ms);
         }
-
+        
         extern "C" {
             // This must exist to keep the linker happy but is never called.
             int _gettimeofday(struct timeval* tv, void* tzvp)
             {
                 Serial.println("_gettimeofday dummy");
-                uint64_t t = micros(); // uptime in microseconds
+                uint64_t t = 0;// micros(); // uptime in microseconds
                 tv->tv_sec = t / 1000000;  // convert to seconds
                 tv->tv_usec = t % 1000000;  // get remaining microseconds
                 return 0;  // return non-zero for error

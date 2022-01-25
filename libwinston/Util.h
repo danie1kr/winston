@@ -94,8 +94,8 @@ namespace winston
 			virtual ~Event();
 
 		private:
-			const std::string name;
 			StopwatchJournal& swj;
+			const std::string name;
 			TimePoint start;
 		};
 
@@ -103,8 +103,8 @@ namespace winston
 		{
 			Entry(const size_t duration, const std::string name);
 
-			const std::string name;
 			const size_t duration;
+			const std::string name;
 		};
 
 		struct Statistics

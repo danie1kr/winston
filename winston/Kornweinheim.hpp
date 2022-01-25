@@ -1,6 +1,5 @@
 
 #include "Kornweinheim.h"
-#include <chrono>
 
 #ifdef WINSTON_WITH_WEBSOCKET
 // send a turnout state via websocket
@@ -314,7 +313,7 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
 #ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
                 signalBox->order(winston::Command::make([this, turnout, requestDir](const winston::TimePoint &created) -> const winston::State
                     {
-                        if ((winston::hal::now() - created) / std::chrono::milliseconds(1) > WINSTON_RAILWAY_DEBUG_INJECTOR_DELAY)
+                        if (inMilliseconds((winston::hal::now() - created)) > WINSTON_RAILWAY_DEBUG_INJECTOR_DELAY)
                         {
                             this->stationDebugInjector->injectTurnoutUpdate(turnout, requestDir);
                             return winston::State::Finished;

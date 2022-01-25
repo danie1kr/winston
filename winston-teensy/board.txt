@@ -9,3 +9,7 @@
 
 # Remove added flags by setting to blank:
 ide.compiler_flags_debug=
+
+teensy41.menu.opt.onone=No optimization Flag
+teensy41.menu.opt.onone.build.flags.optimize=
+teensy41.menu.opt.onone.build.flags.ldspecs=

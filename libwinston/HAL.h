@@ -2,7 +2,6 @@
 
 #include <string>
 #include <vector>
-#include <chrono>
 #include "WinstonTypes.h"
 
 #if !defined(__PRETTY_FUNCTION__) && !defined(__GNUC__)

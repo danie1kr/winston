@@ -21,7 +21,7 @@ namespace winston
 #endif
 
 #ifdef WINSTON_WITH_TEENSYDEBUG
-#include <TeensyDebug.h>
+#include "TeensyDebug/TeensyDebug.h"
 #endif
 
 #ifdef WINSTON_WITH_WEBSOCKET
@@ -408,10 +408,11 @@ namespace winston
         void init()
         {
             Serial.begin(115200);
-            while (!Serial) { // && millis() < 2000) {
+            while (!Serial && millis() < 2000) {
                 // Wait for Serial to initialize
             }
-            text("Winston Teensy Init Hello"_s);
+            Serial.println("hello");
+            text("Winston Teensy Init Hello");
 
 #ifdef WINSTON_WITH_TEENSYDEBUG
             debug.begin(SerialUSB1);
@@ -436,7 +437,7 @@ namespace winston
 
             logRuntimeStatus();
         }
-
+        
         const std::string __FlashStorageStringtoStd(const __FlashStringHelper* fsh)
         {
             PGM_P p = reinterpret_cast<PGM_P>(fsh);
@@ -448,7 +449,7 @@ namespace winston
             }
             return ret;
         }
-
+        
         size_t stream(const __FlashStringHelper* fsh, std::function<size_t(uint8_t)> target)
         {
             PGM_P p = reinterpret_cast<PGM_P>(fsh);
@@ -470,7 +471,7 @@ namespace winston
         {
             Serial.println(text.c_str());
         }
-
+        
         void error(const __FlashStringHelper* fsh)
         {
             logger.err(__FlashStorageStringtoStd(fsh));
@@ -479,7 +480,7 @@ namespace winston
         {
             logger.err(error);
         }
-
+        
         void fatal(const __FlashStringHelper* fsh)
         {
             logger.log(__FlashStorageStringtoStd(fsh), Logger::Entry::Level::Fatal);
@@ -496,7 +497,7 @@ namespace winston
             ::delay(ms);
         }
         
-        extern "C" {
+        /*extern "C" {
             // This must exist to keep the linker happy but is never called.
             int _gettimeofday(struct timeval* tv, void* tzvp)
             {
@@ -506,11 +507,11 @@ namespace winston
                 tv->tv_usec = t % 1000000;  // get remaining microseconds
                 return 0;  // return non-zero for error
             } // end _gettimeofday()
-        }
+        }*/
 
-        std::chrono::system_clock::time_point now()
+        TimePoint now()
         {
-            return std::chrono::system_clock::now();
+            return micros();
         }
 
         void storageSetFilename(std::string filename)

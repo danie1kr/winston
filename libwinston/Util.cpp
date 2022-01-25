@@ -110,10 +110,12 @@ namespace winston
 		return std::string(first);
 	}
 
+#ifdef WINSTON_HAS_CHRONO
 	std::string build(const winston::TimePoint first)
 	{
-		return build(first.time_since_epoch() / std::chrono::milliseconds(1));
+		return build(inMilliseconds(first.time_since_epoch()));
 	}
+#endif
 
 	std::string build(const winston::Result first)
 	{
@@ -253,6 +255,6 @@ namespace winston
 		if (this->journal.size() > WINSTON_JOURNAL_SIZE)
 			this->journal.pop_front();
 
-		this->journal.emplace_back(duration / std::chrono::microseconds(1), text);
+		this->journal.emplace_back(inMicroseconds(duration), text);
 	}
 }

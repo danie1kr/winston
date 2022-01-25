@@ -8,7 +8,7 @@
 #include "Log.h"
 
 #define WINSTON_WITH_HTTP
-//#define WINSTON_WITH_TEENSYDEBUG
+#define WINSTON_WITH_TEENSYDEBUG
 #define WINSTON_WITH_SDFAT
 /*
 #define WINSTON_WITH_WEBSOCKET
@@ -48,6 +48,11 @@ constexpr const __FlashStringHelper* operator "" _s(const char* in, size_t len)
 {
     return ((const __FlashStringHelper*)(in));
 }
+/*
+constexpr const char* operator "" _s(const char* in, size_t len)
+{
+    return in;
+}*/
 
 class UDPSocketTeensy : public winston::hal::UDPSocket, winston::Shared_Ptr<UDPSocketTeensy>
 {

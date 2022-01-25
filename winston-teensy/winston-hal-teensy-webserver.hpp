@@ -155,7 +155,7 @@ bool WebServerTeensy::HTTPConnectionTeensy::body(const __FlashStringHelper* cont
         this->connection.write("\r\n");
         Serial.print("\r\n");
     }
-    //*
+    /*
     auto target = [=](uint8_t c) {
         Serial.write(c);
         return connection.write(c);
@@ -179,7 +179,7 @@ bool WebServerTeensy::HTTPConnectionTeensy::body(const __FlashStringHelper* cont
         connection.write(buffer, bufferPopulated);
         Serial.write(buffer, bufferPopulated);
     }
-    */
+    //*/
 
     this->guard |= (unsigned char)HTTPConnectionTeensy::State::BODY;
     return true;

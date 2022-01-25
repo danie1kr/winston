@@ -204,7 +204,7 @@ namespace winston
 			return this->flushInternal();
 		}
 
-		Command::Shared flushCommand(const Duration waitPeriod = std::chrono::milliseconds(40))
+		Command::Shared flushCommand(const Duration waitPeriod = toMilliseconds(40))
 		{
 			return Command::make([=](const TimePoint& created) -> const State
 			{

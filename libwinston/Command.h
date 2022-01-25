@@ -1,6 +1,5 @@
 #pragma once
 
-#include <chrono>
 #include "WinstonConfig.h"
 #include "WinstonTypes.h"
 #include "Util.h"

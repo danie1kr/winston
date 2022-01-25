@@ -3,7 +3,6 @@
 #include <string>
 #include <deque>
 #include <memory>
-#include <chrono>
 
 #include "Callback.h"
 
@@ -65,8 +64,9 @@ namespace winston
 	std::string build(const unsigned char first);
 	std::string build(const char* first);
 	std::string build(const winston::Result first);
+#ifdef WINSTON_HAS_CHRONO
 	std::string build(const winston::TimePoint first);
-	
+#endif
 	template <typename _First, typename... _Args>
 		std::string build(const _First first, _Args&&... args)
 	{

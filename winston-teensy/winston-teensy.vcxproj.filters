@@ -19,6 +19,9 @@
     <Filter Include="winston-src">
       <UniqueIdentifier>{fdc391cd-5ba0-4cc8-9045-121e20c1a8ac}</UniqueIdentifier>
     </Filter>
+    <Filter Include="TeensyDebug">
+      <UniqueIdentifier>{f9a2bb9e-813d-43a6-81b7-9eb2eee5a83d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="winston-teensy.ino" />
@@ -108,6 +111,9 @@
     <ClInclude Include="..\libwinston\WinstonConfig.h">
       <Filter>libwinston-src</Filter>
     </ClInclude>
+    <ClInclude Include="TeensyDebug\TeensyDebug.h">
+      <Filter>TeensyDebug</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\libwinston\Block.cpp">
@@ -169,6 +175,12 @@
     </ClCompile>
     <ClCompile Include="..\winston\winston-main.cpp">
       <Filter>winston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="TeensyDebug\gdbstub.cpp">
+      <Filter>TeensyDebug</Filter>
+    </ClCompile>
+    <ClCompile Include="TeensyDebug\TeensyDebug.cpp">
+      <Filter>TeensyDebug</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

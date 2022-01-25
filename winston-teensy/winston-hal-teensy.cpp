@@ -18,8 +18,6 @@ namespace winston
 #ifdef WINSTON_WITH_SDFAT
 //#define SDFAT_FILE_TYPE 2 //exfat only
 #include <SD.h>
-//#include <SdFatConfig.h>
-//#include <SdFat.h>
 #endif
 
 #ifdef WINSTON_WITH_TEENSYDEBUG
@@ -239,17 +237,6 @@ void WebServerTeensy::step()
     this->advanceConnectionIterator();
     auto& client = this->it->second;
     client.poll();
-
-    /* ask one client for nonblocking updates
-    if (client.available())
-    {
-        Serial.println("Client connected");
-
-        // Read message from client and log it.
-        WebsocketsMessage msg = client.readBlocking();
-        if(msg.isComplete())
-            this->onMessage(client, msg.data());
-    }*/
 }
 
 WebServerTeensy::Client WebServerTeensy::getClient(unsigned int clientId)
@@ -412,10 +399,9 @@ namespace winston
         void init()
         {
             Serial.begin(115200);
-            while (!Serial && millis() < 2000) {
+            while (!Serial) { //}&& millis() < 2000) {
                 // Wait for Serial to initialize
             }
-            Serial.println("hello");
             text("Winston Teensy Init Hello");
 
 #ifdef WINSTON_WITH_TEENSYDEBUG
@@ -433,10 +419,13 @@ namespace winston
 #endif
             uint8_t mac[6];
             teensyMAC(mac);
-            if (!Ethernet.begin(mac)) {
+#if defined(WINSTON_ETHERNET_IP) && defined(WINSTON_ETHERNET_DNS) && defined(WINSTON_ETHERNET_GATEWAY) && defined(WINSTON_ETHERNET_SUBNET)
+            Ethernet.begin(mac, WINSTON_ETHERNET_IP, WINSTON_ETHERNET_DNS, WINSTON_ETHERNET_GATEWAY, WINSTON_ETHERNET_SUBNET);
+#else
+            if (!Ethernet.begin(mac))
                 error("Failed to start Ethernet\n"_s);
-            }
             else
+ #endif
                 winston::runtimeEnableNetwork();
 
             logRuntimeStatus();

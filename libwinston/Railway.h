@@ -55,7 +55,7 @@ namespace winston
 
 		using Tracks = _TracksClass;
 
-		FLASHMEM Result init(bool blocks = false)
+		Result init(bool blocks = false)
 		{
 			for (Tracks track : Tracks::_values())//for (size_t track = 0; track < tracksCount(); ++track)
 				this->tracks[track] = define(track);// static_cast<Tracks>(track));
@@ -191,7 +191,7 @@ namespace winston
 			return this->track(s);
 		}
 	private:
-		FLASHMEM Result validate()
+		Result validate()
 		{
 			bool passed = true;
 

@@ -473,7 +473,7 @@ const winston::Address Y2021Railway::AddressTranslator::address(winston::Track::
     return 0;
 }
 
-FLASHMEM winston::Track::Shared Y2021Railway::define(const Tracks track)
+winston::Track::Shared Y2021Railway::define(const Tracks track)
 {
     switch (track)
     {
@@ -520,7 +520,7 @@ FLASHMEM winston::Track::Shared Y2021Railway::define(const Tracks track)
 
 }
 
-FLASHMEM void Y2021Railway::connect()// std::array<winston::Track::Shared, tracksCount()>& tracks)
+void Y2021Railway::connect()// std::array<winston::Track::Shared, tracksCount()>& tracks)
 {
 #define LOCAL_TRACK(var)  auto var = this->track(Tracks::var);
     LOCAL_TRACK(PBF1a);

@@ -3,7 +3,7 @@
 #ifdef WINSTON_PLATFORM_TEENSY
 #include "pgmspace.h"
 #else
-#define FLASHMEM
+//#define FLASHMEM
 #endif
 
 #include <array>

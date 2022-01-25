@@ -93,7 +93,7 @@ void Kornweinheim::locoSend(winston::Address address)
     }
 }
 #endif
-FLASHMEM void Kornweinheim::initNetwork()
+void Kornweinheim::initNetwork()
 {
     // z21
     z21Socket = UDPSocket::make(z21IP, z21Port);
@@ -695,7 +695,7 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
 #endif
 
 // setup our model railway system
-FLASHMEM void Kornweinheim::systemSetup() {
+void Kornweinheim::systemSetup() {
     this->initNetwork();
 
     // the user defined railway and its address translator
@@ -723,7 +723,7 @@ FLASHMEM void Kornweinheim::systemSetup() {
     this->signalDevice = TLC5947_SignalDevice::make(1, 24, this->signalSPIDevice);
 };
 
-FLASHMEM void Kornweinheim::systemSetupComplete()
+void Kornweinheim::systemSetupComplete()
 {
 #ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
     //for (auto& kv : this->railway->turnouts())
@@ -757,7 +757,7 @@ bool Kornweinheim::systemLoop()
     return this->signalBox->work();
 }
 
-FLASHMEM void Kornweinheim::populateLocomotiveShed()
+void Kornweinheim::populateLocomotiveShed()
 {
     auto callbacks = locoCallbacks();
     this->addLocomotive(callbacks, 3, "BR 114");

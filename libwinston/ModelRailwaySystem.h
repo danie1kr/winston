@@ -3,7 +3,7 @@
 #ifdef WINSTON_PLATFORM_TEENSY
 #include "pgmspace.h"
 #else
-#define FLASHMEM
+//#define FLASHMEM
 #endif
 
 #include "HAL.h"
@@ -25,7 +25,7 @@ namespace winston
 		{ };
 		virtual ~ModelRailwaySystem() { } ;
 
-		FLASHMEM void setup() {
+		void setup() {
 			this->systemSetup();
 
 			this->railway->init(_features & Features::Blocks);

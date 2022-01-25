@@ -7,10 +7,11 @@ Kornweinheim kwh;
 
 void winston_setup()
 {
-
+#ifdef WINSTON_PLATFORM_TEENSY
     int led = 13;
     pinMode(led, OUTPUT);
     digitalWrite(led, HIGH);
+#endif
 	winston::hal::storageSetFilename(Kornweinheim::name());
     winston::hal::init();
 	winston::hal::text("Hello from Winston!"_s);
@@ -21,10 +22,14 @@ void winston_setup()
 	//using Modelleisenbahn = MRS<Y2020Railway>;
 
 
+#ifdef WINSTON_PLATFORM_TEENSY
 	// setup
     digitalWrite(led, LOW);
+#endif
     kwh.setup();
+#ifdef WINSTON_PLATFORM_TEENSY
     digitalWrite(led, HIGH);
+#endif
 }
 
 #ifdef WINSTON_STATISTICS

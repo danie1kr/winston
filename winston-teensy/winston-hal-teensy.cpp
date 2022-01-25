@@ -1,5 +1,6 @@
 #include "winston-hal-teensy.h"
 
+#ifdef WINSTON_TEENSY_FLASHSTRING
 namespace winston
 {
     std::string build(const __FlashStringHelper* fsh)
@@ -7,6 +8,7 @@ namespace winston
         return hal::__FlashStorageStringtoStd(fsh);
     }
 };
+#endif
 
 #include "HAL.h"
 #include "Util.h"
@@ -69,6 +71,7 @@ bool WebServerTeensy::HTTPConnectionTeensy::body(const std::string& content)
     return true;
 }
 
+#ifdef WINSTON_TEENSY_FLASHSTRING
 bool WebServerTeensy::HTTPConnectionTeensy::header(const __FlashStringHelper* key, const __FlashStringHelper* value)
 {
     if (!(this->guard & (unsigned char)HTTPConnectionTeensy::State::STATUS) || (this->guard & (unsigned char)HTTPConnectionTeensy::State::BODY))
@@ -127,6 +130,7 @@ bool WebServerTeensy::HTTPConnectionTeensy::body(const __FlashStringHelper* cont
     this->guard |= (unsigned char)HTTPConnectionTeensy::State::BODY;
     return true;
 }
+#endif
 
 WebServerTeensy::WebServerTeensy() : winston::WebServer<Client>()
 {
@@ -437,7 +441,7 @@ namespace winston
 
             logRuntimeStatus();
         }
-        
+#ifdef WINSTON_TEENSY_FLASHSTRING
         const std::string __FlashStorageStringtoStd(const __FlashStringHelper* fsh)
         {
             PGM_P p = reinterpret_cast<PGM_P>(fsh);
@@ -466,26 +470,27 @@ namespace winston
         {
             text(__FlashStorageStringtoStd(fsh));
         }
+        void error(const __FlashStringHelper* fsh)
+        {
+            logger.err(__FlashStorageStringtoStd(fsh));
+        }
+        void fatal(const __FlashStringHelper* fsh)
+        {
+            logger.log(__FlashStorageStringtoStd(fsh), Logger::Entry::Level::Fatal);
+            exit(-1);
+        }
+#endif
 
         void text(const std::string& text)
         {
             Serial.println(text.c_str());
         }
         
-        void error(const __FlashStringHelper* fsh)
-        {
-            logger.err(__FlashStorageStringtoStd(fsh));
-        }
         void error(const std::string& error)
         {
             logger.err(error);
         }
         
-        void fatal(const __FlashStringHelper* fsh)
-        {
-            logger.log(__FlashStorageStringtoStd(fsh), Logger::Entry::Level::Fatal);
-            exit(-1);
-        }
         void fatal(const std::string reason)
         {
             logger.log(reason, Logger::Entry::Level::Fatal);
@@ -496,22 +501,10 @@ namespace winston
         {
             ::delay(ms);
         }
-        
-        /*extern "C" {
-            // This must exist to keep the linker happy but is never called.
-            int _gettimeofday(struct timeval* tv, void* tzvp)
-            {
-                Serial.println("_gettimeofday dummy");
-                uint64_t t = micros(); // uptime in microseconds
-                tv->tv_sec = t / 1000000;  // convert to seconds
-                tv->tv_usec = t % 1000000;  // get remaining microseconds
-                return 0;  // return non-zero for error
-            } // end _gettimeofday()
-        }*/
 
         TimePoint now()
         {
-            return micros();
+            return TimePoint(std::chrono::milliseconds(millis()));
         }
 
         void storageSetFilename(std::string filename)

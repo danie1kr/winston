@@ -38,8 +38,10 @@ public:
         bool status(const unsigned int HTTPStatus);
         bool header(const std::string& key, const std::string& value);
         bool body(const std::string& content);
+#ifdef WINSTON_TEENSY_FLASHSTRING
         bool header(const __FlashStringHelper* key, const __FlashStringHelper* value);
         bool body(const __FlashStringHelper* content);
+#endif
     private:
         HTTPClient& connection;
         unsigned char guard;
@@ -125,7 +127,7 @@ bool WebServerTeensy::HTTPConnectionTeensy::body(const std::string& content)
     this->guard |= (unsigned char)HTTPConnectionTeensy::State::BODY;
     return true;
 }
-
+#ifdef WINSTON_TEENSY_FLASHSTRING
 bool WebServerTeensy::HTTPConnectionTeensy::header(const __FlashStringHelper* key, const __FlashStringHelper* value)
 {
     if (!(this->guard & (unsigned char)HTTPConnectionTeensy::State::STATUS) || (this->guard & (unsigned char)HTTPConnectionTeensy::State::BODY))
@@ -155,7 +157,7 @@ bool WebServerTeensy::HTTPConnectionTeensy::body(const __FlashStringHelper* cont
         this->connection.write("\r\n");
         Serial.print("\r\n");
     }
-    /*
+    //*
     auto target = [=](uint8_t c) {
         Serial.write(c);
         return connection.write(c);
@@ -184,7 +186,7 @@ bool WebServerTeensy::HTTPConnectionTeensy::body(const __FlashStringHelper* cont
     this->guard |= (unsigned char)HTTPConnectionTeensy::State::BODY;
     return true;
 }
-
+#endif
 WebServerTeensy::WebServerTeensy() : winston::WebServer<Client>()
 {
 }

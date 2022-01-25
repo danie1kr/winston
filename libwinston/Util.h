@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "Callback.h"
+#include "WinstonConfig.h"
 
 namespace winston
 {

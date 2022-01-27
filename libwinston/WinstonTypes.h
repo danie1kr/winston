@@ -126,6 +126,56 @@ namespace winston
 	protected:
 		bool skip;
 	};
+
+	class GPIOPinDevice : public Shared_Ptr<GPIOPinDevice>
+	{
+	public:
+		enum class State : unsigned char
+		{
+			Low = 0,
+			High = 255
+		};
+
+		using Pin = unsigned char;
+
+		GPIOPinDevice(const Pin pin);
+	protected:
+		const Pin pin;
+	};
+
+	class GPIODigitalPinOutputDevice : public GPIOPinDevice, public Shared_Ptr<GPIODigitalPinOutputDevice>
+	{
+	public:
+		GPIODigitalPinOutputDevice(const Pin pin, const State initial = State::Low);
+		virtual void set(const State value) = 0;
+
+		using Shared_Ptr<GPIODigitalPinOutputDevice>::Shared;
+		using Shared_Ptr<GPIODigitalPinOutputDevice>::make;
+	};
+
+	class GPIODigitalPinInputDevice : public GPIOPinDevice, public Shared_Ptr<GPIODigitalPinInputDevice>
+	{
+	public:
+		enum class Mode : unsigned char
+		{
+			Input,
+			InputPullup
+		};
+
+		GPIODigitalPinInputDevice(const Pin pin, const Mode mode = Mode::Input);
+		virtual const State read() = 0;
+
+		using Shared_Ptr<GPIODigitalPinInputDevice>::Shared;
+		using Shared_Ptr<GPIODigitalPinInputDevice>::make;
+	};
+
+	class GPIODevice : public Shared_Ptr<GPIODevice>
+	{
+	public:
+		virtual GPIODigitalPinInputDevice::Shared getInputPinDevice(GPIODigitalPinInputDevice::Pin pin, GPIODigitalPinInputDevice::Mode) = 0;
+		virtual GPIODigitalPinOutputDevice::Shared getOutputPinDevice(GPIODigitalPinOutputDevice::Pin pin) = 0;
+	};
+
 	class RuntimeHardwareState
 	{
 	private:

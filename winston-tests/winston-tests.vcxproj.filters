@@ -36,7 +36,7 @@
     <ClCompile Include="winston-tests-spi-tlc5947-signal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\winston\FT232_SPIDevice.cpp">
+    <ClCompile Include="..\winston\FT232_Device.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -385,6 +385,18 @@ const winston::Result Arduino_SPIDevice::send(const std::span<DataType> data)
     return winston::Result::OK;
 }
 
+Arduino_GPIOOutputPin::Arduino_GPIOOutputPin(const Pin pin, const State initial)
+    : winston::GPIODigitalPinOutputDevice(pin, initial), winston::Shared_Ptr<Arduino_GPIOOutputPin>()
+{
+    pinMode(pin, OUTPUT);
+    digitalWriteFast(pin, initial == State::Low ? LOW : HIGH);
+}
+
+void Arduino_GPIOOutputPin::Arduino_GPIOOutputPin::set(const State value)
+{
+    digitalWriteFast(pin, value == State::Low ? LOW : HIGH);
+}
+
 void teensyMAC(uint8_t* mac) { // there are 2 MAC addresses each 48bit 
     uint32_t m1 = HW_OCOTP_MAC1;
     uint32_t m2 = HW_OCOTP_MAC0;

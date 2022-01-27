@@ -8,9 +8,15 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 namespace winstontests
 {
 	template<typename T>
-	class Test_SendDevice : public winston::SendDevice<T>, public winston::Shared_Ptr<Test_SendDevice<T>>
+	class Test_SendDevice : public winston::SendDevice<T>, public winston::GPIODigitalPinOutputDevice, public winston::Shared_Ptr<Test_SendDevice<T>>
 	{
 	public:
+		Test_SendDevice()
+			: GPIODigitalPinOutputDevice(0) // we don't care
+		{
+
+		}
+
 		const winston::Result send(const std::span<T> data)
 		{
 			this->_data = data;
@@ -18,6 +24,8 @@ namespace winstontests
 		};
 
 		const std::span<T> data() { return this->_data; };
+
+		void set(const State value) { };  // we don't care
 
 		std::span<T> _data;
 
@@ -31,12 +39,12 @@ namespace winstontests
         TEST_METHOD(DevInit)
         {
 			Test_SendDevice<unsigned char>::Shared sendDevice = Test_SendDevice<unsigned char>::make();
-			TLC5947_SignalDevice::Shared signalDevice = TLC5947_SignalDevice::make(1, 24, sendDevice);
+			TLC5947_SignalDevice::Shared signalDevice = TLC5947_SignalDevice::make(1, 24, sendDevice, sendDevice);
         }
 		TEST_METHOD(SignalUpdatePort_0_0)
 		{
 			Test_SendDevice<unsigned char>::Shared sendDevice = Test_SendDevice<unsigned char>::make();
-			TLC5947_SignalDevice::Shared signalDevice = TLC5947_SignalDevice::make(1, 24, sendDevice);
+			TLC5947_SignalDevice::Shared signalDevice = TLC5947_SignalDevice::make(1, 24, sendDevice, sendDevice);
 
 			winston::Port port(0, 0);
 			winston::Signal::Shared signal = winston::SignalKS::make([](const winston::Signal::Aspects aspect) -> const winston::State { return winston::State::Finished; }, 0, port);

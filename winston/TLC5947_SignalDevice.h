@@ -9,10 +9,10 @@ class TLC5947 : public winston::SignalDevice<T>, public winston::Shared_Ptr<TLC5
 public:
 	const size_t bits = 12;
 
-	TLC5947(const size_t devices, const size_t portsPerDevice, typename winston::SendDevice<T>::Shared device)
-		: winston::SignalDevice<T>(devices, portsPerDevice, device), data((devices * portsPerDevice * bits / 8) / sizeof(T), 0)
+	TLC5947(const size_t devices, const size_t portsPerDevice, typename winston::SendDevice<T>::Shared device, typename winston::GPIODigitalPinOutputDevice::Shared pinOff)
+		: winston::SignalDevice<T>(devices, portsPerDevice, device), data((devices * portsPerDevice * bits / 8) / sizeof(T), 0), pinOff(pinOff)
 	{
-		// todo: disable /oe at startup until fully initialized
+		pinOff->set(winston::GPIOPinDevice::State::High);
 	}
 
 	using winston::Shared_Ptr<TLC5947<T>>::Shared;
@@ -29,6 +29,7 @@ private:
 
 	virtual const winston::Result flushInternal()
 	{
+		pinOff->set(winston::GPIOPinDevice::State::Low);
 		return this->device->send(data);
 	}
 
@@ -67,6 +68,8 @@ private:
 	}
 
 	std::vector<T> data;
+
+	winston::GPIODigitalPinOutputDevice::Shared pinOff;
 };
 
 using TLC5947_SignalDevice = TLC5947<unsigned char>;

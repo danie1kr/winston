@@ -717,13 +717,15 @@ void Kornweinheim::systemSetup() {
 
     // signals
 #ifdef WINSTON_PLATFORM_TEENSY
-    this->signalSPIDevice = SignalSPIDevice::make(10, 20000000);
+    this->signalInterfaceDevice = SignalInterfaceDevice::make(10, 20000000);
+    auto TLC5947Off = Arduino_GPIOOutputPin::make(41, Arduino_GPIOOutputPin::State::High);
 #else
-    this->signalSPIDevice = SignalSPIDevice::make(3, 20000000);
+    this->signalInterfaceDevice = SignalInterfaceDevice::make(3, 20000000);
+    auto TLC5947Off = this->signalInterfaceDevice->getOutputPinDevice(4);
 #endif
-    this->signalSPIDevice->init();
-    this->signalSPIDevice->skipSend(true);
-    this->signalDevice = TLC5947_SignalDevice::make(1, 24, this->signalSPIDevice);
+    this->signalInterfaceDevice->init();
+    this->signalInterfaceDevice->skipSend(true);
+    this->signalDevice = TLC5947_SignalDevice::make(1, 24, this->signalInterfaceDevice, TLC5947Off);
 };
 
 void Kornweinheim::systemSetupComplete()
@@ -737,7 +739,7 @@ void Kornweinheim::systemSetupComplete()
     //for (auto it = turnouts.begin(); it != turnouts.end(); it++)
     //    this->stationDebugInjector->injectTurnoutUpdate(it->second, std::rand() % 2 ? winston::Turnout::Direction::A_B : winston::Turnout::Direction::A_C);
 #endif
-    this->signalSPIDevice->skipSend(false);
+    this->signalInterfaceDevice->skipSend(false);
     this->signalDevice->flush();
     this->signalBox->order(this->signalDevice->flushCommand());
 }

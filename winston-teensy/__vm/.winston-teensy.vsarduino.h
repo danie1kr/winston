@@ -16,7 +16,6 @@
 #define __HARDWARE_imxrt1062__
 #define __HARDWARE_IMXRT1062__
 #define _VMDEBUG 1
-#define BR_USE_UNIX_TIME  0
 #define TCB_SPAN_NAMESPACE_NAME std
 #define WINSTON_PLATFORM_TEENSY
 #define TL_NAMESPACE std

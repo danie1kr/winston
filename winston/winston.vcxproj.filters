@@ -45,7 +45,7 @@
     <ClCompile Include="railways.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FT232_SPIDevice.cpp">
+    <ClCompile Include="FT232_Device.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="external\json11\json11.cpp">
@@ -77,7 +77,7 @@
     <ClInclude Include="TLC5947_SignalDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FT232_SPIDevice.h">
+    <ClInclude Include="FT232_Device.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="external\ftdi-232\ftd2xx.h">

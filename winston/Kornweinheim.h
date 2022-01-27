@@ -113,6 +113,6 @@ private:
     const unsigned short z21Port = 21105;
 
     /* Signal Device */
-    SignalSPIDevice::Shared signalSPIDevice;
+    SignalInterfaceDevice::Shared signalInterfaceDevice;
     TLC5947_SignalDevice::Shared signalDevice;
 };

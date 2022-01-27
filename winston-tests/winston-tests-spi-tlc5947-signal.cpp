@@ -3,7 +3,7 @@
 #include "..\libwinston\Winston.h"
 
 #include "..\winston-hal-x64.h"
-#include "..\winston\FT232_SPIDevice.h"
+#include "..\winston\FT232_Device.h"
 #include "..\winston\TLC5947_SignalDevice.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
@@ -12,16 +12,17 @@ namespace winstontests
 {
 	TEST_CLASS(TLC5947SPI)
 	{
-		SignalSPIDevice::Shared signalSPIDevice;
+		SignalInterfaceDevice::Shared signalInterfaceDevice;
 		TLC5947_SignalDevice::Shared signalDevice;
 
 	public:
 
 		TEST_METHOD_INITIALIZE(init)
 		{
-			this->signalSPIDevice = SignalSPIDevice::make(3, 5000000);
-			this->signalSPIDevice->init();
-			this->signalDevice = TLC5947_SignalDevice::make(1, 24, this->signalSPIDevice);
+			this->signalInterfaceDevice = SignalInterfaceDevice::make(3, 5000000);
+			auto TLC5947Off = this->signalInterfaceDevice->getOutputPinDevice(4);
+			this->signalInterfaceDevice->init();
+			this->signalDevice = TLC5947_SignalDevice::make(1, 24, this->signalInterfaceDevice, TLC5947Off);
 		}
 
 		TEST_METHOD_CLEANUP(cleanup)
@@ -36,14 +37,14 @@ namespace winstontests
 			// all off
 			{
 				std::vector<unsigned char> data((1 * 24 * 12 / 8) / sizeof(unsigned char), 0);
-				this->signalSPIDevice->send(data);
+				this->signalInterfaceDevice->send(data);
 				winston::hal::delay(200);
 			}
 
 			// all on
 			{
 				std::vector<unsigned char> data((1 * 24 * 12 / 8) / sizeof(unsigned char), 0xFF);
-				this->signalSPIDevice->send(data);
+				this->signalInterfaceDevice->send(data);
 				winston::hal::delay(200);
 			}
 
@@ -52,7 +53,7 @@ namespace winstontests
 				std::vector<unsigned char> data((1 * 24 * 12 / 8) / sizeof(unsigned char), 0);
 				data[data.size() - 1] = 0xFF;
 				data[data.size() - 2] = 0x0F;
-				this->signalSPIDevice->send(data);
+				this->signalInterfaceDevice->send(data);
 				winston::hal::delay(200);
 			}
 
@@ -64,7 +65,7 @@ namespace winstontests
 				data[data.size() - 3] = 0x00;
 				data[data.size() - 4] = 0xFF;
 				data[data.size() - 5] = 0x0F;
-				this->signalSPIDevice->send(data);
+				this->signalInterfaceDevice->send(data);
 				winston::hal::delay(200);
 			}
 
@@ -82,7 +83,7 @@ namespace winstontests
 			[]	5  4  3  2  1 
 				0F FF 7F F0 00
 			*/
-				this->signalSPIDevice->send(data);
+				this->signalInterfaceDevice->send(data);
 				winston::hal::delay(200);
 			}
 
@@ -94,7 +95,7 @@ namespace winstontests
 				data[data.size() - 3] = 0x80;
 				data[data.size() - 4] = 0x08;
 				data[data.size() - 5] = 0x00;
-				this->signalSPIDevice->send(data);
+				this->signalInterfaceDevice->send(data);
 				winston::hal::delay(200);
 			}
 		}
@@ -107,7 +108,7 @@ namespace winstontests
 			// all off
 			{
 				std::vector<unsigned char> data((1 * 24 * 12 / 8) / sizeof(unsigned char), 0);
-				this->signalSPIDevice->send(data);
+				this->signalInterfaceDevice->send(data);
 				winston::hal::delay(200);
 			}
 

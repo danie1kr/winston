@@ -90,8 +90,18 @@ public:
 private:
 	SPISettings spiSettings;
 };
+using SignalInterfaceDevice = Arduino_SPIDevice;
 
-using SignalSPIDevice = Arduino_SPIDevice;
+class Arduino_GPIOOutputPin : public winston::GPIODigitalPinOutputDevice, public winston::Shared_Ptr<Arduino_GPIOOutputPin>
+{
+public:
+    Arduino_GPIOOutputPin(const Pin pin, const State initial = State::Low);
+    void set(const State value);
+
+    using winston::Shared_Ptr<Arduino_GPIOOutputPin>::Shared;
+    using winston::Shared_Ptr<Arduino_GPIOOutputPin>::make;
+};
+
 /*
 #ifdef WINSTON_WITH_WEBSOCKET
 class WebServerTeensy : public winston::WebServer<WebsocketsClient>

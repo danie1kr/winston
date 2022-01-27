@@ -5,8 +5,20 @@
 namespace winston
 {
 	Logger logger;
-	RuntimeHardwareState runtimeHardwareState;
 
+	GPIOPinDevice::GPIOPinDevice(const Pin pin) 
+		: Shared_Ptr<GPIOPinDevice>(), pin(pin)
+	{ }
+
+	GPIODigitalPinOutputDevice::GPIODigitalPinOutputDevice(const Pin pin, const State initial)
+		: GPIOPinDevice(pin), Shared_Ptr<GPIODigitalPinOutputDevice>()
+	{ }
+
+	GPIODigitalPinInputDevice::GPIODigitalPinInputDevice(const Pin pin, const Mode direction)
+		: GPIOPinDevice(pin), Shared_Ptr<GPIODigitalPinInputDevice>()
+	{ }
+
+	RuntimeHardwareState runtimeHardwareState;
 	RuntimeHardwareState::RuntimeHardwareState() : state(0) { };
 
 	void logRuntimeStatus()

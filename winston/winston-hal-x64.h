@@ -3,7 +3,7 @@
 #include <WinSock2.h>
 #include "../libwinston/Signal.h"
 #include "../libwinston/HAL.h"
-#include "FT232_SPIDevice.h"
+#include "FT232_Device.h"
 
 const char* operator "" _s(const char* in, size_t len);
 
@@ -74,5 +74,3 @@ private:
 	websocketpp::server<websocketpp::config::asio> server;
 };
 using WebServer = WebServerWSPP;
-
-using SignalSPIDevice = FT232_SPIDevice;

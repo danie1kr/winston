@@ -278,6 +278,13 @@ void Kornweinheim::writeAttachedSignal(
         data["guarding"] = winston::Track::ConnectionToString(connection);
         data["pre"] = signal->preSignal();
         data["main"] = signal->mainSignal();
+        auto lights = data.createNestedArray("lights");
+        for (const auto& signalLight : signal->lights())
+        {
+            auto light = lights.createNestedObject();
+            light["device"] = signalLight.port.device();
+            light["port"] = signalLight.port.port();
+        }
     }
 #endif
 }
@@ -482,7 +489,7 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
         std::string railwayContentJson("");
         serializeJson(railwayContent, railwayContentJson);
 
-        const size_t chunkSize = 512;// this->webServer.maxMessageSize();
+        const size_t chunkSize = this->webServer.maxMessageSize();
         
         for (size_t i = 0; i < railwayContentJson.length(); i += chunkSize)
         {

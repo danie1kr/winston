@@ -35,7 +35,23 @@ namespace winston
 		virtual ~Railway() = default;
 
 		using SignalFactory = std::function < winston::Signal::Shared (winston::Track::Shared track, winston::Track::Connection connection)>;
-		SignalFactory KS(const Length distance = 0, const Port port = Port());
+		template<class _Signal>
+		SignalFactory S(const Length distance, size_t& device, size_t& port)
+		{
+			Port devPort(device, port);
+			port += _Signal::lightsCount();
+			// TODO: ensure port does not overflow
+			return [distance, devPort, this](winston::Track::Shared track, winston::Track::Connection connection)->winston::Signal::Shared {
+				return _Signal::make([=](const winston::Signal::Aspects aspect)->const winston::State {
+					return this->callbacks.signalUpdateCallback(track, connection, aspect);
+					}, distance, devPort);
+			};
+		}
+		SignalFactory KS_dummy(const Length distance = 0, const Port port = Port());
+		inline SignalFactory H(const Length distance, size_t& device, size_t& port)
+		{
+			return S<SignalH>(distance, device, port);
+		}
 
 		void block(const Address address, const Trackset trackset);
 		Block::Shared block(Address address);

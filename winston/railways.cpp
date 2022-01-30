@@ -520,7 +520,7 @@ winston::Track::Shared Y2021Railway::define(const Tracks track)
 
 }
 
-void Y2021Railway::connect()// std::array<winston::Track::Shared, tracksCount()>& tracks)
+void Y2021Railway::connect()
 {
 #define LOCAL_TRACK(var)  auto var = this->track(Tracks::var);
     LOCAL_TRACK(PBF1a);
@@ -562,33 +562,36 @@ void Y2021Railway::connect()// std::array<winston::Track::Shared, tracksCount()>
     const auto B = winston::Track::Connection::B;
     const auto C = winston::Track::Connection::C;
 
+    size_t device = 0;
+    size_t port = 0;
+
     // outer loop
     Turnout1->connect(B, PBF2a, A)
         ->connect(B, Turnout4, A)
         ->connect(B, PBF2, A)
-        ->connect(B, Turnout6, C)
+        ->connect(B, H(5, port, device), Turnout6, C)
         ->connect(A, B1, A)
         ->connect(B, Turnout7, A)
         ->connect(B, B2, A)
         ->connect(B, Turnout11, B)
         ->connect(A, B3, A)
-        ->connect(B, KS(0), Turnout1, A);
+        ->connect(B, KS_dummy(), Turnout1, A);
 
     // inner loop
     Turnout2->connect(A, Turnout3, A)
         ->connect(B, PBF3, A)
-        ->connect(B, B4, A)
+        ->connect(B, H(5, port, device), B4, A)
         ->connect(B, Turnout8, C)
         ->connect(A, Turnout9, A)
         ->connect(B, B5, A)
         ->connect(B, Turnout10, A)
         ->connect(B, B6, A)
-        ->connect(B, KS(0), Turnout2, C);
+        ->connect(B, KS_dummy(), Turnout2, C);
 
     // lower track
-    PBF1a->connect(A, KS(0), Turnout5, B)
+    PBF1a->connect(A, KS_dummy(0), Turnout5, B)
         ->connect(A, PBF1, A)
-        ->connect(B, Turnout6, B);
+        ->connect(B, H(5, port, device), Turnout6, B);
 
     // inner turnouts
     Turnout1->connect(C, Turnout2, B);
@@ -599,19 +602,19 @@ void Y2021Railway::connect()// std::array<winston::Track::Shared, tracksCount()>
     Turnout15->connect(C, Turnout16, C);
 
     // nebengleise
-    Turnout3->connect(C, N1, A, KS(0));
-    Turnout12->connect(B, N2, A, KS(0));
+    Turnout3->connect(C, N1, A, KS_dummy(0));
+    Turnout12->connect(B, N2, A, KS_dummy(0));
 
     // GBF
    Turnout12->connect(A, Turnout13, A)
         ->connect(B, Turnout14, A)
-        ->connect(B, GBF1, A, KS(0));
-   Turnout13->connect(C, GBF3b, A, KS(0))
-       ->connect(B, KS(0), Turnout16, A)
-       ->connect(B, GBF3a, A, KS(0));
-   Turnout14->connect(C, GBF2b, A, KS(0))
-       ->connect(B, KS(0), Turnout15, B)
-       ->connect(A, GBF2a, A, KS(0));
+        ->connect(B, GBF1, A, KS_dummy(0));
+   Turnout13->connect(C, GBF3b, A, KS_dummy(0))
+       ->connect(B, KS_dummy(0), Turnout16, A)
+       ->connect(B, GBF3a, A, KS_dummy(0));
+   Turnout14->connect(C, GBF2b, A, KS_dummy(0))
+       ->connect(B, KS_dummy(0), Turnout15, B)
+       ->connect(A, GBF2a, A, KS_dummy(0));
 }
 
 #ifndef WINSTON_PLATFORM_TEENSY
@@ -714,25 +717,25 @@ void SignalRailway::connect()
           });
     };*/
 
-    a->connect(winston::Track::Connection::A, KS(0), t2, winston::Track::Connection::B)
-        ->connect(winston::Track::Connection::A, g1, winston::Track::Connection::B, KS(0))
-        ->connect(winston::Track::Connection::A, KS(0), t4, winston::Track::Connection::C)
-        ->connect(winston::Track::Connection::A, g4, winston::Track::Connection::B, KS(0))
+    a->connect(winston::Track::Connection::A, KS_dummy(0), t2, winston::Track::Connection::B)
+        ->connect(winston::Track::Connection::A, g1, winston::Track::Connection::B, KS_dummy(0))
+        ->connect(winston::Track::Connection::A, KS_dummy(0), t4, winston::Track::Connection::C)
+        ->connect(winston::Track::Connection::A, g4, winston::Track::Connection::B, KS_dummy(0))
         ->connect(winston::Track::Connection::A, g5, winston::Track::Connection::B)
-        ->connect(winston::Track::Connection::A, KS(0), t5, winston::Track::Connection::A)
-        ->connect(winston::Track::Connection::B, g6, winston::Track::Connection::B, KS(0))
-        ->connect(winston::Track::Connection::A, g7, winston::Track::Connection::B, KS(0))
+        ->connect(winston::Track::Connection::A, KS_dummy(0), t5, winston::Track::Connection::A)
+        ->connect(winston::Track::Connection::B, g6, winston::Track::Connection::B, KS_dummy(0))
+        ->connect(winston::Track::Connection::A, g7, winston::Track::Connection::B, KS_dummy(0))
         ->connect(winston::Track::Connection::A, t1, winston::Track::Connection::A)
         ->connect(winston::Track::Connection::C, t2, winston::Track::Connection::C);
 
-    t1->connect(winston::Track::Connection::B, g2, winston::Track::Connection::A, KS(0))
+    t1->connect(winston::Track::Connection::B, g2, winston::Track::Connection::A, KS_dummy(0))
         ->connect(winston::Track::Connection::B, t3, winston::Track::Connection::A)
         ->connect(winston::Track::Connection::B, g3, winston::Track::Connection::A)
-        ->connect(winston::Track::Connection::B, KS(0), t4, winston::Track::Connection::B);
+        ->connect(winston::Track::Connection::B, KS_dummy(0), t4, winston::Track::Connection::B);
 
-    t3->connect(winston::Track::Connection::C, b, winston::Track::Connection::A, KS(0));
+    t3->connect(winston::Track::Connection::C, b, winston::Track::Connection::A, KS_dummy(0));
 
-    t5->connect(winston::Track::Connection::C, c, winston::Track::Connection::A, KS(0));
+    t5->connect(winston::Track::Connection::C, c, winston::Track::Connection::A, KS_dummy(0));
 
 #define attachSignalSR(track, SignalClass, guardedConnection) \
     track->attachSignal(SignalClass::make([=](const winston::Signal::Aspects aspect)->const winston::State { return this->callbacks.signalUpdateCallback(track, guardedConnection, aspect); }), guardedConnection);

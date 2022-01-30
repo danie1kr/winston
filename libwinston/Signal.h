@@ -102,7 +102,6 @@ namespace winston
 		const Length distance() const;
 		
 		virtual const std::span<const Light> lights() const = 0;
-		virtual const unsigned int lightsCount() const = 0;
 	protected:
 
 		virtual void updateLights() = 0;
@@ -149,7 +148,7 @@ namespace winston
 			return this->_lights;
 		}
 
-		const unsigned int lightsCount() const {
+		static constexpr unsigned int lightsCount() {
 			return _Lights;
 		};
 

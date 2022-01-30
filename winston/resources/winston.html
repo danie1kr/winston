@@ -167,6 +167,25 @@
         </div>
     </div>
 
+    <div id="infoSignal" class="contextMenu">
+        <div class="row>">
+            <div class="col">
+                <label for="infoSignalParent">Track</label>
+                <p id="infoSignalParent"></p>
+            </div>
+            <div class="col">
+                <label for="infoSignalConnection">Connection</label>
+                <p id="infoSignalConnection"></p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <label for="infoSignalLights">Lights</label>
+                <p id="infoSignalLights"></p>
+            </div>
+        </div>
+    </div>
+
     <header>
     <div>
         winston <label id="settingsToggle">⚙</label>
@@ -458,6 +477,22 @@
             }
         }
 
+        function signalInfo(event)
+        {
+            hideContextMenus();
+            let $info = $("#infoSignal");
+            let node = event.target;
+            //$info.find("#infoSignalId").text(node.data("id"));
+            $info.find("#infoSignalParent").text(node.data("parentTrack"));
+            $info.find("#infoSignalConnection").text(node.data("guarding"));
+            let lights = _.map(node.data("lights"), l => "Dev: " + l.device + " Port: " + l.port)
+            let lightsText = lights.join("<br>");
+            $info.find("#infoSignalLights").html(lightsText);
+            $info.css("top", event.originalEvent.clientY + 'px')
+                 .css("left", (event.originalEvent.clientX + 20) + 'px')
+                 .show();
+        }
+
         function cytoscapeCreate()
         {
             return cy = cytoscape({
@@ -633,10 +668,10 @@
             cy.on('click', '.connection', function(event) {
                 click("menuEditNode", event);
             })
-            /*cy.on('click', '.track', function(event) {
-                click("menuTrackNode", event);
-            });*/
-            cy.on('unselect', '.track, .trackNode, .track', function() {
+            cy.on('click', '.signal', function(event) {
+                signalInfo(event);
+            });
+            cy.on('unselect', '.track, .trackNode, .track, .signal', function() {
                 cy.elements().removeClass("reachable");
                 hideContextMenus();
             });
@@ -883,10 +918,12 @@
                 if(existing.length > 0)
                 {
                     existing.removeClass("unverified");
+                    existing.data("lights", signal.lights);
                 }
                 else
                 {
-                    nodes.push({group: 'nodes', data: {id: track + "_signal_" + guarding, guarding: guarding, parentTrack: track, relativePosition: {x: 0, y: 20}}, position: {x: parentPosition.x, y: parentPosition.y + 20}, classes: "signal"});
+                    let lights = signal.lights;
+                    nodes.push({group: 'nodes', data: {id: track + "_signal_" + guarding, guarding: guarding, parentTrack: track, lights: lights, relativePosition: {x: 0, y: 20}}, position: {x: parentPosition.x, y: parentPosition.y + 20}, classes: "signal"});
                     edges.push({group: 'edges', data: {source: track + "_signal_" + guarding, target: track + "_" + guarding}, classes: "signalConnector"});
                 }
             });

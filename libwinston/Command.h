@@ -15,7 +15,7 @@ namespace winston
 		virtual ~Command() = default;
 
 		const State execute();
-#ifdef WINSTON_STATISTICS
+#if defined(WINSTON_STATISTICS) && defined(WINSTON_STATISTICS_DETAILLED)
 		const std::string& name() const;
 #endif
 		void obsolete() noexcept;
@@ -24,7 +24,7 @@ namespace winston
 		Payload payload;
 		const TimePoint created;
 		bool skip;
-#ifdef WINSTON_STATISTICS
+#if defined(WINSTON_STATISTICS) && defined(WINSTON_STATISTICS_DETAILLED)
 		const std::string _name;
 #endif
 	};

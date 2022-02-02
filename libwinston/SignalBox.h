@@ -39,7 +39,7 @@ namespace winston
 		static Signal::Shared nextSignal(Track::Shared& track, const bool guarding, Track::Connection& leaving, const bool main, const bool includingFirst);
 		std::queue<Command::Shared> commands;
 
-#ifdef WINSTON_STATISTICS
+#if defined(WINSTON_STATISTICS) && defined(WINSTON_STATISTICS_DETAILLED)
 	public:
 		const std::string statistics(const size_t withTop = 0) const;
 	private:

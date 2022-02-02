@@ -1,4 +1,4 @@
-
+﻿
 #include "Kornweinheim.h"
 
 #ifdef WINSTON_WITH_WEBSOCKET
@@ -216,10 +216,43 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
 
 #ifdef WINSTON_WITH_WEBSOCKET
 // Define a callback to handle incoming messages
+
+void Kornweinheim::writeSignal(WebServer::HTTPConnection& connection, const winston::Track::Shared track, const winston::Track::Connection trackCon)
+{
+    if (auto signal = track->signalGuarding(trackCon))
+    {
+        unsigned int l = 0;
+        size_t cnt = signal->lights().size();
+        for (const auto& light : signal->lights())
+        {
+            std::string icon = "";
+            switch (light.aspect)
+            {
+            default:
+            case winston::Signal::Aspect::Off: icon = " &#9679;"; break;
+            case winston::Signal::Aspect::Halt: icon = " &#128308;"; break;
+            case winston::Signal::Aspect::ExpectHalt: icon = " &#128997;"; break;
+            case winston::Signal::Aspect::Go: icon = " &#128994;"; break;
+            case winston::Signal::Aspect::ExpectGo: icon = " &#129001;"; break;
+            }
+
+            icon += signal->shows(light.aspect) ? " on" : " off";
+
+            if (l == 0)
+                connection.body(winston::build("<tr><td rowspan=", cnt, ">", track->name(), "</td><td rowspan=", cnt, ">", winston::Track::ConnectionToString(trackCon), "</td><td>"));
+            else
+                connection.body(winston::build("<tr><td>"));
+            ++l;
+            connection.body(winston::build(l, icon, "</td><td>", light.port.device(), "</td><td>", light.port.port(), "</td></tr>"));
+        }
+    }
+}
+
 void Kornweinheim::on_http(WebServer::HTTPConnection& connection, const std::string& resource) {
     const std::string path_index("/");
     const std::string path_railway("/railway");
     const std::string path_log("/log");
+    const std::string path_signals("/signals");
 
     if (resource.compare(path_index) == 0)
     {
@@ -249,6 +282,30 @@ void Kornweinheim::on_http(WebServer::HTTPConnection& connection, const std::str
             connection.body(entry.text); connection.body("</td></tr>\r\n");
         }
 
+        connection.body("</table></body></html>\r\n"_s);
+    }
+    else if (resource.compare(path_signals) == 0)
+    {
+        connection.status(200);
+        connection.header("content-type"_s, "text/html; charset=UTF-8"_s);
+        connection.header("Connection"_s, "close"_s);
+        connection.body("<html><head>winston signal list</head><body><table border=1><tr><th>track</th><th>connection</th><th>light</th><th>device</th><th>port</th></tr>"_s);
+        for (unsigned int i = 0; i < railway->tracksCount(); ++i)
+        {
+            auto track = railway->track(i);
+            switch (track->type())
+            {
+            case winston::Track::Type::Bumper:
+                this->writeSignal(connection, track, winston::Track::Connection::DeadEnd);
+                this->writeSignal(connection, track, winston::Track::Connection::A);
+            case winston::Track::Type::Rail:
+                this->writeSignal(connection, track, winston::Track::Connection::A);
+                this->writeSignal(connection, track, winston::Track::Connection::B);
+                break;
+            default:
+                break;
+            }
+        }
         connection.body("</table></body></html>\r\n"_s);
     }
 }
@@ -282,8 +339,9 @@ void Kornweinheim::writeAttachedSignal(
         for (const auto& signalLight : signal->lights())
         {
             auto light = lights.createNestedObject();
-            light["device"] = signalLight.port.device();
-            light["port"] = signalLight.port.port();
+            light["aspect"] = (unsigned int)signalLight.aspect;
+            light["device"] = (unsigned int)signalLight.port.device();
+            light["port"] = (unsigned int)signalLight.port.port();
         }
     }
 #endif

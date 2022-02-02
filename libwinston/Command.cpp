@@ -6,11 +6,11 @@ namespace winston
 {
 	Command::Command(Payload payload, const std::string name)
 		: payload(payload), created(hal::now()), skip(false)
-#ifdef WINSTON_STATISTICS
+#if defined(WINSTON_STATISTICS) && defined(WINSTON_STATISTICS_DETAILLED)
 		, _name(name)
-#endif
 	{
-#ifndef WINSTON_STATISTICS
+#else
+	{
 		(void)name;
 #endif
 
@@ -33,7 +33,7 @@ namespace winston
 		return hal::now() - this->created;
 	}
 
-#ifdef WINSTON_STATISTICS
+#if defined(WINSTON_STATISTICS) && defined(WINSTON_STATISTICS_DETAILLED)
 	const std::string& Command::name() const
 	{
 		return this->_name;

@@ -81,6 +81,9 @@ private:
     /* websocket */
     WebServer webServer;
 
+    // add a signal to the /signal output
+    void writeSignal(WebServer::HTTPConnection& connection, const winston::Track::Shared track, const winston::Track::Connection trackCon);
+
     // Define a callback to handle incoming messages
     void on_http(WebServer::HTTPConnection& connection, const std::string& resource);
 

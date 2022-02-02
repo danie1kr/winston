@@ -7,8 +7,8 @@
 
 namespace winston
 {
-	SignalBox::SignalBox() 
-#ifdef WINSTON_STATISTICS
+	SignalBox::SignalBox()
+#if defined(WINSTON_STATISTICS) && defined(WINSTON_STATISTICS_DETAILLED)
 		: stopwatchJournal("SignalBox")
 #endif
 	{
@@ -169,7 +169,7 @@ namespace winston
 		return nullptr;
 	}
 
-#ifdef WINSTON_STATISTICS
+#if defined(WINSTON_STATISTICS) && defined(WINSTON_STATISTICS_DETAILLED)
 	const std::string SignalBox::statistics(const size_t withTop) const
 	{
 		return this->stopwatchJournal.toString(withTop);
@@ -188,12 +188,12 @@ namespace winston
 			auto command = std::move(this->commands.front());
 			this->commands.pop();
 
-#ifdef WINSTON_STATISTICS
+#if defined(WINSTON_STATISTICS) && defined(WINSTON_STATISTICS_DETAILLED)
 			auto now = hal::now();
 #endif
 			auto state = command->execute();
 
-#ifdef WINSTON_STATISTICS
+#if defined(WINSTON_STATISTICS) && defined(WINSTON_STATISTICS_DETAILLED)
 			if (state != State::Delay)
 				this->stopwatchJournal.add(hal::now() - now, command->name());
 #endif

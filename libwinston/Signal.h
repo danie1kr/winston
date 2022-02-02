@@ -1,11 +1,75 @@
 #pragma once
 
+#include <functional>
+
 #include "WinstonTypes.h"
 #include "HAL.h"
 #include "Util.h"
-#include <functional>
 #include "span.hpp"
 #include "Command.h"
+
+
+// constexpr to count bits in i
+template<size_t> struct BitCounter;
+template<> struct BitCounter<0>
+{
+	static constexpr size_t count() { return 0; }
+};
+template<> struct BitCounter<1>
+{
+	static constexpr size_t count() { return 1; }
+};
+template<size_t i> struct BitCounter
+{
+	static constexpr size_t count() { return (i & 1) + BitCounter<(i >> 1)>::count(); }
+};
+
+// constexpr to get the bit 1 << N so that (1<<N) is the nth set bit in value
+template<size_t, size_t> class nThSetBit;
+template<> class nThSetBit<0, 0>
+{
+public:
+	static constexpr size_t extract(size_t value)
+	{
+		(void)value;
+		return 0;
+	};
+};
+template<size_t N> class nThSetBit<0, N>
+{
+public:
+	static constexpr size_t extract(size_t value)
+	{
+		(void)value;
+		return 1 << N;
+	};
+};
+template<size_t I> class nThSetBit<I, 0>
+{
+public:
+	static constexpr size_t extract(size_t value)
+	{
+		(void)value;
+		return 0;
+	};
+};
+template<size_t I, size_t N> class nThSetBit
+{
+public:
+	static constexpr size_t extract(size_t value)
+	{
+		if (value & (1 << N))
+		{
+			if (I == 1)
+				return 1 << N;
+			else
+				return nThSetBit<I - 1, N - 1>::extract(value);
+		}
+		else
+			return nThSetBit<I, N - 1>::extract(value);
+
+	};
+};
 
 namespace winston
 {
@@ -24,8 +88,9 @@ namespace winston
 
 		struct Light
 		{
-			static Light make(const Port port);
+			static Light make(const Port port, const Aspect aspect = Aspect::Off);
 			const Port port;
+			const Aspect aspect;
 			unsigned int value = 0;
 			static const unsigned int range = 1 << 12;
 			static const unsigned int maximum = range - 1;
@@ -66,8 +131,8 @@ namespace winston
 
 		*/
 
-		static const Aspects AspectsProtection = (unsigned int)Aspect::Off
-			| (unsigned int)Aspect::Halt
+		static const Aspects AspectsProtection = /*(unsigned int)Aspect::Off
+			|*/ (unsigned int)Aspect::Halt
 			| (unsigned int)Aspect::Go;
 
 		static const Aspects AspectsKS = (unsigned int)Aspect::Halt
@@ -77,8 +142,8 @@ namespace winston
 		static const Aspects AspectsH = (unsigned int)Aspect::Halt
 			| (unsigned int)Aspect::Go;
 
-		static const Aspects AspectsV = (unsigned int)Aspect::Off
-			| (unsigned int)Aspect::ExpectHalt
+		static const Aspects AspectsV = /*(unsigned int)Aspect::Off
+			|*/ (unsigned int)Aspect::ExpectHalt
 			| (unsigned int)Aspect::ExpectGo;
 
 		static const Aspects MaskPreSignalAspect =
@@ -116,13 +181,13 @@ namespace winston
 		return static_cast<const bool>(static_cast<const unsigned int>(a) & static_cast<const unsigned int>(b));
 	}
 	
-	template<unsigned int _Aspects, unsigned int _Lights>
-	class SignalInstance : public Signal, public Shared_Ptr<SignalInstance<_Aspects, _Lights>>
+	template<size_t _Aspects>
+	class SignalInstance : public Signal, public Shared_Ptr<SignalInstance<_Aspects>>
 	{
 	public:
 		SignalInstance(const Callback callback = Signal::defaultCallback(), const Length distance = 0, const Port port = Port())
 			: Signal(callback, distance)
-			, _lights(Sequence<_Lights-1>::generate(port.device(), port.port())) {
+			, _lights(Sequence<BitCounter<_Aspects>::count() - 1>::generate(_Aspects, port.device(), port.port())) {
 		};
 
 		const bool supports(const Aspect aspect, const bool any) const
@@ -148,37 +213,54 @@ namespace winston
 			return this->_lights;
 		}
 
-		static constexpr unsigned int lightsCount() {
-			return _Lights;
+		static constexpr size_t lightsCount() {
+			return BitCounter<_Aspects>::count();
 		};
 
 		void updateLights(); // { static_assert(false, "do not use"); };
 
-		using Shared_Ptr<SignalInstance<_Aspects, _Lights>>::Shared;
-		using Shared_Ptr<SignalInstance<_Aspects, _Lights>>::make;
+		using Shared_Ptr<SignalInstance<_Aspects>>::Shared;
+		using Shared_Ptr<SignalInstance<_Aspects>>::make;
 
 	private:
-		typedef std::array<Light, _Lights> LightsArray;
-
-		template<int... i> static constexpr LightsArray makeLightInSequence(const size_t device, const size_t startPort) { return LightsArray{ { Signal::Light::make(Port(device, startPort + i))... } }; }
-		template<int...> struct Sequence;
-		template<int... i> struct Sequence<0, i...>
+		typedef std::array<Light, BitCounter<_Aspects>::count()> LightsArray;
+		template<int... i> static constexpr LightsArray makeLightInSequence(const Signal::Aspects aspects,  const size_t device, const size_t startPort)
+		{ 
+			return LightsArray{ { Signal::Light::make(Port(device, startPort + i), (Signal::Aspect)nThSetBit<i+1, sizeof(Signal::Aspect) * 8 - 1>::extract(aspects))...}};
+		}
+		template<int...> class Sequence;
+		template<int... i> class Sequence<0, i...>
 		{
-			static constexpr LightsArray generate(const size_t device, const size_t startPort) { return makeLightInSequence<0, i...>(device, startPort); }
+		public:
+			static constexpr LightsArray generate(const Signal::Aspects aspects, const size_t device, const size_t startPort) { return makeLightInSequence<0, i...>(aspects, device, startPort); }
 		};
 
-		template<int i, int... j> struct Sequence<i, j...>
+		template<int i, int... j> class Sequence<i, j...>
 		{
-			static constexpr LightsArray generate(const size_t device, const size_t startPort) { return Sequence<i - 1, i, j...>::generate(device, startPort); }
+		public:
+			static constexpr LightsArray generate(const Signal::Aspects aspects,  const size_t device, const size_t startPort) { return Sequence<i - 1, i, j...>::generate(aspects, device, startPort); }
 		};
 
 		LightsArray _lights;
 	};
 
-	using SignalKS = SignalInstance<Signal::AspectsKS, 3>;
-	using SignalH = SignalInstance<Signal::AspectsH, 2>;
-	using SignalV = SignalInstance<Signal::AspectsV, 2>;
-	using SignalHV = SignalInstance<Signal::AspectsHV, 4>;
+	constexpr Signal::Aspects operator |(Signal::Aspect a, Signal::Aspect b)
+	{
+		return (unsigned int)a | (unsigned int)b;
+	}
+	constexpr Signal::Aspects operator |(Signal::Aspects a, Signal::Aspect b)
+	{
+		return (unsigned int)a | (unsigned int)b;
+	}
+	constexpr Signal::Aspects operator |(Signal::Aspect a, Signal::Aspects b)
+	{
+		return (unsigned int)a | (unsigned int)b;
+	}
+
+	using SignalKS = SignalInstance<Signal::AspectsKS>;
+	using SignalH = SignalInstance<Signal::AspectsH>;
+	using SignalV = SignalInstance<Signal::AspectsV>;
+	using SignalHV = SignalInstance<Signal::AspectsHV>;
 
 	template<typename T>
 	class SignalDevice : public Shared_Ptr<SignalDevice<T>>

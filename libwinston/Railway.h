@@ -48,10 +48,7 @@ namespace winston
 			};
 		}
 		SignalFactory KS_dummy(const Length distance = 0, const Port port = Port());
-		inline SignalFactory H(const Length distance, size_t& device, size_t& port)
-		{
-			return S<SignalH>(distance, device, port);
-		}
+		SignalFactory H(const Length distance, size_t& device, size_t& port);
 
 		void block(const Address address, const Trackset trackset);
 		Block::Shared block(Address address);

@@ -46,7 +46,9 @@ void winston_loop()
         nextSWJPrint = winston::hal::now().time_since_epoch() + toSeconds(secondsPerPrint);
 
         winston::logger.info(kwh.statistics(5));
+#ifdef WINSTON_STATISTICS_DETAILLED
         winston::logger.info(kwh.statisticsSignalBox(5));
+#endif
         winston::logger.info(winston::build("LooPS: ", loopsPerSecond / secondsPerPrint));
         loopsPerSecond = 0;
     }

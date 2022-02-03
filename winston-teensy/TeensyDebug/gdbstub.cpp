@@ -8,7 +8,7 @@
  * @copyright Copyright (c) 2020 Fernando Trias
  * 
  */
-
+#ifdef WINSTON_WITH_TEENSYDEBUG
 #include <Arduino.h>
 
 #define CPU_RESTART_ADDR (uint32_t *)0xE000ED0C
@@ -1194,3 +1194,4 @@ void gdb_init(Stream *device) {
   #endif
 #endif
 }
+#endif

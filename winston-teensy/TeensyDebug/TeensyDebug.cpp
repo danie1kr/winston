@@ -31,7 +31,7 @@ http://wcours.gel.ulaval.ca/GIF1001/docs/arm-instructionset.pdf
 https://web.eecs.umich.edu/~prabal/teaching/eecs373-f10/readings/ARMv7-M_ARM.pdf
 
 */
-
+#ifdef WINSTON_WITH_TEENSYDEBUG
 #include <Arduino.h>
 
 #define GDB_DEBUG_INTERNAL
@@ -1276,3 +1276,4 @@ int Debug::setRegister(const char *reg, uint32_t value) { return debug_setRegist
 // int Debug::restoreRunMode() { return debug_restoreRunMode(); }
 
 Debug debug;
+#endif

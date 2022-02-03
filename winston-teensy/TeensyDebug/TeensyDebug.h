@@ -9,6 +9,8 @@
  * 
  */
 
+#ifdef WINSTON_WITH_TEENSYDEBUG
+
 #ifndef TEENSY_DEBUG_H
 #define TEENSY_DEBUG_H
 
@@ -161,4 +163,5 @@ extern Debug debug;
 // #define triggerBreakpoint() { NVIC_SET_PENDING(IRQ_SOFTWARE); }
 #define DEBUGRUN __attribute__ ((section(".fastrun"), noinline, noclone ))
 
+#endif
 #endif

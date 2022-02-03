@@ -64,7 +64,7 @@ const winston::Result FT232_Device::init()
 
     return status == FT_OK ? winston::Result::OK : winston::Result::ExternalHardwareFailed;
 }
-const winston::Result FT232_Device::send(const std::span<DataType> data)
+const winston::Result FT232_Device::send(const std::vector<DataType> data)
 {
     if (this->skip)
         return winston::Result::OK;

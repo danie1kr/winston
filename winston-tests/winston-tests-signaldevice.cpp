@@ -17,17 +17,17 @@ namespace winstontests
 
 		}
 
-		const winston::Result send(const std::span<T> data)
+		const winston::Result send(const std::vector<T> data)
 		{
 			this->_data = data;
 			return winston::Result::OK;
 		};
 
-		const std::span<T> data() { return this->_data; };
+		const std::vector<T> data() { return this->_data; };
 
 		void set(const State value) { };  // we don't care
 
-		std::span<T> _data;
+		std::vector<T> _data;
 
 		using winston::Shared_Ptr<Test_SendDevice<T>>::Shared;
 		using winston::Shared_Ptr<Test_SendDevice<T>>::make;

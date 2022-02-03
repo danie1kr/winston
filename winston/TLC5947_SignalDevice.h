@@ -23,17 +23,14 @@ private:
 	{
 		for (auto& light : signal->lights())
 			setPort(light.port.device(), light.port.port(), light.value);
-		
-		winston::Result r = this->flush();
-		return r;
+		return this->flush();
 	}
 
 	virtual const winston::Result flushInternal()
 	{
 		pinOff->set(winston::GPIOPinDevice::State::Low);
-		std::vector<T> updateable(this->data);
-		winston::Result r = this->device->send(updateable);
-		return r;
+		//std::vector<T> updateable(this->data);
+		return this->device->send(data);
 	}
 
 	void setPort(const size_t dev, const size_t port, unsigned int value)

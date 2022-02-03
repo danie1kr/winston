@@ -371,7 +371,7 @@ const winston::Result Arduino_SPIDevice::init()
     digitalWrite(this->chipSelect, HIGH);
     return winston::Result::OK;
 }
-const winston::Result Arduino_SPIDevice::send(const std::vector<DataType> &data)
+const winston::Result Arduino_SPIDevice::send(const std::vector<DataType> data)
 {
     if (this->skip)
         return winston::Result::OK;

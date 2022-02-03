@@ -82,7 +82,7 @@ public:
 	using winston::Shared_Ptr<Arduino_SPIDevice>::make;
 
 	const winston::Result init();
-	const winston::Result send(const std::vector<DataType>& data);
+	const winston::Result send(const std::vector<DataType> data);
 
 	static constexpr uint8_t BitOrder(const SPIDataOrder order);
 	static constexpr uint8_t DataMode(const SPIMode mode);

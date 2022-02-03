@@ -28,7 +28,7 @@ public:
 	using winston::Shared_Ptr<FT232_Device>::make;
 
 	const winston::Result init();
-	const winston::Result send(const std::span<DataType> data);
+	const winston::Result send(const std::vector<DataType> data);
 
 	winston::GPIODigitalPinInputDevice::Shared getInputPinDevice(winston::GPIODigitalPinInputDevice::Pin pin, winston::GPIODigitalPinInputDevice::Mode);
 	winston::GPIODigitalPinOutputDevice::Shared getOutputPinDevice(winston::GPIODigitalPinOutputDevice::Pin pin);

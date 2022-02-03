@@ -371,10 +371,26 @@ const winston::Result Arduino_SPIDevice::init()
     digitalWrite(this->chipSelect, HIGH);
     return winston::Result::OK;
 }
-const winston::Result Arduino_SPIDevice::send(const std::span<DataType> data)
+const winston::Result Arduino_SPIDevice::send(const std::vector<DataType> &data)
 {
     if (this->skip)
         return winston::Result::OK;
+
+    winston::logger.info("SPI send");
+    std::string spi("");
+    for (size_t i = 0; i < data.size(); ++i)
+    {
+        if (data[i] == 0xFF) spi += "FF";
+        else if (data[i] == 0x0F) spi += "0F";
+        else if (data[i] == 0xF0) spi += "F0";
+        else if (data[i] == 0x00) spi += "00";
+        else
+            spi += "??";
+
+        if (i % 2 == 0)
+            spi += " ";
+    }
+    winston::logger.info(spi);
 
     digitalWrite(this->chipSelect, LOW);
     SPI.beginTransaction(this->spiSettings);

@@ -114,6 +114,9 @@
     <ClInclude Include="TeensyDebug\TeensyDebug.h">
       <Filter>TeensyDebug</Filter>
     </ClInclude>
+    <ClInclude Include="..\winston\TLC5947_SignalDevice.h">
+      <Filter>winston-src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\libwinston\Block.cpp">

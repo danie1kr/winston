@@ -115,7 +115,7 @@ namespace winston
 	public:
 		using DataType = T;
 		SendDevice() : skip(false) { };
-		virtual const Result send(const std::span<DataType> data) = 0;
+		virtual const Result send(const std::vector<DataType>& data) = 0;
 		void skipSend(bool skip)
 		{
 			this->skip = skip;

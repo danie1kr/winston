@@ -7,15 +7,10 @@
 
 // the setup function runs once when you press reset or power the board
 void setup() {
-    //winston_setup();
-    int led = 13;
-    pinMode(led, OUTPUT);
-    digitalWrite(led, HIGH);
-    delay(1000);
-    digitalWrite(led, LOW);
+    winston_setup();
 }
 
 // the loop function runs over and over again until power down or reset
 void loop() {
-    //winston_loop();
+    winston_loop();
 }

@@ -24,21 +24,15 @@ private:
 		for (auto& light : signal->lights())
 			setPort(light.port.device(), light.port.port(), light.value);
 		
-		winston::logger.info(winston::build("Before update/flush", (int)data[1], " ", (int)data[data.size() - 2]));
 		winston::Result r = this->flush();
-		winston::logger.info(winston::build("After update/flush", (int)data[1], " ", (int)data[data.size() - 2]));
 		return r;
 	}
 
 	virtual const winston::Result flushInternal()
 	{
 		pinOff->set(winston::GPIOPinDevice::State::Low);
-		winston::logger.info(winston::build("Before flush/send data", (int)data[1], " ", (int)data[data.size()-2]));
 		std::vector<T> updateable(this->data);
-		winston::logger.info(winston::build("Before flush/send upd", (int)updateable[1], " ", (int)updateable[updateable.size() - 2]));
 		winston::Result r = this->device->send(updateable);
-		winston::logger.info(winston::build("After flush/send upd", (int)updateable[1], " ", (int)updateable[updateable.size() - 2]));
-		winston::logger.info(winston::build("After flush/send", (int)data[1], " ", (int)data[data.size() - 2]));
 		return r;
 	}
 
@@ -72,7 +66,6 @@ private:
 			bytes[0] = (this->data[n] & 0xF0) | (value >> 8);
 			bytes[1] = value & 0xFF;
 		}
-		winston::logger.info(winston::build("Setting port ", port, " to ", value, " idx: ", n, " before: ", (int)data[n], " ", (int)data[n+1], " after : ", (int)bytes[0], " ", (int)bytes[1]));
 		data[n] = bytes[0];
 		data[n+1] = bytes[1];
 	}

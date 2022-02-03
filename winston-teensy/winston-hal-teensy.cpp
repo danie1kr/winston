@@ -376,6 +376,7 @@ const winston::Result Arduino_SPIDevice::send(const std::vector<DataType> &data)
     if (this->skip)
         return winston::Result::OK;
 
+#ifdef WINSTON_TEENSY_SPI_DEBUG
     winston::logger.info("SPI send");
     std::string spi("");
     for (size_t i = 0; i < data.size(); ++i)
@@ -391,6 +392,7 @@ const winston::Result Arduino_SPIDevice::send(const std::vector<DataType> &data)
             spi += " ";
     }
     winston::logger.info(spi);
+#endif
 
     digitalWrite(this->chipSelect, LOW);
     SPI.beginTransaction(this->spiSettings);

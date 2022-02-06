@@ -431,10 +431,10 @@ namespace winston
     namespace hal {
         void init()
         {
-            Serial.begin(115200);
+            Serial.begin(115200);/*
             while (!Serial) { //}&& millis() < 2000) {
                 // Wait for Serial to initialize
-            }
+            }*/
             text("Winston Teensy Init Hello");
 
 #ifdef WINSTON_WITH_TEENSYDEBUG

@@ -18,7 +18,7 @@ namespace winston
 			FunctionsCallback functions;
 		};
 		
-		Locomotive(const Callbacks callbacks, const Address address, const std::string name);
+		Locomotive(const Callbacks callbacks, const Address address, const std::string name, const NFCAddress nfcAddress);
 		inline void light(bool on);
 		const bool light();
 		const bool forward();
@@ -27,6 +27,7 @@ namespace winston
 		void stop();
 		void update(const bool busy, const bool forward, const unsigned char speed, const uint32_t functions);
 		const Address& address() const;
+		const NFCAddress& nfcAddress() const;
 		const std::string& name();
 	private:
 
@@ -34,6 +35,7 @@ namespace winston
 		struct Details
 		{
 			Address address = { 0 };
+			NFCAddress nfcAddress = { 0 };
 			std::string name = { "" };
 			bool busy = { false };
 			bool forward = { true };

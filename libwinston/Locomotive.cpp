@@ -2,8 +2,8 @@
 
 namespace winston
 {
-	Locomotive::Locomotive(const Callbacks callbacks, const Address address, const std::string name) :
-		callbacks(callbacks), details{ address, name, false, true, 0, 0 }
+	Locomotive::Locomotive(const Callbacks callbacks, const Address address, const std::string name, const NFCAddress nfcAddress) :
+		callbacks(callbacks), details{ address, nfcAddress, name, false, true, 0, 0 }
 	{
 	}
 
@@ -50,6 +50,11 @@ namespace winston
 	const Address& Locomotive::address() const
 	{
 		return this->details.address;
+	}
+
+	const NFCAddress& Locomotive::nfcAddress() const
+	{
+		return this->details.nfcAddress;
 	}
 
 	const std::string& Locomotive::name()

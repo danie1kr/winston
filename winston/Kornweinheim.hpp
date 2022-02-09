@@ -830,10 +830,10 @@ bool Kornweinheim::systemLoop()
 void Kornweinheim::populateLocomotiveShed()
 {
     auto callbacks = locoCallbacks();
-    this->addLocomotive(callbacks, 3, "BR 114");
-    this->addLocomotive(callbacks, 4, "BR 106");
-    this->addLocomotive(callbacks, 5, "BR 64");
-    this->addLocomotive(callbacks, 6, "E 11");
-    this->addLocomotive(callbacks, 7, "BR 218");
+    this->addLocomotive(callbacks, 3, "BR 114", 0);
+    this->addLocomotive(callbacks, 4, "BR 106", 1);
+    this->addLocomotive(callbacks, 5, "BR 64", 2);
+    this->addLocomotive(callbacks, 6, "E 11", 3);
+    this->addLocomotive(callbacks, 7, "BR 218", 4);
 }
 

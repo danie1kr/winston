@@ -154,10 +154,10 @@ namespace winston
 		virtual bool systemLoop() = 0;
 		virtual void populateLocomotiveShed() = 0;
 
-		void addLocomotive(const winston::Locomotive::Callbacks callbacks, const Address address, std::string name)
+		void addLocomotive(const winston::Locomotive::Callbacks callbacks, const Address address, std::string name, const NFCAddress nfcAddress)
 		{
 			//auto loco = Locomotive();
-			this->locomotiveShed.emplace_back(callbacks, address, name);
+			this->locomotiveShed.emplace_back(callbacks, address, name, nfcAddress);
 		}
 
 		// the railway

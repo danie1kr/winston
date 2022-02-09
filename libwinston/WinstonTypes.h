@@ -111,6 +111,20 @@ namespace winston
 	};
 
 	template<typename T>
+	class ReadDevice : public Shared_Ptr<ReadDevice<T>>
+	{
+	public:
+		using DataType = T;
+		ReadDevice() { };
+		virtual const size_t available() = 0;
+		virtual const T read() = 0;
+		virtual const size_t read(std::vector<T>& content, size_t upTo) = 0;
+
+		using Shared_Ptr<ReadDevice<T>>::Shared;
+		using Shared_Ptr<ReadDevice<T>>::make;
+	};
+
+	template<typename T>
 	class SendDevice : public Shared_Ptr<SendDevice<T>>
 	{
 	public:
@@ -187,7 +201,8 @@ namespace winston
 			Railway			= 1,
 			Persistence		= 2,
 			Network			= 3,
-			SPI				= 4
+			SPI				= 4,
+			Serial			= 5
 		};
 		RuntimeHardwareState();
 
@@ -211,6 +226,7 @@ namespace winston
 	auto runtime##what = []() { return runtimeHardwareState.enabled(RuntimeHardwareState::Type::what); }; \
 	auto runtimeEnable##what = []() { runtimeHardwareState.enable(RuntimeHardwareState::Type::what); };
 
+	RUNTIME_LAMBDAS(Serial);
 	RUNTIME_LAMBDAS(SPI);
 	RUNTIME_LAMBDAS(Persistence);
 	RUNTIME_LAMBDAS(Network);
@@ -229,6 +245,10 @@ namespace winston
 	class ModelRailwaySystem;
 
 	class Block;
+	class Detector;
+	template<typename T> class DetectorAddressable;
+	using DCCDetector = DetectorAddressable<Address>;
+	using NFCDetector = DetectorAddressable<NFCAddress>;
 	class Track;
 	class Bumper;
 	class Rail;
@@ -249,15 +269,16 @@ namespace winston
 	class Payload;
 
 	using Length = unsigned int;
+	using Distance = int;
 
 	using TimePoint = std::chrono::system_clock::time_point;
 	using Duration = TimePoint::duration;
 #define toSeconds(x) (std::chrono::seconds(x))
 #define toMilliseconds(x) (std::chrono::milliseconds(x))
 #define toMicroseconds(x) (std::chrono::microseconds(x))
-#define inSeconds(x) (x / toSeconds(1))
-#define inMilliseconds(x) (x / toMilliseconds(1))
-#define inMicroseconds(x) (x / toMicroseconds(1))	/*
+#define inSeconds(x) ((x) / toSeconds(1))
+#define inMilliseconds(x) ((x) / toMilliseconds(1))
+#define inMicroseconds(x) ((x) / toMicroseconds(1))	/*
 #ifdef WINSTON_PLATFORM_WIN_x64
 	using TimePoint = std::chrono::system_clock::time_point;
 	using Duration = TimePoint::duration;

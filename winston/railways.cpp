@@ -1,4 +1,5 @@
 
+#include "../libwinston/Library.h"
 #include "railways.h"
 #include <string>
 #include "../libwinston/better_enum.hpp"
@@ -615,6 +616,14 @@ void Y2021Railway::connect()
    Turnout14->connect(C, GBF2b, A, KS_dummy(0))
        ->connect(B, KS_dummy(0), Turnout15, B)
        ->connect(A, GBF2a, A, KS_dummy(0));
+}
+
+void Y2021Railway::attachDetectors()
+{
+    LOCAL_TRACK(PBF1);
+    const auto B = winston::Track::Connection::B;
+    const auto R3 = winston::library::track::Roco::R3;
+    this->detectors.push_back(winston::NFCDetector::make(this->callbacks.nfcDetectorCallback, PBF1, B, 2 * R3));
 }
 
 #ifndef WINSTON_PLATFORM_TEENSY

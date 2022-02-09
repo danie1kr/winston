@@ -288,4 +288,6 @@ namespace winston
 
 		Track::Shared a, b, c;
 	};
+
+	std::string build(const Track::Connection first);
 }

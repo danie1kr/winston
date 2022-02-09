@@ -23,8 +23,28 @@ private:
 	SOCKET udpSocket;
 	SOCKADDR_IN addr;
 };
-
 using UDPSocket = UDPSocketWinSock;
+
+class SerialDeviceWin : public winston::hal::SerialDevice, winston::Shared_Ptr<SerialDeviceWin>
+{
+public:
+	SerialDeviceWin();
+	bool init(const size_t portNumber, const size_t bauds = 115200,
+		const SerialDataBits databits = SerialDataBits::SERIAL_DATABITS_8,
+		const SerialParity parity = SerialParity::SERIAL_PARITY_NONE,
+		const SerialStopBits stopbits = SerialStopBits::SERIAL_STOPBITS_1);
+	
+	const size_t available();
+	const DataType read();
+	const size_t read(std::vector<DataType>& content, size_t upTo);
+
+	const winston::Result send(const std::vector<DataType> data);
+	using Shared_Ptr<SerialDevice>::Shared;
+	using Shared_Ptr<SerialDevice>::make;
+private:
+	HANDLE serialHandle;
+	COMMTIMEOUTS    timeouts;
+};
 
 #include "../libwinston/WebServer.h"
 

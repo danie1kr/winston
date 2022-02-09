@@ -51,6 +51,9 @@
     <ClCompile Include="external\json11\json11.cpp">
       <Filter>external\json11</Filter>
     </ClCompile>
+    <ClCompile Include="PN532_OccupancyDevice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\central-z21\Z21Const.h">
@@ -96,6 +99,9 @@
       <Filter>external</Filter>
     </ClInclude>
     <ClInclude Include="Kornweinheim.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PN532_OccupancyDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

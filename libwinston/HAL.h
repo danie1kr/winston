@@ -77,5 +77,47 @@ namespace winston
 			const SPIMode mode;
 			const SPIDataOrder order;
 		};
+
+		class SerialDevice : public Shared_Ptr<SerialDevice>, public ReadDevice<unsigned char>, public SendDevice<unsigned char>
+		{
+		public:
+			enum class SerialDataBits {
+				SERIAL_DATABITS_5, /**< 5 databits */
+				SERIAL_DATABITS_6, /**< 6 databits */
+				SERIAL_DATABITS_7, /**< 7 databits */
+				SERIAL_DATABITS_8,  /**< 8 databits */
+				SERIAL_DATABITS_16,  /**< 16 databits */
+			};
+
+			/**
+			 * number of serial stop bits
+			 */
+			enum class SerialStopBits {
+				SERIAL_STOPBITS_1, /**< 1 stop bit */
+				SERIAL_STOPBITS_1_5, /**< 1.5 stop bits */
+				SERIAL_STOPBITS_2, /**< 2 stop bits */
+			};
+
+			/**
+			 * type of serial parity bits
+			 */
+			enum class SerialParity {
+				SERIAL_PARITY_NONE, /**< no parity bit */
+				SERIAL_PARITY_EVEN, /**< even parity bit */
+				SERIAL_PARITY_ODD, /**< odd parity bit */
+				SERIAL_PARITY_MARK, /**< mark parity */
+				SERIAL_PARITY_SPACE /**< space bit */
+			};
+
+			using DataType = unsigned char;
+
+			virtual bool init(const size_t portNumber, const size_t bauds = 115200,
+				const SerialDataBits databits = SerialDataBits::SERIAL_DATABITS_8,
+				const SerialParity parity = SerialParity::SERIAL_PARITY_NONE,
+				const SerialStopBits stopbits = SerialStopBits::SERIAL_STOPBITS_1) = 0;
+
+			using Shared_Ptr<SerialDevice>::Shared;
+			using Shared_Ptr<SerialDevice>::make;
+		};
 	}
 }

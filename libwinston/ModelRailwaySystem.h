@@ -157,7 +157,8 @@ namespace winston
 		void addLocomotive(const winston::Locomotive::Callbacks callbacks, const Address address, std::string name, const NFCAddress nfcAddress)
 		{
 			//auto loco = Locomotive();
-			this->locomotiveShed.emplace_back(callbacks, address, name, nfcAddress);
+			Position pos(this->railway->track(0), winston::Track::Connection::A, 0);
+			this->locomotiveShed.emplace_back(callbacks, address, pos, name, nfcAddress);
 		}
 
 		// the railway

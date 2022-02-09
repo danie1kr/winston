@@ -12,6 +12,7 @@
 #include <memory>
 
 #include "WinstonTypes.h"
+#include "Detector.h"
 #include "Util.h"
 #include "Track.h"
 #include "Block.h"
@@ -29,6 +30,9 @@ namespace winston
 
 			using SignalUpdateCallback = std::function<const State(Track::Shared track, Track::Connection connection, const Signal::Aspects aspect)>;
 			SignalUpdateCallback signalUpdateCallback;
+
+			NFCDetector::Callback nfcDetectorCallback;
+			DCCDetector::Callback dccDetectorCallback;
 		};
 
 		Railway(const Callbacks callbacks);
@@ -70,16 +74,17 @@ namespace winston
 
 		Result init(bool blocks = false)
 		{
-			for (Tracks track : Tracks::_values())//for (size_t track = 0; track < tracksCount(); ++track)
-				this->tracks[track] = define(track);// static_cast<Tracks>(track));
-			connect();
+			for (Tracks track : Tracks::_values())
+				this->tracks[track] = this->define(track);
+			this->connect();
 			if (!blocks)
 			{
 				Trackset set;
-				for (Tracks track : Tracks::_values())//for (size_t track = 0; track < tracksCount(); ++track)
-					set.insert(this->track(track));//static_cast<Tracks>(track)));
+				for (Tracks track : Tracks::_values())
+					set.insert(this->track(track));
 				this->block(1, set);
 			}
+			this->attachDetectors();
 			return this->validate();
 		}
 		static constexpr size_t tracksCount() noexcept {
@@ -87,7 +92,9 @@ namespace winston
 		}
 
 		virtual winston::Track::Shared define(const Tracks track) = 0;
-		virtual void connect() = 0;// std::array < winston::Track::Shared, tracksCount()>& tracks) = 0;
+		virtual void connect() = 0;
+
+		virtual void attachDetectors() { };
 
 		template<typename _Track, typename ..._args>
 		Track::Shared& add(Tracks track, _args && ...args) {
@@ -222,5 +229,6 @@ namespace winston
 
 	protected:
 		std::array<Track::Shared, tracksCount()> tracks;
+		std::vector<Detector::Shared> detectors;
 	};
 }

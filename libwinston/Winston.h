@@ -5,6 +5,7 @@
 #include "Block.h"
 #include "Callback.h"
 #include "Command.h"
+#include "Detector.h"
 #include "DigitalCentralStation.h"
 #include "HAL.h"
 #include "Library.h"

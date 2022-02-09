@@ -211,6 +211,57 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
         return winston::State::Finished;
     };
 
+    callbacks.dccDetectorCallback = [=](winston::Track::Shared track, const winston::Track::Connection connection, const winston::Distance distance, const winston::Address address)
+    {
+        // not used here
+    };
+
+    callbacks.nfcDetectorCallback = [=](winston::Track::Shared track, const winston::Track::Connection connection, const winston::Distance distance, const winston::NFCAddress address)
+    {
+        auto now = winston::hal::now();
+        /*
+        this->signalBox->order(winston::Command::make([track, connection, distance, address, now](const winston::TimePoint &created) -> const winston::State
+            {
+                // actual work as we do not want to block the receiver
+                return winston::State::Finished;
+            }, __PRETTY_FUNCTION__));
+        */
+        /*
+            loco = fromNFCAddress(address) 
+            is now at
+            at actual = track:connection - distance
+
+            // update calculated distance and report error
+            auto mismatch = updateLocoPos(loco) - acutal
+
+            updateLocoPos(loco)
+            {
+                auto previous = loco.position();
+                Duration timeOnTour = 0;
+                auto pos = loco.drive(timeOnTour);   // updates loco position
+                
+                this->signalBox->order(winston::Command::make([=](const winston::TimePoint &created) -> const winston::State
+                {
+                    railway -> updateBlockOccupancy(previous, pos, timeOnTour, loco.trainLength() = 100);
+                    return winston::State::Finished;
+                }, __PRETTY_FUNCTION__));
+
+                this->signalBox->order(winston::Command::make([signalBox](const winston::TimePoint &created) -> const winston::State
+                {
+                    signalbox -> updateSignalsAccordingToBlocks();
+                    return winston::State::Finished;
+                }, __PRETTY_FUNCTION__));
+            }
+
+            loco.drive(Duration &timeOnTour)
+            {
+                timeOnTour = inMilliseconds(this->lastUpdate - winston::hal::now());
+                this->pos = this->pos + this->physicalSpeed() * timeOnTour;
+                return this->pos;
+            }
+        */
+    };
+
     return callbacks;
 }
 

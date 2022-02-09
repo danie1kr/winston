@@ -1,8 +1,8 @@
 #include <algorithm>
 
-#include "Track.h"
 #include "HAL.h"
 #include "Util.h"
+#include "Track.h"
 
 namespace winston
 {
@@ -29,6 +29,12 @@ namespace winston
 		if (connection == "C" || connection == "c") return Connection::C;
 		return Connection::DeadEnd;
 	}
+
+	std::string build(const winston::Track::Connection first)
+	{
+		return winston::Track::ConnectionToString(first);
+	}
+
 	Track::Shared Track::connect(const Connection local, Track::Shared& to, const Connection remote)
 	{
 		return this->connectTo(local, nullptr, to, remote, nullptr);

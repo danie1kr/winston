@@ -84,6 +84,9 @@
     <ClInclude Include="WinstonConfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Detector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Signal.cpp">
@@ -126,6 +129,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Route.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Detector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

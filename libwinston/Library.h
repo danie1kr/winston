@@ -9,7 +9,7 @@ namespace winston
 		namespace track
 		{
 			constexpr Length curve(const double radius, const double degree);
-			class Roco
+			struct Roco
 			{
 				static const Length G1, G12, G14;
 				static const Length DG1, D5, D8, D12;

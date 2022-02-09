@@ -1,9 +1,9 @@
 #include <string>
+#include <algorithm>
+#include <math.h>
 
 #include "Util.h"
 #include "HAL.h"
-#include <algorithm>
-#include <math.h>
 
 #ifdef WINSTON_PLATFORM_TEENSY
 /*#include <sstream>

@@ -351,6 +351,7 @@ public:
     virtual ~Y2021Railway() = default;
 
     static const std::string name();
+    void attachDetectors();
 
     using winston::Shared_Ptr<Y2021Railway>::Shared;
     using winston::Shared_Ptr<Y2021Railway>::make;

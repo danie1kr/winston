@@ -18,11 +18,11 @@ namespace winston
 		extern void fatal(const std::string reason);
 
 		extern void delay(const unsigned int ms);
-
+/*
 		extern void storageSetFilename(std::string filename);
 		extern const unsigned char storageRead(const size_t address);
 		extern void storageWrite(const size_t address, const uint8_t data);
-		extern bool storageCommit();
+		extern bool storageCommit();*/
 
 		extern void init();
 
@@ -118,6 +118,23 @@ namespace winston
 
 			using Shared_Ptr<SerialDevice>::Shared;
 			using Shared_Ptr<SerialDevice>::make;
+		};
+
+		class Storage : public Shared_Ptr<Storage>
+		{
+		protected:
+			Storage(const size_t maxSize = 0);
+			size_t maxSize;
+		public:
+			using Shared_Ptr<Storage>::Shared;
+			using Shared_Ptr<Storage>::make;
+			virtual const Result init() = 0;
+			virtual const Result read(const size_t address, std::vector<unsigned char>& content, const size_t length = 1) = 0;
+			virtual const Result read(const size_t address, std::string& content, const size_t length = 1) = 0;
+			virtual const Result write(const size_t address, std::vector<unsigned char>& content, const size_t length = 0) = 0;
+			virtual const Result write(const size_t address, unsigned char content) = 0;
+			virtual const Result write(const size_t address, std::string& content, const size_t length = 0) = 0;
+			virtual const Result sync() = 0;
 		};
 	}
 }

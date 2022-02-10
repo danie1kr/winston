@@ -118,4 +118,7 @@ private:
     /* Signal Device */
     SignalInterfaceDevice::Shared signalInterfaceDevice;
     TLC5947_SignalDevice::Shared signalDevice;
+
+    /* Storage */
+    winston::hal::Storage::Shared storageLayout;
 };

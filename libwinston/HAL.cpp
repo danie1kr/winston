@@ -12,5 +12,11 @@ namespace winston
 		{
 			return this->state == State::Connected;
 		}
+
+		Storage::Storage(const size_t maxSize)
+			: Shared_Ptr<Storage>(), maxSize(maxSize)
+		{
+
+		}
 	}
 }

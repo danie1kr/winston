@@ -3,6 +3,9 @@
 #include <WinSock2.h>
 #include "../libwinston/Signal.h"
 #include "../libwinston/HAL.h"
+
+#include "mio.hpp"
+
 #include "FT232_Device.h"
 
 const char* operator "" _s(const char* in, size_t len);
@@ -44,6 +47,29 @@ public:
 private:
 	HANDLE serialHandle;
 	COMMTIMEOUTS    timeouts;
+};
+
+class StorageWin : public winston::hal::Storage, winston::Shared_Ptr<StorageWin>
+{
+public:
+	StorageWin(const std::string filename, const size_t maxSize = 0);
+
+	const winston::Result init();
+	const winston::Result read(const size_t address, std::vector<unsigned char>& content, const size_t length = 1);
+	const winston::Result read(const size_t address, std::string& content, const size_t length = 1);
+	const winston::Result write(const size_t address, unsigned char content);
+	const winston::Result write(const size_t address, std::vector<unsigned char>& content, const size_t length = 0);
+	const winston::Result write(const size_t address, std::string& content, const size_t length = 0);
+	const winston::Result sync();
+
+	using Shared_Ptr<StorageWin>::Shared;
+	using Shared_Ptr<StorageWin>::make;
+private:
+
+	const int handleError(const std::error_code& error) const;
+
+	std::string filename;
+	mio::mmap_sink mmap;
 };
 
 #include "../libwinston/WebServer.h"

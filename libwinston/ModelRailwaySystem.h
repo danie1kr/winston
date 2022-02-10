@@ -161,6 +161,16 @@ namespace winston
 			this->locomotiveShed.emplace_back(callbacks, address, pos, name, nfcAddress);
 		}
 
+		Result loadLocomotives()
+		{
+
+		}
+
+		Result storeLocomotives()
+		{
+
+		}
+
 		// the railway
 		_Railway railway;
 		using Tracks = typename _Railway::element_type::Tracks;

@@ -134,7 +134,9 @@ namespace winston
 			auto lower = this->map.lower_bound(throttle);
 			auto upper = this->map.upper_bound(throttle);
 
-			float frac = (lower->first - throttle) / (upper->first - lower->first);
+			// throttle == lower => 0 ==> lower
+			// throttle == upper => 1 ==> upper
+			float frac = (throttle - lower->first) / (upper->first - lower->first);
 			
 			// linear
 			return this->lerp(lower->second, upper->second, frac);
@@ -145,6 +147,10 @@ namespace winston
 
 	const Locomotive::SpeedMap::Speed Locomotive::SpeedMap::lerp(Locomotive::SpeedMap::Speed lower, Locomotive::SpeedMap::Speed upper, const float frac)
 	{
+		if (frac <= 0.0f)
+			return lower;
+		else if (frac >= 1.0f)
+			return upper;
 		return (Speed)(frac * upper + (1.0f - frac) * lower);
 	}
 }

@@ -633,20 +633,21 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
         auto length = layout.size();
         if (offset == 0)
         {
-            winston::hal::storageWrite(address + 0, (fullSize >> 0) & 0xFF);
-            winston::hal::storageWrite(address + 1, (fullSize >> 8) & 0xFF);
-            winston::hal::storageWrite(address + 2, (fullSize >> 16) & 0xFF);
-            winston::hal::storageWrite(address + 3, (fullSize >> 24) & 0xFF);
+            this->storageLayout->write(address + 0, (fullSize >> 0) & 0xFF);
+            this->storageLayout->write(address + 1, (fullSize >> 8) & 0xFF);
+            this->storageLayout->write(address + 2, (fullSize >> 16) & 0xFF);
+            this->storageLayout->write(address + 3, (fullSize >> 24) & 0xFF);
             address = 4;
         }
         else
         {
             address = 4 + offset;
         }
-        for (auto s : layout)
-            winston::hal::storageWrite(address++, s);
+        this->storageLayout->write(address, layout);
+        //for (auto s : layout)
+        //    winston::hal::storageWrite(address++, s);
 
-        winston::hal::storageCommit();
+        this->storageLayout->sync();
 
         if (offset == fullSize - length)
         {
@@ -669,10 +670,9 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
     else if (std::string("\"getRailwayLayout\"").compare(op) == 0)
     {
         size_t address = 0;
-        size_t length = (winston::hal::storageRead(address + 0) << 0) |
-            (winston::hal::storageRead(address + 1) << 8) |
-            (winston::hal::storageRead(address + 2) << 16) |
-            (winston::hal::storageRead(address + 3) << 24);
+        std::vector<unsigned char> data;
+        this->storageLayout->read(address, data, 4);
+        size_t length = (data[0] << 0) | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
         address = 4;
 
         const size_t sizePerMessage = size_t(0.7f * webServer.maxMessageSize());
@@ -682,10 +682,11 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
         while (remaining > 0)
         {
             size_t sent = remaining > sizePerMessage ? sizePerMessage : remaining;
-            auto layout = std::string(sent, '0');
+            std::string layout;
+            this->storageLayout->read(address + offset, layout, sent);
 
-            for (size_t i = 0; i < sent; ++i)
-                layout[i] = winston::hal::storageRead(address + offset + i);
+            //for (size_t i = 0; i < sent; ++i)
+            //    layout[i] = winston::hal::storageRead(address + offset + i);
 #ifdef WINSTON_JSON_11
             Json successObject = Json::object{
                 {"op", "layout"},
@@ -842,6 +843,11 @@ void Kornweinheim::systemSetup() {
     this->signalInterfaceDevice->init();
     this->signalInterfaceDevice->skipSend(true);
     this->signalDevice = TLC5947_SignalDevice::make(1, 24, this->signalInterfaceDevice, TLC5947Off);
+
+    // storage
+    this->storageLayout = StorageWin::make(std::string(this->name()).append(".").append("winston.storage"));
+    if (this->storageLayout->init() != winston::Result::OK)
+        winston::logger.err("Kornweinheim.init: Storage Layout Init failed");
 };
 
 void Kornweinheim::systemSetupComplete()

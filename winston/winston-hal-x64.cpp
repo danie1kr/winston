@@ -9,7 +9,6 @@
 #include <iostream>
 #include <fstream>
 
-#include "mio.hpp"
 #include "winston-hal-x64.h"
 
 #pragma comment(lib, "ws2_32.lib")
@@ -144,17 +143,12 @@ const size_t WebServerWSPP::maxMessageSize()
 {
     return this->server.get_max_message_size();
 }
-
+/*
 static const std::string constWinstonStoragePath = "winston.storage";
 static std::string winstonStoragePath = constWinstonStoragePath;
 static const auto winstonStorageSize = 128 * 1024;
 mio::mmap_sink winstonStorage;
 
-int handle_error(const std::error_code& error)
-{
-    winston::error(error.message());
-    return error.value();
-}
 
 void ensureStorageFile()
 {
@@ -165,7 +159,7 @@ void ensureStorageFile()
         std::string s(winstonStorageSize, 0);
         file << s;
     }
-}
+}*/
 
 UDPSocketWinSock::UDPSocketWinSock(const std::string ip, const unsigned short port) : winston::hal::UDPSocket(ip, port)
 {
@@ -416,6 +410,122 @@ const winston::Result SerialDeviceWin::send(const std::vector<DataType> data)
     return dwBytesWritten == (DWORD)data.size() ? winston::Result::OK : winston::Result::SendFailed;
 }
 
+StorageWin::StorageWin(const std::string filename, const size_t maxSize)
+    : Storage(maxSize), filename(filename)
+{
+}
+
+const winston::Result StorageWin::init()
+{
+    std::ifstream testIfExists(this->filename);
+    if (!testIfExists.good())
+    {
+        std::ofstream file(this->filename);
+        std::string s(maxSize, 0);
+        file << s;
+    }
+
+    std::error_code error;
+    this->mmap = mio::make_mmap_sink(this->filename, 0, mio::map_entire_file, error);
+    if (error)
+        this->handleError(error);
+    else
+        winston::runtimeEnablePersistence();
+    return winston::Result::OK;
+}
+
+const winston::Result StorageWin::read(const size_t address, std::vector<unsigned char>& content, const size_t length)
+{
+    const size_t count = length == 0 ? this->mmap.size() : min(this->mmap.size(), length);
+    if (!this->mmap.is_open())
+        return winston::Result::NotInitialized;
+    content.reserve(count);
+    for (size_t i = address; i < address + count; ++i)
+        content.push_back(this->mmap[i]);
+
+    return winston::Result::OK;
+}
+
+const winston::Result StorageWin::read(const size_t address, std::string& content, const size_t length)
+{
+    const size_t count = length == 0 ? this->mmap.size() : min(this->mmap.size(), length);
+    if (!this->mmap.is_open())
+        return winston::Result::NotInitialized;
+    content.reserve(count);
+    for (size_t i = address; i < address + count; ++i)
+        content.push_back(this->mmap[i]);
+
+    return winston::Result::OK;
+}
+
+const winston::Result StorageWin::write(const size_t address, unsigned char content)
+{
+    if (!this->mmap.is_open())
+        return winston::Result::NotInitialized;
+    if (this->mmap.size() < address + 1)
+    {
+        winston::logger.err("storage too small");
+        return winston::Result::OutOfBounds;
+    }
+    this->mmap[address] = content;
+
+    return winston::Result::OK;
+}
+
+const winston::Result StorageWin::write(const size_t address, std::vector<unsigned char>& content, const size_t length)
+{
+    const size_t count = length == 0 ? content.size() : min(content.size(), length);
+    if (!this->mmap.is_open())
+        return winston::Result::NotInitialized;
+    if (this->mmap.size() < address + count)
+    {
+        winston::logger.err("storage too small");
+        return winston::Result::OutOfBounds;
+    }
+    for (size_t i = 0; i < count; ++i)
+        this->mmap[address + i] = content[i];
+
+    return winston::Result::OK;
+}
+
+const winston::Result StorageWin::write(const size_t address, std::string& content, const size_t length)
+{
+    const size_t count = length == 0 ? content.size() : min(content.size(), length);
+    if (!this->mmap.is_open())
+        return winston::Result::NotInitialized;
+    if (this->mmap.size() < address + count)
+    {
+        winston::logger.err("storage too small");
+        return winston::Result::OutOfBounds;
+    }
+    for (size_t i = 0; i < count; ++i)
+        this->mmap[address + i] = content[i];
+
+    return winston::Result::OK;
+}
+
+const winston::Result StorageWin::sync()
+{
+    if (!this->mmap.is_open())
+        return winston::Result::NotInitialized;
+
+    std::error_code error;
+    this->mmap.sync(error);
+    if (error)
+    {
+        this->handleError(error);
+        return winston::Result::InternalError;
+    }
+    return winston::Result::OK;
+}
+
+const int StorageWin::handleError(const std::error_code& error) const
+{
+    winston::error(error.message());
+    return error.value();
+}
+
+
 namespace winston
 {
     namespace hal {
@@ -426,14 +536,14 @@ namespace winston
                 if (!WSAStartup(MAKEWORD(1, 1), &wsaData))
                     runtimeEnableNetwork();
             }
-
+            /*
             ensureStorageFile();
             std::error_code error;
             winstonStorage = mio::make_mmap_sink(winstonStoragePath, 0, mio::map_entire_file, error);
             if (error) 
                 handle_error(error);
             else
-                runtimeEnablePersistence();
+                runtimeEnablePersistence();*/
         }
 
         void text(const std::string& text)
@@ -462,7 +572,7 @@ namespace winston
         {
             return std::chrono::system_clock::now();
         }
-
+        /*
         void storageSetFilename(std::string filename)
         {
             winstonStoragePath = std::string(filename).append(".").append(constWinstonStoragePath);
@@ -504,6 +614,6 @@ namespace winston
         bool send(const std::string& ip, const unsigned short& port, std::vector<unsigned char>& data)
         {
             return true;
-        }
+        }*/
     }
 }

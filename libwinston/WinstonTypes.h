@@ -46,7 +46,8 @@ namespace winston
 		ValidationFailed,
 		ExternalHardwareFailed,
 		NotInitialized,
-		NotFound
+		NotFound,
+		OutOfBounds,
 	};
 
 	enum class Features : unsigned int

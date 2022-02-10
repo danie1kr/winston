@@ -14,10 +14,7 @@
 #endif
 #include <memory>
 
-//#ifdef WINSTON_PLATFORM_WIN_x64
-//#define WINSTON_HAS_CHRONO
 #include <chrono>
-//#endif
 
 namespace winston
 {
@@ -279,21 +276,5 @@ namespace winston
 #define toMicroseconds(x) (std::chrono::microseconds(x))
 #define inSeconds(x) ((x) / toSeconds(1))
 #define inMilliseconds(x) ((x) / toMilliseconds(1))
-#define inMicroseconds(x) ((x) / toMicroseconds(1))	/*
-#ifdef WINSTON_PLATFORM_WIN_x64
-	using TimePoint = std::chrono::system_clock::time_point;
-	using Duration = TimePoint::duration;
-
-#define inTheFuture(now, add) now + add
-#elif defined(WINSTON_PLATFORM_TEENSY)
-	using TimePoint = unsigned long long;
-	using Duration = unsigned long long;
-#define toSeconds(x) (x/10000000)
-#define toMilliseconds(x) (x/1000)
-#define toMicroseconds(x) (x)
-#define inSeconds(x) (toSeconds(x))
-#define inMilliseconds(x) (toMilliseconds(x))
-#define inMicroseconds(x) (toMicroseconds(x))
-#endif
-*/
+#define inMicroseconds(x) ((x) / toMicroseconds(1))
 }

@@ -5,18 +5,6 @@ namespace winston {
 	{
 	}
 
-	/*Block::Shared Block::traverse(Track::Shared& entry, Track::Connection& connection)
-	{
-		if (!this->blockEntrySet.contains(std::make_pair(entry, connection)))
-		{
-			return nullptr;
-		}
-
-		Track::traverse()
-
-		return Block::Shared();
-	}*/
-
 	const bool Block::contains(Track::Shared track) const
 	{
 		return this->_tracks.find(track) != this->_tracks.end();
@@ -52,9 +40,4 @@ namespace winston {
 	{
 		return this->_tracks;
 	}
-
-	/*bool Block::validate()
-	{
-		return false;
-	}*/
 }

@@ -6,17 +6,6 @@
 #include "HAL.h"
 
 #ifdef WINSTON_PLATFORM_TEENSY
-/*#include <sstream>
-namespace std
-{
-	template < typename T > std::string to_string(const T& n)
-	{
-		std::ostringstream stm;
-		stm << n;
-		return stm.str();
-	}
-}*/
-
 namespace std
 {
 	template < typename T > std::string to_string(const T& value)

@@ -40,8 +40,6 @@ namespace winston
 
 		using SignalFactory = std::function<Signal::Shared(Track::Shared track, Track::Connection connection)>;
 
-		//virtual bool drive(TrackIndex& enter, TrackIndex& exit, bool forward = true) const = 0;
-
 		Track::Shared connect(const Connection local, Track::Shared& to, const Connection remote);
 		Track::Shared connect(const Connection local, SignalFactory guardingLocalSignalFactory, Track::Shared& to, const Connection remote);
 		Track::Shared connect(const Connection local, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory);
@@ -198,7 +196,6 @@ namespace winston
 	{
 	public:
 		Rail(const std::string name = "");
-		//static Track::Shared make();
 
 		bool has(const Connection connection) const;
 		Track::Shared on(const Connection connection) const;
@@ -243,10 +240,8 @@ namespace winston
 
 		using TrackLengthCalculator = const std::function<const Length(const Direction)>;
 
-		//Turnout(const Callback callback, const bool leftTurnout = false);
 		Turnout(const std::string name, const Callback callback, const bool leftTurnout = false);
 		Turnout(const std::string name, const Callback callback, const TrackLengthCalculator trackLengthCalculator, const bool leftTurnout = false);
-		//static Track::Shared make(const Callback callback, const bool leftTurnout);
 
 		bool has(const Connection connection) const;
 		Track::Shared on(const Connection connection) const;
@@ -262,7 +257,6 @@ namespace winston
 
 		void connections(Track::Shared& onA, Track::Shared& onB, Track::Shared& onC);
 
-		//const Task::State toggle();
 		const State startChangeTo(const Direction direction);
 		const State startToggle();
 		const State finalizeChangeTo(const Direction direction);

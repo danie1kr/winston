@@ -109,14 +109,6 @@ namespace winston
 			return set;
 		}
 
-		/*const std::unordered_map<Tracks, Track::Shared> tracks() const
-		{
-			std::unordered_map<Tracks, Track::Shared> map;
-			for (size_t i = 0; i < tracksCount(); ++i)
-				map.insert(std::make_pair(trackEnum(i), this->tracks[i]));
-			return map;
-		}*/
-
 		const std::unordered_map<Tracks, Bumper::Shared> bumper() const
 		{
 			std::unordered_map<Tracks, Bumper::Shared> map;
@@ -137,30 +129,16 @@ namespace winston
 
 		void turnouts(std::function<void(const Tracks track, Turnout::Shared turnout)> callback)
 		{
-//			std::unordered_map<Tracks, Turnout::Shared> map;
 			for (size_t i = 0; i < tracksCount(); ++i)
 				if (this->tracks[i]->type() == Track::Type::Turnout)
 					callback(this->trackEnum(i), std::static_pointer_cast<Turnout>(this->tracks[i]));
-					//map[this->trackEnum(i)] = std::static_pointer_cast<Turnout>(this->tracks[i]);
-			//return map;
 		}
-
-		/*
-		bool traverse(const Track::Connection from, Track::Shared& on, Track::Shared& onto) const
-		{
-			return on ? on->traverse(from, onto) : false;
-		}*/
 
 		inline constexpr Tracks trackEnum(size_t index) const
 		{
 			return Tracks::_from_integral_unchecked((unsigned int)index);
 		}
-		/*
-		inline constexpr unsigned int trackIndex(Tracks track) const
-		{
-			return magic_enum::enum_integer(track);
-		}
-*/
+
 		inline constexpr unsigned int trackIndex(Track::Shared track) const
 		{
 			auto it = std::find(this->tracks.begin(), this->tracks.end(), track);

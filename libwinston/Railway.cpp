@@ -41,14 +41,5 @@ namespace winston
 	Railway::SignalFactory Railway::H(const Length distance, size_t& device, size_t& port)
 	{
 		return S<SignalH>(distance, device, port);
-		/*
-		Port devPort(device, port);
-		port += SignalH::lightsCount();
-		// TODO: ensure port does not overflow
-		return [distance, devPort, this](winston::Track::Shared track, winston::Track::Connection connection)->winston::Signal::Shared {
-			return SignalH::make([=](const winston::Signal::Aspects aspect)->const winston::State {
-				return this->callbacks.signalUpdateCallback(track, connection, aspect);
-				}, distance, devPort);
-		};*/
 	}
 }

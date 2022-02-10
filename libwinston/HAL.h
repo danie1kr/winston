@@ -18,11 +18,6 @@ namespace winston
 		extern void fatal(const std::string reason);
 
 		extern void delay(const unsigned int ms);
-/*
-		extern void storageSetFilename(std::string filename);
-		extern const unsigned char storageRead(const size_t address);
-		extern void storageWrite(const size_t address, const uint8_t data);
-		extern bool storageCommit();*/
 
 		extern void init();
 

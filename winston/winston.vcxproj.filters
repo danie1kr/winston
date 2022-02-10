@@ -25,9 +25,6 @@
     <Filter Include="external\ftdi-ft232">
       <UniqueIdentifier>{3788dd8f-f7fa-4eb1-9d55-5eda0d44d8bd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="external\json11">
-      <UniqueIdentifier>{892d1d11-7833-40a9-9800-8c7d5af0d2c4}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="winston-hal-x64.cpp">
@@ -47,9 +44,6 @@
     </ClCompile>
     <ClCompile Include="FT232_Device.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="external\json11\json11.cpp">
-      <Filter>external\json11</Filter>
     </ClCompile>
     <ClCompile Include="PN532_OccupancyDevice.cpp">
       <Filter>Source Files</Filter>
@@ -91,9 +85,6 @@
     </ClInclude>
     <ClInclude Include="Kornweinheim.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="external\json11\json11.hpp">
-      <Filter>external\json11</Filter>
     </ClInclude>
     <ClInclude Include="external\ArduinoJson-v6.19.0.hpp">
       <Filter>external</Filter>

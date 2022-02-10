@@ -143,23 +143,6 @@ const size_t WebServerWSPP::maxMessageSize()
 {
     return this->server.get_max_message_size();
 }
-/*
-static const std::string constWinstonStoragePath = "winston.storage";
-static std::string winstonStoragePath = constWinstonStoragePath;
-static const auto winstonStorageSize = 128 * 1024;
-mio::mmap_sink winstonStorage;
-
-
-void ensureStorageFile()
-{
-    std::ifstream testIfExists(winstonStoragePath);
-    if (!testIfExists.good())
-    {
-        std::ofstream file(winstonStoragePath);
-        std::string s(winstonStorageSize, 0);
-        file << s;
-    }
-}*/
 
 UDPSocketWinSock::UDPSocketWinSock(const std::string ip, const unsigned short port) : winston::hal::UDPSocket(ip, port)
 {
@@ -536,14 +519,6 @@ namespace winston
                 if (!WSAStartup(MAKEWORD(1, 1), &wsaData))
                     runtimeEnableNetwork();
             }
-            /*
-            ensureStorageFile();
-            std::error_code error;
-            winstonStorage = mio::make_mmap_sink(winstonStoragePath, 0, mio::map_entire_file, error);
-            if (error) 
-                handle_error(error);
-            else
-                runtimeEnablePersistence();*/
         }
 
         void text(const std::string& text)
@@ -572,48 +547,5 @@ namespace winston
         {
             return std::chrono::system_clock::now();
         }
-        /*
-        void storageSetFilename(std::string filename)
-        {
-            winstonStoragePath = std::string(filename).append(".").append(constWinstonStoragePath);
-        }
-
-        const uint8_t storageRead(const size_t address)
-        {
-            if(runtimePersistence() && winstonStorage.size() > address)
-                return winstonStorage[address];
-            else
-                return 0;
-        }
-
-        void storageWrite(const size_t address, const uint8_t data)
-        {
-            if (runtimePersistence() && winstonStorage.size() > address)
-            {
-                winstonStorage[address] = data;
-            }
-            else
-                error("storage too small for full layout");
-        }
-
-        bool storageCommit()
-        {
-            if (!runtimePersistence())
-                return false;
-
-            std::error_code error;
-            winstonStorage.sync(error);
-            if (error)
-            {
-                handle_error(error);
-                return false;
-            }
-            return true;
-        }
-
-        bool send(const std::string& ip, const unsigned short& port, std::vector<unsigned char>& data)
-        {
-            return true;
-        }*/
     }
 }

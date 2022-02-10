@@ -12,7 +12,6 @@ void winston_setup()
     pinMode(led, OUTPUT);
     digitalWrite(led, HIGH);
 #endif
-	//winston::hal::storageSetFilename(Kornweinheim::name());
     winston::hal::init();
 	winston::hal::text("Hello from Winston!"_s);
     std::srand((unsigned int)(inMilliseconds(winston::hal::now().time_since_epoch())));

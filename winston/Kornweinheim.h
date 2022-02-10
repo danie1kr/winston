@@ -9,8 +9,6 @@
 #include "winston-main.h"
 #include "railways.h"
 
-//#define WINSTON_JSON_11
-#define WINSTON_JSON_ARDUINO
 #ifdef WINSTON_PLATFORM_WIN_x64
 #include "winston-hal-x64.h"
 #define WINSTON_WITH_WEBSOCKETS
@@ -21,15 +19,10 @@
 #include "../winston-teensy/winston-hal-teensy-webserver.hpp"
 #endif
 
-#ifdef WINSTON_JSON_11
-#include "external/json11/json11.hpp"
-using namespace json11;
-#endif
 #ifdef __GNUC__ 
 #pragma GCC push_options
 #pragma GCC optimize("Os")
 #endif
-#ifdef WINSTON_JSON_ARDUINO
 #define ARDUINOJSON_ENABLE_STD_STRING 1
 #define ARDUINOJSON_ENABLE_STD_STREAM 0
 #define ARDUINOJSON_ENABLE_ARDUINO_STRING 0
@@ -40,7 +33,6 @@ using namespace json11;
 #pragma GCC pop_options
 #endif
 using namespace ArduinoJson;
-#endif
 
 #include "external/central-z21/Z21.h"
 #include "TLC5947_SignalDevice.h"
@@ -87,13 +79,7 @@ private:
     // Define a callback to handle incoming messages
     void on_http(WebServer::HTTPConnection& connection, const std::string& resource);
 
-    void writeAttachedSignal(
-#ifdef WINSTON_JSON_11
-        Json::array& signals,
-#elif defined(WINSTON_JSON_ARDUINO)
-        JsonArray& signals,
-#endif
-        winston::Track::Shared track, const winston::Track::Connection connection);
+    void writeAttachedSignal(JsonArray& signals, winston::Track::Shared track, const winston::Track::Connection connection);
 
     // Define a callback to handle incoming messages
     void on_message(WebServer::Client &client, const std::string &message);

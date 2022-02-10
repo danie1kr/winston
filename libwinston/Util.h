@@ -79,8 +79,6 @@ namespace winston
 #define LINE STRINGIZE(__LINE__)
 #define CaR(code) { winston::Result r = code; if(r != winston::Result::OK) { winston::error(winston::build(__FILE__ "@" LINE ": " STRINGIZE(code) " -> ", winston::build(r))); return r; } }
 
-	//inline const Result checkResultAndComplain(const Result result, std::string message);
-
 	unsigned char reverse(unsigned char b);
 
 	extern Callback::Shared nop;

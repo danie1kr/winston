@@ -491,12 +491,10 @@ void Z21::processXPacket(uint8_t* data) {
             processBCPacket(data);
             break;
         case Z21RX_LAN_X::TURNOUT_INFO:
-            //if (onAccessoryInfo != NULL)
-            //    onAccessoryInfo(Z21Packet::getBEuint16(data, 5), Z21Packet::getByte(data, 7));
             {
                 uint16_t address = Z21Packet::getBEuint16(data, 5);
                 uint8_t accessoryState = Z21Packet::getByte(data, 7);
-                auto turnout = this->turnoutAddressTranslator->turnout(address);// std::dynamic_pointer_cast<winston::Turnout>(railway->track(RailwayWithSiding::trackFromAddress(address)));
+                auto turnout = this->turnoutAddressTranslator->turnout(address);
                 if (accessoryState == Z21_Accessory_State::P0 || accessoryState == Z21_Accessory_State::P1)
                 {
                     auto direction = accessoryState == Z21_Accessory_State::P1 ? winston::Turnout::Direction::A_B : winston::Turnout::Direction::A_C;
@@ -507,18 +505,6 @@ void Z21::processXPacket(uint8_t* data) {
                 {
                     winston::logger.err(winston::build("Z21: Turnout ", address, " in illegal state ", accessoryState));
                 }
-                
-                
-                /*if (this->turnoutUpdate)
-                {
-                    uint16_t address = Z21Packet::getBEuint16(data, 5);
-                    uint8_t accessoryState = Z21Packet::getByte(data, 7);
-                    auto turnout = this->addressTranslator->turnout(address);// std::dynamic_pointer_cast<winston::Turnout>(railway->track(RailwayWithSiding::trackFromAddress(address)));
-                    auto direction = accessoryState == 0 ? winston::Turnout::Direction::A_B : winston::Turnout::Direction::A_C;
-
-                    this->signalBox->
-                    this->turnoutUpdate(turnout, direction);
-                }*/
                 break;
             }
         case Z21RX_LAN_X::STATUS_CHANGED:
@@ -527,8 +513,6 @@ void Z21::processXPacket(uint8_t* data) {
             break;
         case Z21RX_LAN_X::GET_VERSION:
             this->callbacks.systemInfoCallback(header, "Version", winston::build(Z21Packet::getDB1(data), Z21Packet::getDB2(data)));
-            //if (onGetVersion != NULL && Z21Packet::getDB0(data) == Z21RX_DB0::GET_VERSION)
-            //    onGetVersion(Z21Packet::getDB1(data), Z21Packet::getDB2(data));
             break;
         case Z21RX_LAN_X::CV_RESULT:
             if (onCVResult != NULL && Z21Packet::getDB0(data) == Z21RX_DB0::CV_RESULT)
@@ -539,13 +523,10 @@ void Z21::processXPacket(uint8_t* data) {
                 onBCStopped();
             break;
         case Z21RX_LAN_X::LOCO_INFO:
-            //if (onLocoInfo != NULL)
-                processLocoInfo(data);
+            processLocoInfo(data);
             break;
         case Z21RX_LAN_X::GET_FIRMWARE_VERSION:
             this->callbacks.systemInfoCallback(header, "Firmware Version", winston::build(Z21Packet::getDB1(data), Z21Packet::getDB2(data)));
-            //if (onFirmwareVersion != NULL && Z21Packet::getDB0(data) == Z21RX_DB0::GET_FIRMWARE_VERSION)
-            //    onFirmwareVersion(Z21Packet::getDB1(data), Z21Packet::getDB2(data));
             break;
         default:
             break;
@@ -593,26 +574,18 @@ void Z21::processBCPacket(uint8_t* data) {
     switch (header) {
         case Z21RX_DB0::BC_TRACK_POWER_OFF:
             this->callbacks.trackPowerStatusCallback(false);
-            //if (onTrackPowerOff != NULL)
-            //    onTrackPowerOff();
             break;
 
         case Z21RX_DB0::BC_TRACK_POWER_ON:
             this->callbacks.trackPowerStatusCallback(true);
-            //if (onTrackPowerOn != NULL)
-            //    onTrackPowerOn();
             break;
 
         case Z21RX_DB0::BC_PROGRAMMING_MODE:
             this->callbacks.programmingTrackStatusCallback(true);
-            //if (onTrackProgrammingMode != NULL)
-            //    onTrackProgrammingMode();
             break;
 
         case Z21RX_DB0::BC_TRACK_SHORT_CIRCUIT:
             this->callbacks.shortCircuitDetectedCallback();
-            //if (onTrackShortCircuit != NULL)
-            //    onTrackShortCircuit();
             break;
 
         case Z21RX_DB0::CV_NACK_SC:

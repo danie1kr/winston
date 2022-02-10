@@ -10,13 +10,6 @@ namespace winston
 	class WebServer
 	{
 	public:
-		/*struct HTTPResponse
-		{
-			std::map<const std::string, const std::string> headers;
-			std::string body;
-			unsigned int status;
-		};*/
-
 		class HTTPConnection
 		{
 		public:

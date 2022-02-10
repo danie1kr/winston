@@ -195,6 +195,7 @@
                 <div>Grid <label>hide <input id="gridView" type="checkbox"><span class="lever"></span>show</label></div>
                 <div>Layout <label>fixed <input id="layoutEdit" type="checkbox"><span class="lever"></span>edit</label></div>
                 <div>Blocks <label>view <input id="blockView" type="checkbox"><span class="lever"></span>off</label></div>
+                <div>Detector Debug <label>on <input id="detectorDebug" type="checkbox"><span class="lever"></span>off</label></div>
                 <a id="saveLayout" class="waves-effect waves-light btn-small">Save Layout</a>
                 <a id="resetLayout" class="waves-effect waves-light btn-small">Reset Layout</a>
             </div>
@@ -274,9 +275,7 @@
             }
         }
 
-        connect();
-
-        let railway, signals, blocks, layout, $railway, $saveLayout, $resetLayout, cy, uiEditLayout = false, allowLayoutStorage = true, allowLayoutLoading = true;
+        let railway, signals, blocks, detectors, layout, $railway, $saveLayout, $resetLayout, cy, uiEditLayout = false, allowLayoutStorage = true, allowLayoutLoading = true;
 
         const WinstonTypeTurnout = "turnout";
         const WinstonTypeLocomotive = "locomotive";
@@ -612,6 +611,23 @@
 
                     },
                     {
+                        selector: "node.detector",
+                        style: {
+                            "width": 24,
+                            "height": 24,
+                            "shape": "rectangle",
+                            "background-color": "red"
+                        }
+
+                    },
+                    {
+                        selector: "edge.detector",
+                        style: {
+                            "width": 1
+                        }
+
+                    },
+                    {
                         selector: "node.blockColoring",
                         style: {
                             "background-color": "data(blockColor)"
@@ -746,6 +762,8 @@
                 .trigger("change");
             $("#blockView").prop("checked", URLsp.has("blockView") ? "checked" : null)
                 .trigger("change");
+            $("#detectorDebug").prop("checked", URLsp.has("detectorDebug") ? "checked" : null)
+                .trigger("change");
 
             return cy;
         }
@@ -775,6 +793,7 @@
                     cy.add(layout.cy);
                     cy = cytoscapeUpdateSignals(cy, signals);
                     cy = cytoscapeUpdateBlocks(cy, blocks);
+                    cy = cytoscapeUpdateDetectors(cy, detectors);
                     cy = cytoscapePostAdd(cy);
 
                     cy.viewport({zoom: layout.viewport.zoom, pan: layout.viewport.pan});
@@ -953,6 +972,39 @@
             return cy;
         }
 
+
+        function cytoscapeUpdateDetectors(cy, detectors) {
+            let nodes = [];
+            let edges = [];
+
+            cy.$("node.detector").addClass("unverified");
+
+            _.each(detectors, function (detector, i) {
+                let track = detector.track;
+                let connection = detector.connection;
+
+                let parentPosition = cy.$("node.connection." + connection + "[track=\"" + track + "\"]").position();
+
+                let existing = cy.$("node.detector[parentTrack=\"" + track + "\"][connection=\"" + connection + "\"]");
+                if (existing.length > 0) {
+                    existing.removeClass("unverified");
+                }
+                else {
+                    nodes.push({ group: 'nodes', data: { id: track + "_detector_" + connection, connection: connection, parentTrack: track, relativePosition: { x: 20, y: 0 } }, position: { x: parentPosition.x + 20, y: parentPosition.y}, classes: "detector" });
+                    edges.push({ group: 'edges', data: { source: track + "_detector_" + connection, target: track + "_" + connection }, classes: "detector" });
+                }
+            });
+
+            let unverified = cy.$(".unverified");
+            console.log("removing " + unverified.length + " detectors");
+            unverified.remove();
+
+            cy.add(nodes);
+            cy.add(edges);
+
+            return cy;
+        }
+
         function addTrackToLayout(edges, nodes, tracks, track, xPos)
         {
             function connect(that, connection, connectionName)
@@ -1061,6 +1113,7 @@
                 railway = data.tracks;
                 signals = data.signals;
                 blocks = data.blocks;
+                detectors = data.detectors;
 
                 _.each(data.tracks, function (track, i) {
                     addTrackToLayout(edges, nodes, data.tracks, track, i * 100);
@@ -1145,6 +1198,7 @@
                 cy.add(edges);
                 cy = cytoscapeUpdateSignals(cy, data.signals);
                 cy = cytoscapeUpdateBlocks(cy, data.blocks);
+                cy = cytoscapeUpdateDetectors(cy, data.detectors);
                 cy = cytoscapePostAdd(cy);
 
                 if (allowLayoutLoading)
@@ -1268,6 +1322,7 @@
             $("#ip").on('change', () => {
                 putStateIntoURL();
             }).val(URLsp.get('ipport') || "127.0.0.1:8080");
+            connect();
         
             $railway = $("#railway");
             $("#splitEdge").on('click', cySplitEdge);
@@ -1323,6 +1378,13 @@
                     cy.$().removeClass("blockColoring");
                 putStateIntoURL();
             });
+            $("#detectorDebug").on('change', (event) => {
+                if ($(event.target).prop("checked"))
+                    cy.$(".detector").style("display", "element");
+                else
+                    cy.$(".detector").style("display", "none");
+                putStateIntoURL();
+            });
 
             $("#reconnect").on('click', function() { 
                 connect(); 
@@ -1352,6 +1414,8 @@
                 url += "&layoutEdit";
             if ($("#blockView").prop("checked"))
                 url += "&blockView";
+            if ($("#detectorDebug").prop("checked"))
+                url += "&detectorDebug";
             window.history.pushState({ path: url }, '', url);
         }
 

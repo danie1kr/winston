@@ -9,10 +9,16 @@ namespace winston
 	{
 	public:
 		Detector(Track::Shared track, const Track::Connection connection, const Distance distance);
+		const std::string trackName() const;
+		const Track::Connection connection() const;
+		const Distance distance() const;
 	protected:
-		Track::Shared track;
-		const Track::Connection connection;
-		const Distance distance;
+		struct Details
+		{
+			Track::Shared track;
+			const Track::Connection connection;
+			const Distance distance;
+		} details;
 	};
 
 	template<typename T>

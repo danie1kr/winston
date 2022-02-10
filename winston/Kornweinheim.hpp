@@ -397,6 +397,7 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
         auto tracks = railwayContent.createNestedArray("tracks");
         auto signals = railwayContent.createNestedArray("signals");
         auto blocks = railwayContent.createNestedArray("blocks");
+        auto detectors = railwayContent.createNestedArray("detectors");
 
         for (unsigned int i = 0; i < railway->tracksCount(); ++i)
         {
@@ -462,6 +463,13 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
             auto blockTracks = b.createNestedArray("tracks");
             for (auto& track : bl->tracks())
                 blockTracks.add(track->name());
+        }
+
+        for (auto& detector : this->railway->occupancyDetectors())
+        {
+            auto d = detectors.createNestedObject();
+            d["track"] = detector->trackName();
+            d["connection"] = winston::Track::ConnectionToString(detector->connection());
         }
 
         std::string railwayContentJson("");

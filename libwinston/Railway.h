@@ -134,6 +134,11 @@ namespace winston
 					callback(this->trackEnum(i), std::static_pointer_cast<Turnout>(this->tracks[i]));
 		}
 
+		const std::vector<Detector::Shared>& occupancyDetectors()
+		{
+			return this->detectors;
+		}
+
 		inline constexpr Tracks trackEnum(size_t index) const
 		{
 			return Tracks::_from_integral_unchecked((unsigned int)index);

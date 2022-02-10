@@ -134,13 +134,13 @@ namespace winston
 		virtual const Connection whereConnects(Track::Shared& other) const = 0;
 		virtual const Connection otherConnection(const Connection connection) const = 0;
 		virtual const Result validate() = 0;
-		virtual const Type type() = 0;
+		virtual const Type type() const = 0;
 
 		virtual void attachSignal(Signal::Shared signal, const Connection guarding);
 		virtual Signal::Shared signalFacing(const Connection facing);
 		virtual Signal::Shared signalGuarding(const Connection guarding);
-		virtual const Length length();
-		const std::string name();
+		virtual const Length length() const;
+		const std::string name() const;
 
 	protected:
 		virtual Track::Shared connectTo(const Connection local, SignalFactory guardingLocalSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa = true) = 0;
@@ -173,7 +173,7 @@ namespace winston
 		const Connection whereConnects(Track::Shared& other) const;
 		const Connection otherConnection(const Connection connection) const;
 		const Result validate();
-		const Type type();
+		const Type type() const;
 
 		void attachSignal(Signal::Shared signal, const Connection guarding);
 		Signal::Shared signalFacing(const Connection facing);
@@ -206,7 +206,7 @@ namespace winston
 		const Connection whereConnects(Track::Shared& other) const;
 		const Connection otherConnection(const Connection connection) const;
 		const Result validate();
-		const Type type();
+		const Type type() const;
 
 		void attachSignal(Signal::Shared signal, const Connection guarding);
 		Signal::Shared signalFacing(const Connection facing);
@@ -253,7 +253,7 @@ namespace winston
 		const Connection otherConnection(const Connection connection) const;
 
 		const Result validate();
-		const Type type();
+		const Type type() const;
 
 		void connections(Track::Shared& onA, Track::Shared& onB, Track::Shared& onC);
 
@@ -261,7 +261,7 @@ namespace winston
 		const State startToggle();
 		const State finalizeChangeTo(const Direction direction);
 
-		const Direction direction();
+		const Direction direction() const;
 		static const Direction otherDirection(const Direction current);
 		static const Direction fromConnection(const Connection connection);
 		void fromDirection(Track::Shared& a, Track::Shared& other) const;
@@ -269,7 +269,7 @@ namespace winston
 
 		using Shared_Ptr<Turnout>::Shared;
 		using Shared_Ptr<Turnout>::make;
-		virtual const Length length();
+		virtual const Length length() const;
 
 	private:
 		Track::Shared connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa = true);

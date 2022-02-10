@@ -100,12 +100,12 @@ namespace winston
 		return Result::ValidationFailed;
 	}
 
-	const Length Track::length()
+	const Length Track::length() const
 	{
 		return this->trackLength;
 	}
 	
-	const std::string Track::name()
+	const std::string Track::name() const
 	{
 		return this->_name;
 	}
@@ -197,7 +197,7 @@ namespace winston
 		onA = this->a;
 	}
 
-	const Track::Type Bumper::type()
+	const Track::Type Bumper::type() const
 	{
 		return Type::Bumper;
 	}
@@ -326,7 +326,7 @@ namespace winston
 		return this->validateSingle(a) == Result::OK && this->validateSingle(b) == Result::OK ? Result::OK : Result::ValidationFailed;
 	}
 
-	const Track::Type Rail::type()
+	const Track::Type Rail::type() const
 	{
 		return Type::Rail;
 	}
@@ -510,7 +510,7 @@ namespace winston
 		return this->validateSingle(a) == Result::OK && this->validateSingle(b) == Result::OK && this->validateSingle(c) == Result::OK ? Result::OK : Result::ValidationFailed;
 	}
 
-	const Track::Type Turnout::type()
+	const Track::Type Turnout::type() const
 	{
 		return Type::Turnout;
 	}
@@ -540,7 +540,7 @@ namespace winston
 		return state;
 	}
 
-	const Turnout::Direction Turnout::direction()
+	const Turnout::Direction Turnout::direction() const
 	{
 		return this->dir;
 	}
@@ -574,7 +574,7 @@ namespace winston
 		return this->dir == Direction::Changing ? Connection::DeadEnd : (this->dir == Direction::A_B ? Connection::B : Connection::C);
 	}
 
-	const Length Turnout::length()
+	const Length Turnout::length() const
 	{
 		return this->trackLengthCalculator ? this->trackLengthCalculator(this->dir) : 0;
 	}

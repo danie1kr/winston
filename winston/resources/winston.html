@@ -248,10 +248,6 @@
         let socket = null;
 
         const SocketReconnectTimeout = 10 * 1000;
-
-        let URLsp = new URLSearchParams(window.location.search);
-        $("#ip").val(URLsp.get('ipport') || "127.0.0.1:8080");
-
         function connect()
         {
             socketState = SocketConnecting;
@@ -336,7 +332,7 @@
 
             $element.find(".speed").val(data.forward ? data.speed : -data.speed);
             $element.find(".speedValue").html(data.value);
-            $element.find(".light").attr("checked", data.light ? "checked" : undefined);
+            $element.find(".light").prop("checked", data.light ? "checked" : undefined);
         }
 
         function turnoutGet(id)
@@ -744,6 +740,12 @@
             cy.$(".signal").each(function(signal) {
                 signalRequestStatus(signal.data("guarding"), signal.data("parentTrack"));
             });
+
+            let URLsp = new URLSearchParams(window.location.search);
+            $("#layoutEdit").prop("checked", URLsp.has("layoutEdit") ? "checked" : null)
+                .trigger("change");
+            $("#blockView").prop("checked", URLsp.has("blockView") ? "checked" : null)
+                .trigger("change");
 
             return cy;
         }
@@ -1262,23 +1264,15 @@
         }
 
         $(function() {
-        /*
-            // signal
-            send("turnout_trigger", {id: id});
-
-        */
-            // socket.send(JSON.stringify([msg,data]));
-            // socket.send(JSON.stringify({type: type, room: room, device: device, value: value}));
-
             let URLsp = new URLSearchParams(window.location.search);
-            $("#ip").val(URLsp.get('ipport') || "127.0.0.1:8080");
+            $("#ip").on('change', () => {
+                putStateIntoURL();
+            }).val(URLsp.get('ipport') || "127.0.0.1:8080");
         
             $railway = $("#railway");
             $("#splitEdge").on('click', cySplitEdge);
             $("#deleteTrackNode").on('click', cyDeleteTrackNode);
             $("#pullConnectedNode").on('click', cyPullNode);
-            //$("#rotateTrackNodeCW").on('click', cyRotateNodeCW);
-            //$("#rotateTrackNodeCCW").on('click', cyRotateNodeCCW);
             $(".cancel").on('click', function(event)
             {
                 $(".contextMenu").hide();
@@ -1306,29 +1300,28 @@
             });
             $resetLayout.addClass("disabled");
 
-            $("#layoutEdit").on('change', function(event) {
+            $("#layoutEdit").on('change', function (event) {
                 uiEditLayout = $(event.target).prop("checked");
-                if(!allowLayoutEdit())
-                {
+                if (!allowLayoutEdit()) {
                     cy.nodes().ungrabify();
                     $saveLayout.addClass("disabled");
                     $resetLayout.addClass("disabled");
                 }
-                else
-                {
+                else {
                     cy.nodes().grabify();
-                    if(allowLayoutStorage === true)
-                    {
+                    if (allowLayoutStorage === true) {
                         $saveLayout.removeClass("disabled");
                         $resetLayout.removeClass("disabled");
                     }
                 }
+                putStateIntoURL();
             });
             $("#blockView").on('change', function (event) {
                 if ($(event.target).prop("checked"))
                     cy.$("[blockColor]").addClass("blockColoring");
                 else
                     cy.$().removeClass("blockColoring");
+                putStateIntoURL();
             });
 
             $("#reconnect").on('click', function() { 
@@ -1349,6 +1342,18 @@
             send("getRailway", {});
             send("getLocoShed", {});
         });
+
+        function putStateIntoURL() {
+            var url = window.location.protocol + "//" + window.location.host + window.location.pathname + '?';
+            url += "ipport=" + $("#ip").val();
+            if ($("#gridView").prop("checked"))
+                url += "&gridView";
+            if ($("#layoutEdit").prop("checked"))
+                url += "&layoutEdit";
+            if ($("#blockView").prop("checked"))
+                url += "&blockView";
+            window.history.pushState({ path: url }, '', url);
+        }
 
     </script>
     <script type="text/javascript" src="materialize.min.js"></script>

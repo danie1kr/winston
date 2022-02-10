@@ -106,5 +106,5 @@ private:
     TLC5947_SignalDevice::Shared signalDevice;
 
     /* Storage */
-    winston::hal::Storage::Shared storageLayout;
+    Storage::Shared storageLayout;
 };

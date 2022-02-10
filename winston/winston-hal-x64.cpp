@@ -394,7 +394,7 @@ const winston::Result SerialDeviceWin::send(const std::vector<DataType> data)
 }
 
 StorageWin::StorageWin(const std::string filename, const size_t maxSize)
-    : Storage(maxSize), filename(filename)
+    : StorageInterface(maxSize), filename(filename)
 {
 }
 

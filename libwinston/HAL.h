@@ -115,14 +115,14 @@ namespace winston
 			using Shared_Ptr<SerialDevice>::make;
 		};
 
-		class Storage : public Shared_Ptr<Storage>
+		class StorageInterface : public Shared_Ptr<StorageInterface>
 		{
 		protected:
-			Storage(const size_t maxSize = 0);
+			StorageInterface(const size_t maxSize = 0);
 			size_t maxSize;
 		public:
-			using Shared_Ptr<Storage>::Shared;
-			using Shared_Ptr<Storage>::make;
+			using Shared_Ptr<StorageInterface>::Shared;
+			using Shared_Ptr<StorageInterface>::make;
 			virtual const Result init() = 0;
 			virtual const Result read(const size_t address, std::vector<unsigned char>& content, const size_t length = 1) = 0;
 			virtual const Result read(const size_t address, std::string& content, const size_t length = 1) = 0;

@@ -1,7 +1,7 @@
 
+#include <string>
 #include "../libwinston/Library.h"
 #include "railways.h"
-#include <string>
 #include "../libwinston/better_enum.hpp"
 
 #define BUMPER(track) case Tracks::_enumerated::track: return winston::Bumper::make(#track); 

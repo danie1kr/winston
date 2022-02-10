@@ -21,7 +21,7 @@ namespace winston
 		{
 			// negative = leave at reference, else other direction connection
 			auto connection = this->distance < 0 ? this->reference : this->track->otherConnection(this->reference);
-			this->distance = abs(this->distance);
+			this->distance = this->distance < 0 ? -this->distance : this->distance;
 			auto current = this->track;
 			while (true)
 			{
@@ -124,7 +124,12 @@ namespace winston
 
 	void Locomotive::SpeedMap::learn(const Throttle throttle, const Speed speed)
 	{
-		this->map.insert_or_assign(throttle, speed);
+		if (this->map.find(throttle) == this->map.end())
+		{
+			this->map.insert(std::make_pair(throttle, speed));
+		}
+		else
+			this->map[throttle] = speed;
 	}
 	const Locomotive::SpeedMap::Speed Locomotive::SpeedMap::speed(const Throttle throttle) const
 	{

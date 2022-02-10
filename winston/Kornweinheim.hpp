@@ -674,7 +674,7 @@ void Kornweinheim::systemSetup() {
     this->signalDevice = TLC5947_SignalDevice::make(1, 24, this->signalInterfaceDevice, TLC5947Off);
 
     // storage
-    this->storageLayout = StorageWin::make(std::string(this->name()).append(".").append("winston.storage"));
+    this->storageLayout = Storage::make(std::string(this->name()).append(".").append("winston.storage"));
     if (this->storageLayout->init() != winston::Result::OK)
         winston::logger.err("Kornweinheim.init: Storage Layout Init failed");
 };

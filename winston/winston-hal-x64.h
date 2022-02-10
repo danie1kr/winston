@@ -49,7 +49,7 @@ private:
 	COMMTIMEOUTS    timeouts;
 };
 
-class StorageWin : public winston::hal::Storage, winston::Shared_Ptr<StorageWin>
+class StorageWin : public winston::hal::StorageInterface, winston::Shared_Ptr<StorageWin>
 {
 public:
 	StorageWin(const std::string filename, const size_t maxSize = 0);
@@ -71,6 +71,7 @@ private:
 	std::string filename;
 	mio::mmap_sink mmap;
 };
+using Storage = StorageWin;
 
 #include "../libwinston/WebServer.h"
 

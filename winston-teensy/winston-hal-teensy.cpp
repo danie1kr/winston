@@ -15,11 +15,6 @@ namespace winston
 
 #undef WINSTON_WITH_WEBSOCKET
 
-#ifdef WINSTON_WITH_SDFAT
-//#define SDFAT_FILE_TYPE 2 //exfat only
-#include <SD.h>
-#endif
-
 #ifdef WINSTON_WITH_TEENSYDEBUG
 #include "TeensyDebug/TeensyDebug.h"
 #endif
@@ -289,7 +284,7 @@ size_t WebServerTeensy::maxMessageSize()
     return 2048;
 }
 #endif
-
+/*
 static const std::string constWinstonStoragePath = "winston.storage";
 static std::string winstonStoragePath = constWinstonStoragePath;
 static const auto winstonStorageSize = 128 * 1024;
@@ -316,7 +311,7 @@ void ensureStorageFile()
     winstonStorage = SD.open(winstonStoragePath.c_str(), FILE_WRITE_BEGIN);
 #endif
 }
-
+*/
 UDPSocketTeensy::UDPSocketTeensy(const std::string ip, const unsigned short port) : winston::hal::UDPSocket(ip, port), ip(ip), port(port)
 {
     Udp.begin(port);
@@ -415,6 +410,124 @@ void Arduino_GPIOOutputPin::Arduino_GPIOOutputPin::set(const State value)
     digitalWriteFast(pin, value == State::Low ? LOW : HIGH);
 }
 
+
+StorageArduino::StorageArduino(const std::string filename, const size_t maxSize)
+    : StorageInterface(maxSize), filename(filename)
+{
+}
+
+const winston::Result StorageArduino::init()
+{
+#ifdef WINSTON_WITH_SDFAT
+    if (!winston::runtimePersistence())
+        return winston::Result::ExternalHardwareFailed;
+
+    if (!SD.exists(this->filename.c_str()))
+    {
+        auto file = SD.open(this->filename.c_str(), FILE_WRITE);
+        for (size_t i = 0; i < maxSize; ++i)
+            file.write('0');
+        file.flush();
+        file.close();
+    }
+
+    SD.sdfs.chdir();
+    this->file = SD.open(this->filename.c_str(), FILE_WRITE_BEGIN);
+#endif
+    return winston::Result::OK;
+}
+
+const winston::Result StorageArduino::read(const size_t address, std::vector<unsigned char>& content, const size_t length)
+{
+#ifdef WINSTON_WITH_SDFAT
+    if (!this->file)
+        return winston::Result::NotInitialized;
+    const size_t count = length == 0 ? content.size() : min(content.size(), length);
+    content.reserve(count);
+    this->file.seek(address);
+    this->file.read(content.data(), count);
+#endif
+    return winston::Result::OK;
+}
+
+const winston::Result StorageArduino::read(const size_t address, std::string& content, const size_t length)
+{
+#ifdef WINSTON_WITH_SDFAT
+    if (!this->file)
+        return winston::Result::NotInitialized;
+    const size_t count = length == 0 ? content.size() : min(content.size(), length);
+    content.reserve(count);
+    this->file.seek(address);
+    for (size_t i = 0; i < count; ++i)
+    {
+        char byte;
+        this->file.readBytes(&byte, 1);
+        content.push_back(static_cast<unsigned char>(byte));
+    }
+#endif
+    return winston::Result::OK;
+}
+
+const winston::Result StorageArduino::write(const size_t address, unsigned char content)
+{
+#ifdef WINSTON_WITH_SDFAT
+    if (!this->file)
+        return winston::Result::NotInitialized;
+    if (this->file.size() < address + 1)
+    {
+        winston::logger.err("storage too small");
+        return winston::Result::OutOfBounds;
+    }
+    this->file.seek(address);
+    this->file.write(content);
+#endif
+    return winston::Result::OK;
+}
+
+const winston::Result StorageArduino::write(const size_t address, std::vector<unsigned char>& content, const size_t length)
+{
+#ifdef WINSTON_WITH_SDFAT
+    if (!this->file)
+        return winston::Result::NotInitialized;
+    const size_t count = length == 0 ? content.size() : min(content.size(), length);
+    if (this->file.size() < address + count)
+    {
+        winston::logger.err("storage too small");
+        return winston::Result::OutOfBounds;
+    }
+    this->file.seek(address);
+    this->file.write(content.data(), count);
+#endif
+    return winston::Result::OK;
+}
+
+const winston::Result StorageArduino::write(const size_t address, std::string& content, const size_t length)
+{
+#ifdef WINSTON_WITH_SDFAT
+    if (!this->file)
+        return winston::Result::NotInitialized;
+    const size_t count = length == 0 ? content.size() : min(content.size(), length);
+    if (this->file.size() < address + count)
+    {
+        winston::logger.err("storage too small");
+        return winston::Result::OutOfBounds;
+    }
+    this->file.seek(address);
+    this->file.write(content.data(), count);
+#endif
+    return winston::Result::OK;
+}
+
+const winston::Result StorageArduino::sync()
+{
+#ifdef WINSTON_WITH_SDFAT
+    if (!this->file)
+        return winston::Result::NotInitialized;
+    this->file.flush();
+#endif
+    return winston::Result::OK;
+}
+
 void teensyMAC(uint8_t* mac) { // there are 2 MAC addresses each 48bit 
     uint32_t m1 = HW_OCOTP_MAC1;
     uint32_t m2 = HW_OCOTP_MAC0;
@@ -448,7 +561,6 @@ namespace winston
             else
                 winston::runtimeEnablePersistence();
             SD.sdfs.chdir();
-            ensureStorageFile();
 #endif
             uint8_t mac[6];
             teensyMAC(mac);
@@ -528,7 +640,7 @@ namespace winston
         {
             return TimePoint(std::chrono::milliseconds(millis()));
         }
-
+        /*
         void storageSetFilename(std::string filename)
         {
             winstonStoragePath = std::string(filename).append(".").append(constWinstonStoragePath);
@@ -572,6 +684,6 @@ namespace winston
             winstonStorage.flush();
 #endif
             return true;
-        }
+        }*/
     }
 }

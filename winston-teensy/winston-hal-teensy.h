@@ -102,6 +102,33 @@ public:
     using winston::Shared_Ptr<Arduino_GPIOOutputPin>::make;
 };
 
+#ifdef WINSTON_WITH_SDFAT
+//#define SDFAT_FILE_TYPE 2 //exfat only
+#include <SD.h>
+#endif
+class StorageArduino: public winston::hal::StorageInterface, winston::Shared_Ptr<StorageArduino>
+{
+public:
+	StorageArduino(const std::string filename, const size_t maxSize = 0);
+
+	const winston::Result init();
+	const winston::Result read(const size_t address, std::vector<unsigned char>& content, const size_t length = 1);
+	const winston::Result read(const size_t address, std::string& content, const size_t length = 1);
+	const winston::Result write(const size_t address, unsigned char content);
+	const winston::Result write(const size_t address, std::vector<unsigned char>& content, const size_t length = 0);
+	const winston::Result write(const size_t address, std::string& content, const size_t length = 0);
+	const winston::Result sync();
+
+	using Shared_Ptr<StorageArduino>::Shared;
+	using Shared_Ptr<StorageArduino>::make;
+private:
+	std::string filename;
+#ifdef WINSTON_WITH_SDFAT
+	File file;
+#endif
+};
+using Storage = StorageArduino;
+
 /*
 #ifdef WINSTON_WITH_WEBSOCKET
 class WebServerTeensy : public winston::WebServer<WebsocketsClient>

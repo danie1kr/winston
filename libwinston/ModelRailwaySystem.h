@@ -135,12 +135,12 @@ namespace winston
 
 		Result loadLocomotives()
 		{
-
+			return winston::Result::OK;
 		}
 
 		Result storeLocomotives()
 		{
-
+			return winston::Result::OK;
 		}
 
 		// the railway

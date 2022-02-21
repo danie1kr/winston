@@ -30,7 +30,7 @@ namespace winston
 		RHS_Print(SPI);
 		RHS_Print(Railway);
 	}
-
+	/*
 	Port::Port() :
 		_device(0), _port(0)
 	{
@@ -44,5 +44,5 @@ namespace winston
 	}
 
 	const size_t Port::device() const { return this->_device; }
-	const size_t Port::port() const { return this->_port; }
+	const size_t Port::port() const { return this->_port; }*/
 }

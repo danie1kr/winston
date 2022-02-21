@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <array>
+#include <map>
 #include <algorithm>
 #include <memory>
 
@@ -37,7 +38,7 @@ namespace winston
 
 		Railway(const Callbacks callbacks);
 		virtual ~Railway() = default;
-
+		/*
 		using SignalFactory = std::function < winston::Signal::Shared (winston::Track::Shared track, winston::Track::Connection connection)>;
 		template<class _Signal>
 		SignalFactory S(const Length distance, size_t& device, size_t& port)
@@ -52,7 +53,7 @@ namespace winston
 			};
 		}
 		SignalFactory KS_dummy(const Length distance = 0, const Port port = Port());
-		SignalFactory H(const Length distance, size_t& device, size_t& port);
+		SignalFactory H(const Length distance, size_t& device, size_t& port);*/
 
 		void block(const Address address, const Trackset trackset);
 		Block::Shared block(Address address);
@@ -62,6 +63,21 @@ namespace winston
 		const Callbacks callbacks;
 		Blockmap _blocks;
 	};
+	/*
+	template<typename _DetectorClass>
+	class RailwayWithDetector
+	{
+	public:
+		using Detectors = _DetectorClass;
+		virtual void attachDetectors() { };
+		using DetectorMap = std::map<typename _DetectorClass, Detector::Shared>;
+		const DetectorMap& occupancyDetectors()
+		{
+			return this->detectors;
+		}
+
+		DetectorMap detectors;
+	};*/
 
 	template<typename _TracksClass>
 	class RailwayWithRails : public Railway
@@ -84,7 +100,6 @@ namespace winston
 					set.insert(this->track(track));
 				this->block(1, set);
 			}
-			this->attachDetectors();
 			return this->validate();
 		}
 		static constexpr size_t tracksCount() noexcept {
@@ -93,8 +108,6 @@ namespace winston
 
 		virtual winston::Track::Shared define(const Tracks track) = 0;
 		virtual void connect() = 0;
-
-		virtual void attachDetectors() { };
 
 		template<typename _Track, typename ..._args>
 		Track::Shared& add(Tracks track, _args && ...args) {
@@ -134,11 +147,6 @@ namespace winston
 					callback(this->trackEnum(i), std::static_pointer_cast<Turnout>(this->tracks[i]));
 		}
 
-		const std::vector<Detector::Shared>& occupancyDetectors()
-		{
-			return this->detectors;
-		}
-
 		inline constexpr Tracks trackEnum(size_t index) const
 		{
 			return Tracks::_from_integral_unchecked((unsigned int)index);
@@ -160,12 +168,12 @@ namespace winston
 				return nullptr;
 		}
 
-		inline Track::Shared& track(Tracks index)
+		inline constexpr Track::Shared& track(Tracks index)
 		{
 			return this->tracks[static_cast<size_t>(index)];
 		}
 
-		inline Track::Shared& track(size_t index)
+		inline constexpr Track::Shared& track(size_t index)
 		{
 			return this->tracks[index];
 		}
@@ -212,6 +220,5 @@ namespace winston
 
 	protected:
 		std::array<Track::Shared, tracksCount()> tracks;
-		std::vector<Detector::Shared> detectors;
 	};
 }

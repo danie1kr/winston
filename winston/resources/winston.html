@@ -89,38 +89,43 @@
     </style>
 
     <script type="text/template" id="template_turnout">
-    <div class="winston-turnout row" winston-turnout-track="<%= id %>" winston-turnout-direction="<%= direction %>">
-        <div class="name col s4"><%= name %></div><div class="direction col s3"><%= direction %></div>
+        <div class="winston-turnout row" winston-turnout-track="<%= id %>" winston-turnout-direction="<%= direction %>">
+            <div class="name col s4"><%= name %></div><div class="direction col s3"><%= direction %></div>
 
-<div class="col s2"><a class="waves-effect waves-light btn">toggle</a></div>
+            <div class="col s2"><a class="waves-effect waves-light btn">toggle</a></div>
         </div>
     </script>
 
     <script type="text/template" id="template_loco">
-    <div class="winston-locomotive row" winston-loco-address="<%= address %>" winston-type="locomotive" winston-id="<%= address %>">
-        <div class="row">
-            <div class="name col s3"><%= name %></div>
-            <div class="address col s1"><%= address %></div>
-            <div class="switch col s8">
-                <i class="small material-icons">highlight</i>
-                <label>
-                    Off <input type="checkbox" class="light"> <span class="lever"></span> On
-                </label>
-            </div>
+        <div class="winston-locomotive row" winston-loco-address="<%= address %>" winston-type="locomotive" winston-id="<%= address %>">
+            <div class="row">
+                <div class="name col s3"><%= name %></div>
+                <div class="address col s1"><%= address %></div>
+                <div class="switch col s8">
+                    <i class="small material-icons">highlight</i>
+                    <label>
+                        Off <input type="checkbox" class="light"> <span class="lever"></span> On
+                    </label>
+                </div>
 
-        </div>
-        <div class="row">
-            <div class="col s3">
-            <label class="speedValue"></label>
             </div>
-            <div class="col s5"></div>
-            <div class="col s4"><a class="waves-effect waves-light btn">stop</a></div>
+            <div class="row">
+                <div class="col s3">
+                    <label class="speedValue"></label>
+                </div>
+                <div class="col s5"></div>
+                <div class="col s4"><a class="waves-effect waves-light btn">stop</a></div>
+            </div>
+            <div class="row">
+                <input class="speed" type="range" min="-100" max="100" />
+            </div>
+            <hr>
         </div>
-        <div class="row">
-            <input class="speed" type="range" min="-100" max="100" />
-        </div>
-        <hr>
-    </div>
+    </script>
+
+
+    <script type="text/template" id="template_detector_debug_loco">
+        <option name="<%= id %>" value="<%= id %>"><%= name %></option>
     </script>
 
 </head>
@@ -186,46 +191,49 @@
         </div>
     </div>
 
-    <header>
-    <div>
-        winston <label id="settingsToggle">⚙</label>
-        <div id="settingsContent" class="row">
-            <div class="input-field col s2"><input placeholder="IP" id="ip" type="text" class="validate" value="127.0.0.1"><label for="ip">IP</label></div>
-            <div class="switch col s6">
-                <div>Grid <label>hide <input id="gridView" type="checkbox"><span class="lever"></span>show</label></div>
-                <div>Layout <label>fixed <input id="layoutEdit" type="checkbox"><span class="lever"></span>edit</label></div>
-                <div>Blocks <label>view <input id="blockView" type="checkbox"><span class="lever"></span>off</label></div>
-                <div>Detector Debug <label>on <input id="detectorDebug" type="checkbox"><span class="lever"></span>off</label></div>
-                <a id="saveLayout" class="waves-effect waves-light btn-small">Save Layout</a>
-                <a id="resetLayout" class="waves-effect waves-light btn-small">Reset Layout</a>
-            </div>
-        </div>
-        <hr>  
+    <div id="infoDebugDetector" class="contextMenu">
     </div>
-    <div id="error"></div>
 
-    <ul id="sideLoco" class="sidenav sidenav-fixed">
-        <ul class="collapsible expandable">
-            <li id="locoShedContainer" class="active">
-                <div class="collapsible-header">Locomotives</div>
-                <div class="collapsible-body"></div>
-            </li>
-        </ul>
-    </ul>
-
-    <ul id="sideTurnout" class="sidenav sidenav-fixed">
-        <ul class="collapsible expandable">
-            <li id="turnoutsContainer" class="active">
-                <div class="collapsible-header">Turnouts</div>
-                <div class="collapsible-body"></div>
-            </li>
-        </ul>
-        <div id="console">
-            <h5>Console</h5>
-            <div id="messages"></div>
+    <header>
+        <div>
+            winston <label id="settingsToggle">⚙</label>
+            <div id="settingsContent" class="row">
+                <div class="input-field col s2"><input placeholder="IP" id="ip" type="text" class="validate" value="127.0.0.1"><label for="ip">IP</label></div>
+                <div class="switch col s6">
+                    <div>Grid <label>hide <input id="gridView" type="checkbox"><span class="lever"></span>show</label></div>
+                    <div>Layout <label>fixed <input id="layoutEdit" type="checkbox"><span class="lever"></span>edit</label></div>
+                    <div>Blocks <label>view <input id="blockView" type="checkbox"><span class="lever"></span>off</label></div>
+                    <div>Detector Debug <label>on <input id="detectorDebug" type="checkbox"><span class="lever"></span>off</label> <select id="detectorDebugLoco"></select></div>
+                    <a id="saveLayout" class="waves-effect waves-light btn-small">Save Layout</a>
+                    <a id="resetLayout" class="waves-effect waves-light btn-small">Reset Layout</a>
+                </div>
+            </div>
+            <hr>
         </div>
-        <div id="connection" class="right-align">not connected</div>
-    </ul>
+        <div id="error"></div>
+
+        <ul id="sideLoco" class="sidenav sidenav-fixed">
+            <ul class="collapsible expandable">
+                <li id="locoShedContainer" class="active">
+                    <div class="collapsible-header">Locomotives</div>
+                    <div class="collapsible-body"></div>
+                </li>
+            </ul>
+        </ul>
+
+        <ul id="sideTurnout" class="sidenav sidenav-fixed">
+            <ul class="collapsible expandable">
+                <li id="turnoutsContainer" class="active">
+                    <div class="collapsible-header">Turnouts</div>
+                    <div class="collapsible-body"></div>
+                </li>
+            </ul>
+            <div id="console">
+                <h5>Console</h5>
+                <div id="messages"></div>
+            </div>
+            <div id="connection" class="right-align">not connected</div>
+        </ul>
     </header>
 
 
@@ -234,12 +242,12 @@
 
     </main>
     <!--
-    <footer class="page-footer">
-        <div class="container">
-            
-        </div>
-    </footer>
--->
+        <footer class="page-footer">
+            <div class="container">
+
+            </div>
+        </footer>
+    -->
     <script type="text/javascript">
         const SocketClosed = 0;
         const SocketConnecting = 1;
@@ -249,8 +257,7 @@
         let socket = null;
 
         const SocketReconnectTimeout = 10 * 1000;
-        function connect()
-        {
+        function connect() {
             socketState = SocketConnecting;
             socket = new WebSocket("ws://" + $("#ip").val());
 
@@ -258,15 +265,15 @@
                 parse(JSON.parse(event.data));
             }
 
-            socket.onopen = function(event) {
+            socket.onopen = function (event) {
                 socketState = SocketOpen;
                 $("#connection").html("connected");
                 $("#overlay").hide();
             }
 
-            socket.onclose = function(event) {
+            socket.onclose = function (event) {
 
-                if(socketState === SocketConnecting)
+                if (socketState === SocketConnecting)
                     _.delay(connect, SocketReconnectTimeout);
 
                 socketState = SocketClosed;
@@ -283,45 +290,38 @@
         const TurnoutState_A_C = 1;
         const TurnoutState_Changing = 2;
 
-        function turnoutDirectionLabelFromDirection(direction)
-        {
-            switch(direction)
-            {
+        function turnoutDirectionLabelFromDirection(direction) {
+            switch (direction) {
                 case 0: return "A-B";
                 case 1: return "A-C";
                 default:
-                return "changing";
+                    return "changing";
             }
         }
 
-        function allowLayoutEdit()
-        {
+        function allowLayoutEdit() {
             return uiEditLayout === true;
         }
 
-        function allowWinstonSubmit()
-        {
+        function allowWinstonSubmit() {
             return uiEditLayout === false;
         }
 
-        function winstonGet(type, id)
-        {
+        function winstonGet(type, id) {
             return $("[winston-type=\"" + type + "\"][winston-id=\"" + id + "\"]");
         }
 
-        function loco(data)
-        {
+        function loco(data) {
             let address = data.address;
             let $element = winstonGet(WinstonTypeLocomotive, address);
 
-            if($element === undefined || $element.length === 0)
-            {
+            if ($element === undefined || $element.length === 0) {
                 let $locoShedContainerBody = $("#locoShedContainer>div.collapsible-body");
                 let locoTemplate = _.template($("#template_loco").html());
-                $element = $(locoTemplate({address: address, name: data.name }));
+                $element = $(locoTemplate({ address: address, name: data.name }));
                 $element.find(".speed").on("change", doControlLoco);
                 $element.find(".light").on("change", doControlLoco);
-                $element.find(".stop").on("click", function(event) { 
+                $element.find(".stop").on("click", function (event) {
                     $element.find(".speed").val(0);
                     doControlLoco(event);
                 });
@@ -329,22 +329,27 @@
                 $locoShedContainerBody.append($element);
             }
 
+            let $elementDetectorDebugLoco = $("#detectorDebugLoco>option[value=\"" + address + "\"]");
+            if ($elementDetectorDebugLoco === undefined || $elementDetectorDebugLoco.length === 0) {
+                let $detectorDebugLocoSelect = $("#detectorDebugLoco");
+                let locoTemplate = _.template($("#template_detector_debug_loco").html());
+                $element = $(locoTemplate({ id: address, name: data.name }));
+                $detectorDebugLocoSelect.append($element);
+            }
+
             $element.find(".speed").val(data.forward ? data.speed : -data.speed);
             $element.find(".speedValue").html(data.value);
             $element.find(".light").prop("checked", data.light ? "checked" : undefined);
         }
 
-        function turnoutGet(id)
-        {
+        function turnoutGet(id) {
             return winstonGet(WinstonTypeTurnout, id);
         }
 
-        function turnoutUpdate(turnout)
-        {
+        function turnoutUpdate(turnout) {
             let direction = turnout.data("direction");
             let track = turnout.data("track");
-            switch(direction)
-            {
+            switch (direction) {
                 case TurnoutState_A_B:
                     turnout.neighborhood("[connection=\"b\"]").style("visibility", "visible");
                     turnout.neighborhood("[connection=\"c\"]").style("visibility", "hidden");
@@ -363,8 +368,7 @@
             $(".winston-turnout[winston-turnout-track=\"" + track + "\"]>.direction").html(turnoutDirectionLabelFromDirection(direction));
         }
 
-        function turnoutState(data)
-        {
+        function turnoutState(data) {
             let id = data.id;
             let direction = data.state;
 
@@ -372,39 +376,34 @@
             turnoutUpdate(turnout);
         }
 
-        function turnoutToggle(event)
-        {
+        function turnoutToggle(event) {
             sendTurnoutToggle(event.target.data("track"), event.target.data("direction"));
         }
 
-        function sendTurnoutToggle(track, direction)
-        {
-            if(!allowWinstonSubmit())
+        function sendTurnoutToggle(track, direction) {
+            if (!allowWinstonSubmit())
                 return;
 
             let id = track;//parseInt(track);
             cy.nodes(".turnout[track=\"" + id + "\"]").off("click");
 
-            if(direction !== TurnoutState_Changing)
-                send("doTurnoutToggle", {id: id});
+            if (direction !== TurnoutState_Changing)
+                send("doTurnoutToggle", { id: id });
         }
 
-        function turnoutRequestStatus(track)
-        {
-            if(!allowWinstonSubmit())
+        function turnoutRequestStatus(track) {
+            if (!allowWinstonSubmit())
                 return;
-            send("getTurnoutState", {id: track});
+            send("getTurnoutState", { id: track });
         }
 
-        function signalRequestStatus(guarding, parentTrack)
-        {
-            if(!allowWinstonSubmit())
+        function signalRequestStatus(guarding, parentTrack) {
+            if (!allowWinstonSubmit())
                 return;
-            send("getSignalState", {parentTrack: parentTrack, guarding: guarding});
+            send("getSignalState", { parentTrack: parentTrack, guarding: guarding });
         }
 
-        function signalState(data)
-        {
+        function signalState(data) {
             let track = data.parentTrack;
             let guarding = data.guarding;
             let aspects = data.aspects;
@@ -416,8 +415,7 @@
             //turnoutUpdate(turnout);
         }
 
-        function doControlLoco(event)
-        {
+        function doControlLoco(event) {
             let $target = $(event.target);
             let $loco = $($target.closest(".winston-locomotive"));
             let speed = parseInt($loco.find(".speed").val());
@@ -430,31 +428,26 @@
             });
         }
 
-        function hideContextMenus()
-        {
+        function hideContextMenus() {
             $(".contextMenu").hide();
         }
-     
-        function click(menu, event)
-        {
-            if(!allowLayoutEdit())
-            {
+
+        function click(menu, event) {
+            if (!allowLayoutEdit()) {
                 graphCalculateReachability(event)
                 return;
             }
-            else
-            {
+            else {
                 hideContextMenus();
 
                 let $contextMenu = $("#" + menu);
-                if(menu === "menuTrackNode")
-                {
+                if (menu === "menuTrackNode") {
                     let node = event.target;
                     let name = node.data("displayName");
                     $("#trackNodeName")
                         .val(name ? name : node.data("name"))
                         .off('change')
-                        .on('change', function(e) { 
+                        .on('change', function (e) {
                             let name = e.target.value;
                             node.data("displayName", name);
                             $("#turnoutsContainer>div.collapsible-body")
@@ -472,27 +465,45 @@
             }
         }
 
-        function signalInfo(event)
-        {
+        function signalInfo(event) {
             hideContextMenus();
             let $info = $("#infoSignal");
             let node = event.target;
             //$info.find("#infoSignalId").text(node.data("id"));
             $info.find("#infoSignalParent").text(node.data("parentTrack"));
             $info.find("#infoSignalConnection").text(node.data("guarding"));
-            let lights = _.map(node.data("lights"), l => "Dev: " + l.device + " Port: " + l.port)
+            let lights = _.map(node.data("lights"), l => " Port: " + l.port)
             let lightsText = lights.join("<br>");
             $info.find("#infoSignalLights").html(lightsText);
             $info.css("top", event.originalEvent.clientY + 'px')
-                 .css("left", (event.originalEvent.clientX + 20) + 'px')
-                 .show();
+                .css("left", (event.originalEvent.clientX + 20) + 'px')
+                .show();
         }
 
-        function cytoscapeCreate()
-        {
+        function sendInjectDetector(locoAddress, detectorId) {
+            if (!allowWinstonSubmit())
+                return;
+            send("emu_dcs_inject_detector", { loco: locoAddress, detector: detectorId });
+        }
+
+        function detectorClick(event) {
+
+            if ($("#detectorDebug").prop("checked")) {
+                let loco = $("#detectorDebugLoco").val();
+                let node = event.target;
+
+            }
+            else {
+                hideContextMenus();
+                // infoDebugDetector
+                // show connection info
+            }
+        }
+
+        function cytoscapeCreate() {
             return cy = cytoscape({
                 container: $railway,
-                layout: {name: 'preset'},
+                layout: { name: 'preset' },
                 style: [
                     /*{
                         selector: 'node.track',
@@ -564,7 +575,7 @@
                         selector: ".track",
                         style: {
                             "curve-style": "taxi",
-                        }  
+                        }
                     },*/
                     {
                         selector: ".connection",
@@ -651,109 +662,111 @@
                     initPosAlignmentColor: "#0000ff",
                 }
             }).nodeHtmlLabel([
-            {
-                query: '.trackNode',
-                valign: "center",
-                halign: "center",
-                valignBox: "center",
-                halignBox: "center",
-                tpl: function(data) {
-                    return '<p>' + (data.displayName ? data.displayName : data.name) + '</p>';
-                }
-            }/*,
-            {
-                query: '.l2',
-                tpl: function(data) {
-                    return '<p class="cy-title__p1">' + data.id + '</p>' + '<p  class="cy-title__p2">' + data.name + '</p>';
-                }
-            }*/]);
+                {
+                    query: '.trackNode',
+                    valign: "center",
+                    halign: "center",
+                    valignBox: "center",
+                    halignBox: "center",
+                    tpl: function (data) {
+                        return '<p>' + (data.displayName ? data.displayName : data.name) + '</p>';
+                    }
+                }/*,
+                {
+                    query: '.l2',
+                    tpl: function(data) {
+                        return '<p class="cy-title__p1">' + data.id + '</p>' + '<p  class="cy-title__p2">' + data.name + '</p>';
+                    }
+                }*/]);
         }
 
-        function cytoscapePostAdd(cy)
-        {
-            cy.on('click', '.trackSplitNode', function(event) {
+        function cytoscapePostAdd(cy) {
+            cy.on('click', '.trackSplitNode', function (event) {
                 click("menuTrackNode", event);
             });
-            cy.on('click', '.track', function(event) {
+            cy.on('click', '.track', function (event) {
                 click("menuTrackEdge", event);
             });
-            cy.on('click', '.connection', function(event) {
+            cy.on('click', '.connection', function (event) {
                 click("menuEditNode", event);
             })
-            cy.on('click', '.signal', function(event) {
+            cy.on('click', '.signal', function (event) {
                 signalInfo(event);
             });
-            cy.on('unselect', '.track, .trackNode, .track, .signal', function() {
+            cy.on('click', 'node.detector', function (event) {
+                detectorClick(event);
+            });
+            cy.on('unselect', '.track, .trackNode, .track, .signal, .detector', function () {
                 cy.elements().removeClass("reachable");
                 hideContextMenus();
             });
-            cy.on('mouseover', '.turnout', function(event) {
+            cy.on('mouseover', '.turnout', function (event) {
                 event.target.neighborhood(".turnoutConnection").addClass("highlight");
             });
-            cy.on('mouseout', '.turnout', function(event) { 
+            cy.on('mouseout', '.turnout', function (event) {
                 event.target.neighborhood(".turnoutConnection").removeClass("highlight");
             });
 
-            cy.on('mouseover', '.trackNode', function(event) {
+            cy.on('mouseover', '.trackNode', function (event) {
                 event.target.neighborhood(".signalConnector").show();
             });
-            cy.on('mouseout', '.trackNode', function(event) { 
+            cy.on('mouseout', '.trackNode', function (event) {
                 event.target.neighborhood(".signalConnector").hide();
             });
 
-            cy.on('position', '.trackNode .signal', function() {
-                if(!allowLayoutEdit())
+            cy.on('position', '.trackNode .signal', function () {
+                if (!allowLayoutEdit())
                     return;
             });
 
-            cy.on('position', '.bumper, .turnout, .rail', function(event) {
-                if(!allowLayoutEdit())
+            cy.on('position', '.bumper, .turnout, .rail', function (event) {
+                if (!allowLayoutEdit())
                     return;
                 let that = event.target;
-                cy.$("node.connection[track=\"" + that.data("track") + "\"], node.trackSplitNode[track=\"" + that.data("track") + "\"]").each(function(e) {
-                    e.position({x: that.position().x + e.data("relativePosition").x, y: that.position().y + e.data("relativePosition").y});
+                cy.$("node.connection[track=\"" + that.data("track") + "\"], node.trackSplitNode[track=\"" + that.data("track") + "\"]").each(function (e) {
+                    e.position({ x: that.position().x + e.data("relativePosition").x, y: that.position().y + e.data("relativePosition").y });
                 });
             });
 
-            cy.on('position', '.connection', function(event) {
-                if(!allowLayoutEdit())
+            cy.on('position', '.connection', function (event) {
+                if (!allowLayoutEdit())
                     return;
                 let that = event.target;
                 let parentPosition = cy.$("node.trackNode[track=\"" + that.data("track") + "\"]").position();
-                that.data("relativePosition", {x: that.position().x - parentPosition.x, y: that.position().y - parentPosition.y});
+                that.data("relativePosition", { x: that.position().x - parentPosition.x, y: that.position().y - parentPosition.y });
 
-                that.neighborhood(".signal").each(function(e) {
-                    e.position({x: that.position().x + e.data("relativePosition").x, y: that.position().y + e.data("relativePosition").y});
+                that.neighborhood(".signal").each(function (e) {
+                    e.position({ x: that.position().x + e.data("relativePosition").x, y: that.position().y + e.data("relativePosition").y });
                 });
             });
 
-            cy.on('position', '.signal', function(event) {
-                if(!allowLayoutEdit())
+            cy.on('position', '.signal', function (event) {
+                if (!allowLayoutEdit())
                     return;
                 let that = event.target;
                 let parentPosition = cy.$("node.connection." + that.data("guarding") + "[track=\"" + that.data("parentTrack") + "\"]").position();
-                that.data("relativePosition", {x: that.position().x - parentPosition.x, y: that.position().y - parentPosition.y});
+                that.data("relativePosition", { x: that.position().x - parentPosition.x, y: that.position().y - parentPosition.y });
             });
 
             cy.on('click', '.turnout', turnoutToggle);
 
             cy.nodes().ungrabify();
-            
+
             let $turnoutsContainerBody = $("#turnoutsContainer>div.collapsible-body");
             $turnoutsContainerBody.empty();
-            cy.$(".turnout").each(function(turnout) {
-            
+            cy.$(".turnout").each(function (turnout) {
+
                 let turnoutTemplate = _.template($("#template_turnout").html());
-                let $turnout = $(turnoutTemplate({id: turnout.data("track"), name: turnout.data("displayName") ? turnout.data("displayName") : turnout.data("name"), direction: turnout.data("direction")}));
-                $turnout.on('click', function(event) {
+                let $turnout = $(turnoutTemplate({ id: turnout.data("track"), name: turnout.data("displayName") ? turnout.data("displayName") : turnout.data("name"), direction: turnout.data("direction") }));
+                $turnout.on('click', function (event) {
                     let $target = $(event.target);
                     let $closest = $($target.closest(".winston-turnout"));
-                    sendTurnoutToggle($closest.attr("winston-turnout-track"), $closest.attr("winston-turnout-direction")); 
+                    sendTurnoutToggle($closest.attr("winston-turnout-track"), $closest.attr("winston-turnout-direction"));
                 });
                 $turnoutsContainerBody.append($turnout);
                 turnoutRequestStatus(turnout.data("track"));
             });
-            cy.$(".signal").each(function(signal) {
+            cy.$(".signal").each(function (signal) {
                 signalRequestStatus(signal.data("guarding"), signal.data("parentTrack"));
             });
 
@@ -770,24 +783,21 @@
 
         let layoutString = "";
         let layoutStringSizeReceived = 0;
-        function updateRailwayLayout(data)
-        {
+        function updateRailwayLayout(data) {
             let offset = data.offset;
             let fullSize = data.fullSize;
             let partialLayout = data.layout;
 
             layoutStringSizeReceived += partialLayout.length;
 
-            if(layoutString.length < fullSize)
+            if (layoutString.length < fullSize)
                 layoutString = new Array(fullSize + 1).join(" ");
 
-            layoutString = [layoutString.slice(0, offset), partialLayout, layoutString.slice(offset+partialLayout.length)].join('');
+            layoutString = [layoutString.slice(0, offset), partialLayout, layoutString.slice(offset + partialLayout.length)].join('');
 
-            if(layoutStringSizeReceived === fullSize)
-            {
+            if (layoutStringSizeReceived === fullSize) {
                 layout = JSON.parse(layoutString);
-                if(checkGraphIsomorphism(railway, layout))
-                {
+                if (checkGraphIsomorphism(railway, layout)) {
                     cy.destroy();
                     cy = cytoscapeCreate();
                     cy.add(layout.cy);
@@ -796,27 +806,25 @@
                     cy = cytoscapeUpdateDetectors(cy, detectors);
                     cy = cytoscapePostAdd(cy);
 
-                    cy.viewport({zoom: layout.viewport.zoom, pan: layout.viewport.pan});
+                    cy.viewport({ zoom: layout.viewport.zoom, pan: layout.viewport.pan });
                 }
-                else
-                {
+                else {
                     alert("railway and layout mismatch!");
-                /*    cy.destroy();
-                    cy = cytoscapeCreate();
-                    cy.add(layout.cy);
-                    cy = cytoscapeUpdateRailway(cy, data.tracks);
-                    cy = cytoscapeUpdateSignals(cy, signals);
-                    cy = cytoscapeUpdateBlocks(cy, blocks);
-                    cy = cytoscapePostAdd(cy);*/
+                    /*    cy.destroy();
+                        cy = cytoscapeCreate();
+                        cy.add(layout.cy);
+                        cy = cytoscapeUpdateRailway(cy, data.tracks);
+                        cy = cytoscapeUpdateSignals(cy, signals);
+                        cy = cytoscapeUpdateBlocks(cy, blocks);
+                        cy = cytoscapePostAdd(cy);*/
 
-                    cy.viewport({zoom: layout.viewport.zoom, pan: layout.viewport.pan});
+                    cy.viewport({ zoom: layout.viewport.zoom, pan: layout.viewport.pan });
                 }
             }
         }
 
-        function storeRailwayLayout()
-        {
-            let layout = 
+        function storeRailwayLayout() {
+            let layout =
             {
                 viewport: { zoom: cy.zoom(), pan: cy.pan() },
                 cy: cy.$().jsons()
@@ -826,31 +834,29 @@
             let offset = 0;
             let size = 0;
             let chunkSize = 32000;
-            for(let i = 0; i < payload.length; i += chunkSize)
-                send("storeRailwayLayout", {layout: payload.substring(i, Math.min(i+chunkSize, payload.length)), offset: i, fullSize: payload.length});
+            for (let i = 0; i < payload.length; i += chunkSize)
+                send("storeRailwayLayout", { layout: payload.substring(i, Math.min(i + chunkSize, payload.length)), offset: i, fullSize: payload.length });
 
         }
 
-        function checkGraphIsomorphism(railway, layout)
-        {
-            if(!layout || layout.length === 0 || !layout.cy)
+        function checkGraphIsomorphism(railway, layout) {
+            if (!layout || layout.length === 0 || !layout.cy)
                 return false;
 
             let cyLayout = cytoscape();
             cyLayout.add(layout.cy);
-            
+
             let success = true;
-            _.each(railway, function(track, i) {
+            _.each(railway, function (track, i) {
 
                 let layoutTrack = cyLayout.$(".trackNode[name=\"" + track.name + "\"]");
 
                 let localSuccess = layoutTrack !== undefined && layoutTrack.length > 0 &&
-                            layoutTrack.data("connections").a === track.a &&
-                            layoutTrack.data("connections").b === track.b &&
-                            layoutTrack.data("connections").c === track.c;
+                    layoutTrack.data("connections").a === track.a &&
+                    layoutTrack.data("connections").b === track.b &&
+                    layoutTrack.data("connections").c === track.c;
 
-                if(!localSuccess)
-                {
+                if (!localSuccess) {
                     console.log(track.name, layoutTrack, track, i);
                 }
 
@@ -860,30 +866,26 @@
             return success;
         }
 
-        function graphCalculateReachability(event)
-        {
+        function graphCalculateReachability(event) {
             cy.elements().removeClass("reachable");
-            function traverse($edge)
-            {
-                if($edge.hidden())
+            function traverse($edge) {
+                if ($edge.hidden())
                     return;
-                
+
                 $edge.addClass("reachable");
                 let $nodes = $edge.connectedNodes();
-                _.each($nodes, function($node) {
+                _.each($nodes, function ($node) {
 
-                    if($node.hasClass("reachable"))
+                    if ($node.hasClass("reachable"))
                         return;
 
-                    let $edges = $node.connectedEdges().filter(function(e) { return e !== $edge; });
+                    let $edges = $node.connectedEdges().filter(function (e) { return e !== $edge; });
 
-                    if($node.hasClass("turnout") || $node.hasClass("turnoutConnection"))
-                    {
+                    if ($node.hasClass("turnout") || $node.hasClass("turnoutConnection")) {
                         $node.addClass("reachable");
                         _.each($edges, traverse);
                     }
-                    else if($node.hasClass("bumper"))
-                    { 
+                    else if ($node.hasClass("bumper")) {
                         // we came here somehow (via a), so there is nothing else to do
                         $node.addClass("reachable");
                     }
@@ -898,54 +900,48 @@
             traverse($edge);
         }
 
-        function cytoscapeUpdateRailway(cy, railway)
-        {
-            _.each(railway, function(track, i) {
+        function cytoscapeUpdateRailway(cy, railway) {
+            _.each(railway, function (track, i) {
                 let layoutTrack = cy.$(".trackNode[name=\"" + track.name + "\"]");
 
                 // added track in railway list
-                if(layoutTrack === undefined)
-                {
+                if (layoutTrack === undefined) {
                     addTrackToLayout(cy.nodes(), cy.edges(), railway.tracks, track, i);
                 }
 
                 let localSuccess = layoutTrack !== undefined && layoutTrack.length > 0 &&
-                            layoutTrack.data("connections").a === track.a &&
-                            layoutTrack.data("connections").b === track.b &&
-                            layoutTrack.data("connections").c === track.c;
+                    layoutTrack.data("connections").a === track.a &&
+                    layoutTrack.data("connections").b === track.b &&
+                    layoutTrack.data("connections").c === track.c;
 
-                if(!localSuccess)
-                {
+                if (!localSuccess) {
                     console.log(layoutTrack.data("name"), track, i);
                 }
             });
             return cy;
         }
 
-        function cytoscapeUpdateSignals(cy, signals)
-        {
+        function cytoscapeUpdateSignals(cy, signals) {
             let nodes = [];
             let edges = [];
 
             cy.$("node.signal").addClass("unverified");
 
-            _.each(signals, function(signal, i) {
+            _.each(signals, function (signal, i) {
                 let track = signal.parentTrack;
                 let guarding = signal.guarding;
 
                 let parentPosition = cy.$("node.connection." + guarding + "[track=\"" + track + "\"]").position();
 
                 let existing = cy.$("node.signal[parentTrack=\"" + track + "\"][guarding=\"" + guarding + "\"]");
-                if(existing.length > 0)
-                {
+                if (existing.length > 0) {
                     existing.removeClass("unverified");
                     existing.data("lights", signal.lights);
                 }
-                else
-                {
+                else {
                     let lights = signal.lights;
-                    nodes.push({group: 'nodes', data: {id: track + "_signal_" + guarding, guarding: guarding, parentTrack: track, lights: lights, relativePosition: {x: 0, y: 20}}, position: {x: parentPosition.x, y: parentPosition.y + 20}, classes: "signal"});
-                    edges.push({group: 'edges', data: {source: track + "_signal_" + guarding, target: track + "_" + guarding}, classes: "signalConnector"});
+                    nodes.push({ group: 'nodes', data: { id: track + "_signal_" + guarding, guarding: guarding, parentTrack: track, lights: lights, relativePosition: { x: 0, y: 20 } }, position: { x: parentPosition.x, y: parentPosition.y + 20 }, classes: "signal" });
+                    edges.push({ group: 'edges', data: { source: track + "_signal_" + guarding, target: track + "_" + guarding }, classes: "signalConnector" });
                 }
             });
 
@@ -962,7 +958,7 @@
         function cytoscapeUpdateBlocks(cy, blocks) {
             _.each(blocks, function (block, i) {
                 _.each(block.tracks, function (track, j) {
-                    cy.$("[track=\"" + track + "\"]").forEach(function(ele, i, eles) { 
+                    cy.$("[track=\"" + track + "\"]").forEach(function (ele, i, eles) {
                         ele.data("block", block.address);
                         ele.data("blockColor", "#red");
                     });
@@ -990,7 +986,7 @@
                     existing.removeClass("unverified");
                 }
                 else {
-                    nodes.push({ group: 'nodes', data: { id: track + "_detector_" + connection, connection: connection, parentTrack: track, relativePosition: { x: 20, y: 0 } }, position: { x: parentPosition.x + 20, y: parentPosition.y}, classes: "detector" });
+                    nodes.push({ group: 'nodes', data: { id: track + "_detector_" + connection, connection: connection, parentTrack: track, relativePosition: { x: 20, y: 0 } }, position: { x: parentPosition.x + 20, y: parentPosition.y }, classes: "detector" });
                     edges.push({ group: 'edges', data: { source: track + "_detector_" + connection, target: track + "_" + connection }, classes: "detector" });
                 }
             });
@@ -1005,28 +1001,24 @@
             return cy;
         }
 
-        function addTrackToLayout(edges, nodes, tracks, track, xPos)
-        {
-            function connect(that, connection, connectionName)
-            {
+        function addTrackToLayout(edges, nodes, tracks, track, xPos) {
+            function connect(that, connection, connectionName) {
                 let other = _.find(tracks, t => t.name === connection);
 
-                let thatNode = _.find(nodes, function(n) { return n.data.track === that;});
-                let otherNode = _.find(nodes, function(n) { return n.data.track === connection;});
+                let thatNode = _.find(nodes, function (n) { return n.data.track === that; });
+                let otherNode = _.find(nodes, function (n) { return n.data.track === connection; });
 
-                if(thatNode === undefined || otherNode === undefined)
+                if (thatNode === undefined || otherNode === undefined)
                     return;
 
                 let from = that + "_" + connectionName;//(thatNode.data.type !== "bumper"/* && connectionName !== "a"*/ ? connectionName : "");
 
-                function connectToOther(otherConnectionName)
-                {
-                    if(other[otherConnectionName] === that)
-                    {
+                function connectToOther(otherConnectionName) {
+                    if (other[otherConnectionName] === that) {
                         let to = connection + "_" + otherConnectionName; // (otherNode.data.direction !== undefined /*&& otherConnectionName !== "a"*/ ? otherConnectionName : "");
                         let id = from + "-" + to;
 
-                        edges.push({group: 'edges', data: {id: id, name: id, source: from, target: to}, classes: ""});
+                        edges.push({ group: 'edges', data: { id: id, name: id, source: from, target: to }, classes: "" });
                     }
                 }
 
@@ -1042,49 +1034,45 @@
             let id = track.name;
 
             let type = 0;
-            if(c !== undefined)
+            if (c !== undefined)
                 type = 2;
-            else if(b !== undefined)
+            else if (b !== undefined)
                 type = 1;
 
-            if(type === 2)
-            {
-                nodes.push({group: 'nodes', data: {id: id, displayName: track.name, name: id, track: id, connections: {a: a, b: b, c: c}, direction: 1, type: "turnout", relativePosition: {x: 0, y: 0}}, position: {x: xPos, y: 0}, classes: "trackNode turnout"});
-                nodes.push({group: 'nodes', data: {id: id + "_a", name: id + "_a", track: id, relativePosition: {x: -20, y: 0}}, position: {x: xPos-20, y: 0}, classes: "turnoutConnection connection a"});
-                nodes.push({group: 'nodes', data: {id: id + "_b", name: id + "_b", track: id, relativePosition: {x: 20, y: 0}}, position: {x: xPos+20, y: -20}, classes: "turnoutConnection connection b"});
-                nodes.push({group: 'nodes', data: {id: id + "_c", name: id + "_c", track: id, relativePosition: {x: 20, y: 20}}, position: {x: xPos+20, y: 20}, classes: "turnoutConnection connection c"});
+            if (type === 2) {
+                nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, connections: { a: a, b: b, c: c }, direction: 1, type: "turnout", relativePosition: { x: 0, y: 0 } }, position: { x: xPos, y: 0 }, classes: "trackNode turnout" });
+                nodes.push({ group: 'nodes', data: { id: id + "_a", name: id + "_a", track: id, relativePosition: { x: -20, y: 0 } }, position: { x: xPos - 20, y: 0 }, classes: "turnoutConnection connection a" });
+                nodes.push({ group: 'nodes', data: { id: id + "_b", name: id + "_b", track: id, relativePosition: { x: 20, y: 0 } }, position: { x: xPos + 20, y: -20 }, classes: "turnoutConnection connection b" });
+                nodes.push({ group: 'nodes', data: { id: id + "_c", name: id + "_c", track: id, relativePosition: { x: 20, y: 20 } }, position: { x: xPos + 20, y: 20 }, classes: "turnoutConnection connection c" });
 
-                edges.push({group: 'edges', data: {source: id, target: id+"_a", track: id, connection: "a"}, classes: "track"});
-                edges.push({group: 'edges', data: {source: id, target: id+"_b", track: id, connection: "b"}, classes: "internal"});
-                edges.push({group: 'edges', data: {source: id, target: id+"_c", track: id, connection: "c"}, classes: "internal"});
+                edges.push({ group: 'edges', data: { source: id, target: id + "_a", track: id, connection: "a" }, classes: "track" });
+                edges.push({ group: 'edges', data: { source: id, target: id + "_b", track: id, connection: "b" }, classes: "internal" });
+                edges.push({ group: 'edges', data: { source: id, target: id + "_c", track: id, connection: "c" }, classes: "internal" });
             }
-            else if(type === 1)
-            {
-                nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, connections: {a: a, b: b, c: c}, type: "rail", relativePosition: {x: 0, y: 0}}, position: {x: xPos, y: 0}, classes: "trackNode rail"});
-                nodes.push({group: 'nodes', data: {id: id + "_a", name: id + "_a", track: id, relativePosition: {x: -20, y: 0}}, position: {x: xPos-20, y: 0}, classes: "railConnection connection a"});
-                nodes.push({group: 'nodes', data: {id: id + "_b", name: id + "_b", track: id, relativePosition: {x: 20, y: 0}}, position: {x: xPos+20, y: 0}, classes: "railConnection connection b"});
+            else if (type === 1) {
+                nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, connections: { a: a, b: b, c: c }, type: "rail", relativePosition: { x: 0, y: 0 } }, position: { x: xPos, y: 0 }, classes: "trackNode rail" });
+                nodes.push({ group: 'nodes', data: { id: id + "_a", name: id + "_a", track: id, relativePosition: { x: -20, y: 0 } }, position: { x: xPos - 20, y: 0 }, classes: "railConnection connection a" });
+                nodes.push({ group: 'nodes', data: { id: id + "_b", name: id + "_b", track: id, relativePosition: { x: 20, y: 0 } }, position: { x: xPos + 20, y: 0 }, classes: "railConnection connection b" });
 
-                edges.push({group: 'edges', data: {source: id, target: id+"_a", track: id, connection: "a"}, classes: "track"});
-                edges.push({group: 'edges', data: {source: id, target: id+"_b", track: id, connection: "b"}, classes: "track"});
+                edges.push({ group: 'edges', data: { source: id, target: id + "_a", track: id, connection: "a" }, classes: "track" });
+                edges.push({ group: 'edges', data: { source: id, target: id + "_b", track: id, connection: "b" }, classes: "track" });
             }
-            else
-            {
-                nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, connections: {a: a, b: b, c: c}, type: "bumper", relativePosition: {x: 0, y: 0}}, position: {x: xPos, y: 0}, classes: "trackNode bumper"});
-                nodes.push({group: 'nodes', data: {id: id + "_a", name: id + "_a", track: id, relativePosition: {x: -20, y: 0}}, position: {x: xPos-20, y: 0}, classes: "bumperConnection connection a"});
-                edges.push({group: 'edges', data: {source: id, target: id+"_a", track: id, connection: "a"}, classes: "track"});
+            else {
+                nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, connections: { a: a, b: b, c: c }, type: "bumper", relativePosition: { x: 0, y: 0 } }, position: { x: xPos, y: 0 }, classes: "trackNode bumper" });
+                nodes.push({ group: 'nodes', data: { id: id + "_a", name: id + "_a", track: id, relativePosition: { x: -20, y: 0 } }, position: { x: xPos - 20, y: 0 }, classes: "bumperConnection connection a" });
+                edges.push({ group: 'edges', data: { source: id, target: id + "_a", track: id, connection: "a" }, classes: "track" });
             }
 
             console.log("added track " + id);
 
-            if(a !== undefined) connect(id, a, "a");
-            if(b !== undefined) connect(id, b, "b");
-            if(c !== undefined) connect(id, c, "c");
+            if (a !== undefined) connect(id, a, "a");
+            if (b !== undefined) connect(id, b, "b");
+            if (c !== undefined) connect(id, c, "c");
         }
 
         let railwayString = "";
         let railwayStringSizeReceived = 0;
-        function buildRailwayGraph(dataMsg)
-        {
+        function buildRailwayGraph(dataMsg) {
             let offset = dataMsg.offset;
             let fullSize = dataMsg.fullSize;
             let partialRailway = dataMsg.railway;
@@ -1118,54 +1106,54 @@
                 _.each(data.tracks, function (track, i) {
                     addTrackToLayout(edges, nodes, data.tracks, track, i * 100);
                     /*
-    
+
                     function connect(that, connection, connectionName)
                     {
                         let other = _.find(data.tracks, t => t.name === connection);
-    
+
                         let thatNode = _.find(nodes, function(n) { return n.data.track === that;});
                         let otherNode = _.find(nodes, function(n) { return n.data.track === connection;});
-    
+
                         if(thatNode === undefined || otherNode === undefined)
                             return;
-    
+
                         let from = that + connectionName;//(thatNode.data.type !== "bumper"/* && connectionName !== "a"* ? connectionName : "");
-    
+
                         function connectToOther(otherConnectionName)
                         {
                             if(other[otherConnectionName] === that)
                             {
                                 let to = connection + otherConnectionName; // (otherNode.data.direction !== undefined /*&& otherConnectionName !== "a"* ? otherConnectionName : "");
                                 let id = from + "-" + to;
-                                
+
                                 edges.push({group: 'edges', data: {id: id, name: id, source: from, target: to}, classes: ""});
                             }
                         }
-    
+
                         connectToOther("a");
                         connectToOther("b");
                         connectToOther("c");
                     }
-    
-    
+
+
                     let a = track.a;
                     let b = track.b;
                     let c = track.c;
                     let id = track.name;
-    
+
                     let type = 0;
                     if(c !== undefined)
                         type = 2;
                     else if(b !== undefined)
                         type = 1;
-    
+
                     if(type === 2)
                     {
                         nodes.push({group: 'nodes', data: {id: id, displayName: track.name, name: id, track: id, connections: {a: a, b: b, c: c}, direction: 1, type: "turnout", relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "trackNode turnout"});
                         nodes.push({group: 'nodes', data: {id: id + "a", name: id + "a", track: id, relativePosition: {x: -20, y: 0}}, position: {x: i*100-20, y: 0}, classes: "turnoutConnection connection a"});
                         nodes.push({group: 'nodes', data: {id: id + "b", name: id + "b", track: id, relativePosition: {x: 20, y: 0}}, position: {x: i*100+20, y: 0}, classes: "turnoutConnection connection b"});
                         nodes.push({group: 'nodes', data: {id: id + "c", name: id + "c", track: id, relativePosition: {x: 20, y: 20}}, position: {x: i*100+20, y: 20}, classes: "turnoutConnection connection c"});
-                    
+
                         edges.push({group: 'edges', data: {source: id, target: id+"a", track: id, connection: "a"}, classes: "track"});
                         edges.push({group: 'edges', data: {source: id, target: id+"b", track: id, connection: "b"}, classes: "internal"});
                         edges.push({group: 'edges', data: {source: id, target: id+"c", track: id, connection: "c"}, classes: "internal"});
@@ -1175,7 +1163,7 @@
                         nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, connections: {a: a, b: b, c: c}, type: "rail", relativePosition: {x: 0, y: 0}}, position: {x: i*100, y: 0}, classes: "trackNode rail"});
                         nodes.push({group: 'nodes', data: {id: id + "a", name: id + "a", track: id, relativePosition: {x: -20, y: 0}}, position: {x: i*100-20, y: 0}, classes: "railConnection connection a"});
                         nodes.push({group: 'nodes', data: {id: id + "b", name: id + "b", track: id, relativePosition: {x: 20, y: 0}}, position: {x: i*100+20, y: 0}, classes: "railConnection connection b"});
-                    
+
                         edges.push({group: 'edges', data: {source: id, target: id+"a", track: id, connection: "a"}, classes: "track"});
                         edges.push({group: 'edges', data: {source: id, target: id+"b", track: id, connection: "b"}, classes: "track"});
                     }
@@ -1185,9 +1173,9 @@
                         nodes.push({group: 'nodes', data: {id: id + "a", name: id + "a", track: id, relativePosition: {x: -20, y: 0}}, position: {x: i*100-20, y: 0}, classes: "bumperConnection connection a"});
                         edges.push({group: 'edges', data: {source: id, target: id+"a", track: id, connection: "a"}, classes: "track"});
                     }
-    
+
                     console.log("added track " + id);
-    
+
                     if(a !== undefined) connect(id, a, "a");
                     if(b !== undefined) connect(id, b, "b");
                     if(c !== undefined) connect(id, c, "c");*/
@@ -1208,70 +1196,68 @@
             }
         }
 
-        function error(data)
-        {
+        function error(data) {
             $("#error").append($("<p>").html(data));
             console.error(data);
         }
 
-        function message(data)
-        {
+        function message(data) {
             $("#message").append($("<p>").html(data));
             console.log(data);
         }
 
-        function parse(content)
-        {
+        function parse(content) {
             let op = content.op;
             let data = content.data;
 
-            switch(op)
-            {
+            switch (op) {
                 case "turnoutState": { turnoutState(data); break; }
                 case "signalState": { signalState(data); break; }
                 case "railway": { buildRailwayGraph(data); break; }
                 case "layout": { updateRailwayLayout(data); break; }
                 case "loco": { loco(data); break; }
-                case "storeRailwayLayoutSuccessful": { 
+                case "storeRailwayLayoutSuccessful": {
                     allowLayoutStorage = data;
-                    if(allowLayoutStorage)
+                    if (allowLayoutStorage)
                         $saveLayout.removeClass("disabled");
-                    message("layout storage successful: " + data); break; }
+                    message("layout storage successful: " + data); break;
+                }
                 case "error": { error(data); break; }
                 default:
-                {
-                    error("unparsable op:" + op);
-                    break;
-                }
+                    {
+                        error("unparsable op:" + op);
+                        break;
+                    }
             }
         }
 
-        function send(op, data)
-        {
-            if(socketState === SocketOpen)
-                socket.send(JSON.stringify({ op: op, data:data }));
+        function send(op, data) {
+            if (socketState === SocketOpen)
+                socket.send(JSON.stringify({ op: op, data: data }));
             else
                 setTimeout(send, 100, op, data);
         }
 
-        function cySplitEdge(event)
-        {
-            if(!cy || !allowLayoutEdit())
+        function cySplitEdge(event) {
+            if (!cy || !allowLayoutEdit())
                 return;
 
-            cy.$('edge:selected').each(function(edge)
-            {
+            cy.$('edge:selected').each(function (edge) {
                 let nodes = edge.connectedNodes();
                 let id = nodes[0].id() + "|" + nodes[1].id();
-                let nodePosition = {x: (nodes[0].position().x + nodes[1].position().x)/2.0, y: (nodes[0].position().y + nodes[1].position().y)/2.0 };
+                let nodePosition = { x: (nodes[0].position().x + nodes[1].position().x) / 2.0, y: (nodes[0].position().y + nodes[1].position().y) / 2.0 };
                 let parentTrack = nodes[0].data("track");
                 let parentTrackNode = cy.$("#" + parentTrack);
                 cy.add([
-                    { group: 'nodes', data: { id: id, 
-                                                track: nodes[0].data("track"),
-                                                relativePosition: {x: nodePosition.x - parentTrackNode.position().x, y: nodePosition.y - parentTrackNode.position().y}}, 
-                                                position: nodePosition, 
-                                                classes: "trackSplitNode"},
+                    {
+                        group: 'nodes', data: {
+                            id: id,
+                            track: nodes[0].data("track"),
+                            relativePosition: { x: nodePosition.x - parentTrackNode.position().x, y: nodePosition.y - parentTrackNode.position().y }
+                        },
+                        position: nodePosition,
+                        classes: "trackSplitNode"
+                    },
                     { group: 'edges', data: { id: nodes[0].id() + "-" + id, track: nodes[0].data("track"), source: nodes[0].id(), target: id }, classes: "track" },
                     { group: 'edges', data: { id: id + "-" + nodes[1].id(), track: nodes[1].data("track"), source: id, target: nodes[1].id() }, classes: "track" }
                 ]);
@@ -1280,18 +1266,16 @@
             hideContextMenus();
         }
 
-        function cyDeleteTrackNode(event)
-        {
-            if(!cy || !allowLayoutEdit())
+        function cyDeleteTrackNode(event) {
+            if (!cy || !allowLayoutEdit())
                 return;
 
-            cy.$('node.trackSplitNode:selected').each(function(node)
-            {
+            cy.$('node.trackSplitNode:selected').each(function (node) {
                 let edges = node.connectedEdges();
                 let neighbors = node.neighborhood("node");
                 let id = neighbors[0].id() + "-" + neighbors[1].id();
 
-                cy.add({group: "edges", data: {id: id, source: neighbors[0].id(), target: neighbors[1].id()}, classes: "track"});
+                cy.add({ group: "edges", data: { id: id, source: neighbors[0].id(), target: neighbors[1].id() }, classes: "track" });
 
                 edges.edges();
                 node.remove();
@@ -1299,57 +1283,53 @@
             hideContextMenus();
         }
 
-        function cyPullNode(event)
-        {
-            if(!cy || !allowLayoutEdit())
+        function cyPullNode(event) {
+            if (!cy || !allowLayoutEdit())
                 return;
 
-            cy.$('node.connection:selected').each(function(node)
-            {
+            cy.$('node.connection:selected').each(function (node) {
                 let edges = node.connectedEdges();
                 let neighbor = node.openNeighborhood("node.connection");
                 let track = neighbor.data("track");
 
-                cy.$('node.trackNode[track="' + track + '"]').each(function(n) {
-                    n.position({x: node.position().x + 40, y: node.position().y}).emit("position");    
+                cy.$('node.trackNode[track="' + track + '"]').each(function (n) {
+                    n.position({ x: node.position().x + 40, y: node.position().y }).emit("position");
                 });
             });
             hideContextMenus();
         }
 
-        $(function() {
+        $(function () {
             let URLsp = new URLSearchParams(window.location.search);
             $("#ip").on('change', () => {
                 putStateIntoURL();
             }).val(URLsp.get('ipport') || "127.0.0.1:8080");
             connect();
-        
+
             $railway = $("#railway");
             $("#splitEdge").on('click', cySplitEdge);
             $("#deleteTrackNode").on('click', cyDeleteTrackNode);
             $("#pullConnectedNode").on('click', cyPullNode);
-            $(".cancel").on('click', function(event)
-            {
+            $(".cancel").on('click', function (event) {
                 $(".contextMenu").hide();
                 cy.$().unselect();
             });
-            $("#settingsToggle").on('click', function() { $("#settingsContent").toggle(); });
+            $("#settingsToggle").on('click', function () { $("#settingsContent").toggle(); });
             hideContextMenus();
             $("#settingsContent").hide();
 
             $saveLayout = $("#saveLayout");
-            $saveLayout.on('click', function() {
-                if(allowLayoutStorage === true)
-                {
+            $saveLayout.on('click', function () {
+                if (allowLayoutStorage === true) {
                     allowLayoutStorage = false;
                     $saveLayout.addClass("disabled");
-                    storeRailwayLayout(); 
+                    storeRailwayLayout();
                 }
             });
             $saveLayout.addClass("disabled");
 
             $resetLayout = $("#resetLayout");
-            $resetLayout.on('click', function() {
+            $resetLayout.on('click', function () {
                 allowLayoutLoading = false;
                 send("getRailway", {});
             });
@@ -1386,16 +1366,16 @@
                 putStateIntoURL();
             });
 
-            $("#reconnect").on('click', function() { 
-                connect(); 
+            $("#reconnect").on('click', function () {
+                connect();
                 send("getRailway", {});
                 send("getLocoShed", {});
             });
 
             //$('#sideLoco').sideNav({edge: "left", isFixed: true});
 
-            M.Sidenav.init($('#sideLoco').get(0), {edge: "right"}).open();
-            M.Sidenav.init($('#sideTurnout').get(0), {edge: "left"}).open();
+            M.Sidenav.init($('#sideLoco').get(0), { edge: "right" }).open();
+            M.Sidenav.init($('#sideTurnout').get(0), { edge: "left" }).open();
 
             M.AutoInit();
 

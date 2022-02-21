@@ -415,7 +415,7 @@ void Y2020Railway::connect()
 }
 #endif
 
-Y2021Railway::Y2021Railway(const Callbacks callbacks) : winston::RailwayWithRails<Y2021RailwayTracks>(callbacks) {};
+Y2021Railway::Y2021Railway(const Callbacks callbacks) : winston::RailwayWithRails<Y2021RailwayTracks>(callbacks){};
 const std::string Y2021Railway::name()
 {
     return std::string("Y2021Railway");
@@ -565,7 +565,7 @@ void Y2021Railway::connect()
 
     size_t device = 0;
     size_t port = 0;
-
+    /*
     // outer loop
     Turnout1->connect(B, PBF2a, A)
         ->connect(B, Turnout4, A)
@@ -615,15 +615,62 @@ void Y2021Railway::connect()
        ->connect(B, GBF3a, A, KS_dummy(0));
    Turnout14->connect(C, GBF2b, A, KS_dummy(0))
        ->connect(B, KS_dummy(0), Turnout15, B)
-       ->connect(A, GBF2a, A, KS_dummy(0));
+       ->connect(A, GBF2a, A, KS_dummy(0));*/
+
+       // outer loop
+    Turnout1->connect(B, PBF2a, A)
+        ->connect(B, Turnout4, A)
+        ->connect(B, PBF2, A)
+        ->connect(B, Turnout6, C)
+        ->connect(A, B1, A)
+        ->connect(B, Turnout7, A)
+        ->connect(B, B2, A)
+        ->connect(B, Turnout11, B)
+        ->connect(A, B3, A)
+        ->connect(B, Turnout1, A);
+
+    // inner loop
+    Turnout2->connect(A, Turnout3, A)
+        ->connect(B, PBF3, A)
+        ->connect(B, B4, A)
+        ->connect(B, Turnout8, C)
+        ->connect(A, Turnout9, A)
+        ->connect(B, B5, A)
+        ->connect(B, Turnout10, A)
+        ->connect(B, B6, A)
+        ->connect(B, Turnout2, C);
+
+    // lower track
+    PBF1a->connect(A, Turnout5, B)
+        ->connect(A, PBF1, A)
+        ->connect(B, Turnout6, B);
+
+    // inner turnouts
+    Turnout1->connect(C, Turnout2, B);
+    Turnout4->connect(C, Turnout5, C);
+    Turnout7->connect(C, Turnout8, B);
+    Turnout9->connect(C, Turnout12, C);
+    Turnout10->connect(C, Turnout11, C);
+    Turnout15->connect(C, Turnout16, C);
+
+    // nebengleise
+    Turnout3->connect(C, N1, A);
+    Turnout12->connect(B, N2, A);
+
+    // GBF
+    Turnout12->connect(A, Turnout13, A)
+        ->connect(B, Turnout14, A)
+        ->connect(B, GBF1, A);
+    Turnout13->connect(C, GBF3b, A)
+        ->connect(B, Turnout16, A)
+        ->connect(B, GBF3a, A);
+    Turnout14->connect(C, GBF2b, A)
+        ->connect(B, Turnout15, B)
+        ->connect(A, GBF2a, A);
 }
 
 void Y2021Railway::attachDetectors()
 {
-    LOCAL_TRACK(PBF1);
-    const auto B = winston::Track::Connection::B;
-    const auto R3 = winston::library::track::Roco::R3;
-    this->detectors.push_back(winston::NFCDetector::make(this->callbacks.nfcDetectorCallback, PBF1, B, 2 * R3));
 }
 
 #ifndef WINSTON_PLATFORM_TEENSY
@@ -726,7 +773,26 @@ void SignalRailway::connect()
           });
     };*/
 
-    a->connect(winston::Track::Connection::A, KS_dummy(0), t2, winston::Track::Connection::B)
+    a->connect(winston::Track::Connection::A, t2, winston::Track::Connection::B)
+        ->connect(winston::Track::Connection::A, g1, winston::Track::Connection::B)
+        ->connect(winston::Track::Connection::A, t4, winston::Track::Connection::C)
+        ->connect(winston::Track::Connection::A, g4, winston::Track::Connection::B)
+        ->connect(winston::Track::Connection::A, g5, winston::Track::Connection::B)
+        ->connect(winston::Track::Connection::A, t5, winston::Track::Connection::A)
+        ->connect(winston::Track::Connection::B, g6, winston::Track::Connection::B)
+        ->connect(winston::Track::Connection::A, g7, winston::Track::Connection::B)
+        ->connect(winston::Track::Connection::A, t1, winston::Track::Connection::A)
+        ->connect(winston::Track::Connection::C, t2, winston::Track::Connection::C);
+
+    t1->connect(winston::Track::Connection::B, g2, winston::Track::Connection::A)
+        ->connect(winston::Track::Connection::B, t3, winston::Track::Connection::A)
+        ->connect(winston::Track::Connection::B, g3, winston::Track::Connection::A)
+        ->connect(winston::Track::Connection::B, t4, winston::Track::Connection::B);
+
+    t3->connect(winston::Track::Connection::C, b, winston::Track::Connection::A);
+
+    t5->connect(winston::Track::Connection::C, c, winston::Track::Connection::A);
+    /*a->connect(winston::Track::Connection::A, KS_dummy(0), t2, winston::Track::Connection::B)
         ->connect(winston::Track::Connection::A, g1, winston::Track::Connection::B, KS_dummy(0))
         ->connect(winston::Track::Connection::A, KS_dummy(0), t4, winston::Track::Connection::C)
         ->connect(winston::Track::Connection::A, g4, winston::Track::Connection::B, KS_dummy(0))
@@ -744,25 +810,25 @@ void SignalRailway::connect()
 
     t3->connect(winston::Track::Connection::C, b, winston::Track::Connection::A, KS_dummy(0));
 
-    t5->connect(winston::Track::Connection::C, c, winston::Track::Connection::A, KS_dummy(0));
+    t5->connect(winston::Track::Connection::C, c, winston::Track::Connection::A, KS_dummy(0));*/
 
 #define attachSignalSR(track, SignalClass, guardedConnection) \
     track->attachSignal(SignalClass::make([=](const winston::Signal::Aspects aspect)->const winston::State { return this->callbacks.signalUpdateCallback(track, guardedConnection, aspect); }), guardedConnection);
 
-    //attachSignal(g1, winston::SignalKS, winston::Track::Connection::A);
-    //attachSignalSR(g1, winston::SignalKS, winston::Track::Connection::B);
-    //attachSignalSR(a, winston::SignalKS, winston::Track::Connection::A);
-    //attachSignalSR(b, winston::SignalKS, winston::Track::Connection::A);
-    //attachSignalSR(c, winston::SignalKS, winston::Track::Connection::A);
-    //attachSignalSR(g2, winston::SignalKS, winston::Track::Connection::A);
-    //attachSignalSR(g3, winston::SignalKS, winston::Track::Connection::B);
-    //attachSignal(g4, winston::SignalKS, winston::Track::Connection::A);
-    //attachSignalSR(g4, winston::SignalKS, winston::Track::Connection::B);
-    //attachSignalSR(g5, winston::SignalKS, winston::Track::Connection::A);
-    //attachSignal(g5, winston::SignalKS, winston::Track::Connection::B);
-    //attachSignal(g6, winston::SignalKS, winston::Track::Connection::A);
-    //attachSignalSR(g6, winston::SignalKS, winston::Track::Connection::B);
-    //attachSignal(g7, winston::SignalKS, winston::Track::Connection::A);
-    //attachSignalSR(g7, winston::SignalKS, winston::Track::Connection::B);
+    attachSignalSR(g1, winston::SignalKS, winston::Track::Connection::A);
+    attachSignalSR(g1, winston::SignalKS, winston::Track::Connection::B);
+    attachSignalSR(a, winston::SignalKS, winston::Track::Connection::A);
+    attachSignalSR(b, winston::SignalKS, winston::Track::Connection::A);
+    attachSignalSR(c, winston::SignalKS, winston::Track::Connection::A);
+    attachSignalSR(g2, winston::SignalKS, winston::Track::Connection::A);
+    attachSignalSR(g3, winston::SignalKS, winston::Track::Connection::B);
+    attachSignalSR(g4, winston::SignalKS, winston::Track::Connection::A);
+    attachSignalSR(g4, winston::SignalKS, winston::Track::Connection::B);
+    attachSignalSR(g5, winston::SignalKS, winston::Track::Connection::A);
+    attachSignalSR(g5, winston::SignalKS, winston::Track::Connection::B);
+    attachSignalSR(g6, winston::SignalKS, winston::Track::Connection::A);
+    attachSignalSR(g6, winston::SignalKS, winston::Track::Connection::B);
+    attachSignalSR(g7, winston::SignalKS, winston::Track::Connection::A);
+    attachSignalSR(g7, winston::SignalKS, winston::Track::Connection::B);
 }
 #endif

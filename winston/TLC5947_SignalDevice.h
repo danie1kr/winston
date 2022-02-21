@@ -9,8 +9,8 @@ class TLC5947 : public winston::SignalDevice<T>, public winston::Shared_Ptr<TLC5
 public:
 	const size_t bits = 12;
 
-	TLC5947(const size_t devices, const size_t portsPerDevice, typename winston::SendDevice<T>::Shared device, typename winston::GPIODigitalPinOutputDevice::Shared pinOff)
-		: winston::SignalDevice<T>(devices, portsPerDevice, device), data((devices * portsPerDevice * bits / 8) / sizeof(T), 0), pinOff(pinOff)
+	TLC5947(const size_t ports, typename winston::SendDevice<T>::Shared device, typename winston::GPIODigitalPinOutputDevice::Shared pinOff)
+		: winston::SignalDevice<T>(ports, device), data((ports * bits / 8) / sizeof(T), 0), pinOff(pinOff)
 	{
 		pinOff->set(winston::GPIOPinDevice::State::High);
 	}
@@ -22,7 +22,7 @@ private:
 	const winston::Result updateInternal(winston::Signal::Shared signal)
 	{
 		for (auto& light : signal->lights())
-			setPort(light.port.device(), light.port.port(), light.value);
+			setPort(light.port, light.value);
 		return this->flush();
 	}
 
@@ -33,17 +33,21 @@ private:
 		return this->device->send(data);
 	}
 
-	void setPort(const size_t dev, const size_t port, unsigned int value)
+	void setPort(const size_t port, unsigned int value)
 	{
-		if (dev >= this->devices || port >= this->portsPerDevice)
+		if (port >= this->ports)
 			return;
-		//size_t n = (bits * (dev * this->portsPerDevice + port)) / 8;
-		//size_t slots = (bits * (this->devices * this->portsPerDevice)) / 8;
-		//size_t n = slots - 1 - (bits * (dev * this->portsPerDevice + port)) / 8 - 1;
-		//size_t n = (bits * ((this->devices - 1 - dev) * this->portsPerDevice + (this->portsPerDevice - 1 - port))) / 8;
+		//size_t n = (bits * (dev * this->ports + port)) / 8;
+		//size_t slots = (bits * (this->devices * this->ports)) / 8;
+		//size_t n = slots - 1 - (bits * (dev * this->ports + port)) / 8 - 1;
+		//size_t n = (bits * ((this->devices - 1 - dev) * this->ports + (this->ports - 1 - port))) / 8;
 		
-		size_t slots = this->devices * this->portsPerDevice;
-		size_t n = (bits * (slots - 1 - ((dev) * this->portsPerDevice + (port)))) / 8;
+		
+		size_t slots = 1 * this->ports;
+		size_t n2 = (bits * (slots - 1 - ((0) * this->ports + (port)))) / 8;
+		
+		//size_t slots = this->devices * this->ports;
+		size_t n = (bits * (this->ports - 1 - port)) / 8;
 		unsigned char bytes[2] = { 0, 0 };
 		if (port % 2 != 0)
 		{

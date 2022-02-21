@@ -36,6 +36,7 @@ using namespace ArduinoJson;
 
 #include "external/central-z21/Z21.h"
 #include "TLC5947_SignalDevice.h"
+#include "PN532_DetectorDevice.h"
 
 constexpr auto FRAME_SLEEP = 50;
 
@@ -62,6 +63,9 @@ private:
     void locoSend(winston::Address address);
 
     void initNetwork();
+
+    void setupSignals();
+    void setupDetectors();
 
     winston::DigitalCentralStation::Callbacks z21Callbacks();
 
@@ -107,4 +111,13 @@ private:
 
     /* Storage */
     Storage::Shared storageLayout;
+
+    /* Occupancy Detector Devices */
+#ifdef WINSTON_PLATFORM_TEENSY
+    
+#elif defined(WINSTON_PLATFORM_WIN_x64)
+    SerialDeviceWin::Shared serial;
+    PN532_DetectorDevice::Shared pn532;
+    std::array<winston::NFCDetector::Shared, 1> nfcDetectors;
+#endif
 };

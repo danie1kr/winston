@@ -155,26 +155,13 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
         return winston::State::Finished;
     };
 
-    callbacks.signalUpdateCallback = [=](winston::Track::Shared track, winston::Track::Connection connection, const winston::Signal::Aspects aspects) -> const winston::State
-    {
-#ifdef WINSTON_WITH_WEBSOCKET
-        // send to web socket server
-        signalSendState(track->name(), connection, aspects);
-#endif
-
-        // update physical light
-        this->signalDevice->update(track->signalGuarding(connection));
-        winston::logger.info("Signal at ", track->name(), "|", winston::Track::ConnectionToString(connection), " set to ", aspects);
-
-        return winston::State::Finished;
-    };
-
-    callbacks.dccDetectorCallback = [=](winston::Track::Shared track, const winston::Track::Connection connection, const winston::Distance distance, const winston::Address address)
+    callbacks.dccDetectorCallback = [=](winston::Detector::Shared, const winston::Address address) -> winston::Result
     {
         // not used here
+        return winston::Result::OK;
     };
 
-    callbacks.nfcDetectorCallback = [=](winston::Track::Shared track, const winston::Track::Connection connection, const winston::Distance distance, const winston::NFCAddress address)
+    callbacks.nfcDetectorCallback = [=](winston::Detector::Shared, const winston::NFCAddress address) -> winston::Result
     {
         auto now = winston::hal::now();
         /*
@@ -218,6 +205,7 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
                 return this->pos;
             }
         */
+        return winston::Result::OK;
     };
 
     return callbacks;
@@ -252,7 +240,7 @@ void Kornweinheim::writeSignal(WebServer::HTTPConnection& connection, const wins
             else
                 connection.body(winston::build("<tr><td>"));
             ++l;
-            connection.body(winston::build(l, icon, "</td><td>", light.port.device(), "</td><td>", light.port.port(), "</td></tr>"));
+            connection.body(winston::build(l, icon, "</td><td>", light.port, "</td><td>", light.port, "</td></tr>"));
         }
     }
 }
@@ -298,7 +286,7 @@ void Kornweinheim::on_http(WebServer::HTTPConnection& connection, const std::str
         connection.status(200);
         connection.header("content-type"_s, "text/html; charset=UTF-8"_s);
         connection.header("Connection"_s, "close"_s);
-        connection.body("<html><head>winston signal list</head><body><table border=1><tr><th>track</th><th>connection</th><th>light</th><th>device</th><th>port</th></tr>"_s);
+        connection.body("<html><head>winston signal list</head><body><table border=1><tr><th>track</th><th>connection</th><th>light</th><th>port</th></tr>"_s);
         for (unsigned int i = 0; i < railway->tracksCount(); ++i)
         {
             auto track = railway->track(i);
@@ -334,8 +322,7 @@ void Kornweinheim::writeAttachedSignal(JsonArray& signals, winston::Track::Share
         {
             auto light = lights.createNestedObject();
             light["aspect"] = (unsigned int)signalLight.aspect;
-            light["device"] = (unsigned int)signalLight.port.device();
-            light["port"] = (unsigned int)signalLight.port.port();
+            light["port"] = (unsigned int)signalLight.port;
         }
     }
 }
@@ -465,7 +452,7 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
                 blockTracks.add(track->name());
         }
 
-        for (auto& detector : this->railway->occupancyDetectors())
+        for (auto& detector : this->nfcDetectors)
         {
             auto d = detectors.createNestedObject();
             d["track"] = detector->trackName();
@@ -627,9 +614,9 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
         }*/
     }
 #ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
-    else if (op.find(std::string("\"emu_z21_inject\"")) == 0)
+    else if (op.find(std::string("\"emu_dcs_inject\"")) == 0)
     {
-        if (std::string("\"emu_z21_inject_occupied\"").compare(op) == 0)
+        if (std::string("\"emu_dcs_inject_detector\"").compare(op) == 0)
         {
             /*
             unsigned int block = (unsigned int)data["block"].toInt();
@@ -679,13 +666,142 @@ void Kornweinheim::systemSetup() {
 #endif
     this->signalInterfaceDevice->init();
     this->signalInterfaceDevice->skipSend(true);
-    this->signalDevice = TLC5947_SignalDevice::make(1, 24, this->signalInterfaceDevice, TLC5947Off);
+    this->signalDevice = TLC5947_SignalDevice::make(24, this->signalInterfaceDevice, TLC5947Off);
 
     // storage
     this->storageLayout = Storage::make(std::string(this->name()).append(".").append("winston.storage"));
     if (this->storageLayout->init() != winston::Result::OK)
         winston::logger.err("Kornweinheim.init: Storage Layout Init failed");
+
+    // detectors
+#ifdef WINSTON_PLATFORM_TEENSY
+
+#elif defined(WINSTON_PLATFORM_WIN_x64)
+    this->serial = SerialDeviceWin::make();
+    this->serial->init(5);
+#endif
 };
+
+
+void Kornweinheim::setupSignals()
+{
+    auto signalUpdateCallback = [=](winston::Track::Shared track, winston::Track::Connection connection, const winston::Signal::Aspects aspects) -> const winston::State
+    {
+#ifdef WINSTON_WITH_WEBSOCKET
+        // send to web socket server
+        signalSendState(track->name(), connection, aspects);
+#endif
+
+        // update physical light
+        this->signalDevice->update(track->signalGuarding(connection));
+        winston::logger.info("Signal at ", track->name(), "|", winston::Track::ConnectionToString(connection), " set to ", aspects);
+
+        return winston::State::Finished;
+};
+
+    // H
+    unsigned int port = 0;
+    this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::PBF1), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::PBF2), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::PBF3), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
+    /*this->railway->track(Y2021RailwayTracks::PBF1)->attachSignal(winston::SignalH::make([=](const winston::Signal::Aspects aspect)->const winston::State {
+        return signalUpdateCallback(track, connection, aspect);
+        }, 5U, port), winston::Track::Connection::B);
+    port += winston::SignalH::lightsCount();
+    this->railway->track(Y2021RailwayTracks::PBF2)->attachSignal(winston::SignalH::make(signalUpdateCallback, 5U, port), winston::Track::Connection::B);
+    port += winston::SignalH::lightsCount();
+    this->railway->track(Y2021RailwayTracks::PBF3)->attachSignal(winston::SignalH::make(signalUpdateCallback, 5U, port), winston::Track::Connection::B);
+    port += winston::SignalH::lightsCount();*/
+
+    // dummy
+    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::PBF1a), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::B3), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
+    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::B6), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
+    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::N1), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::N2), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF1), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF3a), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF3b), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF3b), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
+    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF2a), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF2b), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF2b), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
+
+    
+/*
+    this->railway->track(Y2021RailwayTracks::PBF1a)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::A);
+    this->railway->track(Y2021RailwayTracks::B3)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::B);
+    this->railway->track(Y2021RailwayTracks::B6)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::B);
+    this->railway->track(Y2021RailwayTracks::N1)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::A);
+    this->railway->track(Y2021RailwayTracks::N2)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::A);
+    this->railway->track(Y2021RailwayTracks::GBF1)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::A);
+    this->railway->track(Y2021RailwayTracks::GBF3a)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::A);
+    this->railway->track(Y2021RailwayTracks::GBF3b)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::A);
+    this->railway->track(Y2021RailwayTracks::GBF3b)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::B);
+    this->railway->track(Y2021RailwayTracks::GBF2a)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::A);
+    this->railway->track(Y2021RailwayTracks::GBF2b)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::A);
+    this->railway->track(Y2021RailwayTracks::GBF2b)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::B);
+*/
+}
+
+void Kornweinheim::setupDetectors()
+{
+    auto nfcDetectorCallback = [=](winston::Detector::Shared detector, const winston::NFCAddress address) -> winston::Result
+    {
+        auto now = winston::hal::now();
+        /*
+        this->signalBox->order(winston::Command::make([track, connection, distance, address, now](const winston::TimePoint &created) -> const winston::State
+            {
+                // actual work as we do not want to block the receiver
+                return winston::State::Finished;
+            }, __PRETTY_FUNCTION__));
+        */
+        /*
+            loco = fromNFCAddress(address)
+            is now at
+            at actual = track:connection - distance
+
+            // update calculated distance and report error
+            auto mismatch = updateLocoPos(loco) - acutal
+
+            updateLocoPos(loco)
+            {
+                auto previous = loco.position();
+                Duration timeOnTour = 0;
+                auto pos = loco.drive(timeOnTour);   // updates loco position
+
+                this->signalBox->order(winston::Command::make([=](const winston::TimePoint &created) -> const winston::State
+                {
+                    railway -> updateBlockOccupancy(previous, pos, timeOnTour, loco.trainLength() = 100);
+                    return winston::State::Finished;
+                }, __PRETTY_FUNCTION__));
+
+                this->signalBox->order(winston::Command::make([signalBox](const winston::TimePoint &created) -> const winston::State
+                {
+                    signalbox -> updateSignalsAccordingToBlocks();
+                    return winston::State::Finished;
+                }, __PRETTY_FUNCTION__));
+            }
+
+            loco.drive(Duration &timeOnTour)
+            {
+                timeOnTour = inMilliseconds(this->lastUpdate - winston::hal::now());
+                this->pos = this->pos + this->physicalSpeed() * timeOnTour;
+                return this->pos;
+            }
+        */
+        return winston::Result::OK;
+    };
+#ifdef WINSTON_PLATFORM_TEENSY
+
+#elif defined(WINSTON_PLATFORM_WIN_x64)
+    const auto pbf1 = this->railway->track(Y2021RailwayTracks::PBF1);
+    const auto B = winston::Track::Connection::B;
+    const auto R3 = winston::library::track::Roco::R3;
+    this->nfcDetectors[0] = winston::NFCDetector::make(nfcDetectorCallback, pbf1, B, 2 * R3);
+    this->pn532 = PN532_DetectorDevice::make(*this->nfcDetectors[0].get(), *this->serial.get());
+#endif
+}
 
 void Kornweinheim::systemSetupComplete()
 {

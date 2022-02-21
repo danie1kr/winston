@@ -42,8 +42,8 @@ public:
 	const size_t read(std::vector<DataType>& content, size_t upTo);
 
 	const winston::Result send(const std::vector<DataType> data);
-	using Shared_Ptr<SerialDevice>::Shared;
-	using Shared_Ptr<SerialDevice>::make;
+	using Shared_Ptr<SerialDeviceWin>::Shared;
+	using Shared_Ptr<SerialDeviceWin>::make;
 private:
 	HANDLE serialHandle;
 	COMMTIMEOUTS    timeouts;

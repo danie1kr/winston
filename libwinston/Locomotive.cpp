@@ -98,7 +98,7 @@ namespace winston
 		auto now = hal::now();
 		timeOnTour = this->details.lastPositionUpdate - now;
 		this->details.lastPositionUpdate = now;
-		this->details.position.drive(this->speedMap.speed(this->details.speed) * inMilliseconds(timeOnTour));
+		this->details.position.drive((Distance)(this->speedMap.speed(this->details.speed) * inMilliseconds(timeOnTour)));
 		return this->position();
 	}
 
@@ -141,7 +141,7 @@ namespace winston
 
 			// throttle == lower => 0 ==> lower
 			// throttle == upper => 1 ==> upper
-			float frac = (throttle - lower->first) / (upper->first - lower->first);
+			float frac = (float)(throttle - lower->first) / (float)(upper->first - lower->first);
 			
 			// linear
 			return this->lerp(lower->second, upper->second, frac);

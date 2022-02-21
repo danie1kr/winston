@@ -73,7 +73,7 @@ namespace winston
 			const SPIDataOrder order;
 		};
 
-		class SerialDevice : public Shared_Ptr<SerialDevice>, public ReadDevice<unsigned char>, public SendDevice<unsigned char>
+		class SerialDevice : public ReadDevice<unsigned char>, public SendDevice<unsigned char>, public Shared_Ptr<SerialDevice>
 		{
 		public:
 			enum class SerialDataBits {

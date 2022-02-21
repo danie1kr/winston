@@ -44,6 +44,7 @@ namespace winston
 					}, __PRETTY_FUNCTION__));
 			});
 
+			this->populateLocomotiveShed();
 			for(const auto &loco : this->locomotiveShed ) {
 
 				this->signalBox->order(winston::Command::make([this, loco](const TimePoint &created) -> const winston::State
@@ -54,13 +55,15 @@ namespace winston
 					}, __PRETTY_FUNCTION__));
 			}
 
+			this->setupSignals();
+			this->setupDetectors();
+
 			this->signalBox->order(winston::Command::make([](const TimePoint &created) -> const winston::State
 				{
 					logger.log("Init tasks complete");
 					return winston::State::Finished;
 				}, __PRETTY_FUNCTION__));
 
-			this->populateLocomotiveShed();
 			this->systemSetupComplete();
 		};
 
@@ -126,6 +129,9 @@ namespace winston
 		virtual bool systemLoop() = 0;
 		virtual void populateLocomotiveShed() = 0;
 
+		virtual void setupSignals() = 0;
+		virtual void setupDetectors() = 0;
+
 		void addLocomotive(const winston::Locomotive::Callbacks callbacks, const Address address, std::string name, const NFCAddress nfcAddress)
 		{
 			//auto loco = Locomotive();
@@ -141,6 +147,22 @@ namespace winston
 		Result storeLocomotives()
 		{
 			return winston::Result::OK;
+		}
+
+		//using SignalFactory = std::function < winston::Signal::Shared(winston::Track::Shared track, winston::Track::Connection connection)>;
+		template<class _Signal>
+		void signalFactory(winston::Track::Shared track, const winston::Track::Connection connection, winston::Distance distance, unsigned int& port, const winston::Railway::Callbacks::SignalUpdateCallback& signalUpdateCallback)
+		{
+			track->attachSignal(_Signal::make([track, connection, signalUpdateCallback](const winston::Signal::Aspects aspect)->const winston::State {
+				return signalUpdateCallback(track, connection, aspect);
+				}, distance, port), connection);
+			port += (unsigned int)_Signal::lightsCount();
+
+			/* TODO: ensure port does not overflow
+			return [distance, devPort, this](winston::Track::Shared track, winston::Track::Connection connection)->winston::Signal::Shared {
+				return _Signal::make([=](const winston::Signal::Aspects aspect)->const winston::State {
+					return this->callbacks.signalUpdateCallback(track, connection, aspect);
+					}, distance, devPort);9*/
 		}
 
 		// the railway

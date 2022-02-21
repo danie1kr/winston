@@ -39,7 +39,7 @@ namespace winston
 	{
 		return this->connectTo(local, nullptr, to, remote, nullptr);
 	}
-
+	/*
 	Track::Shared Track::connect(const Connection local, SignalFactory guardingLocalSignalFactory, Track::Shared& to, const Connection remote)
 	{
 		return this->connectTo(local, guardingLocalSignalFactory, to, remote, nullptr);
@@ -53,7 +53,7 @@ namespace winston
 	Track::Shared Track::connect(const Connection local, SignalFactory guardingLocalSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory)
 	{
 		return this->connectTo(local, guardingLocalSignalFactory, to, remote, guardingRemoteSignalFactory);
-	}
+	}*/
 
 	void Track::block(const Address address)
 	{

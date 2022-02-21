@@ -41,9 +41,9 @@ namespace winston
 		using SignalFactory = std::function<Signal::Shared(Track::Shared track, Track::Connection connection)>;
 
 		Track::Shared connect(const Connection local, Track::Shared& to, const Connection remote);
-		Track::Shared connect(const Connection local, SignalFactory guardingLocalSignalFactory, Track::Shared& to, const Connection remote);
-		Track::Shared connect(const Connection local, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory);
-		Track::Shared connect(const Connection local, SignalFactory guardingLocalSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory);
+		//Track::Shared connect(const Connection local, SignalFactory guardingLocalSignalFactory, Track::Shared& to, const Connection remote);
+		//Track::Shared connect(const Connection local, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory);
+		//Track::Shared connect(const Connection local, SignalFactory guardingLocalSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory);
 		virtual bool has(const Connection connection) const = 0;
 		virtual Track::Shared on(const Connection connection) const = 0;
 		

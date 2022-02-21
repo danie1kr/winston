@@ -317,8 +317,12 @@ BETTER_ENUM(Y2021RailwayTracks, unsigned int,
     N2,
     B1, B2, B3, B4, B5, B6
 );
+enum class Y2021RailwayDetectors : unsigned int
+{
+    B1, B4, B3, B6, B2_Speedtrap_A, B2_Speedtrap_B, PBF1
+};
 
-class Y2021Railway : public winston::RailwayWithRails<Y2021RailwayTracks>, winston::Shared_Ptr<Y2021Railway>
+class Y2021Railway : public winston::RailwayWithRails<Y2021RailwayTracks>/*, public winston::RailwayWithDetector<Y2021RailwayDetectors>*/, public winston::Shared_Ptr<Y2021Railway>
 {
     /*
      //====Turnout11======================B2===============\\

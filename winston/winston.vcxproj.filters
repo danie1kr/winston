@@ -45,7 +45,7 @@
     <ClCompile Include="FT232_Device.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PN532_OccupancyDevice.cpp">
+    <ClCompile Include="PN532_DetectorDevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -92,7 +92,7 @@
     <ClInclude Include="Kornweinheim.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PN532_OccupancyDevice.h">
+    <ClInclude Include="PN532_DetectorDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

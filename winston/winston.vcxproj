@@ -127,7 +127,7 @@
     <ClCompile Include="external\central-z21\Z21Packet.cpp" />
     <ClCompile Include="FT232_Device.cpp" />
     <ClInclude Include="Kornweinheim.hpp" />
-    <ClCompile Include="PN532_OccupancyDevice.cpp" />
+    <ClCompile Include="PN532_DetectorDevice.cpp" />
     <ClCompile Include="railways.cpp" />
     <ClCompile Include="winston-hal-x64.cpp" />
     <ClCompile Include="winston-main.cpp" />
@@ -147,7 +147,7 @@
     <ClInclude Include="FT232_Device.h" />
     <ClInclude Include="Kornweinheim.h" />
     <ClInclude Include="mio.hpp" />
-    <ClInclude Include="PN532_OccupancyDevice.h" />
+    <ClInclude Include="PN532_DetectorDevice.h" />
     <ClInclude Include="railways.h" />
     <ClInclude Include="TLC5947_SignalDevice.h" />
     <ClInclude Include="winston-hal-x64.h" />

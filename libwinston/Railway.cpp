@@ -27,7 +27,7 @@ namespace winston
 	{
 		return this->_blocks;
 	}
-
+	/*
 	Railway::SignalFactory Railway::KS_dummy(const Length distance, const Port port)
 	{
 		winston::logger.warn("warn: KS_dummy signal on HW 0#21-23");
@@ -41,5 +41,5 @@ namespace winston
 	Railway::SignalFactory Railway::H(const Length distance, size_t& device, size_t& port)
 	{
 		return S<SignalH>(distance, device, port);
-	}
+	}*/
 }

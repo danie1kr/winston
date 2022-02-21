@@ -63,6 +63,7 @@ namespace winston
 		return static_cast<bool>(static_cast<int>(a) & static_cast<int>(b));
 	}
 
+	/*
 	class Port
 	{
 	public:
@@ -74,7 +75,8 @@ namespace winston
 	private:
 		const size_t _device;
 		const size_t _port;
-	};
+	};*/
+	using Port = unsigned int;
 
 	template<class _T>
 	class Shared_Ptr

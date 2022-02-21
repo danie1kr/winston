@@ -39,14 +39,14 @@ namespace winstontests
         TEST_METHOD(DevInit)
         {
 			Test_SendDevice<unsigned char>::Shared sendDevice = Test_SendDevice<unsigned char>::make();
-			TLC5947_SignalDevice::Shared signalDevice = TLC5947_SignalDevice::make(1, 24, sendDevice, sendDevice);
+			TLC5947_SignalDevice::Shared signalDevice = TLC5947_SignalDevice::make(24, sendDevice, sendDevice);
         }
 		TEST_METHOD(SignalUpdatePort_0_0)
 		{
 			Test_SendDevice<unsigned char>::Shared sendDevice = Test_SendDevice<unsigned char>::make();
-			TLC5947_SignalDevice::Shared signalDevice = TLC5947_SignalDevice::make(1, 24, sendDevice, sendDevice);
+			TLC5947_SignalDevice::Shared signalDevice = TLC5947_SignalDevice::make(24, sendDevice, sendDevice);
 
-			winston::Port port(0, 0);
+			winston::Port port{ 0 };
 			winston::Signal::Shared signal = winston::SignalKS::make([](const winston::Signal::Aspects aspect) -> const winston::State { return winston::State::Finished; }, 0, port);
 			{
 				signal->aspect(winston::Signal::Aspect::Halt);

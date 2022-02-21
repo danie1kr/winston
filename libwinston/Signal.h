@@ -185,9 +185,9 @@ namespace winston
 	class SignalInstance : public Signal, public Shared_Ptr<SignalInstance<_Aspects>>
 	{
 	public:
-		SignalInstance(const Callback callback = Signal::defaultCallback(), const Length distance = 0, const Port port = Port())
+		SignalInstance(const Callback callback = Signal::defaultCallback(), const Length distance = 0, const Port port = 0)
 			: Signal(callback, distance)
-			, _lights(Sequence<BitCounter<_Aspects>::count() - 1>::generate(_Aspects, port.device(), port.port())) {
+			, _lights(Sequence<BitCounter<_Aspects>::count() - 1>::generate(_Aspects, port)) {
 		};
 
 		const bool supports(const Aspect aspect, const bool any) const
@@ -224,21 +224,21 @@ namespace winston
 
 	private:
 		typedef std::array<Light, BitCounter<_Aspects>::count()> LightsArray;
-		template<int... i> static constexpr LightsArray makeLightInSequence(const Signal::Aspects aspects,  const size_t device, const size_t startPort)
+		template<int... i> static constexpr LightsArray makeLightInSequence(const Signal::Aspects aspects, const unsigned int startPort)
 		{ 
-			return LightsArray{ { Signal::Light::make(Port(device, startPort + i), (Signal::Aspect)nThSetBit<i+1, sizeof(Signal::Aspect) * 8 - 1>::extract(aspects))...}};
+			return LightsArray{ { Signal::Light::make(startPort + i, (Signal::Aspect)nThSetBit<i+1, sizeof(Signal::Aspect) * 8 - 1>::extract(aspects))...}};
 		}
 		template<int...> class Sequence;
 		template<int... i> class Sequence<0, i...>
 		{
 		public:
-			static constexpr LightsArray generate(const Signal::Aspects aspects, const size_t device, const size_t startPort) { return makeLightInSequence<0, i...>(aspects, device, startPort); }
+			static constexpr LightsArray generate(const Signal::Aspects aspects, const unsigned int startPort) { return makeLightInSequence<0, i...>(aspects, startPort); }
 		};
 
 		template<int i, int... j> class Sequence<i, j...>
 		{
 		public:
-			static constexpr LightsArray generate(const Signal::Aspects aspects,  const size_t device, const size_t startPort) { return Sequence<i - 1, i, j...>::generate(aspects, device, startPort); }
+			static constexpr LightsArray generate(const Signal::Aspects aspects, const unsigned int startPort) { return Sequence<i - 1, i, j...>::generate(aspects, startPort); }
 		};
 
 		LightsArray _lights;
@@ -267,8 +267,8 @@ namespace winston
 	{
 		//static_assert(bits <= sizeof(T) * 8, "too many bits for T");
 	public:
-		SignalDevice(const size_t devices, const size_t portsPerDevice, typename SendDevice<T>::Shared device)
-			: device(device), devices(devices), portsPerDevice(portsPerDevice)
+		SignalDevice(const size_t ports, typename SendDevice<T>::Shared device)
+			: device(device), ports(ports)
 		{
 
 		}
@@ -306,8 +306,7 @@ namespace winston
 		virtual const Result updateInternal(winston::Signal::Shared signal) = 0;
 		virtual const Result flushInternal() = 0;
 		typename SendDevice<T>::Shared device;
-		size_t devices;
-		size_t portsPerDevice;
+		size_t ports;
 	private:
 		TimePoint lastFlush;
 		TimePoint lastUpdate;

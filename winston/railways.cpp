@@ -4,8 +4,8 @@
 #include "railways.h"
 #include "../libwinston/better_enum.hpp"
 
-#define BUMPER(track) case Tracks::_enumerated::track: return winston::Bumper::make(#track); 
-#define RAIL(track) case Tracks::_enumerated::track: return winston::Rail::make(#track); 
+#define BUMPER(track, ...) case Tracks::_enumerated::track: return winston::Bumper::make(#track, __VA_ARGS__); 
+#define RAIL(track, ...) case Tracks::_enumerated::track: return winston::Rail::make(#track, __VA_ARGS__); 
 #define TURNOUT(track, callback, ...) case Tracks::_enumerated::track: return winston::Turnout::make(#track, callback, __VA_ARGS__); 
 
 #ifndef WINSTON_PLATFORM_TEENSY
@@ -476,49 +476,48 @@ const winston::Address Y2021Railway::AddressTranslator::address(winston::Track::
 
 winston::Track::Shared Y2021Railway::define(const Tracks track)
 {
+    using namespace winston::library::track;
+    auto turnoutCallback = [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::static_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); };
     switch (track)
     {
-        BUMPER(N1);
-        BUMPER(N2);
-        BUMPER(GBF1);
-        BUMPER(GBF2a);
-        BUMPER(GBF3a);
-        BUMPER(PBF1a);
-        RAIL(PBF1);
-        RAIL(PBF2);
-        RAIL(PBF2a);
-        RAIL(PBF3);
-        RAIL(GBF2b);
-        RAIL(GBF3b);
-        RAIL(B1);
-        RAIL(B2);
-        RAIL(B3);
-        RAIL(B4);
-        RAIL(B5);
-        RAIL(B6);
-    case Tracks::Turnout1:
-    case Tracks::Turnout3:
-    case Tracks::Turnout7:
-    case Tracks::Turnout9:
-    case Tracks::Turnout12:
-    case Tracks::Turnout14:
-        return winston::Turnout::make(std::string(track._to_string()), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::static_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, false);
-    case Tracks::Turnout2:
-    case Tracks::Turnout4:
-    case Tracks::Turnout5:
-    case Tracks::Turnout6:
-    case Tracks::Turnout8:
-    case Tracks::Turnout10:
-    case Tracks::Turnout11:
-    case Tracks::Turnout13:
-    case Tracks::Turnout15:
-    case Tracks::Turnout16:
-        return winston::Turnout::make(std::string(track._to_string()), [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::static_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); }, true);
+        BUMPER(N1, Roco::R2 + Roco::G12 + Roco::R3 + Roco::R10 + Roco::G12 + 2 * Roco::G1);
+        BUMPER(N2, 2 * Roco::G12 + Roco::R2 + Roco::G1);
+        BUMPER(GBF1, 4 * Roco::G12 + Roco::R10 + Roco::G1);
+        BUMPER(GBF2a, 2 * Roco::G1);
+        BUMPER(GBF3a, Roco::G1);
+        BUMPER(PBF1a, 3 * Roco::G1);
+        RAIL(PBF1, Roco::G4 + 2 * Roco::R3);
+        RAIL(PBF2, Roco::G1 + Roco::G4 + Roco::G12 + Roco::G14 + 2 * Roco::R2);
+        RAIL(PBF2a, Roco::R3);
+        RAIL(PBF3, Roco::G1 + Roco::G4 + Roco::G12 + Roco::R2);
+        RAIL(GBF2b, Roco::G1 + Roco::G14);
+        RAIL(GBF3b, 3 * Roco::G1 + Roco::G4);
+        RAIL(B1, Roco::G12 + Roco::R2);
+        RAIL(B2, Roco::G12 + Roco::G1 + Roco::G4 + Roco::R3);
+        RAIL(B3, 4 * Roco::R3 + Roco::G14);
+        RAIL(B4, Roco::G12 + 4 * Roco::R2);
+        RAIL(B5, Roco::G12 + 3 * Roco::G1);
+        RAIL(B6, Roco::G1 + 5 * Roco::R2 + Roco::G14);
+        TURNOUT(Turnout1, turnoutCallback, Roco::BW23, false);
+        TURNOUT(Turnout3, turnoutCallback, Roco::W15, false);
+        TURNOUT(Turnout7, turnoutCallback, Roco::BW23, false);
+        TURNOUT(Turnout9, turnoutCallback, Roco::W15, false);
+        TURNOUT(Turnout12, turnoutCallback, Roco::W15, false);
+        TURNOUT(Turnout14, turnoutCallback, Roco::W15, false);
+        TURNOUT(Turnout2, turnoutCallback, Roco::BW23, true);
+        TURNOUT(Turnout4, turnoutCallback, Roco::W15, true);
+        TURNOUT(Turnout5, turnoutCallback, Roco::W15, true);
+        TURNOUT(Turnout6, turnoutCallback, Roco::BW23, true);
+        TURNOUT(Turnout8, turnoutCallback, Roco::BW23, true);
+        TURNOUT(Turnout10, turnoutCallback, Roco::W15, true);
+        TURNOUT(Turnout11, turnoutCallback, Roco::W15, true);
+        TURNOUT(Turnout13, turnoutCallback, Roco::W15, true);
+        TURNOUT(Turnout15, turnoutCallback, Roco::W15, true);
+        TURNOUT(Turnout16, turnoutCallback, Roco::W15, true);
     default:
         winston::hal::fatal(std::string("track ") + std::string(track._to_string()) + std::string("not in switch"));
         return winston::Bumper::make();
     }
-
 }
 
 void Y2021Railway::connect()

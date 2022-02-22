@@ -452,11 +452,12 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
                 blockTracks.add(track->name());
         }
 
-        for (auto& detector : this->nfcDetectors)
+        for(size_t detector = 0; detector < this->nfcDetectors.size(); ++detector)
         {
             auto d = detectors.createNestedObject();
-            d["track"] = detector->trackName();
-            d["connection"] = winston::Track::ConnectionToString(detector->connection());
+            d["id"] = detector;
+            d["track"] = this->nfcDetectors[detector]->position().trackName();
+            d["connection"] = winston::Track::ConnectionToString(this->nfcDetectors[detector]->position().connection());
         }
 
         std::string railwayContentJson("");
@@ -614,16 +615,21 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
         }*/
     }
 #ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
-    else if (op.find(std::string("\"emu_dcs_inject\"")) == 0)
+    else if (std::string("\"emu_dcs_inject_detector\"").compare(op) == 0)
     {
-        if (std::string("\"emu_dcs_inject_detector\"").compare(op) == 0)
-        {
-            /*
-            unsigned int block = (unsigned int)data["block"].toInt();
-            unsigned int loco = (unsigned int)data["loco"].toInt();
-            // this->stationDebugInjector->injectBlockUpdate(block, loco);
-            */
-        }
+        unsigned int id = data["id"];
+        winston::Address address = data["address"];
+
+        auto loco = this->locoFromAddress(address);
+        if (loco)
+            this->detectorUpdate(this->nfcDetectors[id], *loco);
+        else
+            winston::logger.err(winston::build("error: locomotive ", address, " not in shed"));
+        /*
+        unsigned int block = (unsigned int)data["block"].toInt();
+        unsigned int loco = (unsigned int)data["loco"].toInt();
+        // this->stationDebugInjector->injectBlockUpdate(block, loco);
+        */
     }
 #endif
     else
@@ -744,62 +750,107 @@ void Kornweinheim::setupSignals()
 */
 }
 
+winston::Result Kornweinheim::detectorUpdate(winston::Detector::Shared detector, winston::Locomotive& loco)
+{
+    // theoretical delays:
+    /*
+    	speed					
+	km/h	    25	     60	     80	    120	    160
+	m/s	         6,94	 16,67	 22,22	 33,33	 44,44
+	m/s @ 1:87	 0,08	  0,19	  0,26	  0,38	  0,51
+	mm/s	    79,82	191,57	255,43	383,14	510,86
+d	1	         0,08	  0,19	  0,26	  0,38	  0,51
+e	2	         0,16	  0,38	  0,51	  0,77	  1,02
+l	4	         0,32	  0,77	  1,02	  1,53	  2,04
+a	8	         0,64	  1,53	  2,04	  3,07	  4,09
+y	16	         1,28	  3,07	  4,09	  6,13	  8,17
+ms	32	         2,55	  6,13	  8,17	 12,26	 16,35
+    speed in mm/s * delay in ms / 1000 = overshoot
+    */
+    auto now = winston::hal::now(); // - offset (=2 ms Card->IC, +1ms IC->Teensy, +5ms Teensy->Teensy == 8ms <=> 2.04mm @ scaled 0.255 m/s @ 22.2m/s = 80 km/h
+    // actual work as we do not want to block the receiver
+    this->signalBox->order(winston::Command::make([detector, loco, now](const winston::TimePoint& created) -> const winston::State
+        {
+            // loco is now at
+            auto current = detector->position();
+           // auto deviation = loco.drive() - current;
+
+
+            return winston::State::Finished;
+        }, __PRETTY_FUNCTION__));
+    /*
+        loco = fromNFCAddress(address)
+        is now at
+        at actual = track:connection - distance
+
+        // update calculated distance and report error
+        auto mismatch = updateLocoPos(loco) - acutal
+
+        updateLocoPos(loco)
+        {
+            auto previous = loco.position();
+            Duration timeOnTour = 0;
+            auto pos = loco.drive(timeOnTour);   // updates loco position
+
+            this->signalBox->order(winston::Command::make([=](const winston::TimePoint &created) -> const winston::State
+            {
+                railway -> updateBlockOccupancy(previous, pos, timeOnTour, loco.trainLength() = 100);
+                return winston::State::Finished;
+            }, __PRETTY_FUNCTION__));
+
+            this->signalBox->order(winston::Command::make([signalBox](const winston::TimePoint &created) -> const winston::State
+            {
+                signalbox -> updateSignalsAccordingToBlocks();
+                return winston::State::Finished;
+            }, __PRETTY_FUNCTION__));
+        }
+
+        loco.drive(Duration &timeOnTour)
+        {
+            timeOnTour = inMilliseconds(this->lastUpdate - winston::hal::now());
+            this->pos = this->pos + this->physicalSpeed() * timeOnTour;
+            return this->pos;
+        }
+    */
+    return winston::Result::OK;
+}
+
 void Kornweinheim::setupDetectors()
 {
     auto nfcDetectorCallback = [=](winston::Detector::Shared detector, const winston::NFCAddress address) -> winston::Result
     {
-        auto now = winston::hal::now();
-        /*
-        this->signalBox->order(winston::Command::make([track, connection, distance, address, now](const winston::TimePoint &created) -> const winston::State
-            {
-                // actual work as we do not want to block the receiver
-                return winston::State::Finished;
-            }, __PRETTY_FUNCTION__));
-        */
-        /*
-            loco = fromNFCAddress(address)
-            is now at
-            at actual = track:connection - distance
-
-            // update calculated distance and report error
-            auto mismatch = updateLocoPos(loco) - acutal
-
-            updateLocoPos(loco)
-            {
-                auto previous = loco.position();
-                Duration timeOnTour = 0;
-                auto pos = loco.drive(timeOnTour);   // updates loco position
-
-                this->signalBox->order(winston::Command::make([=](const winston::TimePoint &created) -> const winston::State
-                {
-                    railway -> updateBlockOccupancy(previous, pos, timeOnTour, loco.trainLength() = 100);
-                    return winston::State::Finished;
-                }, __PRETTY_FUNCTION__));
-
-                this->signalBox->order(winston::Command::make([signalBox](const winston::TimePoint &created) -> const winston::State
-                {
-                    signalbox -> updateSignalsAccordingToBlocks();
-                    return winston::State::Finished;
-                }, __PRETTY_FUNCTION__));
-            }
-
-            loco.drive(Duration &timeOnTour)
-            {
-                timeOnTour = inMilliseconds(this->lastUpdate - winston::hal::now());
-                this->pos = this->pos + this->physicalSpeed() * timeOnTour;
-                return this->pos;
-            }
-        */
-        return winston::Result::OK;
+        auto loco = this->locoFromAddress(address);
+        if (loco)
+            return this->detectorUpdate(detector, *loco);
+        else
+            return winston::Result::NotFound;
     };
 #ifdef WINSTON_PLATFORM_TEENSY
 
 #elif defined(WINSTON_PLATFORM_WIN_x64)
+    /*
     const auto pbf1 = this->railway->track(Y2021RailwayTracks::PBF1);
     const auto B = winston::Track::Connection::B;
     const auto R3 = winston::library::track::Roco::R3;
     this->nfcDetectors[0] = winston::NFCDetector::make(nfcDetectorCallback, pbf1, B, 2 * R3);
-    this->pn532 = PN532_DetectorDevice::make(*this->nfcDetectors[0].get(), *this->serial.get());
+    this->pn532 = PN532_DetectorDevice::make(*this->nfcDetectors[0].get(), *this->serial.get());*/
+    size_t i = 0;
+    // teensy 1
+    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::B3), winston::Track::Connection::B, 0);
+    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::B6), winston::Track::Connection::B, 0);
+    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::PBF1a), winston::Track::Connection::A, 0);
+    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::N1), winston::Track::Connection::A, 0);
+    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::GBF1), winston::Track::Connection::A, 0);
+    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::GBF2b), winston::Track::Connection::A, 0);
+    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::GBF3b), winston::Track::Connection::A, 0);
+
+    // teensy2
+    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::B1), winston::Track::Connection::A, 0);
+    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::B4), winston::Track::Connection::A, 0);
+    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::B2), winston::Track::Connection::A, 0);
+    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::B2), winston::Track::Connection::B, 0);
+    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::B5), winston::Track::Connection::B, 0);
+    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::N2), winston::Track::Connection::A, 0);
 #endif
 }
 

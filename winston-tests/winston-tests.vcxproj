@@ -125,6 +125,7 @@
     <ClCompile Include="..\winston\FT232_Device.cpp" />
     <ClCompile Include="..\winston\railways.cpp" />
     <ClCompile Include="..\winston\winston-hal-x64.cpp" />
+    <ClCompile Include="winston-tests-detector.cpp" />
     <ClCompile Include="winston-tests-mini.cpp" />
     <ClCompile Include="winston-tests-signal.cpp" />
     <ClCompile Include="winston-tests-signaldevice.cpp" />

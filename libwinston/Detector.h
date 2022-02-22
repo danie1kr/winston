@@ -2,6 +2,7 @@
 
 #include "WinstonTypes.h"
 #include "Track.h"
+#include "Position.h"
 
 namespace winston
 {
@@ -9,16 +10,9 @@ namespace winston
 	{
 	public:
 		Detector(Track::Shared track, const Track::Connection connection, const Distance distance);
-		const std::string trackName() const;
-		const Track::Connection connection() const;
-		const Distance distance() const;
+		const Position &position() const;
 	protected:
-		struct Details
-		{
-			Track::Shared track;
-			const Track::Connection connection;
-			const Distance distance;
-		} details;
+		const Position pos;
 	};
 
 	template<typename T>

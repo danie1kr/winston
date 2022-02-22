@@ -1,4 +1,5 @@
 #include "Winston.h"
+#include "WinstonTypes.h"
 #include "Log.h"
 #include "HAL.h"
 

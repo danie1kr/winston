@@ -125,6 +125,7 @@
     <ClInclude Include="Log.h" />
     <ClInclude Include="ModelRailwaySystem.h" />
     <ClInclude Include="optional.hpp" />
+    <ClInclude Include="Position.h" />
     <ClInclude Include="Route.h" />
     <ClInclude Include="span.hpp" />
     <ClInclude Include="Track.h" />
@@ -146,6 +147,7 @@
     <ClCompile Include="HAL.cpp" />
     <ClCompile Include="Library.cpp" />
     <ClCompile Include="Locomotive.cpp" />
+    <ClCompile Include="Position.cpp" />
     <ClCompile Include="Railway.cpp" />
     <ClCompile Include="Route.cpp" />
     <ClCompile Include="Signal.cpp" />

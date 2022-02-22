@@ -23,6 +23,7 @@ namespace winston
 			const Length Roco::G1 = 2300;
 			const Length Roco::G12 = G1 / 2;
 			const Length Roco::G14 = G1 / 4;
+			const Length Roco::G4 = G1 * 4;
 
 			const Length Roco::DG1 = 1190;
 			const Length Roco::D5 = 50;

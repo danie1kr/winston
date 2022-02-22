@@ -21,7 +21,7 @@ namespace winston
 	{
 	public:
 
-		Track(std::string name, Length tracklength = 0);
+		Track(std::string name, Length tracklength);
 
 		enum class Connection : unsigned int
 		{
@@ -162,7 +162,7 @@ namespace winston
 	class Bumper : public Track, public Shared_Ptr<Bumper>, public std::enable_shared_from_this<Bumper>
 	{
 	public:
-		Bumper(const std::string name = "");
+		Bumper(const std::string name = "", Length tracklength = 0);
 		//static Track::Shared make();
 
 		bool has(const Connection connection) const;
@@ -195,7 +195,7 @@ namespace winston
 	class Rail : public Track, public Shared_Ptr<Rail>, public std::enable_shared_from_this<Rail>
 	{
 	public:
-		Rail(const std::string name = "");
+		Rail(const std::string name = "", Length tracklength = 0);
 
 		bool has(const Connection connection) const;
 		Track::Shared on(const Connection connection) const;

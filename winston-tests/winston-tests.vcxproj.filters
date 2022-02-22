@@ -39,6 +39,9 @@
     <ClCompile Include="..\winston\FT232_Device.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="winston-tests-detector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\winston\winston-hal-x64.h">

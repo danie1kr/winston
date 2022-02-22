@@ -98,6 +98,7 @@ private:
 
     void populateLocomotiveShed();
 
+    winston::Result detectorUpdate(winston::Detector::Shared detector, winston::Locomotive &loco);
 
     /* z21 */
     UDPSocket::Shared z21Socket;
@@ -118,6 +119,6 @@ private:
 #elif defined(WINSTON_PLATFORM_WIN_x64)
     SerialDeviceWin::Shared serial;
     PN532_DetectorDevice::Shared pn532;
-    std::array<winston::NFCDetector::Shared, 1> nfcDetectors;
+    std::array<winston::NFCDetector::Shared, 13> nfcDetectors;
 #endif
 };

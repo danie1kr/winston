@@ -110,8 +110,8 @@ namespace winston
 		return this->_name;
 	}
 
-	Bumper::Bumper(const std::string name)
-		: Track(name), Shared_Ptr<Bumper>(), a()
+	Bumper::Bumper(const std::string name, Length tracklength)
+		: Track(name, tracklength), Shared_Ptr<Bumper>(), a()
 	{
 
 	}
@@ -232,8 +232,8 @@ namespace winston
 		onC = c;
 	}
 
-	Rail::Rail(const std::string name)
-		: Track(name), Shared_Ptr<Rail>(), a(), b()
+	Rail::Rail(const std::string name, Length tracklength)
+		: Track(name, tracklength), Shared_Ptr<Rail>(), a(), b()
 	{
 
 	}
@@ -371,13 +371,13 @@ namespace winston
 	}
 
 	Turnout::Turnout(const std::string name, const Callback callback, const bool leftTurnout)
-		: Track(name), Shared_Ptr<Turnout>(), callback(callback), trackLengthCalculator(nullptr), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c()
+		: Track(name, 0), Shared_Ptr<Turnout>(), callback(callback), trackLengthCalculator(nullptr), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c()
 	{
 
 	}
 
 	Turnout::Turnout(const std::string name, const Callback callback, const TrackLengthCalculator trackLengthCalculator, const bool leftTurnout)
-		: Track(name), Shared_Ptr<Turnout>(), callback(callback), trackLengthCalculator(trackLengthCalculator), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c()
+		: Track(name, 0), Shared_Ptr<Turnout>(), callback(callback), trackLengthCalculator(trackLengthCalculator), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c()
 	{
 
 	}

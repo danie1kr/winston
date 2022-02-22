@@ -5,47 +5,6 @@
 
 namespace winston
 {
-	Position::Position(Track::Shared track, const Track::Connection reference, const Distance distance)
-		: track(track), reference(reference), distance(distance)
-	{
-
-	}
-
-	Position::Transit Position::drive(const Distance distance)
-	{
-		this->distance += distance;
-		auto block = this->track->block();
-		if (this->distance >= 0 && this->distance <= (int)this->track->length())
-			return Transit::Stay;
-		else
-		{
-			// negative = leave at reference, else other direction connection
-			auto connection = this->distance < 0 ? this->reference : this->track->otherConnection(this->reference);
-			this->distance = this->distance < 0 ? -this->distance : this->distance;
-			auto current = this->track;
-			while (true)
-			{
-				auto onto = current;
-				if (!track->traverse(connection, onto, true))
-				{
-					logger.err(build("cannot traverse during Position::drive: ", current->name(), " leaving on ", Track::ConnectionToString(connection)));
-					return Transit::TraversalError;
-				}
-
-				if (this->distance < (int)onto->length())
-					break;
-				else
-					this->distance -= onto->length();
-
-				connection = onto->whereConnects(current);
-				connection = onto->otherConnection(connection);
-				current = onto;
-			}
-			this->track = current;
-			return this->track->block() == block ? Transit::CrossTrack : Transit::CrossBlock;
-		}
-	}
-
 	Locomotive::Locomotive(const Callbacks callbacks, const Address address, const Position start, const std::string name, const NFCAddress nfcAddress) :
 		callbacks(callbacks), details{ address, nfcAddress, start, hal::now(), name, false, true, 0, 0 }, speedMap()
 	{

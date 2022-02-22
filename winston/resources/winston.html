@@ -125,7 +125,7 @@
 
 
     <script type="text/template" id="template_detector_debug_loco">
-        <option name="<%= id %>" value="<%= id %>"><%= name %></option>
+        <option value="<%= id %>"><%= name %></option>
     </script>
 
 </head>
@@ -203,7 +203,14 @@
                     <div>Grid <label>hide <input id="gridView" type="checkbox"><span class="lever"></span>show</label></div>
                     <div>Layout <label>fixed <input id="layoutEdit" type="checkbox"><span class="lever"></span>edit</label></div>
                     <div>Blocks <label>view <input id="blockView" type="checkbox"><span class="lever"></span>off</label></div>
-                    <div>Detector Debug <label>on <input id="detectorDebug" type="checkbox"><span class="lever"></span>off</label> <select id="detectorDebugLoco"></select></div>
+                    <div>Detector Debug <label>on <input id="detectorDebug" type="checkbox"><span class="lever"></span>off</label> 
+                            <div class="input-field col s12">
+                                <select id="detectorDebugLoco">
+                                    <option value="" disabled selected>Choose a locomotive</option>
+                                </select>
+                                    <label>Detector </label>
+                            </div>
+                    </div>
                     <a id="saveLayout" class="waves-effect waves-light btn-small">Save Layout</a>
                     <a id="resetLayout" class="waves-effect waves-light btn-small">Reset Layout</a>
                 </div>
@@ -335,6 +342,7 @@
                 let locoTemplate = _.template($("#template_detector_debug_loco").html());
                 $element = $(locoTemplate({ id: address, name: data.name }));
                 $detectorDebugLocoSelect.append($element);
+                M.FormSelect.init(document.querySelectorAll('select'));
             }
 
             $element.find(".speed").val(data.forward ? data.speed : -data.speed);
@@ -411,7 +419,7 @@
             let colorClass = aspects & 0b00100 ? "green" : "red";
 
             let signal = cy.nodes(".signal[id=\"" + track + "_signal_" + guarding + "\"]").removeClass("green").removeClass("red").addClass(colorClass);
-            console.log(aspects);
+            //console.log(aspects);
             //turnoutUpdate(turnout);
         }
 
@@ -480,10 +488,10 @@
                 .show();
         }
 
-        function sendInjectDetector(locoAddress, detectorId) {
+        function sendInjectDetector(locoAddress, id) {
             if (!allowWinstonSubmit())
                 return;
-            send("emu_dcs_inject_detector", { loco: locoAddress, detector: detectorId });
+            send("emu_dcs_inject_detector", { loco: locoAddress, id: id });
         }
 
         function detectorClick(event) {
@@ -491,7 +499,7 @@
             if ($("#detectorDebug").prop("checked")) {
                 let loco = $("#detectorDebugLoco").val();
                 let node = event.target;
-
+                sendInjectDetector(loco, node.data("detectorId"));
             }
             else {
                 hideContextMenus();
@@ -976,6 +984,7 @@
             cy.$("node.detector").addClass("unverified");
 
             _.each(detectors, function (detector, i) {
+                let id = detector.id;
                 let track = detector.track;
                 let connection = detector.connection;
 
@@ -986,7 +995,7 @@
                     existing.removeClass("unverified");
                 }
                 else {
-                    nodes.push({ group: 'nodes', data: { id: track + "_detector_" + connection, connection: connection, parentTrack: track, relativePosition: { x: 20, y: 0 } }, position: { x: parentPosition.x + 20, y: parentPosition.y }, classes: "detector" });
+                    nodes.push({ group: 'nodes', data: { detectorId: id, id: track + "_detector_" + connection, connection: connection, parentTrack: track, relativePosition: { x: 20, y: 0 } }, position: { x: parentPosition.x + 20, y: parentPosition.y }, classes: "detector" });
                     edges.push({ group: 'edges', data: { source: track + "_detector_" + connection, target: track + "_" + connection }, classes: "detector" });
                 }
             });
@@ -1378,6 +1387,8 @@
             M.Sidenav.init($('#sideTurnout').get(0), { edge: "left" }).open();
 
             M.AutoInit();
+            //$('select').material_select();
+            M.FormSelect.init(document.querySelectorAll('select'));
 
             //$("#sideLoco").get(0).sidenav();
 

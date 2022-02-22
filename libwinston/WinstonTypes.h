@@ -49,8 +49,9 @@ namespace winston
 
 	enum class Features : unsigned int
 	{
-		None = 0,
-		Blocks = 1
+		None =		0b00,
+		Blocks =	0b01,
+		Detectors = 0b10
 	};
 
 	inline Features operator|(Features a, Features b)

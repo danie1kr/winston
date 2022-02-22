@@ -2,32 +2,11 @@
 
 #include <map>
 #include "WinstonTypes.h"
+#include "Position.h"
 #include "Track.h"
 
 namespace winston
 {
-	class Position
-	{
-	public:
-		enum class Transit
-		{
-			Stay		= 0,
-			CrossTrack	= 1,
-			CrossBlock	= 2,
-			TraversalError = 3
-		};
-
-		Position(Track::Shared track, const Track::Connection reference, const Distance distance);
-		Transit drive(const Distance distance);
-	private:
-		// the track we are on
-		Track::Shared track;
-
-		// the connection we use as reference for the distance
-		Track::Connection reference;
-		Distance distance;
-	};
-
 	// https://www.wolframalpha.com/input/?i=solve+s+%3D+%28v1%C2%B2-v0%C2%B2%29%2F2a+%2B+v1%28T+-+%28v1-v0%29%2Fa%29+for+a
 	class Locomotive : public Shared_Ptr<Locomotive>
 	{

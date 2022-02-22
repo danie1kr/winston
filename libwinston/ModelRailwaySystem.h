@@ -81,6 +81,15 @@ namespace winston
 				return *it;
 		}
 
+		tl::optional<Locomotive&> locoFromAddress(const NFCAddress address)
+		{
+			auto it = std::find_if(this->locomotiveShed.begin(), this->locomotiveShed.end(), [address](const auto& loco) { return loco.nfcAddress() == address; });
+			if (it == this->locomotiveShed.end())
+				return tl::nullopt;
+			else
+				return *it;
+		}
+
 		const Address addressOfLoco(const Locomotive& loco) const
 		{
 			return loco.address();
@@ -164,6 +173,8 @@ namespace winston
 					return this->callbacks.signalUpdateCallback(track, connection, aspect);
 					}, distance, devPort);9*/
 		}
+
+		virtual Result detectorUpdate(winston::Detector::Shared detector, Locomotive &loco) = 0;
 
 		// the railway
 		_Railway railway;

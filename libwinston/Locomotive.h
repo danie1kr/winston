@@ -26,7 +26,9 @@ namespace winston
 		const bool forward();
 		const unsigned char speed();
 		void drive(const bool forward, const unsigned char speed);
+		void speedTrap(const Distance distance = 0);
 		const Position& moved(Duration& timeOnTour);
+		void position(const Position p);
 		const Position& position();
 		void stop();
 		void update(const bool busy, const bool forward, const unsigned char speed, const uint32_t functions);
@@ -42,9 +44,9 @@ namespace winston
 			using Speed = unsigned int;
 			const Speed speed(const Throttle throttle) const;
 			void learn(const Throttle throttle, const Speed speed);
-			std::map<Throttle, Speed> map;
 		private:
 			static const Speed lerp(const Speed lower, const Speed upper, const float frac);
+			std::map<Throttle, Speed> map;
 		};
 
 		const Callbacks callbacks;
@@ -62,6 +64,7 @@ namespace winston
 		} details;
 
 		SpeedMap speedMap;
+		TimePoint speedTrapStart;
 	};
 }
 

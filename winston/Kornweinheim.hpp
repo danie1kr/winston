@@ -455,7 +455,7 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
         for(size_t detector = 0; detector < this->nfcDetectors.size(); ++detector)
         {
             auto d = detectors.createNestedObject();
-            d["id"] = detector;
+            d["id"] = (int)detector;
             d["track"] = this->nfcDetectors[detector]->position().trackName();
             d["connection"] = winston::Track::ConnectionToString(this->nfcDetectors[detector]->position().connection());
         }

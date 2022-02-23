@@ -6,7 +6,7 @@
 namespace winston
 {
 	Locomotive::Locomotive(const Callbacks callbacks, const Address address, const Position start, const std::string name, const NFCAddress nfcAddress) :
-		callbacks(callbacks), details{ address, nfcAddress, start, hal::now(), name, false, true, 0, 0 }, speedMap()
+		callbacks(callbacks), details{ address, nfcAddress, start, hal::now(), name, false, true, 0, 0 }, speedMap(), speedTrapStart(hal::now())
 	{
 		this->speedMap.learn(0, 0);
 		this->speedMap.learn(255, 50);
@@ -39,6 +39,19 @@ namespace winston
 		this->callbacks.drive(this->address(), speed, forward);
 	}
 
+	void Locomotive::speedTrap(const Distance distance)
+	{
+		if (distance == 0)
+		{
+			this->speedTrapStart = hal::now();
+		}
+		else
+		{
+			auto time = inMilliseconds(hal::now() - this->speedTrapStart);
+			this->speedMap.learn(this->speed(), (1000*distance) / time);
+		}
+	}
+
 	void Locomotive::stop()
 	{
 		this->details.speed = 0;
@@ -55,10 +68,19 @@ namespace winston
 	const Position& Locomotive::moved(Duration& timeOnTour)
 	{
 		auto now = hal::now();
-		timeOnTour = this->details.lastPositionUpdate - now;
-		this->details.lastPositionUpdate = now;
-		this->details.position.drive((Distance)(this->speedMap.speed(this->details.speed) * inMilliseconds(timeOnTour)));
+		timeOnTour = now - this->details.lastPositionUpdate;
+		if (inMilliseconds(timeOnTour) > WINSTON_LOCO_POSITION_TRACK_RATE)
+		{
+			this->details.lastPositionUpdate = now;
+			this->details.position.drive((Distance)(this->speedMap.speed(this->details.speed) * inMilliseconds(timeOnTour)) / 1000);
+		}
 		return this->position();
+	}
+
+	void Locomotive::position(const Position p)
+	{
+		this->details.lastPositionUpdate = hal::now();
+		this->details.position = p;
 	}
 
 	const Position& Locomotive::position()

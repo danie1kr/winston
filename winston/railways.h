@@ -335,9 +335,9 @@ class Y2021Railway : public winston::RailwayWithRails<Y2021RailwayTracks>/*, pub
     ||  ||                 //         //                ||  ||
     B3  B6              GBF2b        GBF3b              ||  ||
     ||  ||               ||           ||                ||  ||
-    ||  ||               ||     Turnout16               ||  ||
-    ||  ||               ||     //    ||                B4  B1
-    ||  ||              Turnout15     ||                ||  ||
+    ||  ||               Turnout15    ||                ||  ||
+    ||  ||               ||     \\    ||                B4  B1
+    ||  ||               ||       Turnout16             ||  ||
     ||  ||               ||           ||                ||  ||
     ||   \\             GBF2a        GBF3a              ||  ||
     ||    \\             ||           ||               //   ||

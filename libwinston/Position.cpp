@@ -32,6 +32,15 @@ namespace winston
 		else
 		{
 			// check next/prev track
+			//auto otherTrack = this->track->on(this->dist > 0 ? this->track->otherConnection(this->reference) : this->reference);
+			if (other.track == this->track->on(this->reference))
+			{
+				return this->dist + abs(other.dist);
+			}
+			else if (other.track == this->track->on(this->track->otherConnection(this->reference)))
+			{
+				return this->track->length() - this->dist + abs(other.dist);
+			}
 		}
 		return 0;
 	}
@@ -46,27 +55,39 @@ namespace winston
 		{
 			// negative = leave at reference, else other direction connection
 			auto connection = this->dist < 0 ? this->reference : this->track->otherConnection(this->reference);
+
+			// travel the remaining track to the other side - for -distance, it is already done
+			if (distance > 0)
+				this->dist -= this->track->length();
+
 			this->dist = this->dist < 0 ? -this->dist : this->dist;
 			auto current = this->track;
 			while (true)
 			{
-				auto onto = current;
-				if (!track->traverse(connection, onto, true))
+				Track::Shared onto;
+				if (!current->traverse(connection, onto, true))
 				{
 					logger.err(build("cannot traverse during Position::drive: ", current->name(), " leaving on ", Track::ConnectionToString(connection)));
 					return Transit::TraversalError;
 				}
 
 				if (this->dist < (int)onto->length())
+				{
+					connection = onto->whereConnects(current);
+					current = onto;
 					break;
+				}
 				else
 					this->dist -= onto->length();
 
 				connection = onto->whereConnects(current);
+				if(!onto->canTraverse(connection))
+					return Transit::TraversalError;
 				connection = onto->otherConnection(connection);
 				current = onto;
 			}
 			this->track = current;
+			this->reference = connection;
 			return this->track->block() == block ? Transit::CrossTrack : Transit::CrossBlock;
 		}
 	}

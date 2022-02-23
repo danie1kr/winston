@@ -25,6 +25,8 @@
 
 #define WINSTON_WITH_WEBSOCKET
 
+#define WINSTON_LOCO_POSITION_TRACK_RATE	(1000U/40U)
+
 /*
 in case teensy does not start up:
 	update fnet config:

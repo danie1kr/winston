@@ -7,6 +7,53 @@
 
 namespace winston
 {
+	/*
+	    v1        /------
+		         /
+		v0 -----/     
+		               
+	        |   | |    |  
+			t0  tatb   t1
+			 T0  Ta  T1
+
+		s = v*t
+		v = a*t
+		s = 1/2 a * t*t
+
+		known: v0, v1, s, t0, ta, t1, T0
+
+		tb = 
+
+		s = v0 * (ta-t0) + a/2 * (tb-ta)² + v1 * (t1-tb)
+		s = v0 * (T0) + a/2 * (Ta)² + v1 * (T1)
+		===================================================
+		v1    /------
+			 /
+		v0 -/
+		 0
+			| |    |
+			t0ta   t1
+
+		known: v0, v1, s, t0, t1
+		a = (v1 - v0) / (ta - t0)
+		s = v0 * (ta-t0) + a/2 * (ta-t0)² + v1 * (t1-ta)
+		s = v0 * (ta-t0) + 1/2 * (v1 - v0) / (ta - t0) * (ta-t0)² + v1 * (t1-ta)
+		s = v0 * (ta-t0) + 1/2 * (v1 - v0) * (ta-t0) + v1 * (t1-ta)
+		s = (ta-t0) * (v0 + (v1 - v0)/2) + v1 * (t1 - ta)
+
+		s / (v0 + (v1 - v0)/2) = ta + v1*t1 - v1*ta
+		s / (v0 + (v1 - v0)/2) - v1*t1 = ta * (1 - v1)
+		(s / (v0 + (v1 - v0)/2) - v1*t1) / (1 - v1) = ta
+
+		solve s = (v0 * (ta-t0)) + (1/2 * (v1 - v0) * (ta-t0)) + (v1 * (t1-ta) ) for ta
+		t = (2 s + t0 (v0 + v1) - 2 t1 v1)/(v0 - v1) and v0!=v1
+
+		t0 = 0:	
+		solve s = (v0 * (t)) + (1/2 * (v1 - v0) * (t)) + (v1 * (t1-t) ) for t
+		t = (2 (s - t1 v1))/(v0 - v1) and v0!=v1
+		a = (v1 - v0) / t
+
+	*/
 	// https://www.wolframalpha.com/input/?i=solve+s+%3D+%28v1%C2%B2-v0%C2%B2%29%2F2a+%2B+v1%28T+-+%28v1-v0%29%2Fa%29+for+a
 	class Locomotive : public Shared_Ptr<Locomotive>
 	{
@@ -19,34 +66,51 @@ namespace winston
 			using FunctionsCallback = std::function<void(const Address address, const uint32_t functions)>;
 			FunctionsCallback functions;
 		};
+
+		using Throttle = unsigned char;
+		using Speed = unsigned int;
+		using ThrottleSpeedMap = std::map<Throttle, Speed>;
 		
-		Locomotive(const Callbacks callbacks, const Address address, const Position start, const std::string name, const NFCAddress nfcAddress);
+		Locomotive(const Callbacks callbacks, const Address address, const Position start, const ThrottleSpeedMap speedMap, const std::string name, const NFCAddress nfcAddress);
 		inline void light(bool on);
 		const bool light();
 		const bool forward();
-		const unsigned char speed();
-		void drive(const bool forward, const unsigned char speed);
+		const Speed speed();
+		const Throttle throttle();
+		template<bool _force>
+		void drive(const bool forward, const Throttle throttle)
+		{
+			this->details.forward = forward;
+			this->details.modelThrottle = throttle;
+			if (_force)
+				this->details.throttle = throttle;
+		}
 		void speedTrap(const Distance distance = 0);
 		const Position& moved(Duration& timeOnTour);
 		void position(const Position p);
 		const Position& position();
 		void stop();
-		void update(const bool busy, const bool forward, const unsigned char speed, const uint32_t functions);
+		const Position& update();
 		const Address& address() const;
 		const NFCAddress& nfcAddress() const;
 		const std::string& name();
+
+		static const ThrottleSpeedMap defaultThrottleSpeedMap;
+		void update(const bool busy, const bool forward, const Throttle throttle, const uint32_t functions);
 	private:
+
+		static const float acceleration(const Throttle throttle);
 
 		class SpeedMap
 		{
 		public:
-			using Throttle = unsigned char;
-			using Speed = unsigned int;
+			SpeedMap();
+			SpeedMap(ThrottleSpeedMap map);
 			const Speed speed(const Throttle throttle) const;
 			void learn(const Throttle throttle, const Speed speed);
 		private:
-			static const Speed lerp(const Speed lower, const Speed upper, const float frac);
-			std::map<Throttle, Speed> map;
+			//static const Speed lerp(const Speed lower, const Speed upper, const float frac);
+			ThrottleSpeedMap map;
 		};
 
 		const Callbacks callbacks;
@@ -55,11 +119,12 @@ namespace winston
 			Address address = { 0 };
 			NFCAddress nfcAddress = { 0 };
 			Position position;
-			TimePoint lastPositionUpdate;
+			TimePoint lastPositionUpdate, lastSpeedUpdate;
 			std::string name = { "" };
 			bool busy = { false };
 			bool forward = { true };
-			unsigned char speed = { 0 };
+			Throttle throttle = { 0 };
+			float modelThrottle = { 0.f };
 			uint32_t functions = { 0 };
 		} details;
 

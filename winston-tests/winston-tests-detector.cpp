@@ -207,7 +207,9 @@ namespace winstontests
 
             auto N1 = railway->track(Y2021RailwayTracks::N1);
             auto pos = winston::Position(N1, winston::Track::Connection::A, 200);
-            auto loco = winston::Locomotive::make(locoCallbacks(), 0, pos, "testloco1", 0);
+
+            winston::Locomotive::ThrottleSpeedMap map{ {0, 0},{255, 50} };
+            auto loco = winston::Locomotive::make(locoCallbacks(), 0, pos, map, "testloco1", 0);
 
             auto div = 10;// 00;
             auto distance = 320; // mm
@@ -215,7 +217,7 @@ namespace winstontests
             auto expectedSpeed = distance * 1000 / delay;
             // ==> 320 / 8 ==> 40mm/s
 
-            loco->update(false, true, 100, 0);
+            loco->drive<true>(true, 100);
             loco->speedTrap(0);
             winston::hal::delay(delay / div);
             loco->speedTrap(distance / div);
@@ -226,15 +228,50 @@ namespace winstontests
             auto newPos = loco->moved(timeOnTour);
             Assert::AreEqual(pos.trackName(), newPos.trackName());
             Assert::IsTrue(pos.connection() == newPos.connection());
-            Assert::IsTrue(abs(pos.distance() - newPos.distance()) == (expectedSpeed / div));
+            Assert::IsTrue(abs(abs(pos.distance() - newPos.distance()) - (expectedSpeed / div)) <= 2);
         }
 
         TEST_METHOD(DriveLocoOnTrack)
         {
+            railway = Y2021Railway::make(railwayCallbacks());
+            Assert::IsTrue(railway->init() == winston::Result::OK);
+            auto N1 = railway->track(Y2021RailwayTracks::N1);
+            auto pos = winston::Position(N1, winston::Track::Connection::A, 200);
+
+            winston::Locomotive::ThrottleSpeedMap map{ {0, 0}, {100, 100}, {255, 255} };
+            auto loco = winston::Locomotive::make(locoCallbacks(), 0, pos, map, "testloco1", 0);
+            auto expectedDistance = 10;
+            loco->drive<true>(true, 100);
+            loco->position(pos);
+            winston::hal::delay(100);   // ==> distance = 10mm
+            winston::Duration timeOnTour;
+            auto newPos = loco->moved(timeOnTour);
+            Assert::AreEqual(pos.trackName(), newPos.trackName());
+            Assert::IsTrue(pos.connection() == newPos.connection());
+            Assert::IsTrue(abs(abs(pos.distance() - newPos.distance()) - (expectedDistance)) <= 2);
         }
         
         TEST_METHOD(DriveLocoOnRail2Rail)
         {
+            railway = Y2021Railway::make(railwayCallbacks());
+            Assert::IsTrue(railway->init() == winston::Result::OK);
+            auto PBF3 = railway->track(Y2021RailwayTracks::PBF3);
+            auto B4 = railway->track(Y2021RailwayTracks::B4);
+            auto pos = winston::Position(PBF3, winston::Track::Connection::B, 50);
+            auto target = winston::Position(B4, winston::Track::Connection::A, 50);
+
+            winston::Locomotive::ThrottleSpeedMap map{ {0, 0}, {100, 1000}, {255, 2550} };
+            auto loco = winston::Locomotive::make(locoCallbacks(), 0, pos, map, "testloco1", 0);
+            auto throttle = 100;
+            loco->drive<true>(false, throttle);
+            loco->position(pos);
+            winston::hal::delay(100);   // ==> distance = 100mm
+            winston::Duration timeOnTour;
+            auto newPos = loco->moved(timeOnTour);
+            auto targetDistance = inMilliseconds(timeOnTour) * map[throttle] / 1000;
+            Assert::AreEqual(target.trackName(), newPos.trackName());
+            Assert::IsTrue(target.connection() == newPos.connection());
+            Assert::IsTrue(newPos.distance() + target.distance() == targetDistance);
         }
 
         TEST_METHOD(DriveLocoOnLoop)

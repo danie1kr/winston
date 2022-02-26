@@ -3,6 +3,7 @@
 #include <string>
 #include <deque>
 #include <memory>
+#include <algorithm>
 
 #include "WinstonConfig.h"
 #include "Callback.h"
@@ -72,6 +73,22 @@ namespace winston
 		std::string build(const _First first, _Args&&... args)
 	{
 		return build(first) + build(args...);
+	}
+
+	template<typename T>
+	const T lerp(const T lower, const T upper, const float frac)
+	{
+		if (frac <= 0.0f)
+			return lower;
+		else if (frac >= 1.0f)
+			return upper;
+		return (T)(frac * upper + (1.0f - frac) * lower);
+	}
+
+	template<typename T>
+	const T clamp(const T lower, const T upper, const T x)
+	{
+		return std::min(std::max(x, lower), upper);
 	}
 
 #define STRINGIZE(x) STRINGIZE2(x)

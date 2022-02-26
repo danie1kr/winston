@@ -5,11 +5,10 @@
 
 namespace winston
 {
-	Locomotive::Locomotive(const Callbacks callbacks, const Address address, const Position start, const std::string name, const NFCAddress nfcAddress) :
-		callbacks(callbacks), details{ address, nfcAddress, start, hal::now(), name, false, true, 0, 0 }, speedMap(), speedTrapStart(hal::now())
+	const Locomotive::ThrottleSpeedMap Locomotive::defaultThrottleSpeedMap = { {0, 0},{255, 50} };
+	Locomotive::Locomotive(const Callbacks callbacks, const Address address, const Position start, const ThrottleSpeedMap throttleSpeedMap, const std::string name, const NFCAddress nfcAddress) :
+		callbacks(callbacks), details{ address, nfcAddress, start, hal::now(), hal::now(), name, false, true, 0, 0.f, 0 }, speedMap(throttleSpeedMap), speedTrapStart(hal::now())
 	{
-		this->speedMap.learn(0, 0);
-		this->speedMap.learn(255, 50);
 	}
 
 	void Locomotive::light(bool on)
@@ -29,14 +28,14 @@ namespace winston
 		return this->details.forward;
 	}
 
-	const unsigned char Locomotive::speed()
+	const Locomotive::Speed Locomotive::speed()
 	{
-		return this->details.speed;
+		return this->speedMap.speed(this->details.throttle);
 	}
 
-	void Locomotive::drive(const bool forward, const unsigned char speed)
+	const Locomotive::Throttle Locomotive::throttle()
 	{
-		this->callbacks.drive(this->address(), speed, forward);
+		return this->details.throttle;
 	}
 
 	void Locomotive::speedTrap(const Distance distance)
@@ -54,14 +53,15 @@ namespace winston
 
 	void Locomotive::stop()
 	{
-		this->details.speed = 0;
+		this->details.throttle = 0;
 	}
 
-	void Locomotive::update(const bool busy, const bool forward, const unsigned char speed, const uint32_t functions)
+	void Locomotive::update(const bool busy, const bool forward, const Throttle throttle, const uint32_t functions)
 	{
 		this->details.busy = busy;
 		this->details.forward = forward;
-		this->details.speed = speed;
+		this->details.throttle = throttle;
+		this->details.modelThrottle = throttle;
 		this->details.functions = functions;
 	}
 
@@ -71,10 +71,29 @@ namespace winston
 		timeOnTour = now - this->details.lastPositionUpdate;
 		if (inMilliseconds(timeOnTour) > WINSTON_LOCO_POSITION_TRACK_RATE)
 		{
+			this->details.position.drive((Distance)((this->details.forward ? 1 : -1) * this->speedMap.speed(this->details.throttle) * inMilliseconds(timeOnTour)) / 1000);
 			this->details.lastPositionUpdate = now;
-			this->details.position.drive((Distance)(this->speedMap.speed(this->details.speed) * inMilliseconds(timeOnTour)) / 1000);
 		}
 		return this->position();
+	}
+
+	const Position& Locomotive::update()
+	{
+		auto now = hal::now();
+		Duration speedUpdateRate = now - this->details.lastSpeedUpdate;
+		if (inMilliseconds(speedUpdateRate) > WINSTON_LOCO_SPEED_TRACK_RATE)
+		{
+			auto diff = (float)this->details.throttle - this->details.modelThrottle;
+
+			// 0..255 in 4s <=> on linear curve
+
+			this->details.modelThrottle += (diff / 255.f) * inMilliseconds(speedUpdateRate) / 4000.f;
+			this->details.modelThrottle = clamp<float>(0.f, 255.f, this->details.modelThrottle);
+			this->callbacks.drive(this->address(), (unsigned char)this->details.modelThrottle, this->details.forward);
+			this->details.lastSpeedUpdate = now;
+		}
+		// dont care about the updated duration
+		return this->moved(speedUpdateRate);
 	}
 
 	void Locomotive::position(const Position p)
@@ -103,6 +122,31 @@ namespace winston
 		return this->details.name;
 	}
 
+	const float Locomotive::acceleration(const Throttle throttle)
+	{
+		float x = throttle / 255.f;
+		if (x < 0.5f)
+			return 1.f;
+		else if (x < 0.8f)
+			return -x * 2.f + 2.f;
+		else if (x < 1.f)
+			return -x + 1.2f;
+		else 
+			return 0.f;
+	}
+
+	Locomotive::SpeedMap::SpeedMap()
+		: map()
+	{
+
+	}
+
+	Locomotive::SpeedMap::SpeedMap(ThrottleSpeedMap map)
+		: map(map)
+	{
+
+	}
+
 	void Locomotive::SpeedMap::learn(const Throttle throttle, const Speed speed)
 	{
 		if (this->map.find(throttle) == this->map.end())
@@ -112,7 +156,7 @@ namespace winston
 		else
 			this->map[throttle] = speed;
 	}
-	const Locomotive::SpeedMap::Speed Locomotive::SpeedMap::speed(const Throttle throttle) const
+	const Locomotive::Speed Locomotive::SpeedMap::speed(const Throttle throttle) const
 	{
 		auto lookup = this->map.find(throttle);
 		if (lookup == this->map.end())
@@ -125,18 +169,18 @@ namespace winston
 			float frac = (float)(throttle - lower->first) / (float)(upper->first - lower->first);
 			
 			// linear
-			return this->lerp(lower->second, upper->second, frac);
+			return lerp<Speed>(lower->second, upper->second, frac);
 		}
 		else
 			return lookup->second;
 	}
-
-	const Locomotive::SpeedMap::Speed Locomotive::SpeedMap::lerp(Locomotive::SpeedMap::Speed lower, Locomotive::SpeedMap::Speed upper, const float frac)
+	/*
+	const Locomotive::Speed Locomotive::SpeedMap::lerp(Locomotive::Speed lower, Locomotive::Speed upper, const float frac)
 	{
 		if (frac <= 0.0f)
 			return lower;
 		else if (frac >= 1.0f)
 			return upper;
 		return (Speed)(frac * upper + (1.0f - frac) * lower);
-	}
+	}*/
 }

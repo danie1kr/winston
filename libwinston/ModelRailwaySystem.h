@@ -141,11 +141,9 @@ namespace winston
 		virtual void setupSignals() = 0;
 		virtual void setupDetectors() = 0;
 
-		void addLocomotive(const winston::Locomotive::Callbacks callbacks, const Address address, std::string name, const NFCAddress nfcAddress)
+		void addLocomotive(const winston::Locomotive::Callbacks callbacks, const Address address, const Position start, const Locomotive::ThrottleSpeedMap speedMap, std::string name, const NFCAddress nfcAddress)
 		{
-			//auto loco = Locomotive();
-			Position pos(this->railway->track(0), winston::Track::Connection::A, 0);
-			this->locomotiveShed.emplace_back(callbacks, address, pos, name, nfcAddress);
+			this->locomotiveShed.emplace_back(callbacks, address, start, speedMap, name, nfcAddress);
 		}
 
 		Result loadLocomotives()

@@ -891,10 +891,11 @@ bool Kornweinheim::systemLoop()
 void Kornweinheim::populateLocomotiveShed()
 {
     auto callbacks = locoCallbacks();
-    this->addLocomotive(callbacks, 3, "BR 114", 0);
-    this->addLocomotive(callbacks, 4, "BR 106", 1);
-    this->addLocomotive(callbacks, 5, "BR 64", 2);
-    this->addLocomotive(callbacks, 6, "E 11", 3);
-    this->addLocomotive(callbacks, 7, "BR 218", 4);
+    winston::Position pos(this->railway->track(Y2021RailwayTracks::N1), winston::Track::Connection::A, 100);
+    this->addLocomotive(callbacks, 3, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 114", 0);
+    this->addLocomotive(callbacks, 4, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 106", 1);
+    this->addLocomotive(callbacks, 5, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 64", 2);
+    this->addLocomotive(callbacks, 6, pos, winston::Locomotive::defaultThrottleSpeedMap, "E 11", 3);
+    this->addLocomotive(callbacks, 7, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 218", 4);
 }
 

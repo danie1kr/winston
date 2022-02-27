@@ -276,6 +276,41 @@ namespace winstontests
 
         TEST_METHOD(DriveLocoOnLoop)
         {
+            railway = Y2021Railway::make(railwayCallbacks());
+            Assert::IsTrue(railway->init() == winston::Result::OK);
+
+            auto PBF3 = railway->track(Y2021RailwayTracks::PBF3);
+            auto B4 = railway->track(Y2021RailwayTracks::B4);
+            auto Turnout8 = std::static_pointer_cast<winston::Turnout>(railway->track(Y2021RailwayTracks::Turnout8));
+            auto Turnout9 = std::static_pointer_cast<winston::Turnout>(railway->track(Y2021RailwayTracks::Turnout9));
+            auto B5 = railway->track(Y2021RailwayTracks::B5);
+            auto Turnout10 = std::static_pointer_cast<winston::Turnout>(railway->track(Y2021RailwayTracks::Turnout10));
+            auto B6 = railway->track(Y2021RailwayTracks::B6);
+            auto Turnout2 = std::static_pointer_cast<winston::Turnout>(railway->track(Y2021RailwayTracks::Turnout2));
+            auto Turnout3 = std::static_pointer_cast<winston::Turnout>(railway->track(Y2021RailwayTracks::Turnout3));
+
+            Turnout8->finalizeChangeTo(winston::Turnout::Direction::A_C);
+            Turnout9->finalizeChangeTo(winston::Turnout::Direction::A_B);
+            Turnout10->finalizeChangeTo(winston::Turnout::Direction::A_B);
+            Turnout2->finalizeChangeTo(winston::Turnout::Direction::A_C);
+            Turnout3->finalizeChangeTo(winston::Turnout::Direction::A_B);
+
+            auto pos = winston::Position(PBF3, winston::Track::Connection::A, 50);
+            auto distance = (signed)(PBF3->length() + B4->length() + Turnout8->length() + Turnout9->length() + B5->length() + Turnout10->length() + B6->length() + Turnout2->length() + Turnout3->length() + 10);
+            auto expect = winston::Position(PBF3, winston::Track::Connection::A, 60);
+
+            winston::Locomotive::ThrottleSpeedMap map{ {0, 0}, {100, 500000}, {255, 2550} };
+            auto loco = winston::Locomotive::make(locoCallbacks(), 0, pos, map, "testloco1", 0);
+            auto throttle = 100;
+            loco->drive<true>(true, throttle);
+            loco->position(pos);
+            winston::hal::delay(100);   // ==> distance = 50000mm
+            winston::Duration timeOnTour;
+            auto newPos = loco->moved(timeOnTour);
+            auto travelledDistance = inMilliseconds(timeOnTour) * map[throttle] / 1000;
+            Assert::AreEqual(newPos.trackName(), expect.trackName());
+            Assert::IsTrue(newPos.connection() == expect.connection());
+            //Assert::IsTrue(newPos.distance() - (travelledDistance - distance) < 50);
         }
     };
 }

@@ -578,4 +578,9 @@ namespace winston
 	{
 		return this->trackLengthCalculator ? this->trackLengthCalculator(this->dir) : 0;
 	}
+
+	const Length Turnout::lengthOnDirection(const Direction dir) const
+	{
+		return this->trackLengthCalculator(dir);
+	}
 }

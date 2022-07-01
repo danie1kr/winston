@@ -4,6 +4,7 @@
 #include "SignalBox.h"
 #include "HAL.h"
 #include "Railway.h"
+#include "Track.h"
 
 namespace winston
 {
@@ -82,6 +83,29 @@ namespace winston
 		}
 	}
 
+	void SignalBox::setSignalsFor(Turnout::Shared turnout, const Track::Connection connectionStartFrom)
+	{
+		Track::Shared signalCurrent = turnout;
+		auto signalConnection = Track::Connection::A;
+		auto signalToSet = this->nextSignal(signalCurrent, true, signalConnection, true, true);
+
+		Track::Shared current = turnout;
+		auto connection = turnout->fromDirection();
+		Signal::Shared signal;
+		auto result = Track::traverse<Track::TraversalSignalHandling::ForwardDirection>(current, connection, signal);
+
+		Signal::Aspect aspect;
+		switch (result)
+		{
+		case Track::TraversalResult::Bumper:
+		case Track::TraversalResult::Looped:
+		case Track::TraversalResult::Signal: aspect = Signal::Aspect::Go; break;
+		default:
+		case Track::TraversalResult::OpenTurnout: aspect = Signal::Aspect::Halt; break;
+		}
+		this->setSignalOn(signalCurrent, signalConnection, aspect);
+	}
+
 	void SignalBox::setSignalsFor(Turnout::Shared turnout)
 	{
 		// A_facing = leave turnout at A, find first main signal facing A
@@ -92,28 +116,10 @@ namespace winston
 		// the closed direction
 		this->order(Command::make([this, turnout](const TimePoint &created) -> const winston::State { this->setSignalsFor(turnout, turnout->otherDirection(turnout->direction())); return State::Finished; }, __PRETTY_FUNCTION__));
 		// backwards on entry
-		this->order(Command::make([this, turnout](const TimePoint &created) -> const winston::State { 
+		this->order(Command::make([this, turnout](const TimePoint& created) -> const winston::State {
 
+			this->setSignalsFor(turnout, Track::Connection::A);
 
-			Track::Shared signalCurrent = turnout;
-			auto signalConnection = Track::Connection::A;
-			auto signalToSet = this->nextSignal(signalCurrent, true, signalConnection, true, true);
-
-			Track::Shared current = turnout;
-			auto connection = turnout->fromDirection();
-			Signal::Shared signal;
-			auto result = Track::traverse<Track::TraversalSignalHandling::ForwardDirection>(current, connection, signal);
-
-			Signal::Aspect aspect;
-			switch (result)
-			{
-			case Track::TraversalResult::Bumper: 
-			case Track::TraversalResult::Looped: 
-			case Track::TraversalResult::Signal: aspect = Signal::Aspect::Go; break;
-			default:
-			case Track::TraversalResult::OpenTurnout: aspect = Signal::Aspect::Halt; break;
-			}
-			this->setSignalOn(signalCurrent, signalConnection, aspect);
 
 			return State::Finished; 
 

@@ -98,7 +98,6 @@ private:
 
     void populateLocomotiveShed();
 
-    winston::Result detectorUpdate(winston::Detector::Shared detector, winston::Locomotive &loco);
 
     /* z21 */
     UDPSocket::Shared z21Socket;
@@ -113,12 +112,18 @@ private:
     /* Storage */
     Storage::Shared storageLayout;
 
-    /* Occupancy Detector Devices */
+    /* Occupancy Detector */
+    winston::Result detectorUpdate(winston::Detector::Shared detector, winston::Locomotive &loco);
 #ifdef WINSTON_PLATFORM_TEENSY
     
 #elif defined(WINSTON_PLATFORM_WIN_x64)
     SerialDeviceWin::Shared serial;
     PN532_DetectorDevice::Shared pn532;
     std::array<winston::NFCDetector::Shared, 13> nfcDetectors;
+#endif
+
+#ifdef WINSTON_LOCO_TRACKING
+    void webSocket_sendLocosPosition();
+    winston::TimePoint lastWebsocketLocoTrackingUpdate;
 #endif
 };

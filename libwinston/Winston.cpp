@@ -5,6 +5,15 @@
 
 namespace winston
 {
+#define RUNTIME_LAMBDAS(what) \
+	bool runtime##what() { return runtimeHardwareState.enabled(RuntimeHardwareState::Type::what); }; \
+	void runtimeEnable##what () { runtimeHardwareState.enable(RuntimeHardwareState::Type::what); };
+	RUNTIME_LAMBDAS(Serial);
+	RUNTIME_LAMBDAS(SPI);
+	RUNTIME_LAMBDAS(Persistence);
+	RUNTIME_LAMBDAS(Network);
+	RUNTIME_LAMBDAS(Railway);
+
 	Logger logger;
 
 	GPIOPinDevice::GPIOPinDevice(const Pin pin) 
@@ -24,7 +33,7 @@ namespace winston
 
 	void logRuntimeStatus()
 	{
-#define RHS_Print(what) logger.info(#what ": o", runtimePersistence() ? "n" : "ff");
+#define RHS_Print(what) logger.info(#what ": o", runtime##what() ? "n" : "ff");
 		logger.info("Winston Runtime Status");
 		RHS_Print(Persistence);
 		RHS_Print(Network);

@@ -88,7 +88,7 @@ namespace winston
 		void speedTrap(const Distance distance = 0);
 		const Position& moved(Duration& timeOnTour);
 		void position(const Position p);
-		const Position& position();
+		const Position& position() const;
 		void stop();
 		const Position& update();
 		const Address& address() const;

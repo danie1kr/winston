@@ -1,6 +1,36 @@
 ﻿
 #include "Kornweinheim.h"
 
+
+#ifdef WINSTON_LOCO_TRACKING
+void Kornweinheim::webSocket_sendLocosPosition()
+{
+#ifdef WINSTON_WITH_WEBSOCKET
+    auto now = winston::hal::now();
+    if (inMilliseconds(now - this->lastWebsocketLocoTrackingUpdate) > WINSTON_LOCO_UPDATE_POSITION_WEBSOCKET_RATE)
+    {
+        DynamicJsonDocument obj(32 + this->locomotiveShed.size() * 256);
+        obj["op"] = "locoPositions";
+        auto data = obj.createNestedArray("data");
+        for (const auto &loco: this->locomotiveShed)
+        {
+            auto l = data.createNestedObject();
+            l["address"] = loco.address();
+
+            const auto& pos = loco.position();
+            l["track"] = pos.trackName();
+            l["connection"] = winston::Track::ConnectionToString(pos.connection());
+            l["distance"] = pos.distance();
+        }
+        std::string json("");
+        serializeJson(obj, json);
+        webServer.broadcast(json);
+        this->lastWebsocketLocoTrackingUpdate = now;
+    }
+#endif
+}
+#endif
+
 #ifdef WINSTON_WITH_WEBSOCKET
 // send a turnout state via websocket
 void Kornweinheim::turnoutSendState(const std::string turnoutTrackId, const winston::Turnout::Direction dir)
@@ -400,6 +430,7 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
                     auto track = tracks.createNestedObject();
                     track["a"] = a->name();
                     track["name"] = bumper->name();
+                    track["length"] = bumper->length();
 
                     writeAttachedSignal(signals, bumper, winston::Track::Connection::A);
 
@@ -415,6 +446,7 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
                     track["a"] = a->name();
                     track["b"] = b->name();
                     track["name"] = rail->name();
+                    track["length"] = rail->length();
 
                     writeAttachedSignal(signals, rail, winston::Track::Connection::A);
                     writeAttachedSignal(signals, rail, winston::Track::Connection::B);
@@ -432,6 +464,9 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
                     track["b"] = b->name();
                     track["c"] = c->name();
                     track["name"] = turnout->name();
+                    auto length = track.createNestedObject("lengths");
+                    length["a_b"] = turnout->lengthOnDirection(winston::Turnout::Direction::A_B);
+                    length["a_c"] = turnout->lengthOnDirection(winston::Turnout::Direction::A_C);
 
                     writeAttachedSignal(signals, turnout, winston::Track::Connection::A);
                     writeAttachedSignal(signals, turnout, winston::Track::Connection::B);
@@ -675,7 +710,7 @@ void Kornweinheim::systemSetup() {
     this->signalDevice = TLC5947_SignalDevice::make(24, this->signalInterfaceDevice, TLC5947Off);
 
     // storage
-    this->storageLayout = Storage::make(std::string(this->name()).append(".").append("winston.storage"));
+    this->storageLayout = Storage::make(std::string(this->name()).append(".").append("winston.storage"), 128 * 1024);
     if (this->storageLayout->init() != winston::Result::OK)
         winston::logger.err("Kornweinheim.init: Storage Layout Init failed");
 
@@ -872,16 +907,23 @@ void Kornweinheim::systemSetupComplete()
 
 // accept new requests and loop over what the signal box has to do
 bool Kornweinheim::systemLoop()
-{
-#ifdef WINSTON_WITH_WEBSOCKET
+{    
     {
-
+#ifdef WINSTON_WITH_WEBSOCKET
 #ifdef WINSTON_STATISTICS
         winston::StopwatchJournal::Event tracer(this->stopWatchJournal, "webServer");
 #endif
         this->webServer.step();
-    }
 #endif
+    }
+    {
+#ifdef WINSTON_LOCO_TRACKING
+#ifdef WINSTON_STATISTICS
+        StopwatchJournal::Event tracer(this->stopWatchJournal, "loco tracking");
+#endif
+        this->webSocket_sendLocosPosition();
+#endif
+    }
 #ifdef WINSTON_STATISTICS
     winston::StopwatchJournal::Event tracer(this->stopWatchJournal, "signalBox");
 #endif

@@ -345,6 +345,11 @@
                 M.FormSelect.init(document.querySelectorAll('select'));
             }
 
+            let locoNode = cy.$("node.locomotive[address=\"" + address + "\"]");
+            if (locoNode === undefined || locoNode === 0) {
+                locoNode = { group: 'nodes', data: { address: address }, classes: "locomotive" };
+                cy.add(locoNode);
+            }
             $element.find(".speed").val(data.forward ? data.speed : -data.speed);
             $element.find(".speedValue").html(data.value);
             $element.find(".light").prop("checked", data.light ? "checked" : undefined);
@@ -409,6 +414,13 @@
             if (!allowWinstonSubmit())
                 return;
             send("getSignalState", { parentTrack: parentTrack, guarding: guarding });
+        }
+
+        function locoPositions(data) {
+            _.each(data, loco => {
+                let locoNode = cy.$("node.locomotive[address=\"" + loco.address + "\"]");
+                
+            });
         }
 
         function signalState(data) {
@@ -512,6 +524,8 @@
             return cy = cytoscape({
                 container: $railway,
                 layout: { name: 'preset' },
+                boxSelectionEnabled: true,
+                panningEnabled: true,
                 style: [
                     /*{
                         selector: 'node.track',
@@ -593,6 +607,13 @@
                         }
                     },
                     {
+                        selector: ".connector",
+                        style: {
+                            "width": 5,
+                            "height": 5
+                        }
+                    },
+                    {
                         selector: ".highlight",
                         style: {
                             "background-color": "orange",
@@ -647,6 +668,14 @@
 
                     },
                     {
+                        selecotr: "node.locomotive",
+                        style: {
+                            "width": 8,
+                            "height": 8,
+                            "shape": "diamond"
+                        }
+                    },
+                    {
                         selector: "node.blockColoring",
                         style: {
                             "background-color": "data(blockColor)"
@@ -695,7 +724,7 @@
             cy.on('click', '.track', function (event) {
                 click("menuTrackEdge", event);
             });
-            cy.on('click', '.connection', function (event) {
+            cy.on('click', '.connection, .connector', function (event) {
                 click("menuEditNode", event);
             })
             cy.on('click', '.signal', function (event) {
@@ -732,7 +761,8 @@
                     return;
                 let that = event.target;
                 cy.$("node.connection[track=\"" + that.data("track") + "\"], node.trackSplitNode[track=\"" + that.data("track") + "\"]").each(function (e) {
-                    e.position({ x: that.position().x + e.data("relativePosition").x, y: that.position().y + e.data("relativePosition").y });
+                    if(!e.selected())
+                        e.position({ x: that.position().x + e.data("relativePosition").x, y: that.position().y + e.data("relativePosition").y });
                 });
             });
 
@@ -744,6 +774,7 @@
                 that.data("relativePosition", { x: that.position().x - parentPosition.x, y: that.position().y - parentPosition.y });
 
                 that.neighborhood(".signal").each(function (e) {
+                        if(!e.selected())
                     e.position({ x: that.position().x + e.data("relativePosition").x, y: that.position().y + e.data("relativePosition").y });
                 });
             });
@@ -1011,11 +1042,11 @@
         }
 
         function addTrackToLayout(edges, nodes, tracks, track, xPos) {
-            function connect(that, connection, connectionName) {
-                let other = _.find(tracks, t => t.name === connection);
+            function connect(that, otherTrackName, connectionName) {
+                let other = _.find(tracks, t => t.name === otherTrackName);
 
                 let thatNode = _.find(nodes, function (n) { return n.data.track === that; });
-                let otherNode = _.find(nodes, function (n) { return n.data.track === connection; });
+                let otherNode = _.find(nodes, function (n) { return n.data.track === otherTrackName; });
 
                 if (thatNode === undefined || otherNode === undefined)
                     return;
@@ -1024,10 +1055,16 @@
 
                 function connectToOther(otherConnectionName) {
                     if (other[otherConnectionName] === that) {
-                        let to = connection + "_" + otherConnectionName; // (otherNode.data.direction !== undefined /*&& otherConnectionName !== "a"*/ ? otherConnectionName : "");
+                        let to = otherTrackName + "_" + otherConnectionName; // (otherNode.data.direction !== undefined /*&& otherConnectionName !== "a" */ ? otherConnectionName : "");
                         let id = from + "-" + to;
-
+                        /* one edge between other-A and B-that
                         edges.push({ group: 'edges', data: { id: id, name: id, source: from, target: to }, classes: "" });
+                        */
+
+                        // another connector node between other-A and B-that
+                        nodes.push({ group: 'nodes', data: { id: id}, classes: "connector" });
+                        edges.push({ group: 'edges', data: { source: from, target: id, track: that}, classes: "track" });
+                        edges.push({ group: 'edges', data: { source: to, target: id, track: otherTrackName}, classes: "track" });
                     }
                 }
 
@@ -1035,7 +1072,6 @@
                 connectToOther("b");
                 connectToOther("c");
             }
-
 
             let a = track.a;
             let b = track.b;
@@ -1049,7 +1085,7 @@
                 type = 1;
 
             if (type === 2) {
-                nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, connections: { a: a, b: b, c: c }, direction: 1, type: "turnout", relativePosition: { x: 0, y: 0 } }, position: { x: xPos, y: 0 }, classes: "trackNode turnout" });
+                nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, lengths: track.lengths, connections: { a: a, b: b, c: c }, direction: 1, type: "turnout", relativePosition: { x: 0, y: 0 } }, position: { x: xPos, y: 0 }, classes: "trackNode turnout" });
                 nodes.push({ group: 'nodes', data: { id: id + "_a", name: id + "_a", track: id, relativePosition: { x: -20, y: 0 } }, position: { x: xPos - 20, y: 0 }, classes: "turnoutConnection connection a" });
                 nodes.push({ group: 'nodes', data: { id: id + "_b", name: id + "_b", track: id, relativePosition: { x: 20, y: 0 } }, position: { x: xPos + 20, y: -20 }, classes: "turnoutConnection connection b" });
                 nodes.push({ group: 'nodes', data: { id: id + "_c", name: id + "_c", track: id, relativePosition: { x: 20, y: 20 } }, position: { x: xPos + 20, y: 20 }, classes: "turnoutConnection connection c" });
@@ -1059,7 +1095,7 @@
                 edges.push({ group: 'edges', data: { source: id, target: id + "_c", track: id, connection: "c" }, classes: "internal" });
             }
             else if (type === 1) {
-                nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, connections: { a: a, b: b, c: c }, type: "rail", relativePosition: { x: 0, y: 0 } }, position: { x: xPos, y: 0 }, classes: "trackNode rail" });
+                nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, length: track.length, connections: { a: a, b: b, c: c }, type: "rail", relativePosition: { x: 0, y: 0 } }, position: { x: xPos, y: 0 }, classes: "trackNode rail" });
                 nodes.push({ group: 'nodes', data: { id: id + "_a", name: id + "_a", track: id, relativePosition: { x: -20, y: 0 } }, position: { x: xPos - 20, y: 0 }, classes: "railConnection connection a" });
                 nodes.push({ group: 'nodes', data: { id: id + "_b", name: id + "_b", track: id, relativePosition: { x: 20, y: 0 } }, position: { x: xPos + 20, y: 0 }, classes: "railConnection connection b" });
 
@@ -1067,7 +1103,7 @@
                 edges.push({ group: 'edges', data: { source: id, target: id + "_b", track: id, connection: "b" }, classes: "track" });
             }
             else {
-                nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, connections: { a: a, b: b, c: c }, type: "bumper", relativePosition: { x: 0, y: 0 } }, position: { x: xPos, y: 0 }, classes: "trackNode bumper" });
+                nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, length: track.length, connections: { a: a, b: b, c: c }, type: "bumper", relativePosition: { x: 0, y: 0 } }, position: { x: xPos, y: 0 }, classes: "trackNode bumper" });
                 nodes.push({ group: 'nodes', data: { id: id + "_a", name: id + "_a", track: id, relativePosition: { x: -20, y: 0 } }, position: { x: xPos - 20, y: 0 }, classes: "bumperConnection connection a" });
                 edges.push({ group: 'edges', data: { source: id, target: id + "_a", track: id, connection: "a" }, classes: "track" });
             }
@@ -1231,6 +1267,7 @@
                         $saveLayout.removeClass("disabled");
                     message("layout storage successful: " + data); break;
                 }
+                case "locoPositions": { locoPositions(data); break; }
                 case "error": { error(data); break; }
                 default:
                     {
@@ -1296,14 +1333,34 @@
             if (!cy || !allowLayoutEdit())
                 return;
 
-            cy.$('node.connection:selected').each(function (node) {
+            cy.$('node:selected').each(function (node) {
                 let edges = node.connectedEdges();
-                let neighbor = node.openNeighborhood("node.connection");
+
+                if (node.hasClass("connector")) {
+                    let neighbor = node.openNeighborhood("node.connection");
+                    neighbor.each((neigh, i) => {
+                        let track = neigh.data("track");
+                        cy.$('node.trackNode[track="' + track + '"]').each(function (n) {
+                            let distance = Math.sqrt((neigh.position().x - node.position().x) * (neigh.position().x - node.position().x) + (neigh.position().y - node.position().y) * (neigh.position().y - node.position().y));
+                            if (distance > 100)
+                                n.position({ x: node.position().x + 40 * (i * 2 - 1), y: node.position().y }).emit("position");
+                        });
+                    });
+                }
+                else // connection
+                {
+                    let neighbor = node.openNeighborhood("node.connector");
+                    let distance = Math.sqrt((neighbor.position().x - node.position().x) * (neighbor.position().x - node.position().x) + (neighbor.position().y - node.position().y) * (neighbor.position().y - node.position().y));
+                    if (distance > 100)
+                        neighbor.position({ x: node.position().x + 40, y: node.position().y }).emit("position");
+                }
+                    /*
+                let neighbor = node.openNeighborhood(node.hasClass("connector") ? "node.connection" : "node.connector");
                 let track = neighbor.data("track");
 
                 cy.$('node.trackNode[track="' + track + '"]').each(function (n) {
                     n.position({ x: node.position().x + 40, y: node.position().y }).emit("position");
-                });
+                });*/
             });
             hideContextMenus();
         }

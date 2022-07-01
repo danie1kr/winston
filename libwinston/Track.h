@@ -270,6 +270,7 @@ namespace winston
 		using Shared_Ptr<Turnout>::Shared;
 		using Shared_Ptr<Turnout>::make;
 		virtual const Length length() const;
+		const Length lengthOnDirection(const Direction dir) const;
 
 	private:
 		Track::Shared connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa = true);

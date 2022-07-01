@@ -223,6 +223,19 @@ namespace winston
 		StateType state;
 	};
 	extern RuntimeHardwareState runtimeHardwareState;
+
+
+#define DEFINE_RUNTIME_LAMBDA(what) \
+	bool runtime##what(); \
+	void runtimeEnable##what();
+
+	DEFINE_RUNTIME_LAMBDA(Serial);
+	DEFINE_RUNTIME_LAMBDA(SPI);
+	DEFINE_RUNTIME_LAMBDA(Persistence);
+	DEFINE_RUNTIME_LAMBDA(Network);
+	DEFINE_RUNTIME_LAMBDA(Railway);
+
+	/*
 #define RUNTIME_LAMBDAS(what) \
 	auto runtime##what = []() { return runtimeHardwareState.enabled(RuntimeHardwareState::Type::what); }; \
 	auto runtimeEnable##what = []() { runtimeHardwareState.enable(RuntimeHardwareState::Type::what); };
@@ -231,7 +244,7 @@ namespace winston
 	RUNTIME_LAMBDAS(SPI);
 	RUNTIME_LAMBDAS(Persistence);
 	RUNTIME_LAMBDAS(Network);
-	RUNTIME_LAMBDAS(Railway);
+	RUNTIME_LAMBDAS(Railway);*/
 	void logRuntimeStatus();
 
 	template<size_t>

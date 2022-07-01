@@ -121,6 +121,15 @@ namespace winston
 #endif
 				this->digitalCentralStation->tick();
 			}
+			{
+#ifdef WINSTON_LOCO_TRACKING
+#ifdef WINSTON_STATISTICS
+				StopwatchJournal::Event tracer(this->stopWatchJournal, "loco ltracking");
+#endif
+				for (auto& loco : this->locomotiveShed)
+					loco.update();
+#endif
+			}
 			return this->systemLoop();
 		};
 		using Railway = _Railway;

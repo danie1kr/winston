@@ -6,27 +6,27 @@
 			All non-arduino files created by visual micro and all visual studio project or solution files can be freely deleted and are not required to compile a sketch (do not delete your own code!).
 			Note: debugger breakpoints are stored in '.sln' or '.asln' files, knowledge of last uploaded breakpoints is stored in the upload.vmps.xml file. Both files are required to continue a previous debug session without needing to compile and upload again
 	
-	Hardware: Teensy 4.1, Platform=teensy4, Package=teensy
+	Hardware: Teensy 4.1                                                                                                                           (teensy41), Platform=teensy4, Package=teensy
 */
 
 #if defined(_VMICRO_INTELLISENSE)
 
 #ifndef _VSARDUINO_H_
 #define _VSARDUINO_H_
-#define __HARDWARE_imxrt1062__
-#define __HARDWARE_IMXRT1062__
+#define __HARDWARE_imxrt1062__ 1
+#define __HARDWARE_IMXRT1062__ 1
 #define _VMDEBUG 1
-#define WINSTON_WITH_TEENSYDEBUG
+#define WINSTON_WITH_TEENSYDEBUG 1
 #define TCB_SPAN_NAMESPACE_NAME std
-#define WINSTON_PLATFORM_TEENSY
+#define WINSTON_PLATFORM_TEENSY 1
 #define TL_NAMESPACE std
-#define __IMXRT1062__
+#define __IMXRT1062__ 1
 #define TEENSYDUINO 156
 #define ARDUINO 108019
-#define ARDUINO_TEENSY41
+#define ARDUINO_TEENSY41 1
 #define F_CPU 600000000
-#define USB_DUAL_SERIAL
-#define LAYOUT_US_ENGLISH
+#define USB_DUAL_SERIAL 1
+#define LAYOUT_US_ENGLISH 1
 #define __cplusplus 201103L
 #undef __cplusplus
 #define __cplusplus 201103L
@@ -85,7 +85,7 @@ typedef unsigned long __uint32_t;
 
 #define at_quick_exit(x)
 
-#include "arduino.h"
+#include <arduino.h>
 #define abs(x) ((x)>0?(x):-(x))
 #define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
 #define round(x)     ((x)>=0?(long)((x)+0.5):(long)((x)-0.5))

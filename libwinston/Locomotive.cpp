@@ -71,7 +71,8 @@ namespace winston
 		timeOnTour = now - this->details.lastPositionUpdate;
 		if (inMilliseconds(timeOnTour) > WINSTON_LOCO_POSITION_TRACK_RATE)
 		{
-			this->details.position.drive((Distance)((this->details.forward ? 1 : -1) * this->speedMap.speed(this->details.throttle) * inMilliseconds(timeOnTour)) / 1000);
+			if(this->details.throttle != 0)
+				this->details.position.drive((Distance)((this->details.forward ? 1 : -1) * this->speedMap.speed(this->details.throttle) * inMilliseconds(timeOnTour)) / 1000);
 			this->details.lastPositionUpdate = now;
 		}
 		return this->position();
@@ -102,7 +103,7 @@ namespace winston
 		this->details.position = p;
 	}
 
-	const Position& Locomotive::position()
+	const Position& Locomotive::position() const
 	{
 		return this->details.position;
 	}

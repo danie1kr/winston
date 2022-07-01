@@ -25,6 +25,7 @@ namespace winston
 		Railway::Callbacks::TurnoutUpdateCallback injectTurnoutSignalHandling(Railway::Callbacks::TurnoutUpdateCallback callback);
 
 		void initSignalsForTurnouts(std::set<Turnout::Shared> turnouts);
+		void setSignalsFor(Turnout::Shared turnout, const Track::Connection connectionStartFrom);
 		void setSignalsFor(Turnout::Shared turnout, const Turnout::Direction direction);
 		void setSignalsFor(Turnout::Shared turnout);
 		static void setSignalOn(Track::Shared track, const Track::Connection signalGuardedConnection, const Signal::Aspect aspect);

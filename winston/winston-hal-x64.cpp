@@ -60,6 +60,7 @@ void WebServerWSPP::init(OnHTTP onHTTP, OnMessage onMessage, unsigned int port)
     this->server.set_http_handler(websocketpp::lib::bind(&WebServerWSPP::on_http, this, websocketpp::lib::placeholders::_1));
     this->server.set_message_handler(websocketpp::lib::bind(&WebServerWSPP::on_msg, this, websocketpp::lib::placeholders::_1, websocketpp::lib::placeholders::_2));
     this->server.set_open_handler(websocketpp::lib::bind(&WebServerWSPP::on_open, this, websocketpp::lib::placeholders::_1));
+    this->server.set_fail_handler(websocketpp::lib::bind(&WebServerWSPP::on_close, this, websocketpp::lib::placeholders::_1));
     this->server.set_close_handler(websocketpp::lib::bind(&WebServerWSPP::on_close, this, websocketpp::lib::placeholders::_1));
 
     this->server.listen(port);
@@ -69,7 +70,14 @@ void WebServerWSPP::init(OnHTTP onHTTP, OnMessage onMessage, unsigned int port)
 
 void WebServerWSPP::send(Client& connection, const std::string &data)
 {
-    this->server.send(connection, data, websocketpp::frame::opcode::text);
+    try
+    {
+        this->server.send(connection, data, websocketpp::frame::opcode::text);
+    }
+    catch (std::exception e)
+    {
+        connection.reset();
+    }
 }
 
 void WebServerWSPP::step()

@@ -120,9 +120,6 @@
     <ClInclude Include="..\libwinston\Detector.h">
       <Filter>libwinston-src</Filter>
     </ClInclude>
-    <ClInclude Include="..\winston\PN532_OccupancyDevice.h">
-      <Filter>winston-src</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\libwinston\Block.cpp">
@@ -193,9 +190,6 @@
     </ClCompile>
     <ClCompile Include="..\libwinston\Detector.cpp">
       <Filter>libwinston-src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\winston\PN532_OccupancyDevice.cpp">
-      <Filter>winston-src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -32,7 +32,10 @@ namespace winston
 			using SignalUpdateCallback = std::function<const State(Track::Shared track, Track::Connection connection, const Signal::Aspects aspect)>;
 			SignalUpdateCallback signalUpdateCallback;
 
+			#ifdef WINSTON_NFC_DETECTORS
 			NFCDetector::Callback nfcDetectorCallback;
+			#endif
+
 			DCCDetector::Callback dccDetectorCallback;
 		};
 

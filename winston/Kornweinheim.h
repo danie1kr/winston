@@ -118,8 +118,10 @@ private:
     
 #elif defined(WINSTON_PLATFORM_WIN_x64)
     SerialDeviceWin::Shared serial;
+#ifdef WINSTON_NFC_DETECTORS
     PN532_DetectorDevice::Shared pn532;
     std::array<winston::NFCDetector::Shared, 13> nfcDetectors;
+#endif
 #endif
 
 #ifdef WINSTON_LOCO_TRACKING

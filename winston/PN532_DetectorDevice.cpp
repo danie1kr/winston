@@ -1,5 +1,5 @@
 #include "PN532_DetectorDevice.h"
-
+#ifdef WINSTON_NFC_DETECTORS
 PN532_DetectorDevice::PN532_DetectorDevice(winston::NFCDetector& detector, winston::hal::SerialDevice& device)
 	: winston::DetectorDevice<winston::NFCAddress>(detector), winston::Shared_Ptr<PN532_DetectorDevice>(), lastCommand(), lastSend(0), expectedHandler(), firmwareVersion(0), device(device)
 {
@@ -316,3 +316,4 @@ const winston::Result PN532_DetectorDevice::card(PN532_DetectorDevice& instance)
     result = instance.startReadPassiveTargetID(PN532_MIFARE_ISO14443A);
     return result;
 }
+#endif

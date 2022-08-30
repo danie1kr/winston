@@ -191,6 +191,7 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
         return winston::Result::OK;
     };
 
+#ifdef WINSTON_NFC_DETECTORS
     callbacks.nfcDetectorCallback = [=](winston::Detector::Shared, const winston::NFCAddress address) -> winston::Result
     {
         auto now = winston::hal::now();
@@ -237,6 +238,7 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
         */
         return winston::Result::OK;
     };
+#endif
 
     return callbacks;
 }
@@ -486,14 +488,15 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
             for (auto& track : bl->tracks())
                 blockTracks.add(track->name());
         }
-
-        for(size_t detector = 0; detector < this->nfcDetectors.size(); ++detector)
+#ifdef WINSTON_NFC_DETECTORS
+        for (size_t detector = 0; detector < this->nfcDetectors.size(); ++detector)
         {
             auto d = detectors.createNestedObject();
             d["id"] = (int)detector;
             d["track"] = this->nfcDetectors[detector]->position().trackName();
             d["connection"] = winston::Track::ConnectionToString(this->nfcDetectors[detector]->position().connection());
         }
+#endif
 
         std::string railwayContentJson("");
         serializeJson(railwayContent, railwayContentJson);
@@ -656,10 +659,11 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
         winston::Address address = data["address"];
 
         auto loco = this->locoFromAddress(address);
-        if (loco)
-            this->detectorUpdate(this->nfcDetectors[id], *loco);
-        else
-            winston::logger.err(winston::build("error: locomotive ", address, " not in shed"));
+        // TODO: detector update
+        //if (loco)
+        //    this->detectorUpdate(this->nf[id], *loco);
+        //else
+        //    winston::logger.err(winston::build("error: locomotive ", address, " not in shed"));
         /*
         unsigned int block = (unsigned int)data["block"].toInt();
         unsigned int loco = (unsigned int)data["loco"].toInt();
@@ -862,7 +866,7 @@ void Kornweinheim::setupDetectors()
     };
 #ifdef WINSTON_PLATFORM_TEENSY
 
-#elif defined(WINSTON_PLATFORM_WIN_x64)
+#elif defined(WINSTON_PLATFORM_WIN_x64) && defined(WINSTON_NFC_DETECTORS)
     /*
     const auto pbf1 = this->railway->track(Y2021RailwayTracks::PBF1);
     const auto B = winston::Track::Connection::B;

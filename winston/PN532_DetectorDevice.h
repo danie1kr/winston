@@ -3,6 +3,7 @@
 #include <queue>
 #include "../libwinston/Detector.h"
 
+#ifdef WINSTON_NFC_DETECTORS
 
 // see https://github.com/elechouse/PN532/blob/PN532_HSU/PN532/PN532.h
 constexpr auto PN532_COMMAND_GETFIRMWAREVERSION = (0x02);
@@ -59,4 +60,5 @@ private:
 	unsigned int firmwareVersion;
 	winston::hal::SerialDevice& device;
 };
+#endif
 

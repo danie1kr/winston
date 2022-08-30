@@ -262,7 +262,9 @@ namespace winston
 	class Detector;
 	template<typename T> class DetectorAddressable;
 	using DCCDetector = DetectorAddressable<Address>;
+#ifdef WINSTON_NFC_DETECTORS
 	using NFCDetector = DetectorAddressable<NFCAddress>;
+#endif
 	class Track;
 	class Bumper;
 	class Rail;

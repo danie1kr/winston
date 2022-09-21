@@ -18,3 +18,7 @@
 /winston-teensy/Debug Realworld
 /winston-teensy/Release
 /.vs/winston/FileContentIndex
+/winston-esp-signal/wifi.h
+/winston-esp-signal/Debug
+/winston-esp-signal/.vs/winston-esp-signal
+/winston-esp-signal/winston-esp-signal.vcxproj.user

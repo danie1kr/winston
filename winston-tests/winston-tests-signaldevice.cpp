@@ -51,19 +51,19 @@ namespace winstontests
 			{
 				signal->aspect(winston::Signal::Aspect::Halt);
 				signalDevice->update(signal);
-				const std::vector<unsigned int> expect_Halt = { 0x00, 0x0F, 0xFF};
+				const std::vector<unsigned int> expect_Halt = { 0x00, winston::Signal::Light::maximum >> 8, winston::Signal::Light::maximum & 0xFF};
 			
 				auto data = sendDevice->data();
-				std::vector<unsigned int> lastThree(data.end() - 3, data.end());
-				Assert::IsTrue(expect_Halt == lastThree);
+				std::vector<unsigned int> data31To33(data.end() - 6, data.end() - 3);
+				Assert::IsTrue(expect_Halt == data31To33);
 			}
 			{
 				signal->aspect(winston::Signal::Aspect::Go);
 				signalDevice->update(signal);
-				const std::vector<unsigned int> expect_Go = { 0xFF, 0xF0, 0x00 };
+				const std::vector<unsigned int> expect_Go = { winston::Signal::Light::maximum >> 4, (winston::Signal::Light::maximum & 0xF) << 4, 0x00 };
 				auto data = sendDevice->data();
-				std::vector<unsigned int> lastThree(data.end() - 3, data.end());
-				Assert::IsTrue(expect_Go == lastThree);
+				std::vector<unsigned int> data34To36(data.end() - 3, data.end());
+				Assert::IsTrue(expect_Go == data34To36);
 			}
 		}
     };

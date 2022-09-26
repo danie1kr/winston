@@ -21,10 +21,10 @@ namespace winston
 
 		extern void init();
 
-		class UDPSocket : public Shared_Ptr<UDPSocket>
+		class Socket : public Shared_Ptr<Socket>
 		{
 		public:
-			enum class State
+			enum class State : unsigned char
 			{
 				NotConnected,
 				Connecting,
@@ -32,7 +32,13 @@ namespace winston
 				Closing
 			};
 
-			UDPSocket(const std::string ip, const unsigned short port);
+			enum class Type : unsigned char
+			{
+				TCP,
+				UDP
+			};
+
+			Socket(const std::string ip, const unsigned short port);
 			virtual const Result send(const std::vector<unsigned char> data) = 0;
 			virtual const Result recv(std::vector<unsigned char>& data) = 0;
 
@@ -41,7 +47,6 @@ namespace winston
 		protected:
 			State state;
 		};
-
 
 		template<typename T>
 		class SPIDevice : public Device, public SendDevice<T>, public Shared_Ptr<SPIDevice<T>>

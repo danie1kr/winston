@@ -306,9 +306,9 @@ namespace winstontests
             loco->position(pos);
             winston::hal::delay(100);   // ==> distance = 50000mm
             winston::Duration timeOnTour;
-            auto newPos = loco->moved(timeOnTour);
+            auto& newPos = loco->moved(timeOnTour);
             auto travelledDistance = inMilliseconds(timeOnTour) * map[throttle] / 1000;
-            Assert::AreEqual(newPos.trackName(), expect.trackName());
+            Assert::AreEqual(expect.trackName(), newPos.trackName());
             Assert::IsTrue(newPos.connection() == expect.connection());
             //Assert::IsTrue(newPos.distance() - (travelledDistance - distance) < 50);
         }

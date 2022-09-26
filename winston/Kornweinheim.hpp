@@ -692,7 +692,7 @@ void Kornweinheim::systemSetup() {
 
     // the system specific digital central station
     auto at = std::static_pointer_cast<winston::DigitalCentralStation::TurnoutAddressTranslator>(addressTranslator);
-    auto udp = std::static_pointer_cast<winston::hal::UDPSocket>(this->z21Socket);
+    auto udp = std::static_pointer_cast<winston::hal::Socket>(this->z21Socket);
     this->digitalCentralStation = Z21::make(udp, at, *this, this->signalBox, z21Callbacks());
 
 #ifdef WINSTON_RAILWAY_DEBUG_INJECTOR

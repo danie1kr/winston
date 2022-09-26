@@ -3,9 +3,6 @@
 #include "../libwinston/Util.h"
 #include "../libwinston/Log.h"
 
-#include <WinSock2.h>
-#include <WS2tcpip.h>
-
 #include <iostream>
 #include <fstream>
 
@@ -151,7 +148,7 @@ const size_t WebServerWSPP::maxMessageSize()
 {
     return this->server.get_max_message_size();
 }
-
+/*
 UDPSocketWinSock::UDPSocketWinSock(const std::string ip, const unsigned short port) : winston::hal::UDPSocket(ip, port)
 {
     this->addr.sin_family = AF_INET;
@@ -226,7 +223,7 @@ const winston::Result UDPSocketWinSock::recv(std::vector<unsigned char>& data)
         data.resize(0);
     return winston::Result::OK;
 }
-
+*/
 SerialDeviceWin::SerialDeviceWin()
     : winston::hal::SerialDevice(), winston::Shared_Ptr<SerialDeviceWin>()
 {

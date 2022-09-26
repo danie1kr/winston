@@ -24,7 +24,7 @@
 class Z21 : public winston::DigitalCentralStation, winston::Shared_Ptr<Z21> {
 public:
     Z21() = delete;
-    Z21(winston::hal::UDPSocket::Shared& socket, winston::DigitalCentralStation::TurnoutAddressTranslator::Shared& addressTranslator, LocoAddressTranslator& locoAddressTranslator, winston::SignalBox::Shared& signalBox, winston::DigitalCentralStation::Callbacks callbacks);
+    Z21(winston::hal::Socket::Shared& socket, winston::DigitalCentralStation::TurnoutAddressTranslator::Shared& addressTranslator, LocoAddressTranslator& locoAddressTranslator, winston::SignalBox::Shared& signalBox, winston::DigitalCentralStation::Callbacks callbacks);
     void processPacket(uint8_t *packet);
 
     const winston::Result connect();
@@ -184,7 +184,7 @@ public:
     Z21Packet packet;
 
 private:
-    winston::hal::UDPSocket::Shared socket;
+    winston::hal::Socket::Shared socket;
 };
 
 //extern Z21Translator Z21;

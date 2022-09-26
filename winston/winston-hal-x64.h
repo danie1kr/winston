@@ -10,23 +10,96 @@
 
 const char* operator "" _s(const char* in, size_t len);
 
-class UDPSocketWinSock : public winston::hal::UDPSocket, winston::Shared_Ptr<UDPSocketWinSock>
+#include <WinSock2.h>
+#include <WS2tcpip.h>
+template<winston::hal::Socket::Type SocketType>
+class SocketWinSock : public winston::hal::Socket, winston::Shared_Ptr<SocketWinSock<SocketType>>
 {
 public:
-	using winston::Shared_Ptr<UDPSocketWinSock>::Shared;
-	using winston::Shared_Ptr<UDPSocketWinSock>::make;
+	using winston::Shared_Ptr<SocketWinSock<SocketType>>::Shared;
+	using winston::Shared_Ptr<SocketWinSock<SocketType>>::make;
 
-	UDPSocketWinSock(const std::string ip, const unsigned short port);
-	const winston::Result send(const std::vector<unsigned char> data);
-	const winston::Result recv(std::vector<unsigned char>& data);
+	SocketWinSock(const std::string ip, const unsigned short port) : winston::hal::Socket(ip, port)
+	{
+		this->addr.sin_family = AF_INET;
+		this->addr.sin_port = htons(port);
+		inet_pton(AF_INET, ip.c_str(), &this->addr.sin_addr.s_addr);
+
+		u_long nMode = 1; // 1: NON-BLOCKING
+		ioctlsocket(this->socket, FIONBIO, &nMode);
+
+		this->connect();
+	}
+
+	const winston::Result send(const std::vector<unsigned char> data)
+	{
+		auto sz = (int)(data.size() * sizeof(unsigned char));
+
+		auto result = sendto(this->socket, reinterpret_cast<const char*>(data.data()), sz, 0, (SOCKADDR*)&this->addr, (int)sizeof(SOCKADDR_IN));
+
+		if (result == sz)
+		{
+			this->state = State::Connected;
+			return winston::Result::OK;
+		}
+		else
+		{
+			this->state = State::NotConnected;
+			if (result == -1)
+				this->connect();
+
+			return winston::Result::SendFailed;
+		}
+	}
+
+	const winston::Result recv(std::vector<unsigned char>& data)
+	{
+		sockaddr_in from;
+		int size = (int)sizeof(from);
+		data.resize(1000);
+
+		fd_set fds;
+		struct timeval tv;
+
+		// Set up the file descriptor set.
+		FD_ZERO(&fds);
+		FD_SET(this->socket, &fds);
+
+		// Set up the struct timeval for the timeout.
+		tv.tv_sec = 0;
+		tv.tv_usec = 0; // anything > 0 is at least 14ms
+
+		// Wait until timeout or data received.
+		if (select(0, &fds, NULL, NULL, &tv) > 0) {
+			int ret = recvfrom(this->socket, reinterpret_cast<char*>(data.data()), (int)data.size(), 0, reinterpret_cast<SOCKADDR*>(&from), &size);
+			if (ret < 0)
+				return winston::Result::ReceiveFailed;
+
+			// make the buffer zero terminated
+			data.resize(ret);
+		}
+		else
+			data.resize(0);
+		return winston::Result::OK;
+	}
 private:
 
-	const winston::Result connect();
+	const winston::Result connect()
+	{
+		if (!winston::runtimeNetwork())
+			return winston::Result::NotInitialized;
 
-	SOCKET udpSocket;
+		closesocket(this->socket);
+		this->socket = ::socket(AF_INET, SocketType == winston::hal::Socket::Type::UDP ? SOCK_DGRAM : SOCK_STREAM, 0);
+		this->state = State::Connecting;
+		return winston::Result::OK;
+	}
+
+	SOCKET socket;
 	SOCKADDR_IN addr;
 };
-using UDPSocket = UDPSocketWinSock;
+using UDPSocket = SocketWinSock<winston::hal::Socket::Type::UDP>;
+using TCPSocket = SocketWinSock<winston::hal::Socket::Type::TCP>;
 
 class SerialDeviceWin : public winston::hal::SerialDevice, winston::Shared_Ptr<SerialDeviceWin>
 {

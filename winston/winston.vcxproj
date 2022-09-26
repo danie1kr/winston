@@ -126,6 +126,7 @@
     <ClCompile Include="external\central-z21\Z21.cpp" />
     <ClCompile Include="external\central-z21\Z21Packet.cpp" />
     <ClCompile Include="FT232_Device.cpp" />
+    <ClInclude Include="IC74HC695_SignalDevice.h" />
     <ClInclude Include="Kornweinheim.hpp" />
     <ClCompile Include="PN532_DetectorDevice.cpp" />
     <ClCompile Include="railways.cpp" />

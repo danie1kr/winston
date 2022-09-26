@@ -95,6 +95,9 @@
     <ClInclude Include="PN532_DetectorDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="IC74HC695_SignalDevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\winston.html">

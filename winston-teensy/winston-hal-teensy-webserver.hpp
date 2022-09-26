@@ -81,8 +81,6 @@ private:
     WebsocketsServer server;
     EthernetServer httpServer;
     OnHTTP onHTTP;
-
-    WebsocketsClient clients[1];
 };
 using WebServer = WebServerTeensy;
 #endif
@@ -239,6 +237,7 @@ void WebServerTeensy::step()
                     // so we can send a reply.
                     HTTPConnectionTeensy connection(httpClient);
                     this->onHTTP(connection, resource);
+                    httpClient.close();
                     break;
                 }
                 else if (c == '\n') {
@@ -303,14 +302,10 @@ void WebServerTeensy::step()
                     }
                 });
             this->newConnection(connection);
-            //clients[0] = connection;
         }
 
 
     }
-    //if(clients[0].available())
-    //    clients[0].poll();
-    //return;
     if (this->connections.size() == 0)
         return;
     this->advanceConnectionIterator();

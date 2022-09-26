@@ -1,4 +1,6 @@
 #pragma once
+#ifndef WINSTON_TYPES_H
+#define WINSTON_TYPES_H
 
 #ifdef __GNUC__ 
 #pragma GCC push_options
@@ -296,3 +298,4 @@ namespace winston
 #define inMilliseconds(x) ((x) / toMilliseconds(1))
 #define inMicroseconds(x) ((x) / toMicroseconds(1))
 }
+#endif

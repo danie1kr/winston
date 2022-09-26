@@ -312,7 +312,7 @@ void ensureStorageFile()
 #endif
 }
 */
-UDPSocketTeensy::UDPSocketTeensy(const std::string ip, const unsigned short port) : winston::hal::UDPSocket(ip, port), ip(ip), port(port)
+UDPSocketTeensy::UDPSocketTeensy(const std::string ip, const unsigned short port) : winston::hal::Socket(ip, port), ip(ip), port(port)
 {
     Udp.begin(port);
 }

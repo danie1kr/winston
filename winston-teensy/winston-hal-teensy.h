@@ -56,7 +56,7 @@ constexpr const char* operator "" _s(const char* in, size_t len)
 }
 #endif
 
-class UDPSocketTeensy : public winston::hal::UDPSocket, winston::Shared_Ptr<UDPSocketTeensy>
+class UDPSocketTeensy : public winston::hal::Socket, winston::Shared_Ptr<UDPSocketTeensy>
 {
 public:
 	using winston::Shared_Ptr<UDPSocketTeensy>::Shared;

@@ -1,3 +1,5 @@
+#ifndef WINSTON_UTIL_H
+#define WINSTON_UTIL_H
 #pragma once
 
 #include <string>
@@ -141,3 +143,4 @@ namespace winston
 		std::deque<Entry> journal;
 	};
 }
+#endif

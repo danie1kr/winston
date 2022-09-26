@@ -120,6 +120,9 @@
     <ClInclude Include="..\libwinston\Detector.h">
       <Filter>libwinston-src</Filter>
     </ClInclude>
+    <ClInclude Include="..\libwinston\Position.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\libwinston\Block.cpp">
@@ -189,6 +192,9 @@
       <Filter>TeensyDebug</Filter>
     </ClCompile>
     <ClCompile Include="..\libwinston\Detector.cpp">
+      <Filter>libwinston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libwinston\Position.cpp">
       <Filter>libwinston-src</Filter>
     </ClCompile>
   </ItemGroup>

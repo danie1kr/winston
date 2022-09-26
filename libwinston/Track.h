@@ -1,3 +1,5 @@
+#ifndef WINSTON_TRACK_H
+#define WINSTON_TRACK_H
 #pragma once
 
 #include <array>
@@ -286,3 +288,4 @@ namespace winston
 
 	std::string build(const Track::Connection first);
 }
+#endif

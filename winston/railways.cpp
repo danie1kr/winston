@@ -481,7 +481,7 @@ winston::Track::Shared Y2021Railway::define(const Tracks track)
     switch (track)
     {
         BUMPER(N1, Roco::R2 + Roco::G12 + Roco::R3 + Roco::R10 + Roco::G12 + 2 * Roco::G1);
-        BUMPER(N2, 2 * Roco::G12 + Roco::R2 + Roco::G1);
+        BUMPER(N2, Roco::D12 + 2 * Roco::G12 + Roco::R10);
         BUMPER(GBF1, 4 * Roco::G12 + Roco::R10 + Roco::G1);
         BUMPER(GBF2a, 2 * Roco::G1);
         BUMPER(GBF3a, Roco::G1);
@@ -494,10 +494,12 @@ winston::Track::Shared Y2021Railway::define(const Tracks track)
         RAIL(GBF3b, 3 * Roco::G1 + Roco::G4);
         RAIL(B1, Roco::G12 + Roco::R2);
         RAIL(B2, Roco::G12 + Roco::G1 + Roco::G4 + Roco::R3);
-        RAIL(B3, 4 * Roco::R3 + Roco::G14);
+        RAIL(B3, 3 * Roco::R3 + Roco::G14 + Roco::R2);
         RAIL(B4, Roco::G12 + 4 * Roco::R2);
         RAIL(B5, Roco::G12 + 3 * Roco::G1);
-        RAIL(B6, Roco::G1 + 5 * Roco::R2 + Roco::G14);
+        RAIL(B6, Roco::G1 + 5 * Roco::R2 + Roco::G12);
+        RAIL(B_PBF2_PBF1, Roco::DG1);
+        RAIL(B_To_GBF, Roco::G12);
         TURNOUT(Turnout1, turnoutCallback, Roco::BW23, false);
         TURNOUT(Turnout3, turnoutCallback, Roco::W15, false);
         TURNOUT(Turnout7, turnoutCallback, Roco::BW23, false);
@@ -539,6 +541,8 @@ void Y2021Railway::connect()
     LOCAL_TRACK(B4);
     LOCAL_TRACK(B5);
     LOCAL_TRACK(B6);
+    LOCAL_TRACK(B_PBF2_PBF1);
+    LOCAL_TRACK(B_To_GBF);
     LOCAL_TRACK(N1);
     LOCAL_TRACK(N2);
     LOCAL_TRACK(Turnout1);
@@ -646,9 +650,11 @@ void Y2021Railway::connect()
 
     // inner turnouts
     Turnout1->connect(C, Turnout2, B);
-    Turnout4->connect(C, Turnout5, C);
+    Turnout4->connect(C, B_PBF2_PBF1, A)
+        ->connect(B, Turnout5, C);
     Turnout7->connect(C, Turnout8, B);
-    Turnout9->connect(C, Turnout12, C);
+    Turnout9->connect(C, B_To_GBF, A)
+        ->connect(B, Turnout12, C);
     Turnout10->connect(C, Turnout11, C);
     Turnout15->connect(C, Turnout16, C);
 
@@ -661,11 +667,11 @@ void Y2021Railway::connect()
         ->connect(B, Turnout14, A)
         ->connect(B, GBF1, A);
     Turnout13->connect(C, GBF3b, A)
-        ->connect(B, Turnout16, A)
-        ->connect(B, GBF3a, A);
+        ->connect(B, Turnout16, B)
+        ->connect(A, GBF3a, A);
     Turnout14->connect(C, GBF2b, A)
-        ->connect(B, Turnout15, B)
-        ->connect(A, GBF2a, A);
+        ->connect(B, Turnout15, A)
+        ->connect(B, GBF2a, A);
 }
 
 void Y2021Railway::attachDetectors()

@@ -315,7 +315,8 @@ BETTER_ENUM(Y2021RailwayTracks, unsigned int,
     GBF3a, GBF3b,
     N1,
     N2,
-    B1, B2, B3, B4, B5, B6
+    B1, B2, B3, B4, B5, B6,
+    B_PBF2_PBF1, B_To_GBF
 );
 enum class Y2021RailwayDetectors : unsigned int
 {

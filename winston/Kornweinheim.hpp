@@ -746,30 +746,46 @@ void Kornweinheim::setupSignals()
 
     // H
     unsigned int port = 0;
-    this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::PBF1), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
-    this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::PBF2), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
-    this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::PBF3), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
-    /*this->railway->track(Y2021RailwayTracks::PBF1)->attachSignal(winston::SignalH::make([=](const winston::Signal::Aspects aspect)->const winston::State {
-        return signalUpdateCallback(track, connection, aspect);
-        }, 5U, port), winston::Track::Connection::B);
-    port += winston::SignalH::lightsCount();
-    this->railway->track(Y2021RailwayTracks::PBF2)->attachSignal(winston::SignalH::make(signalUpdateCallback, 5U, port), winston::Track::Connection::B);
-    port += winston::SignalH::lightsCount();
-    this->railway->track(Y2021RailwayTracks::PBF3)->attachSignal(winston::SignalH::make(signalUpdateCallback, 5U, port), winston::Track::Connection::B);
-    port += winston::SignalH::lightsCount();*/
+    // PBF
+    this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF1), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF2), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF3), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
 
     // dummy
+    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF1), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF2), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF3), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
     port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::PBF1a), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+
+    // rechte Strecke
+    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B1), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
+    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B4), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
+    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::B1), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::B4), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+
+    // obere Strecke
+    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B2), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
+    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B5), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
+    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B2), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B5), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+
+    // linke Strecke
     port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::B3), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
     port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::B6), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
-    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::N1), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B3), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B6), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    
+    // Abstellgleise
+    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::N1), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
     port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::N2), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
-    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF1), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    
+    // GBF
+    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::GBF1), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
     port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF3a), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
-    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF3b), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::GBF3b), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
     port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF3b), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
     port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF2a), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
-    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF2b), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::GBF2b), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
     port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF2b), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
 
     

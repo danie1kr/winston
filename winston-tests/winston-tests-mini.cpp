@@ -166,7 +166,7 @@ namespace winstontests
             Assert::IsTrue(sBA.operator bool() == true);
             Assert::IsTrue(sCA.operator bool() == true);
 
-            signalBox->setSignalsFor(t1);
+            signalBox->setSignalsForChangingTurnout(t1, t1->direction());
             for (int i = 0; i < 10; ++i)
                 signalBox->work();
             Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Go));

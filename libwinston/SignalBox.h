@@ -27,8 +27,8 @@ namespace winston
 		void initSignalsForTurnouts(std::set<Turnout::Shared> turnouts);
 		void setSignalsFor(Turnout::Shared turnout, const Track::Connection connectionStartFrom);
 		void setSignalsFor(Turnout::Shared turnout, const Turnout::Direction direction);
-		void setSignalsFor(Turnout::Shared turnout);
-		static void setSignalOn(Track::Shared track, const Track::Connection signalGuardedConnection, const Signal::Aspect aspect);
+		void setSignalsForChangingTurnout(Turnout::Shared turnout, const Turnout::Direction targetDirection);
+		static void setSignalOn(Track::Shared track, const Track::Connection signalGuardedConnection, const Signal::Aspect aspect, const Signal::Aspect preAspect = Signal::Aspect::Off);
 		
 		void order(Command::Shared command);
 		bool work();

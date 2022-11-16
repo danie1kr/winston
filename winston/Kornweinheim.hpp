@@ -174,7 +174,7 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
     callbacks.turnoutUpdateCallback = [=](winston::Turnout::Shared turnout, const winston::Turnout::Direction direction) -> const winston::State
     {
         // tell the signal box to update the signals
-        this->signalBox->setSignalsFor(turnout);
+        this->signalBox->setSignalsForChangingTurnout(turnout, direction);
 
 #ifdef WINSTON_WITH_WEBSOCKET
         // tell the ui what happens

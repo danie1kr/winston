@@ -245,15 +245,15 @@ namespace winston
 		LightsArray _lights;
 	};
 
-	constexpr Signal::Aspects operator |(Signal::Aspect a, Signal::Aspect b)
+	constexpr Signal::Aspects operator |(const Signal::Aspect a, const Signal::Aspect b) 
 	{
 		return (unsigned int)a | (unsigned int)b;
 	}
-	constexpr Signal::Aspects operator |(Signal::Aspects a, Signal::Aspect b)
+	constexpr Signal::Aspects operator |(const Signal::Aspects a, const Signal::Aspect b)
 	{
 		return (unsigned int)a | (unsigned int)b;
 	}
-	constexpr Signal::Aspects operator |(Signal::Aspect a, Signal::Aspects b)
+	constexpr Signal::Aspects operator |(const Signal::Aspect a, const Signal::Aspects b)
 	{
 		return (unsigned int)a | (unsigned int)b;
 	}

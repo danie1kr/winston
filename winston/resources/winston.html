@@ -430,9 +430,16 @@
 
             let colorClass = aspects & 0b00100 ? "green" : "red";
 
-            let signal = cy.nodes(".signal[id=\"" + track + "_signal_" + guarding + "\"]").removeClass("green").removeClass("red").addClass(colorClass);
-            //console.log(aspects);
-            //turnoutUpdate(turnout);
+            if (aspects & 0b00001) colorClass = "black";        // Off
+            else if (aspects & 0b00010) colorClass = "red";   // Halt
+            else if (aspects & 0b00100) colorClass = "green";   // Go
+            else if (aspects & 0b01000) colorClass = "yellow";  // ExpectHalt
+            else if (aspects & 0b10000) colorClass = "turquoise";   // ExpectGo
+
+            let signal = cy.nodes(".signal[id=\"" + track + "_signal_" + guarding + "\"]")
+            //    .removeClass("black").removeClass("green").removeClass("red").removeClass("yellow").removeClass("turquoise")
+            //    .addClass(colorClass)
+                .data("aspects", aspects);
         }
 
         function doControlLoco(event) {
@@ -639,7 +646,14 @@
                             "width": 10,
                             "height": 10,
                             "shape": "octagon",
-                            "background-color": "red"
+                            //"background-color": "red"
+                        }
+
+                    }/*,
+                    {
+                        selector: ".signal.black",
+                        style: {
+                            "background-color": "black"
                         }
 
                     },
@@ -650,6 +664,27 @@
                         }
 
                     },
+                    {
+                        selector: ".signal.red",
+                        style: {
+                            "background-color": "red"
+                        }
+
+                    },
+                    {
+                        selector: ".signal.yellow",
+                        style: {
+                            "background-color": "yellow"
+                        }
+
+                    },
+                    {
+                        selector: ".signal.turquoise",
+                        style: {
+                            "background-color": "turquoise"
+                        }
+
+                    }*/,
                     {
                         selector: "node.detector",
                         style: {
@@ -708,6 +743,42 @@
                     halignBox: "center",
                     tpl: function (data) {
                         return '<p>' + (data.displayName ? data.displayName : data.name) + '</p>';
+                    }
+                },
+                {
+                    query: '.signal',
+                    valign: "center",
+                    halign: "center",
+                    valignBox: "center",
+                    halignBox: "center",
+                    tpl: function (data) {
+                        let html = "";
+                        console.log(data);
+                        _.each(data.lights, l => {
+                            let color = "black";
+                            let symbol = "B";
+
+                            
+                            if (l.aspect == 0b00010) { if (l.aspect & data.aspects) { color = "red"; } symbol = "●"; }
+                            if (l.aspect == 0b00100) { if (l.aspect & data.aspects) { color = "green"; } symbol = "●"; }
+                            if (l.aspect == 0b01000) { if (l.aspect & data.aspects) { color = "red"; } symbol = "○"; }
+                            if (l.aspect == 0b10000) { if (l.aspect & data.aspects) { color = "green"; } symbol = "○"; }
+
+                            /*
+                            
+                            if (l.aspect & data.aspects) {
+                                if (data.aspects & 0b01010) color = "red";
+                                else if (data.aspects & 0b10100) color = "green";
+                            }
+                            if (data.aspects & 0b00110) symbol = "●";
+                            else if (data.aspects & 0b11000) symbol = "○";
+                            */
+                            html += '<span style="color:' + color + ';">' + symbol + '</span>';
+                        });
+
+                        return '<p>'
+                            + html
+                            + '</p>';
                     }
                 }/*,
                 {

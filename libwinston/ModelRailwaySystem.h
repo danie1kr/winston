@@ -38,7 +38,7 @@ namespace winston
 					{
 						this->digitalCentralStation->requestTurnoutInfo(turnout);
 						winston::hal::delay(50);
-						this->signalBox->setSignalsFor(turnout);
+						this->signalBox->setSignalsForChangingTurnout(turnout, turnout->direction());
 						winston::hal::delay(100);
 						return winston::State::Finished;
 					}, __PRETTY_FUNCTION__));

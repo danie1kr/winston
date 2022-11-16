@@ -21,11 +21,11 @@ namespace winston
 	const State Signal::aspect(const Aspect aspect)
 	{
 		// pre-signal off if main signal shows Halt
-		if ((unsigned int)aspect & Signal::MaskPreSignalAspect)
+		/*if ((unsigned int)aspect & Signal::MaskPreSignalAspect)
 		{
-			//if(this->_aspect & (unsigned int)Signal::Aspect::Halt)
-			//	this->_aspect = this->_aspect & (unsigned int)Signal::MaskMainSignalAspect; // & pre-signal Off
-			//else
+			if(this->_aspect & (unsigned int)Signal::Aspect::Halt)
+		//		this->_aspect = this->_aspect & (unsigned int)Signal::MaskMainSignalAspect; // & pre-signal Off
+		//	else
 				this->_aspect = (this->_aspect & (unsigned int)Signal::MaskMainSignalAspect) | (unsigned int)aspect; // & pre-signal Off
 		}
 		else
@@ -36,7 +36,17 @@ namespace winston
 				this->_aspect = (this->_aspect & (unsigned int)Signal::MaskPreSignalAspect) | (unsigned int)aspect;
 			//else
 			//	this->_aspect = (unsigned int)aspect;
-		}
+		}*/
+
+		if ((unsigned int)aspect & Signal::MaskPreSignalAspect)
+			this->_aspect = (this->_aspect & (unsigned int)Signal::MaskMainSignalAspect) | (unsigned int)aspect;
+		if (aspect & Signal::Aspect::Go)
+			this->_aspect = (this->_aspect & (unsigned int)Signal::MaskPreSignalAspect) | aspect;
+		if (aspect & Signal::Aspect::Halt)
+			this->_aspect = (unsigned int)aspect;
+		if (aspect & Signal::Aspect::Off)
+			this->_aspect = (unsigned int)Signal::Aspect::Off;
+
 		this->updateLights();
 		return this->callback(this->_aspect);
 	}

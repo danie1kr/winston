@@ -20,7 +20,7 @@ namespace winston
 		return [this, callback](Turnout::Shared turnout, Turnout::Direction direction) -> State {
 			State state = callback(turnout, direction);
 			if (state == State::Finished)
-				this->setSignalsFor(turnout);
+				this->setSignalsForChangingTurnout(turnout, direction);
 			return state;
 		};
 	}
@@ -28,12 +28,12 @@ namespace winston
 	void SignalBox::initSignalsForTurnouts(std::set<Turnout::Shared> turnouts)
 	{
 		for (auto &turnout: turnouts)
-			this->setSignalsFor(turnout);
+			this->setSignalsFor(turnout, turnout->direction());
 	}
 
-	void SignalBox::setSignalOn(Track::Shared track, const Track::Connection signalGuardedConnection, const Signal::Aspect aspect)
+	void SignalBox::setSignalOn(Track::Shared track, const Track::Connection signalGuardedConnection, const Signal::Aspect aspect, const Signal::Aspect preAspect)
 	{
-		const auto preSignalAspect = aspect == Signal::Aspect::Go ? Signal::Aspect::ExpectGo : Signal::Aspect::ExpectHalt;
+		const auto preSignalAspect = aspect & Signal::Aspect::Go ? Signal::Aspect::ExpectGo : Signal::Aspect::ExpectHalt;
 
 		auto current = track;
 		auto connection = signalGuardedConnection;
@@ -41,6 +41,8 @@ namespace winston
 		if (Signal::Shared mainSignal = track->signalGuarding(connection))
 		{
 			mainSignal->aspect(aspect);
+			if (preAspect != Signal::Aspect::Off)
+				mainSignal->aspect(preAspect);
 			auto otherConnection = current->otherConnection(connection);
 			Signal::Shared preSignal;
 			/*auto result = */ Track::traverse<Track::TraversalSignalHandling::OppositeDirection>(current, otherConnection, preSignal);
@@ -62,6 +64,7 @@ namespace winston
 		if (signalToSet)
 		{
 			auto aspect = Signal::Aspect::Halt;
+			auto preAspect = Signal::Aspect::Off;
 			if (turnout->direction() == direction)
 			{
 				Track::Shared current = turnout;
@@ -73,13 +76,19 @@ namespace winston
 				{
 				case Track::TraversalResult::Bumper:
 				case Track::TraversalResult::Looped:
-				case Track::TraversalResult::Signal: aspect = Signal::Aspect::Go; break;
+					aspect = Signal::Aspect::Go;
+					break;
+				case Track::TraversalResult::Signal:
+					aspect = Signal::Aspect::Go;
+					if (signal->shows(Signal::Aspect::Halt))
+						preAspect = Signal::Aspect::ExpectHalt;
+					break;
 				default:
 				case Track::TraversalResult::OpenTurnout: aspect = Signal::Aspect::Halt; break;
 				}
 			}// else halt == default
 
-			this->setSignalOn(signalCurrent, signalConnection, aspect);
+			this->setSignalOn(signalCurrent, signalConnection, aspect, preAspect);
 		}
 	}
 
@@ -94,33 +103,56 @@ namespace winston
 		Signal::Shared signal;
 		auto result = Track::traverse<Track::TraversalSignalHandling::ForwardDirection>(current, connection, signal);
 
-		Signal::Aspect aspect;
+		auto aspect = Signal::Aspect::Halt;
+		auto preAspect = Signal::Aspect::Off;
 		switch (result)
 		{
 		case Track::TraversalResult::Bumper:
 		case Track::TraversalResult::Looped:
-		case Track::TraversalResult::Signal: aspect = Signal::Aspect::Go; break;
+			aspect = Signal::Aspect::Go;
+			break;
+		case Track::TraversalResult::Signal:
+			aspect = Signal::Aspect::Go;
+			if(signal->shows(Signal::Aspect::Halt))
+				preAspect = Signal::Aspect::ExpectHalt;
+			break;
 		default:
 		case Track::TraversalResult::OpenTurnout: aspect = Signal::Aspect::Halt; break;
 		}
-		this->setSignalOn(signalCurrent, signalConnection, aspect);
+		this->setSignalOn(signalCurrent, signalConnection, aspect, preAspect);
 	}
 
-	void SignalBox::setSignalsFor(Turnout::Shared turnout)
+	void SignalBox::setSignalsForChangingTurnout(Turnout::Shared turnout, const Turnout::Direction targetDirection)
 	{
 		// A_facing = leave turnout at A, find first main signal facing A
 		// B_guarding = leave turnout at B, find first pre signal if 
 
+		Turnout::Direction thisDirection, otherDirection;
+
+		if (targetDirection == Turnout::Direction::Changing)
+		{
+			thisDirection = Turnout::Direction::A_B;
+			otherDirection = Turnout::Direction::A_C;
+		}
+		else
+		{
+			thisDirection = targetDirection;
+			otherDirection = turnout->otherDirection(targetDirection);
+		}
 		// the direction
-		this->order(Command::make([this, turnout](const TimePoint &created) -> const winston::State { this->setSignalsFor(turnout, turnout->direction()); return State::Finished; }, __PRETTY_FUNCTION__));
+		this->order(Command::make([this, turnout, thisDirection](const TimePoint &created) -> const winston::State { 
+			this->setSignalsFor(turnout, thisDirection); 
+			return State::Finished; 
+		}, __PRETTY_FUNCTION__));
 		// the closed direction
-		this->order(Command::make([this, turnout](const TimePoint &created) -> const winston::State { this->setSignalsFor(turnout, turnout->otherDirection(turnout->direction())); return State::Finished; }, __PRETTY_FUNCTION__));
+		this->order(Command::make([this, turnout, otherDirection](const TimePoint &created) -> const winston::State { 
+			this->setSignalsFor(turnout, otherDirection); 
+			return State::Finished; 
+		}, __PRETTY_FUNCTION__));
 		// backwards on entry
 		this->order(Command::make([this, turnout](const TimePoint& created) -> const winston::State {
 
 			this->setSignalsFor(turnout, Track::Connection::A);
-
-
 			return State::Finished; 
 
 		}, __PRETTY_FUNCTION__));

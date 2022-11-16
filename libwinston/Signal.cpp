@@ -8,7 +8,7 @@ namespace winston
 	}
 
 	Signal::Signal(const Callback callback, const Length distance)
-		: callback(callback), _distance(distance), _aspect((unsigned int)Aspect::Off)
+		: callback(callback), _distance(distance), _aspect((unsigned int)Aspect::Go)
 	{
 
 	}

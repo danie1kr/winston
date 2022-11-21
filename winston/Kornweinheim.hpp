@@ -1,4 +1,8 @@
-﻿
+﻿#ifdef WINSTON_PLATFORM_TEENSY
+#define Binary_h
+// keeps binary_h from beeing used which kills our 
+#endif
+
 #include "Kornweinheim.h"
 
 
@@ -254,25 +258,46 @@ void Kornweinheim::writeSignal(WebServer::HTTPConnection& connection, const wins
         size_t cnt = signal->lights().size();
         for (const auto& light : signal->lights())
         {
-            std::string icon = "";
+            std::string icon = "", color="black";
             switch (light.aspect)
             {
             default:
-            case winston::Signal::Aspect::Off: icon = " &#9679;"; break;
-            case winston::Signal::Aspect::Halt: icon = " &#128308;"; break;
-            case winston::Signal::Aspect::ExpectHalt: icon = " &#128997;"; break;
-            case winston::Signal::Aspect::Go: icon = " &#128994;"; break;
-            case winston::Signal::Aspect::ExpectGo: icon = " &#129001;"; break;
+            case winston::Signal::Aspect::Off: 
+                icon = "off";
+                break;
+            case winston::Signal::Aspect::Halt: 
+                icon = "&#11044;"; 
+                if (signal->shows(light.aspect)) 
+                { color = "red"; }; 
+                break;
+            case winston::Signal::Aspect::Go: 
+                icon = "&#11044;"; 
+                if (signal->shows(light.aspect)) {
+                    color = "green";
+                }; break;
+            case winston::Signal::Aspect::ExpectHalt: 
+                icon = "&#9675;"; 
+                if (signal->shows(light.aspect)) {
+                 color = "red";
+                };
+                break;
+            case winston::Signal::Aspect::ExpectGo: 
+                icon = "&#9675;";
+                if (signal->shows(light.aspect)) {
+                    color = "green";
+                }; break;
             }
 
-            icon += signal->shows(light.aspect) ? " on" : " off";
+            //icon += signal->shows(light.aspect) ? " on" : " off";
+
+            std::string signal = "<span style=\"color:" + color + ";\">" + icon + "</span>";
 
             if (l == 0)
                 connection.body(winston::build("<tr><td rowspan=", cnt, ">", track->name(), "</td><td rowspan=", cnt, ">", winston::Track::ConnectionToString(trackCon), "</td><td>"));
             else
                 connection.body(winston::build("<tr><td>"));
             ++l;
-            connection.body(winston::build(l, icon, "</td><td>", light.port, "</td><td>", light.port, "</td></tr>"));
+            connection.body(winston::build(l, signal, "</td><td>", light.port, "</td></tr>"));
         }
     }
 }
@@ -327,6 +352,7 @@ void Kornweinheim::on_http(WebServer::HTTPConnection& connection, const std::str
             case winston::Track::Type::Bumper:
                 this->writeSignal(connection, track, winston::Track::Connection::DeadEnd);
                 this->writeSignal(connection, track, winston::Track::Connection::A);
+                break;
             case winston::Track::Type::Rail:
                 this->writeSignal(connection, track, winston::Track::Connection::A);
                 this->writeSignal(connection, track, winston::Track::Connection::B);
@@ -711,7 +737,8 @@ void Kornweinheim::systemSetup() {
 #endif
     this->signalInterfaceDevice->init();
     this->signalInterfaceDevice->skipSend(true);
-    this->signalDevice = TLC5947_SignalDevice::make(24, this->signalInterfaceDevice, TLC5947Off);
+    const unsigned int chainedTLC5947s = 4;
+    this->signalDevice = TLC5947_SignalDevice::make(chainedTLC5947s * 24, this->signalInterfaceDevice, TLC5947Off);
 
     // storage
     this->storageLayout = Storage::make(std::string(this->name()).append(".").append("winston.storage"), 128 * 1024);
@@ -752,41 +779,43 @@ void Kornweinheim::setupSignals()
     this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF3), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
 
     // dummy
-    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF1), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
-    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF2), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
-    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF3), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
-    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::PBF1a), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF1), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF2), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF3), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::PBF1a), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    ++port; // to align with 24port device
 
     // rechte Strecke
-    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B1), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
-    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B4), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
-    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::B1), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
-    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::B4), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B1), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B4), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::B1), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::B4), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
 
     // obere Strecke
-    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B2), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
-    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B5), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
-    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B2), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
-    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B5), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
-
-    // linke Strecke
-    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::B3), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
-    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::B6), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
-    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B3), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
-    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B6), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B2), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B5), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B2), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B5), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+        // linke Strecke
+    this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::B3), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::B6), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
+    ++port; // to align with 24port device
+    this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B3), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B6), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
     
     // Abstellgleise
-    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::N1), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
-    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::N2), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::N1), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::N2), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
     
     // GBF
-    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::GBF1), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
-    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF3a), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
-    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::GBF3b), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
-    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF3b), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
-    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF2a), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
-    port = 19; this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::GBF2b), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
-    port = 19; this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF2b), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::GBF1), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF3a), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::GBF3b), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF3b), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF2a), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    ++port; // to align with 24port device
+    this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::GBF2b), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
+    this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF2b), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
 
     
 /*

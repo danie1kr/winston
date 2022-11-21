@@ -331,6 +331,7 @@ WebServerTeensy::Client& WebServerTeensy::getClient(const unsigned int clientId)
 
 const unsigned int WebServerTeensy::getClientId(Client client)
 {
+    // unused
     return 0;
 }
 

@@ -11,7 +11,6 @@
 
 #ifdef WINSTON_PLATFORM_WIN_x64
 #include "winston-hal-x64.h"
-#define WINSTON_WITH_WEBSOCKETS
 #endif
 
 #ifdef WINSTON_PLATFORM_TEENSY

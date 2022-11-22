@@ -424,15 +424,23 @@ const winston::Result StorageArduino::init()
 
     if (!SD.exists(this->filename.c_str()))
     {
+        Serial.println("file does not exist, creating");
         auto file = SD.open(this->filename.c_str(), FILE_WRITE);
         for (size_t i = 0; i < maxSize; ++i)
             file.write('0');
         file.flush();
         file.close();
     }
+    else
+        Serial.println("file found");
 
-    SD.sdfs.chdir();
-    this->file = SD.open(this->filename.c_str(), FILE_WRITE_BEGIN);
+    //SD.sdfs.chdir();
+    this->file = SD/*.sdfs*/.open(this->filename.c_str(), FILE_WRITE_BEGIN);
+    if (!this->file)
+    {
+        Serial.println("could not open file!");
+        return winston::Result::NotFound;
+    }
 #endif
     return winston::Result::OK;
 }
@@ -442,7 +450,7 @@ const winston::Result StorageArduino::read(const size_t address, std::vector<uns
 #ifdef WINSTON_WITH_SDFAT
     if (!this->file)
         return winston::Result::NotInitialized;
-    const size_t count = length == 0 ? content.size() : min(content.size(), length);
+    const size_t count = length == 0 ? this->file.size(): min(this->file.size(), length);
     content.reserve(count);
     this->file.seek(address);
     this->file.read(content.data(), count);
@@ -455,7 +463,8 @@ const winston::Result StorageArduino::read(const size_t address, std::string& co
 #ifdef WINSTON_WITH_SDFAT
     if (!this->file)
         return winston::Result::NotInitialized;
-    const size_t count = length == 0 ? content.size() : min(content.size(), length);
+    const size_t count = length == 0 ? this->file.size() : min(this->file.size(), length);
+    content.clear();
     content.reserve(count);
     this->file.seek(address);
     for (size_t i = 0; i < count; ++i)
@@ -551,6 +560,7 @@ namespace winston
             text("Winston Teensy Init Hello");
 
 #ifdef WINSTON_WITH_TEENSYDEBUG
+            SerialUSB1.begin(115200);
             debug.begin(SerialUSB1);
 #endif
 

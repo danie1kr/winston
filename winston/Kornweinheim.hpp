@@ -583,7 +583,12 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
     {
         size_t address = 0;
         std::vector<unsigned char> data;
-        this->storageLayout->read(address, data, 4);
+        auto result = this->storageLayout->read(address, data, 4);
+        if (result != winston::Result::OK)
+        {
+            winston::logger.err(winston::build("getRailwayLayout could not read layout file."));
+            return;
+        }
         size_t length = (data[0] << 0) | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
         address = 4;
 

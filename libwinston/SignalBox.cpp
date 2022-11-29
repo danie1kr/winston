@@ -40,6 +40,8 @@ namespace winston
 		// current and from are now the position of mainSignal
 		if (Signal::Shared mainSignal = track->signalGuarding(connection))
 		{
+			if (preAspect == Signal::Aspect::Off)
+				mainSignal->aspect(preAspect);
 			mainSignal->aspect(aspect);
 			if (preAspect != Signal::Aspect::Off)
 				mainSignal->aspect(preAspect);

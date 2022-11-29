@@ -9,7 +9,6 @@
 #include "Log.h"
 
 #define WEBSOCKETS_USE_ETHERNET     true
-#define USE_NATIVE_ETHERNET         true
 
 #define WINSTON_WEBSOCKETS_WebSockets2_Generic
 //#define WINSTON_WEBSOCKETS_ArduinoWebsockets
@@ -202,7 +201,11 @@ void WebServerTeensy::init(OnHTTP onHTTP, OnMessage onMessage, unsigned int port
     this->onMessage = onMessage;
     this->it = this->connections.begin();
     this->server.listen(port + 1);
-    this->httpServer.begin(port);
+#ifdef WINSTON_WITH_QNETHERNET
+    this->httpServer.begin(port, false);
+#else
+     this->httpServer.begin(port);
+#endif
 }
 
 void WebServerTeensy::send(Client& connection, const std::string& data)

@@ -54,6 +54,8 @@ void WebServerWSPP::init(OnHTTP onHTTP, OnMessage onMessage, unsigned int port)
     this->onMessage = onMessage;
     this->server.init_asio();
 
+    this->server.clear_access_channels(websocketpp::log::alevel::all);
+
     this->server.set_http_handler(websocketpp::lib::bind(&WebServerWSPP::on_http, this, websocketpp::lib::placeholders::_1));
     this->server.set_message_handler(websocketpp::lib::bind(&WebServerWSPP::on_msg, this, websocketpp::lib::placeholders::_1, websocketpp::lib::placeholders::_2));
     this->server.set_open_handler(websocketpp::lib::bind(&WebServerWSPP::on_open, this, websocketpp::lib::placeholders::_1));

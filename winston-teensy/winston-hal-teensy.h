@@ -10,6 +10,19 @@
 #define WINSTON_WITH_HTTP
 #define WINSTON_WITH_TEENSYDEBUG
 #define WINSTON_WITH_SDFAT
+
+//#define WINSTON_WITH_QNETHERNET
+
+#ifdef WINSTON_WITH_QNETHERNET
+#define USE_NATIVE_ETHERNET         false
+#define USE_QN_ETHERNET             true
+#include <QNEthernet.h>
+using namespace qindesign::network;
+#else
+#define USE_NATIVE_ETHERNET         true
+#define USE_QN_ETHERNET             false
+#include <NativeEthernet.h>
+#endif
 /*
 #define WINSTON_WITH_WEBSOCKET
 #define WEBSOCKETS_USE_ETHERNET     true
@@ -28,7 +41,6 @@ using namespace websockets2_generic;
 #endif
 #endif
 */
-#include <NativeEthernet.h>
 #include <SPI.h>
 
 #ifdef WINSTON_TEENSY_FLASHSTRING

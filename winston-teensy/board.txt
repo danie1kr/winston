@@ -13,3 +13,5 @@ ide.compiler_flags_debug=
 teensy41.menu.opt.onone=No optimization Flag
 teensy41.menu.opt.onone.build.flags.optimize=
 teensy41.menu.opt.onone.build.flags.ldspecs=
+
+recipe.hooks.deploy.postupload.1.pattern=cmd.exe /c ping localhost -n 10 

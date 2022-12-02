@@ -18,6 +18,8 @@ namespace winston
 		return [](const Aspects aspect)->const State { return State::Finished; };
 	}
 
+	void Signal::init() { }
+
 	const State Signal::aspect(const Aspect aspect)
 	{
 		// pre-signal off if main signal shows Halt
@@ -66,6 +68,7 @@ namespace winston
 		return this->_distance;
 	}
 
+	template<> void SignalKS::init() { }
 	template<> void SignalKS::updateLights()
 	{
 		// Halt, Go, ExpectHalt
@@ -74,6 +77,7 @@ namespace winston
 		this->_lights[1].value = this->shows(Aspect::Go) ? Light::maximum : 0;
 		this->_lights[2].value = this->shows(Aspect::Halt) ? Light::maximum : 0;
 	}
+	template<> void SignalH::init() { }
 	template<> void SignalH::updateLights()
 	{
 		// Halt, Go
@@ -81,6 +85,7 @@ namespace winston
 		this->_lights[0].value = this->shows(Aspect::Go) ? Light::maximum : 0;
 		this->_lights[1].value = this->shows(Aspect::Halt) ? Light::maximum : 0;
 	}
+	template<> void SignalV::init() { }
 	template<> void SignalV::updateLights()
 	{
 		// ExpectHalt, ExpectGo
@@ -88,6 +93,7 @@ namespace winston
 		this->_lights[0].value = this->shows(Aspect::ExpectGo) ? Light::maximum : 0;
 		this->_lights[1].value = this->shows(Aspect::ExpectHalt) ? Light::maximum : 0;
 	}
+	template<> void SignalHV::init() { }
 	template<> void SignalHV::updateLights()
 	{
 		// Halt, Go, ExpectHalt, ExpectGo
@@ -96,5 +102,15 @@ namespace winston
 		this->_lights[1].value = this->shows(Aspect::ExpectHalt) ? Light::maximum : 0;
 		this->_lights[2].value = this->shows(Aspect::Go) ? Light::maximum : 0;
 		this->_lights[3].value = this->shows(Aspect::Halt) ? Light::maximum : 0;
+	}
+
+	template<> void SignalAlwaysHalt::init()
+	{
+		this->_aspect = (unsigned int)Aspect::Halt;
+	}
+
+	template<> void SignalAlwaysHalt::updateLights()
+	{
+		this->_lights[0].value = Light::maximum;
 	}
 }

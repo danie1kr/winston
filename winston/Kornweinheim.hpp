@@ -461,6 +461,7 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
                     track["length"] = bumper->length();
 
                     writeAttachedSignal(signals, bumper, winston::Track::Connection::A);
+                    writeAttachedSignal(signals, bumper, winston::Track::Connection::DeadEnd);
 
                     break;
                 }
@@ -774,7 +775,12 @@ void Kornweinheim::setupSignals()
         winston::logger.info("Signal at ", track->name(), "|", winston::Track::ConnectionToString(connection), " set to ", aspects);
 
         return winston::State::Finished;
-};
+    };
+
+    auto signalUpdateAlwaysHalt = [=](winston::Track::Shared track, winston::Track::Connection connection, const winston::Signal::Aspects aspects) -> const winston::State
+    {
+        return winston::State::Finished;
+    };
 
     // H
     unsigned int port = 0;
@@ -801,7 +807,7 @@ void Kornweinheim::setupSignals()
     this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B5), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
     this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B2), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
     this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B5), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
-        // linke Strecke
+    // linke Strecke
     this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::B3), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
     this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::B6), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
     ++port; // to align with 24port device
@@ -822,8 +828,15 @@ void Kornweinheim::setupSignals()
     this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::GBF2b), winston::Track::Connection::A, 5U, port, signalUpdateCallback);
     this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF2b), winston::Track::Connection::B, 5U, port, signalUpdateCallback);
 
-    
-/*
+    // don't care for ports here
+    unsigned int dncPort = 0;
+    this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::N1), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
+    this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::N2), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
+    this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::PBF1a), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
+    this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::GBF1), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
+    this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::GBF2a), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
+    this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::GBF3a), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
+    /*
     this->railway->track(Y2021RailwayTracks::PBF1a)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::A);
     this->railway->track(Y2021RailwayTracks::B3)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::B);
     this->railway->track(Y2021RailwayTracks::B6)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::B);

@@ -132,8 +132,7 @@ namespace winston
 
 		*/
 
-		static const Aspects AspectsProtection = /*(unsigned int)Aspect::Off
-			|*/ (unsigned int)Aspect::Halt
+		static const Aspects AspectsProtection = (unsigned int)Aspect::Halt
 			| (unsigned int)Aspect::Go;
 
 		static const Aspects AspectsKS = (unsigned int)Aspect::Halt
@@ -154,6 +153,8 @@ namespace winston
 
 		static const Aspects AspectsHV = AspectsH | AspectsV;
 
+		static const Aspects AspectsAlwaysHalt = (unsigned int)Aspect::Halt;
+
 		using Callback = std::function<const State(const Aspects aspect)>;
 		static Callback defaultCallback();
 		Signal(const Callback callback = defaultCallback(), const Length distance = 0);
@@ -170,6 +171,7 @@ namespace winston
 		virtual const std::span<const Light> lights() const = 0;
 	protected:
 
+		virtual void init() = 0;
 		virtual void updateLights() = 0;
 
 		const Callback callback;
@@ -189,6 +191,7 @@ namespace winston
 		SignalInstance(const Callback callback = Signal::defaultCallback(), const Length distance = 0, const Port port = 0)
 			: Signal(callback, distance)
 			, _lights(Sequence<BitCounter<_Aspects>::count() - 1>::generate(_Aspects, port)) {
+			this->init();
 		};
 
 		const bool supports(const Aspect aspect, const bool any) const
@@ -218,6 +221,7 @@ namespace winston
 			return BitCounter<_Aspects>::count();
 		};
 
+		void init();
 		void updateLights(); // { static_assert(false, "do not use"); };
 
 		using Shared_Ptr<SignalInstance<_Aspects>>::Shared;
@@ -242,6 +246,7 @@ namespace winston
 			static constexpr LightsArray generate(const Signal::Aspects aspects, const unsigned int startPort) { return Sequence<i - 1, i, j...>::generate(aspects, startPort); }
 		};
 
+	protected:
 		LightsArray _lights;
 	};
 
@@ -262,6 +267,7 @@ namespace winston
 	using SignalH = SignalInstance<Signal::AspectsH>;
 	using SignalV = SignalInstance<Signal::AspectsV>;
 	using SignalHV = SignalInstance<Signal::AspectsHV>;
+	using SignalAlwaysHalt = SignalInstance<Signal::AspectsAlwaysHalt>;
 
 	template<typename T>
 	class SignalDevice : public Shared_Ptr<SignalDevice<T>>

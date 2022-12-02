@@ -559,8 +559,8 @@
                     {
                         selector: ".trackSplitNode",
                         style: {
-                            "width": 5,
-                            "height": 5,
+                            "width": 8,
+                            "height": 8,
                             "shape": "rectangle"
                         }
                     },
@@ -988,8 +988,14 @@
             _.each(signals, function (signal, i) {
                 let track = signal.parentTrack;
                 let guarding = signal.guarding;
+                let parentNode = guarding === "deadend"
+                    ? "node.trackNode.bumper[track=\"" + track + "\"]"
+                    : "node.connection." + guarding + "[track=\"" + track + "\"]";
 
-                let parentPosition = cy.$("node.connection." + guarding + "[track=\"" + track + "\"]").position();
+                let parentPosition = cy.$(parentNode).position();
+                let edgeTarget = guarding === "deadend"
+                    ? cy.$(parentNode).id()
+                    : track + "_" + guarding;
 
                 let existing = cy.$("node.signal[parentTrack=\"" + track + "\"][guarding=\"" + guarding + "\"]");
                 if (existing.length > 0) {
@@ -999,7 +1005,7 @@
                 else {
                     let lights = signal.lights;
                     nodes.push({ group: 'nodes', data: { id: track + "_signal_" + guarding, guarding: guarding, parentTrack: track, lights: lights, relativePosition: { x: 0, y: 20 } }, position: { x: parentPosition.x, y: parentPosition.y + 20 }, classes: "signal" });
-                    edges.push({ group: 'edges', data: { source: track + "_signal_" + guarding, target: track + "_" + guarding }, classes: "signalConnector" });
+                    edges.push({ group: 'edges', data: { source: track + "_signal_" + guarding, target: edgeTarget }, classes: "signalConnector" });
                 }
             });
 

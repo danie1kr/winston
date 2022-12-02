@@ -113,7 +113,6 @@ namespace winston
 	Bumper::Bumper(const std::string name, Length tracklength)
 		: Track(name, tracklength), Shared_Ptr<Bumper>(), a()
 	{
-
 	}
 
 	bool Bumper::has(const Connection connection) const

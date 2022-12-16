@@ -94,8 +94,8 @@ void Kornweinheim::initNetwork()
 #ifdef WINSTON_WITH_WEBSOCKET
     // webServer
     this->webServer.init(
-        [=](WebServer::HTTPConnection& client, const std::string& resource) {
-            this->on_http(client, resource);
+        [=](WebServer::HTTPConnection& client, const winston::HTTPMethod method, const std::string& resource) {
+            this->on_http(client, method, resource);
         },
         [=](WebServer::Client& client, const std::string& resource) {
             this->on_message(client, resource);
@@ -195,55 +195,6 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
         return winston::Result::OK;
     };
 
-#ifdef WINSTON_NFC_DETECTORS
-    callbacks.nfcDetectorCallback = [=](winston::Detector::Shared, const winston::NFCAddress address) -> winston::Result
-    {
-        auto now = winston::hal::now();
-        /*
-        this->signalBox->order(winston::Command::make([track, connection, distance, address, now](const winston::TimePoint &created) -> const winston::State
-            {
-                // actual work as we do not want to block the receiver
-                return winston::State::Finished;
-            }, __PRETTY_FUNCTION__));
-        */
-        /*
-            loco = fromNFCAddress(address) 
-            is now at
-            at actual = track:connection - distance
-
-            // update calculated distance and report error
-            auto mismatch = updateLocoPos(loco) - acutal
-
-            updateLocoPos(loco)
-            {
-                auto previous = loco.position();
-                Duration timeOnTour = 0;
-                auto pos = loco.drive(timeOnTour);   // updates loco position
-                
-                this->signalBox->order(winston::Command::make([=](const winston::TimePoint &created) -> const winston::State
-                {
-                    railway -> updateBlockOccupancy(previous, pos, timeOnTour, loco.trainLength() = 100);
-                    return winston::State::Finished;
-                }, __PRETTY_FUNCTION__));
-
-                this->signalBox->order(winston::Command::make([signalBox](const winston::TimePoint &created) -> const winston::State
-                {
-                    signalbox -> updateSignalsAccordingToBlocks();
-                    return winston::State::Finished;
-                }, __PRETTY_FUNCTION__));
-            }
-
-            loco.drive(Duration &timeOnTour)
-            {
-                timeOnTour = inMilliseconds(this->lastUpdate - winston::hal::now());
-                this->pos = this->pos + this->physicalSpeed() * timeOnTour;
-                return this->pos;
-            }
-        */
-        return winston::Result::OK;
-    };
-#endif
-
     return callbacks;
 }
 
@@ -302,11 +253,14 @@ void Kornweinheim::writeSignal(WebServer::HTTPConnection& connection, const wins
     }
 }
 
-void Kornweinheim::on_http(WebServer::HTTPConnection& connection, const std::string& resource) {
+void Kornweinheim::on_http(WebServer::HTTPConnection& connection, const winston::HTTPMethod method, const std::string& resource) {
     const std::string path_index("/");
     const std::string path_railway("/railway");
     const std::string path_log("/log");
     const std::string path_signals("/signals");
+    const std::string path_confirmation_yes("/confirm_yes");
+    const std::string path_confirmation_maybe("/confirm_maybe");
+    const std::string path_confirmation_no("/confirm_no");
 
     if (resource.compare(path_index) == 0)
     {
@@ -363,6 +317,18 @@ void Kornweinheim::on_http(WebServer::HTTPConnection& connection, const std::str
         }
         connection.body("</table></body></html>\r\n"_s);
     }
+    else if (resource.compare(path_confirmation_yes) == 0)
+    {
+        this->userConfirmation->confirm(winston::ConfirmationProvider::Answer::Yes);
+    }
+    else if (resource.compare(path_confirmation_maybe) == 0)
+    {
+        this->userConfirmation->confirm(winston::ConfirmationProvider::Answer::Maybe);
+    }
+    else if (resource.compare(path_confirmation_no) == 0)
+    {
+        this->userConfirmation->confirm(winston::ConfirmationProvider::Answer::No);
+    }
 }
 
 void Kornweinheim::writeAttachedSignal(JsonArray& signals, winston::Track::Shared track, const winston::Track::Connection connection)
@@ -388,7 +354,6 @@ void Kornweinheim::writeAttachedSignal(JsonArray& signals, winston::Track::Share
 // Define a callback to handle incoming messages
 void Kornweinheim::on_message(WebServer::Client& client, const std::string& message)
 {
-
     DynamicJsonDocument msg(32 * 1024);
     deserializeJson(msg, message);
     JsonObject obj = msg.as<JsonObject>();
@@ -515,15 +480,6 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
             for (auto& track : bl->tracks())
                 blockTracks.add(track->name());
         }
-#ifdef WINSTON_NFC_DETECTORS
-        for (size_t detector = 0; detector < this->nfcDetectors.size(); ++detector)
-        {
-            auto d = detectors.createNestedObject();
-            d["id"] = (int)detector;
-            d["track"] = this->nfcDetectors[detector]->position().trackName();
-            d["connection"] = winston::Track::ConnectionToString(this->nfcDetectors[detector]->position().connection());
-        }
-#endif
 
         std::string railwayContentJson("");
         serializeJson(railwayContent, railwayContentJson);
@@ -758,8 +714,9 @@ void Kornweinheim::systemSetup() {
     this->serial = SerialDeviceWin::make();
     this->serial->init(5);
 #endif
-};
 
+    this->inventStorylines();
+};
 
 void Kornweinheim::setupSignals()
 {
@@ -919,41 +876,6 @@ ms	32	         2,55	  6,13	  8,17	 12,26	 16,35
 
 void Kornweinheim::setupDetectors()
 {
-    auto nfcDetectorCallback = [=](winston::Detector::Shared detector, const winston::NFCAddress address) -> winston::Result
-    {
-        auto loco = this->locoFromAddress(address);
-        if (loco)
-            return this->detectorUpdate(detector, *loco);
-        else
-            return winston::Result::NotFound;
-    };
-#ifdef WINSTON_PLATFORM_TEENSY
-
-#elif defined(WINSTON_PLATFORM_WIN_x64) && defined(WINSTON_NFC_DETECTORS)
-    /*
-    const auto pbf1 = this->railway->track(Y2021RailwayTracks::PBF1);
-    const auto B = winston::Track::Connection::B;
-    const auto R3 = winston::library::track::Roco::R3;
-    this->nfcDetectors[0] = winston::NFCDetector::make(nfcDetectorCallback, pbf1, B, 2 * R3);
-    this->pn532 = PN532_DetectorDevice::make(*this->nfcDetectors[0].get(), *this->serial.get());*/
-    size_t i = 0;
-    // teensy 1
-    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::B3), winston::Track::Connection::B, 0);
-    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::B6), winston::Track::Connection::B, 0);
-    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::PBF1a), winston::Track::Connection::A, 0);
-    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::N1), winston::Track::Connection::A, 0);
-    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::GBF1), winston::Track::Connection::A, 0);
-    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::GBF2b), winston::Track::Connection::A, 0);
-    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::GBF3b), winston::Track::Connection::A, 0);
-
-    // teensy2
-    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::B1), winston::Track::Connection::A, 0);
-    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::B4), winston::Track::Connection::A, 0);
-    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::B2), winston::Track::Connection::A, 0);
-    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::B2), winston::Track::Connection::B, 0);
-    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::B5), winston::Track::Connection::B, 0);
-    this->nfcDetectors[i++] = winston::NFCDetector::make(nfcDetectorCallback, this->railway->track(Y2021RailwayTracks::N2), winston::Track::Connection::A, 0);
-#endif
 }
 
 void Kornweinheim::systemSetupComplete()
@@ -1001,10 +923,41 @@ void Kornweinheim::populateLocomotiveShed()
 {
     auto callbacks = locoCallbacks();
     winston::Position pos(this->railway->track(Y2021RailwayTracks::N1), winston::Track::Connection::A, 100);
-    this->addLocomotive(callbacks, 3, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 114", 0);
-    this->addLocomotive(callbacks, 4, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 106", 1);
-    this->addLocomotive(callbacks, 5, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 64", 2);
-    this->addLocomotive(callbacks, 6, pos, winston::Locomotive::defaultThrottleSpeedMap, "E 11", 3);
-    this->addLocomotive(callbacks, 7, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 218", 4);
+    this->addLocomotive(callbacks, 3, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 114", (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods | (unsigned char)winston::Locomotive::Type::Shunting);
+    this->addLocomotive(callbacks, 4, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 106", (unsigned char)winston::Locomotive::Type::Shunting | (unsigned char)winston::Locomotive::Type::Goods);
+    this->addLocomotive(callbacks, 5, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 64", (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods);
+    this->addLocomotive(callbacks, 6, pos, winston::Locomotive::defaultThrottleSpeedMap, "E 11", (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods);
+    this->addLocomotive(callbacks, 8, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 218", (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods);
+    this->addLocomotive(callbacks, 7, pos, winston::Locomotive::defaultThrottleSpeedMap, "Gravita", (unsigned char)winston::Locomotive::Type::Shunting | (unsigned char)winston::Locomotive::Type::Goods);
 }
 
+void Kornweinheim::inventStorylines()
+{
+#ifdef WINSTON_STORYLINES
+    this->userConfirmation = winston::ConfirmationProvider::make();
+    this->display = winston::DisplayLog::make();
+
+    auto collectAndDrive = winston::Storyline::make();
+    collectAndDrive->invent([&]() {
+
+        auto loco = winston::TaskRandomLoco::make((unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods);
+        collectAndDrive->queue(std::static_pointer_cast<winston::Storyline::Task>(loco));
+        auto assembleTrack = winston::TaskRandomTrack::make(winston::Block::Type::Transit);
+        collectAndDrive->queue(std::static_pointer_cast<winston::Storyline::Task>(assembleTrack));
+
+        auto confirmLocoTrack = winston::TaskConfirm::make(userConfirmation, display, loco, "nach", assembleTrack, [collectAndDrive, loco, assembleTrack]() -> winston::State {
+            collectAndDrive->immediate(std::static_pointer_cast<winston::Storyline::Task>(loco));
+            collectAndDrive->immediate(std::static_pointer_cast<winston::Storyline::Task>(assembleTrack));
+            return winston::State::Running;
+        });
+        collectAndDrive->queue(std::static_pointer_cast<winston::Storyline::Task>(confirmLocoTrack));
+
+        });
+    this->storylines.push_back(collectAndDrive);
+
+    this->signalBox->order(winston::Command::make([](const winston::TimePoint& created) -> const winston::State
+        {
+            return winston::State::Running;
+        }, __PRETTY_FUNCTION__));
+#endif
+}

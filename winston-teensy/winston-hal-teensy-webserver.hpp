@@ -61,7 +61,7 @@ public:
         unsigned char buffer[512];
     };
     using HTTPConnection = HTTPConnectionTeensy;
-    using OnHTTP = std::function<void(HTTPConnection& client, const std::string& resource)>;
+    using OnHTTP = std::function<void(HTTPConnection& client, const winston::HTTPMethod method, const std::string& resource)>;
 
     WebServerTeensy();
     virtual ~WebServerTeensy() = default;
@@ -223,7 +223,7 @@ void WebServerTeensy::step()
         // An http request ends with a blank line.
         bool currentLineIsBlank = true;
         bool firstLine = true;
-        std::string line(""), resource("");
+        std::string line(""), resource(""), method("");
 
         while (httpClient.connected()) {
             if (httpClient.available()) {
@@ -239,7 +239,7 @@ void WebServerTeensy::step()
                     // character) and the line is blank, the http request has ended,
                     // so we can send a reply.
                     HTTPConnectionTeensy connection(httpClient);
-                    this->onHTTP(connection, resource);
+                    this->onHTTP(connection, winston::HTTPMethod::_from_string_nothrow(method.c_str()).value(), resource);
                     httpClient.close();
                     break;
                 }
@@ -253,13 +253,16 @@ void WebServerTeensy::step()
                         size_t i = 0;
                         for (; i < line.length() && line[i] != ' '; ++i)
                             method += line[i];
-                        if (method.compare("GET"))
-                            break;
-                        ++i;
+                        if (method.compare("GET") == 0 || method.compare("PUT") == 0)
+                        {
+                            ++i;
 
-                        for (; i < line.length() && line[i] != ' '; ++i)
-                            resource += line[i];
-                        line.erase();
+                            for (; i < line.length() && line[i] != ' '; ++i)
+                                resource += line[i];
+                            line.erase();
+                        }
+                        else
+                            break;
                     }
                     currentLineIsBlank = true;
                 }

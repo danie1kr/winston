@@ -32,10 +32,6 @@ namespace winston
 			using SignalUpdateCallback = std::function<const State(Track::Shared track, Track::Connection connection, const Signal::Aspects aspect)>;
 			SignalUpdateCallback signalUpdateCallback;
 
-			#ifdef WINSTON_NFC_DETECTORS
-			NFCDetector::Callback nfcDetectorCallback;
-			#endif
-
 			DCCDetector::Callback dccDetectorCallback;
 		};
 
@@ -58,7 +54,7 @@ namespace winston
 		SignalFactory KS_dummy(const Length distance = 0, const Port port = Port());
 		SignalFactory H(const Length distance, size_t& device, size_t& port);*/
 
-		void block(const Address address, const Trackset trackset);
+		void block(const Address address, const Trackset trackset, const Block::Type type);
 		Block::Shared block(Address address);
 		const Blockmap blocks() const;
 
@@ -101,7 +97,7 @@ namespace winston
 				Trackset set;
 				for (Tracks track : Tracks::_values())
 					set.insert(this->track(track));
-				this->block(1, set);
+				this->block(1, set, Block::Type::Free);
 			}
 			return this->validate();
 		}

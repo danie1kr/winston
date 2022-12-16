@@ -194,3 +194,14 @@ private:
 	websocketpp::server<websocketpp::config::asio> server;
 };
 using WebServer = WebServerWSPP;
+
+class DisplayWin : public winston::TaskConfirm::Display, public winston::Shared_Ptr<DisplayWin>
+{
+public:
+	DisplayWin();
+	virtual ~DisplayWin() = default;
+	virtual const winston::Result send(const std::vector<DataType> data);
+	using winston::Shared_Ptr<DisplayWin>::Shared;
+	using winston::Shared_Ptr<DisplayWin>::make;
+};
+using Display = DisplayWin;

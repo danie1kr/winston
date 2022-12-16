@@ -80,7 +80,7 @@ private:
     void writeSignal(WebServer::HTTPConnection& connection, const winston::Track::Shared track, const winston::Track::Connection trackCon);
 
     // Define a callback to handle incoming messages
-    void on_http(WebServer::HTTPConnection& connection, const std::string& resource);
+    void on_http(WebServer::HTTPConnection& connection, const winston::HTTPMethod method, const std::string& resource);
 
     void writeAttachedSignal(JsonArray& signals, winston::Track::Shared track, const winston::Track::Connection connection);
 
@@ -97,6 +97,11 @@ private:
 
     void populateLocomotiveShed();
 
+    void inventStorylines();
+    std::vector<winston::Storyline::Shared> storylines;
+    winston::Storyline::Shared activeStory = nullptr;
+    winston::ConfirmationProvider::Shared userConfirmation;
+    winston::TaskConfirm::Display::Shared display;
 
     /* z21 */
     UDPSocket::Shared z21Socket;
@@ -117,10 +122,6 @@ private:
     
 #elif defined(WINSTON_PLATFORM_WIN_x64)
     SerialDeviceWin::Shared serial;
-#ifdef WINSTON_NFC_DETECTORS
-    PN532_DetectorDevice::Shared pn532;
-    std::array<winston::NFCDetector::Shared, 13> nfcDetectors;
-#endif
 #endif
 
 #ifdef WINSTON_LOCO_TRACKING

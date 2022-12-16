@@ -115,7 +115,7 @@ void WebServerWSPP::on_http(ConnectionWSPP hdl)
 {
     auto con = this->server.get_con_from_hdl(hdl);
     HTTPConnectionWSPP connection(con);
-    this->onHTTP(connection, con->get_resource());
+    this->onHTTP(connection, winston::HTTPMethod::_from_string(con->get_request().get_method().c_str()), con->get_resource());
 
     /*
     auto con = this->server.get_con_from_hdl(hdl);
@@ -515,6 +515,17 @@ const int StorageWin::handleError(const std::error_code& error) const
     return error.value();
 }
 
+DisplayWin::DisplayWin()
+{
+
+}
+
+const winston::Result DisplayWin::send(const std::vector<DataType> data)
+{
+    for (auto& line : data)
+        winston::hal::text(winston::build(line, "\n"));
+    return winston::Result::OK;
+}
 
 namespace winston
 {

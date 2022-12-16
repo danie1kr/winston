@@ -21,7 +21,6 @@
 namespace winston
 {
 	using Address = uint16_t;
-	using NFCAddress = unsigned long long;
 
 	using Id = unsigned int;
 
@@ -30,10 +29,12 @@ namespace winston
 
 	enum class State
 	{
+		New,
 		Running,
 		Skipped,
 		Delay,
-		Finished
+		Finished,
+		Aborted
 	};
 
 	enum class Result
@@ -264,9 +265,6 @@ namespace winston
 	class Detector;
 	template<typename T> class DetectorAddressable;
 	using DCCDetector = DetectorAddressable<Address>;
-#ifdef WINSTON_NFC_DETECTORS
-	using NFCDetector = DetectorAddressable<NFCAddress>;
-#endif
 	class Track;
 	class Bumper;
 	class Rail;
@@ -283,6 +281,7 @@ namespace winston
 
 	class Locomotive;
 
+	class BasicCommand;
 	class Command;
 	class Payload;
 

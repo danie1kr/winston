@@ -15,6 +15,7 @@
 #include "Route.h"
 #include "Signal.h"
 #include "SignalBox.h"
+#include "Storyline.h"
 #include "Track.h"
 #include "Util.h"
 #include "Position.h"

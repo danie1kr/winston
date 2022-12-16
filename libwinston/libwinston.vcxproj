@@ -128,6 +128,7 @@
     <ClInclude Include="Position.h" />
     <ClInclude Include="Route.h" />
     <ClInclude Include="span.hpp" />
+    <ClInclude Include="Storyline.h" />
     <ClInclude Include="Track.h" />
     <ClInclude Include="Railway.h" />
     <ClInclude Include="Signal.h" />
@@ -151,6 +152,7 @@
     <ClCompile Include="Railway.cpp" />
     <ClCompile Include="Route.cpp" />
     <ClCompile Include="Signal.cpp" />
+    <ClCompile Include="Storyline.cpp" />
     <ClCompile Include="Track.cpp" />
     <ClCompile Include="SignalBox.cpp" />
     <ClCompile Include="Util.cpp" />

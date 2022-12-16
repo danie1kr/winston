@@ -140,6 +140,17 @@ private:
 #endif
 };
 using Storage = StorageArduino;
+/*
+class DisplayArduino : public winston::TaskConfirm::Display, public winston::Shared_Ptr<DisplayArduino>
+{
+public:
+	DisplayArduino();
+	virtual ~DisplayArduino() = default;
+	virtual const winston::Result send(const std::vector<DataType> data);
+	using winston::Shared_Ptr<DisplayArduino>::Shared;
+	using winston::Shared_Ptr<DisplayArduino>::make;
+};
+using Display = DisplayArduino;*/
 
 /*
 #ifdef WINSTON_WITH_WEBSOCKET

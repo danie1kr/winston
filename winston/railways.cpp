@@ -565,10 +565,10 @@ void Y2021Railway::connect()
     const auto A = winston::Track::Connection::A;
     const auto B = winston::Track::Connection::B;
     const auto C = winston::Track::Connection::C;
-
+/*
     size_t device = 0;
     size_t port = 0;
-    /*
+    
     // outer loop
     Turnout1->connect(B, PBF2a, A)
         ->connect(B, Turnout4, A)

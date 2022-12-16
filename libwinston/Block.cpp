@@ -1,7 +1,7 @@
 #include "Block.h"
 
 namespace winston {
-	Block::Block(const Address address, const Trackset tracks) : Shared_Ptr<Block>(), address(address), _tracks(tracks)
+	Block::Block(const Address address, const Trackset tracks, const Type type) : Shared_Ptr<Block>(), address(address), _tracks(tracks), type(type)
 	{
 	}
 
@@ -39,5 +39,10 @@ namespace winston {
 	const Trackset Block::tracks() const
 	{
 		return this->_tracks;
+	}
+
+	const bool Block::isType(const Type type) const
+	{
+		return this->type == type;
 	}
 }

@@ -12,13 +12,24 @@ namespace winston {
 	class Block : public Shared_Ptr<Block>
 	{
 	public:
-		Block(const Address address, const Trackset tracks);
+		enum class Type : unsigned char
+		{
+			Free,
+			Transit,
+			Siding
+		};
+
+
+		Block(const Address address, const Trackset tracks, const Type type);
 		//Block::Shared traverse(Track::Shared& entry, Track::Connection& connection);
 		//bool validate();
 
 		const bool contains(Track::Shared track) const;
 		const BlockEntrySet entries() const;
 		const Trackset tracks() const;
+
+		const Type type;
+		const bool isType(const Type type) const;
 
 		using Shared_Ptr<Block>::Shared;
 		using Shared_Ptr<Block>::make;

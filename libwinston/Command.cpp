@@ -4,8 +4,8 @@
 
 namespace winston
 {
-	Command::Command(Payload payload, const std::string name)
-		: payload(payload), created(hal::now()), skip(false)
+	BasicCommand::BasicCommand(const std::string name)
+		: Shared_Ptr<BasicCommand>(), created(hal::now())
 #if defined(WINSTON_STATISTICS) && defined(WINSTON_STATISTICS_DETAILLED)
 		, _name(name)
 	{
@@ -13,30 +13,29 @@ namespace winston
 	{
 		(void)name;
 #endif
-
 	}
 
-	void Command::obsolete() noexcept
-	{
-		this->skip = true;
-	}
-
-	const State Command::execute()
-	{
-		if (this->skip)
-			return State::Skipped;
-		return this->payload(this->created);
-	}
-
-	const Duration Command::age() const
+	const Duration BasicCommand::age() const
 	{
 		return hal::now() - this->created;
 	}
 
 #if defined(WINSTON_STATISTICS) && defined(WINSTON_STATISTICS_DETAILLED)
-	const std::string& Command::name() const
+	const std::string& BasicCommand::name() const
 	{
 		return this->_name;
 	}
 #endif
+
+	Command::Command(Payload payload, const std::string name)
+		: BasicCommand(name), payload(payload)
+
+	{
+
+	}
+
+	const State Command::execute()
+	{
+		return this->payload(this->created);
+	}
 }

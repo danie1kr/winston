@@ -6,8 +6,8 @@
 namespace winston
 {
 	const Locomotive::ThrottleSpeedMap Locomotive::defaultThrottleSpeedMap = { {0, 0},{255, 50} };
-	Locomotive::Locomotive(const Callbacks callbacks, const Address address, const Position start, const ThrottleSpeedMap throttleSpeedMap, const std::string name, const NFCAddress nfcAddress) :
-		callbacks(callbacks), details{ address, nfcAddress, start, hal::now(), hal::now(), name, false, true, 0, 0.f, 0 }, speedMap(throttleSpeedMap), speedTrapStart(hal::now())
+	Locomotive::Locomotive(const Callbacks callbacks, const Address address, const Position start, const ThrottleSpeedMap throttleSpeedMap, const std::string name, const Types types) :
+		callbacks(callbacks), details{ address, start, hal::now(), hal::now(), name, false, true, 0, 0.f, 0, types }, speedMap(throttleSpeedMap), speedTrapStart(hal::now())
 	{
 	}
 
@@ -47,7 +47,7 @@ namespace winston
 		else
 		{
 			auto time = inMilliseconds(hal::now() - this->speedTrapStart);
-			this->speedMap.learn(this->speed(), (1000*distance) / time);
+			this->speedMap.learn(this->throttle(), (1000*distance) / time);
 		}
 	}
 
@@ -113,14 +113,19 @@ namespace winston
 		return this->details.address;
 	}
 
-	const NFCAddress& Locomotive::nfcAddress() const
-	{
-		return this->details.nfcAddress;
-	}
-
 	const std::string& Locomotive::name()
 	{
 		return this->details.name;
+	}
+
+	const bool Locomotive::isType(const Type type) const
+	{
+		return (unsigned char)this->details.types & (unsigned char)type;
+	}
+
+	const Locomotive::Types Locomotive::types() const
+	{
+		return this->details.types;
 	}
 
 	const float Locomotive::acceleration(const Throttle throttle)

@@ -6,6 +6,8 @@
 
 namespace winston
 {
+	BETTER_ENUM(HTTPMethod, unsigned char, GET, PUT);
+
 	template<class _WebSocketConnection>
 	class WebServer
 	{
@@ -18,7 +20,7 @@ namespace winston
 			virtual bool body(const std::string& content) = 0;
 		};
 
-		using OnHTTP = std::function<void(HTTPConnection &client, const std::string &resource)>;
+		using OnHTTP = std::function<void(HTTPConnection &client, const HTTPMethod method, const std::string &resource)>;
 		using OnMessage = std::function<void(_WebSocketConnection &client, const std::string &message)>;
 
 		WebServer()

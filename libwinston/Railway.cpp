@@ -7,7 +7,7 @@ namespace winston
 	{
 	}
 
-	void Railway::block(const Address address, const Trackset trackset)
+	void Railway::block(const Address address, const Trackset trackset, const Block::Type type)
 	{
 		if (this->_blocks.find(address) != this->_blocks.end())
 			hal::fatal("block address exists already");
@@ -15,7 +15,7 @@ namespace winston
 		for (auto& track : trackset)
 			track->block(address);
 
-		this->_blocks.insert(std::make_pair(address, Block::make(address, trackset)));
+		this->_blocks.insert(std::make_pair(address, Block::make(address, trackset, type)));
 	}
 
 	Block::Shared Railway::block(Address address)

@@ -67,11 +67,20 @@ namespace winston
 			FunctionsCallback functions;
 		};
 
+		enum class Type : unsigned char
+		{
+			Single = 0b1,
+			Passenger = 0b10,
+			Goods = 0b100,
+			Shunting = 0b1000
+		};
+
+		using Types = unsigned char;
 		using Throttle = unsigned char;
 		using Speed = unsigned int;
 		using ThrottleSpeedMap = std::map<Throttle, Speed>;
 		
-		Locomotive(const Callbacks callbacks, const Address address, const Position start, const ThrottleSpeedMap speedMap, const std::string name, const NFCAddress nfcAddress);
+		Locomotive(const Callbacks callbacks, const Address address, const Position start, const ThrottleSpeedMap speedMap, const std::string name, const Types types);
 		inline void light(bool on);
 		const bool light();
 		const bool forward();
@@ -92,8 +101,10 @@ namespace winston
 		void stop();
 		const Position& update();
 		const Address& address() const;
-		const NFCAddress& nfcAddress() const;
 		const std::string& name();
+
+		const bool isType(const Type type) const;
+		const Types types() const;
 
 		static const ThrottleSpeedMap defaultThrottleSpeedMap;
 		void update(const bool busy, const bool forward, const Throttle throttle, const uint32_t functions);
@@ -117,7 +128,6 @@ namespace winston
 		struct Details
 		{
 			Address address = { 0 };
-			NFCAddress nfcAddress = { 0 };
 			Position position;
 			TimePoint lastPositionUpdate, lastSpeedUpdate;
 			std::string name = { "" };
@@ -126,6 +136,7 @@ namespace winston
 			Throttle throttle = { 0 };
 			float modelThrottle = { 0.f };
 			uint32_t functions = { 0 };
+			Types types = { (unsigned char)Type::Single };
 		} details;
 
 		SpeedMap speedMap;

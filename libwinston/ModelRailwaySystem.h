@@ -81,15 +81,6 @@ namespace winston
 				return *it;
 		}
 
-		tl::optional<Locomotive&> locoFromAddress(const NFCAddress address)
-		{
-			auto it = std::find_if(this->locomotiveShed.begin(), this->locomotiveShed.end(), [address](const auto& loco) { return loco.nfcAddress() == address; });
-			if (it == this->locomotiveShed.end())
-				return tl::nullopt;
-			else
-				return *it;
-		}
-
 		const Address addressOfLoco(const Locomotive& loco) const
 		{
 			return loco.address();
@@ -150,9 +141,9 @@ namespace winston
 		virtual void setupSignals() = 0;
 		virtual void setupDetectors() = 0;
 
-		void addLocomotive(const winston::Locomotive::Callbacks callbacks, const Address address, const Position start, const Locomotive::ThrottleSpeedMap speedMap, std::string name, const NFCAddress nfcAddress)
+		void addLocomotive(const winston::Locomotive::Callbacks callbacks, const Address address, const Position start, const Locomotive::ThrottleSpeedMap speedMap, const std::string name, const Locomotive::Types types)
 		{
-			this->locomotiveShed.emplace_back(callbacks, address, start, speedMap, name, nfcAddress);
+			this->locomotiveShed.emplace_back(callbacks, address, start, speedMap, name, types);
 		}
 
 		Result loadLocomotives()

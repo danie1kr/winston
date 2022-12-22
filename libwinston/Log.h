@@ -4,7 +4,7 @@
 #include <string>
 
 #ifndef WINSTON_LOG_SIZE
-#define WINSTON_LOG_SIZE 64
+#define WINSTON_LOG_SIZE 256
 #endif
 
 namespace winston

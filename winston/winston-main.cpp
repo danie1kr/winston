@@ -25,6 +25,7 @@ void winston_setup()
 #endif
 	// setup
     kwh.setup();
+    winston::hal::text("KWH Setup complete!"_s);
 #ifdef WINSTON_PLATFORM_TEENSY
     digitalWrite(led, HIGH);
 #endif

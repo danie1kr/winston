@@ -8,6 +8,7 @@ class TLC5947 : public winston::SignalDevice<T>, public winston::Shared_Ptr<TLC5
 	//static_assert(bits <= sizeof(T) * 8, "too many bits for T");
 public:
 	const size_t bits = 12;
+	static const unsigned int SPI_Clock = 5000000;
 
 	TLC5947(const size_t ports, typename winston::SendDevice<T>::Shared device, typename winston::GPIODigitalPinOutputDevice::Shared pinOff)
 		: winston::SignalDevice<T>(ports, device), data((ports * bits / 8) / sizeof(T), 0), pinOff(pinOff)

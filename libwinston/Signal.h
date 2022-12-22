@@ -80,8 +80,8 @@ namespace winston
 		enum class Aspect
 		{
 			Off =			0b00001,
-			Halt =			0b00010,
-			Go =			0b00100,
+			Go =			0b00010,
+			Halt =			0b00100,
 			ExpectHalt =	0b01000,
 			ExpectGo =		0b10000
 		};
@@ -231,7 +231,7 @@ namespace winston
 		typedef std::array<Light, BitCounter<_Aspects>::count()> LightsArray;
 		template<int... i> static constexpr LightsArray makeLightInSequence(const Signal::Aspects aspects, const unsigned int startPort)
 		{ 
-			return LightsArray{ { Signal::Light::make(startPort + i, (Signal::Aspect)nThSetBit<i+1, sizeof(Signal::Aspect) * 8 - 1>::extract(aspects))...}};
+			return LightsArray{ { Signal::Light::make(startPort + i, (Signal::Aspect)nThSetBit<BitCounter<_Aspects>::count()-1 - i+1, sizeof(Signal::Aspect) * 8 - 1>::extract(aspects))...}};
 		}
 		template<int...> class Sequence;
 		template<int... i> class Sequence<0, i...>

@@ -428,11 +428,11 @@
             let guarding = data.guarding;
             let aspects = data.aspects;
 
-            let colorClass = aspects & 0b00100 ? "green" : "red";
+            let colorClass = "black";
 
             if (aspects & 0b00001) colorClass = "black";        // Off
-            else if (aspects & 0b00010) colorClass = "red";   // Halt
-            else if (aspects & 0b00100) colorClass = "green";   // Go
+            else if (aspects & 0b00100) colorClass = "red";   // Halt
+            else if (aspects & 0b00010) colorClass = "green";   // Go
             else if (aspects & 0b01000) colorClass = "yellow";  // ExpectHalt
             else if (aspects & 0b10000) colorClass = "turquoise";   // ExpectGo
 
@@ -721,8 +721,8 @@
                             let color = "black";
                             let symbol = "B";
                             
-                            if (l.aspect == 0b00010) { if (l.aspect & data.aspects) { color = "red"; } symbol = "●"; }
-                            if (l.aspect == 0b00100) { if (l.aspect & data.aspects) { color = "green"; } symbol = "●"; }
+                            if (l.aspect == 0b00100) { if (l.aspect & data.aspects) { color = "red"; } symbol = "●"; }
+                            if (l.aspect == 0b00010) { if (l.aspect & data.aspects) { color = "green"; } symbol = "●"; }
                             if (l.aspect == 0b01000) { if (l.aspect & data.aspects) { color = "red"; } symbol = "○"; }
                             if (l.aspect == 0b10000) { if (l.aspect & data.aspects) { color = "green"; } symbol = "○"; }
 

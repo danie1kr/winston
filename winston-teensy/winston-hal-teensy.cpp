@@ -638,7 +638,7 @@ namespace winston
         void fatal(const std::string reason)
         {
             logger.log(reason, Logger::Entry::Level::Fatal);
-            exit(-1);
+            //exit(-1);
         }
 
         void delay(const unsigned int ms)

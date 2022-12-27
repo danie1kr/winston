@@ -60,13 +60,18 @@ Z21::Z21(winston::hal::Socket::Shared& socket, winston::DigitalCentralStation::T
 const winston::Result Z21::connect()
 {
     CaR(this->logoff());
+#ifdef WINSTON_REALWORLD
+    // give the z21 time to boot
+    winston::hal::delay(8000);
+#else
     winston::hal::delay(100);
+#endif
     CaR(this->getStatus());
     CaR(this->getSerialNumber());
     CaR(this->getHardwareInfo());
     CaR(this->getFirmwareVersion());
     CaR(this->getVersion());
-    CaR(this->setBroadcastFlags(Z21_Broadcast::STATUS_LOCO_TURNOUT | Z21_Broadcast::ALL_LOCO_INFO));
+    CaR(this->setBroadcastFlags(Z21_Broadcast::STATUS_LOCO_TURNOUT));// | Z21_Broadcast::ALL_LOCO_INFO));
 
     return winston::Result::OK;
 }

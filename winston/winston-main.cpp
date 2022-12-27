@@ -8,9 +8,11 @@ Kornweinheim kwh;
 void winston_setup()
 {
 #ifdef WINSTON_PLATFORM_TEENSY
-    int led = 13;
+    int led = 14;
     pinMode(led, OUTPUT);
     digitalWrite(led, HIGH);
+    pinMode(13, OUTPUT);
+    digitalWrite(13, HIGH);
 #endif
     winston::hal::init();
 	winston::hal::text("Hello from Winston!"_s);

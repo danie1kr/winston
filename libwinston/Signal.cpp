@@ -7,6 +7,18 @@ namespace winston
 		return { port, aspect };
 	}
 
+	constexpr unsigned int Signal::Light::maximum(const Aspect aspect)
+	{
+		switch (aspect)
+		{
+		case Aspect::Off: return 0;
+		case Aspect::Go: return (range / 8) - 1;
+		case Aspect::Halt: return (range / 4) - 1;
+		case Aspect::ExpectGo: return (range / 8) - 1;
+		case Aspect::ExpectHalt: return (range / 4) - 1;
+		}
+	}
+
 	Signal::Signal(const Callback callback, const Length distance)
 		: callback(callback), _distance(distance), _aspect((unsigned int)Aspect::Go)
 	{
@@ -71,37 +83,33 @@ namespace winston
 	template<> void SignalKS::init() { }
 	template<> void SignalKS::updateLights()
 	{
-		// Halt, Go, ExpectHalt
-		// order is Aspect reversed due to nThSetBit going from 1<<N to 1<<0
-		this->_lights[0].value = this->shows(Aspect::Go) ? Light::maximum : 0;
-		this->_lights[1].value = this->shows(Aspect::Halt) ? Light::maximum : 0;
-		this->_lights[2].value = this->shows(Aspect::ExpectHalt) ? Light::maximum : 0;
+		// Go, Halt, ExpectHalt
+		this->_lights[0].value = this->shows(Aspect::Go) ? Light::maximum(Aspect::Go) : 0;
+		this->_lights[1].value = this->shows(Aspect::Halt) ? Light::maximum(Aspect::Halt) : 0;
+		this->_lights[2].value = this->shows(Aspect::ExpectHalt) ? Light::maximum(Aspect::ExpectHalt) : 0;
 	}
 	template<> void SignalH::init() { }
 	template<> void SignalH::updateLights()
 	{
-		// Halt, Go
-		// order is Aspect reversed due to nThSetBit going from 1<<N to 1<<0
-		this->_lights[0].value = this->shows(Aspect::Go) ? Light::maximum : 0;
-		this->_lights[1].value = this->shows(Aspect::Halt) ? Light::maximum : 0;
+		// Go, Halt
+		this->_lights[0].value = this->shows(Aspect::Go) ? Light::maximum(Aspect::Go) : 0;
+		this->_lights[1].value = this->shows(Aspect::Halt) ? Light::maximum(Aspect::Halt) : 0;
 	}
 	template<> void SignalV::init() { }
 	template<> void SignalV::updateLights()
 	{
 		// ExpectHalt, ExpectGo
-		// order is Aspect reversed due to nThSetBit going from 1<<N to 1<<0
-		this->_lights[0].value = this->shows(Aspect::ExpectHalt) ? Light::maximum : 0;
-		this->_lights[1].value = this->shows(Aspect::ExpectGo) ? Light::maximum : 0;
+		this->_lights[0].value = this->shows(Aspect::ExpectHalt) ? Light::maximum(Aspect::ExpectHalt) : 0;
+		this->_lights[1].value = this->shows(Aspect::ExpectGo) ? Light::maximum(Aspect::Go) : 0;
 	}
 	template<> void SignalHV::init() { }
 	template<> void SignalHV::updateLights()
 	{
-		// Halt, Go, ExpectHalt, ExpectGo
-		// order is Aspect reversed due to nThSetBit going from 1<<N to 1<<0
-		this->_lights[0].value = this->shows(Aspect::Go) ? Light::maximum : 0;
-		this->_lights[1].value = this->shows(Aspect::Halt) ? Light::maximum : 0;
-		this->_lights[2].value = this->shows(Aspect::ExpectHalt) ? Light::maximum : 0;
-		this->_lights[3].value = this->shows(Aspect::ExpectGo) ? Light::maximum : 0;
+		// Go, Halt, ExpectHalt, ExpectGo
+		this->_lights[0].value = this->shows(Aspect::Go) ? Light::maximum(Aspect::Go) : 0;
+		this->_lights[1].value = this->shows(Aspect::Halt) ? Light::maximum(Aspect::Halt) : 0;
+		this->_lights[2].value = this->shows(Aspect::ExpectHalt) ? Light::maximum(Aspect::ExpectHalt) : 0;
+		this->_lights[3].value = this->shows(Aspect::ExpectGo) ? Light::maximum(Aspect::ExpectGo) : 0;
 	}
 
 	template<> void SignalAlwaysHalt::init()
@@ -111,6 +119,6 @@ namespace winston
 
 	template<> void SignalAlwaysHalt::updateLights()
 	{
-		this->_lights[0].value = Light::maximum;
+		this->_lights[0].value = Light::maximum(Aspect::Halt);
 	}
 }

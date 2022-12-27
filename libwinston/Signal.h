@@ -94,7 +94,9 @@ namespace winston
 			const Aspect aspect;
 			unsigned int value = 0;
 			static const unsigned int range = 1 << 12;
-			static const unsigned int maximum = (range / WINSTON_SIGNAL_LIGHT_DIV) - 1;
+			//static const unsigned int maximum = (range / WINSTON_SIGNAL_LIGHT_DIV) - 1;
+
+			static constexpr unsigned int maximum(const Aspect aspect);
 		};
 
 		/*

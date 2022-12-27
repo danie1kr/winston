@@ -248,7 +248,7 @@ void Kornweinheim::writeSignal(WebServer::HTTPConnection& connection, const wins
             else
                 connection.body(winston::build("<tr><td>"));
             ++l;
-            connection.body(winston::build(l, signal, "</td><td>", light.port, "</td></tr>"));
+            connection.body(winston::build(l, signal, "</td><td>", light.port, "</td><td>", light.port == 999 ? "n/a" : winston::build(light.port / 24, " @ ", light.port % 24), "</td></tr>"));
         }
     }
 }
@@ -297,7 +297,7 @@ void Kornweinheim::on_http(WebServer::HTTPConnection& connection, const winston:
         connection.status(200);
         connection.header("content-type"_s, "text/html; charset=UTF-8"_s);
         connection.header("Connection"_s, "close"_s);
-        connection.body("<html><head>winston signal list</head><body><table border=1><tr><th>track</th><th>connection</th><th>light</th><th>port</th></tr>"_s);
+        connection.body("<html><head>winston signal list</head><body><table border=1><tr><th>track</th><th>connection</th><th>light</th><th>port</th><th>device @ port</th></tr>"_s);
         for (unsigned int i = 0; i < railway->tracksCount(); ++i)
         {
             auto track = railway->track(i);

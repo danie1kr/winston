@@ -97,6 +97,7 @@ namespace winston
 #define STRINGIZE2(x) #x
 #define LINE STRINGIZE(__LINE__)
 #define CaR(code) { winston::Result r = code; if(r != winston::Result::OK) { winston::error(winston::build(__FILE__ "@" LINE ": " STRINGIZE(code) " -> ", winston::build(r))); return r; } }
+#define CheckAndReport(code) { winston::Result r = code; if(r != winston::Result::OK) { winston::error(winston::build(__FILE__ "@" LINE ": " STRINGIZE(code) " -> ", winston::build(r))); } }
 
 	unsigned char reverse(unsigned char b);
 

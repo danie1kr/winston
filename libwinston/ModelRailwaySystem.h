@@ -30,6 +30,21 @@ namespace winston
 
 			this->railway->init(_features & Features::Blocks);
 
+			this->populateLocomotiveShed();
+
+			for(const auto &loco : this->locomotiveShed ) {
+
+				this->signalBox->order(winston::Command::make([this, loco](const TimePoint &created) -> const winston::State
+					{
+						this->digitalCentralStation->requestLocoInfo(loco);
+						winston::hal::delay(150);
+						return winston::State::Finished;
+					}, __PRETTY_FUNCTION__));
+			}
+
+			this->setupSignals();
+			this->setupDetectors();
+			
 			this->digitalCentralStation->connect();
 
 			this->railway->turnouts([=](const Tracks track, winston::Turnout::Shared turnout) {
@@ -43,20 +58,6 @@ namespace winston
 						return winston::State::Finished;
 					}, __PRETTY_FUNCTION__));
 			});
-
-			this->populateLocomotiveShed();
-			for(const auto &loco : this->locomotiveShed ) {
-
-				this->signalBox->order(winston::Command::make([this, loco](const TimePoint &created) -> const winston::State
-					{
-						this->digitalCentralStation->requestLocoInfo(loco);
-						winston::hal::delay(150);
-						return winston::State::Finished;
-					}, __PRETTY_FUNCTION__));
-			}
-
-			this->setupSignals();
-			this->setupDetectors();
 
 			this->signalBox->order(winston::Command::make([](const TimePoint &created) -> const winston::State
 				{

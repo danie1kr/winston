@@ -538,8 +538,8 @@ const winston::Result StorageArduino::sync()
 }
 
 void teensyMAC(uint8_t* mac) { // there are 2 MAC addresses each 48bit 
-    uint32_t m1 = HW_OCOTP_MAC1;
-    uint32_t m2 = HW_OCOTP_MAC0;
+    const unsigned int m1 = HW_OCOTP_MAC1;
+    const unsigned int m2 = HW_OCOTP_MAC0;
     mac[0] = m1 >> 8;
     mac[1] = m1 >> 0;
     mac[2] = m2 >> 24;
@@ -571,6 +571,17 @@ namespace winston
             else
                 winston::runtimeEnablePersistence();
             SD.sdfs.chdir();
+
+            if (winston::runtimePersistence() && CrashReport)
+            {
+                File log = SD.open("crash.log", FILE_WRITE);
+                if (log)
+                {
+                    log.println("===");
+                    log.print(CrashReport);
+                    log.close();
+                }
+            }
 #endif
             uint8_t mac[6];
             teensyMAC(mac);

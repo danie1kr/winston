@@ -36,6 +36,8 @@ public:
     void triggerLocoDrive(const winston::Address address, const unsigned char speed, const bool forward);
     void triggerLocoFunction(const winston::Address address, const uint32_t functions);
 
+    void keepAlive();
+
     using winston::Shared_Ptr<Z21>::Shared;
     using winston::Shared_Ptr<Z21>::make;
 
@@ -43,6 +45,11 @@ private:
     const winston::Result send(Z21Packet &packet);
 
     void notImplemented(std::string command);
+
+    winston::TimePoint lastMsgSent;
+    const std::chrono::seconds keepAliveTimeout = std::chrono::seconds(24);
+
+    const unsigned int broadcastFlags = Z21_Broadcast::STATUS_LOCO_TURNOUT;// | Z21_Broadcast::ALL_LOCO_INFO;
 
 protected:
     void processXPacket(uint8_t *packet);

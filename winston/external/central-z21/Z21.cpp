@@ -21,7 +21,7 @@
 #define NOT_IMPLEMENTED(func) winston::logger.warn(winston::build("Z21: ", func, " not implemented"));
 
 Z21::Z21(winston::hal::Socket::Shared& socket, winston::DigitalCentralStation::TurnoutAddressTranslator::Shared& addressTranslator, LocoAddressTranslator& locoAddressTranslator, winston::SignalBox::Shared& signalBox, winston::DigitalCentralStation::Callbacks callbacks)
-    : winston::DigitalCentralStation(addressTranslator, locoAddressTranslator, signalBox, callbacks), socket(socket)
+    : winston::DigitalCentralStation(addressTranslator, locoAddressTranslator, signalBox, callbacks), socket(socket), lastMsgSent{}
 {
     this->onBroadcastFlags = [](uint32_t flags) { NOT_IMPLEMENTED("onBroadcastFlags"); };
 
@@ -71,15 +71,25 @@ const winston::Result Z21::connect()
     CaR(this->getHardwareInfo());
     CaR(this->getFirmwareVersion());
     CaR(this->getVersion());
-    CaR(this->setBroadcastFlags(Z21_Broadcast::STATUS_LOCO_TURNOUT));// | Z21_Broadcast::ALL_LOCO_INFO));
+    CaR(this->setBroadcastFlags(this->broadcastFlags));// | Z21_Broadcast::ALL_LOCO_INFO));
 
     return winston::Result::OK;
 }
 
 const winston::Result Z21::send(Z21Packet& packet)
 {
+    this->lastMsgSent = winston::hal::now();
     winston::Result result = this->socket->send(packet.data);
     return result;
+}
+
+void Z21::keepAlive()
+{
+    if (winston::hal::now() - this->lastMsgSent > this->keepAliveTimeout)
+    {        
+        CheckAndReport(this->getStatus());
+        CheckAndReport(this->setBroadcastFlags(this->broadcastFlags));
+    }
 }
 
 const winston::Result Z21::tick()
@@ -90,6 +100,9 @@ const winston::Result Z21::tick()
         auto result = this->socket->recv(data);
         if (data.size() > 0)
             this->processPacket(data.data());
+
+        this->keepAlive();
+
         return result;
     }
     //else

@@ -5,6 +5,15 @@
 
 #include "Kornweinheim.h"
 
+/*
+    TODO: 
+        - separate webUI into own class
+        - retry commands if no answer came
+        - show state via signals
+        - initial connect, wait until first answer
+        - set maximum light value when setting up signal
+*/
+
 
 #ifdef WINSTON_LOCO_TRACKING
 void Kornweinheim::webSocket_sendLocosPosition()

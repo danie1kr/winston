@@ -24,6 +24,11 @@ namespace winston
 		this->station->callbacks.locomotiveUpdateCallback(loco, busy, forward, speed, functions);
 	}
 
+	void DigitalCentralStation::keepAlive()
+	{
+
+	}
+
 	void DigitalCentralStation::turnoutUpdate(Turnout::Shared turnout, const Turnout::Direction direction)
 	{
 		this->signalBox->order(Command::make([turnout, direction](const TimePoint &created) -> const State 

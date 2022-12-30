@@ -71,6 +71,7 @@ namespace winston
 		virtual void triggerTurnoutChangeTo(winston::Turnout::Shared turnout, winston::Turnout::Direction direction) = 0;
 		virtual void triggerLocoDrive(const Address address, const unsigned char speed, const bool forward) = 0;
 		virtual void triggerLocoFunction(const Address address, const uint32_t functions) = 0;
+		virtual void keepAlive();
 
 		void turnoutUpdate(Turnout::Shared turnout, const Turnout::Direction direction);
 

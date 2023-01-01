@@ -60,12 +60,12 @@ Z21::Z21(winston::hal::Socket::Shared& socket, winston::DigitalCentralStation::T
 const winston::Result Z21::connect()
 {
     CaR(this->logoff());
-#ifdef WINSTON_REALWORLD
+/*#ifdef WINSTON_REALWORLD
     // give the z21 time to boot
     winston::hal::delay(8000);
-#else
+#else*/
     winston::hal::delay(100);
-#endif
+//#endif
     CaR(this->getStatus());
     CaR(this->getSerialNumber());
     CaR(this->getHardwareInfo());

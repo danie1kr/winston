@@ -162,13 +162,15 @@ namespace winston
 		Signal(const Callback callback = defaultCallback(), const Length distance = 0);
 
 		const State aspect(const Aspect aspect);
-		const Aspects aspect() const;
-		const bool shows(Aspect aspect) const;
+		inline const Aspects aspect() const;
+		inline const bool shows(Aspect aspect) const;
 		virtual const bool supports(const Aspect aspect, const bool any) const = 0;
 		virtual const bool preSignal() const = 0;
 		virtual const bool mainSignal() const = 0;
 
 		const Length distance() const;
+
+		void overwrite(const Aspects aspect);
 		
 		virtual const std::span<const Light> lights() const = 0;
 	protected:
@@ -179,6 +181,7 @@ namespace winston
 		const Callback callback;
 		const Length _distance;
 		Aspects _aspect;
+		Aspects _forced;
 	};
 
 	inline const bool operator&(const Signal::Aspect a, const Signal::Aspect b)

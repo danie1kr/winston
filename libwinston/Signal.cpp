@@ -17,10 +17,11 @@ namespace winston
 		case Aspect::ExpectGo: return (range / 8) - 1;
 		case Aspect::ExpectHalt: return (range / 4) - 1;
 		}
+		return 0;
 	}
 
 	Signal::Signal(const Callback callback, const Length distance)
-		: callback(callback), _distance(distance), _aspect((unsigned int)Aspect::Go)
+		: callback(callback), _distance(distance), _aspect((unsigned int)Aspect::Go), _forced(0)
 	{
 
 	}
@@ -62,17 +63,20 @@ namespace winston
 			this->_aspect = (unsigned int)Signal::Aspect::Off;
 
 		this->updateLights();
-		return this->callback(this->_aspect);
+		return this->callback(this->aspect());
 	}
 
 	const Signal::Aspects Signal::aspect() const
 	{
-		return this->_aspect;
+		if (this->_forced)
+			return this->_forced;
+		else
+			return this->_aspect;
 	}
 
 	const bool Signal::shows(Aspect aspect) const
 	{
-		return (const unsigned int)this->_aspect & (const unsigned int)aspect;
+		return (const unsigned int)this->aspect() & (const unsigned int)aspect;
 	}
 
 	const Length Signal::distance() const
@@ -80,9 +84,31 @@ namespace winston
 		return this->_distance;
 	}
 
+	void Signal::overwrite(const Aspects aspect)
+	{
+		this->_forced = aspect;
+		this->updateLights();
+	}
+
 	template<> void SignalKS::init() { }
 	template<> void SignalKS::updateLights()
 	{
+		/*if (this->_forced)
+		{
+			if ((const unsigned int)this->_forced & (const unsigned int)Aspect::Off)
+			{
+				this->_lights[0].value = 0;
+				this->_lights[1].value = 0;
+				this->_lights[2].value = 0;
+			}
+			else
+			{
+				this->_lights[0].value = ((const unsigned int)this->_forced & (const unsigned int)Aspect::Go) ? Light::maximum(Aspect::Go) : 0;
+				this->_lights[1].value = ((const unsigned int)this->_forced & (const unsigned int)Aspect::Halt) ? Light::maximum(Aspect::Halt) : 0;
+				this->_lights[2].value = ((const unsigned int)this->_forced & (const unsigned int)Aspect::ExpectHalt) ? Light::maximum(Aspect::ExpectHalt) : 0;
+			}
+			return;
+		}*/
 		// Go, Halt, ExpectHalt
 		this->_lights[0].value = this->shows(Aspect::Go) ? Light::maximum(Aspect::Go) : 0;
 		this->_lights[1].value = this->shows(Aspect::Halt) ? Light::maximum(Aspect::Halt) : 0;
@@ -91,6 +117,20 @@ namespace winston
 	template<> void SignalH::init() { }
 	template<> void SignalH::updateLights()
 	{
+		/*if (this->_forced)
+		{
+			if ((const unsigned int)this->_forced & (const unsigned int)Aspect::Off)
+			{
+				this->_lights[0].value = 0;
+				this->_lights[1].value = 0;
+			}
+			else
+			{
+				this->_lights[0].value = ((const unsigned int)this->_forced & (const unsigned int)Aspect::Go) ? Light::maximum(Aspect::Go) : 0;
+				this->_lights[1].value = ((const unsigned int)this->_forced & (const unsigned int)Aspect::Halt) ? Light::maximum(Aspect::Halt) : 0;
+			}
+			return;
+		}*/
 		// Go, Halt
 		this->_lights[0].value = this->shows(Aspect::Go) ? Light::maximum(Aspect::Go) : 0;
 		this->_lights[1].value = this->shows(Aspect::Halt) ? Light::maximum(Aspect::Halt) : 0;
@@ -98,6 +138,20 @@ namespace winston
 	template<> void SignalV::init() { }
 	template<> void SignalV::updateLights()
 	{
+		/*if (this->_forced)
+		{
+			if ((const unsigned int)this->_forced & (const unsigned int)Aspect::Off)
+			{
+				this->_lights[0].value = 0;
+				this->_lights[1].value = 0;
+			}
+			else
+			{
+				this->_lights[0].value = ((const unsigned int)this->_forced & (const unsigned int)Aspect::ExpectHalt) ? Light::maximum(Aspect::ExpectHalt) : 0;
+				this->_lights[1].value = ((const unsigned int)this->_forced & (const unsigned int)Aspect::Go) ? Light::maximum(Aspect::Go) : 0;
+			}
+			return;
+		}*/
 		// ExpectHalt, ExpectGo
 		this->_lights[0].value = this->shows(Aspect::ExpectHalt) ? Light::maximum(Aspect::ExpectHalt) : 0;
 		this->_lights[1].value = this->shows(Aspect::ExpectGo) ? Light::maximum(Aspect::Go) : 0;
@@ -105,6 +159,24 @@ namespace winston
 	template<> void SignalHV::init() { }
 	template<> void SignalHV::updateLights()
 	{
+		/*if (this->_forced)
+		{
+			if ((const unsigned int)this->_forced & (const unsigned int)Aspect::Off)
+			{
+				this->_lights[0].value = 0;
+				this->_lights[1].value = 0;
+				this->_lights[2].value = 0;
+				this->_lights[3].value = 0;
+			}
+			else
+			{
+				this->_lights[0].value = ((const unsigned int)this->_forced & (const unsigned int)Aspect::Go) ? Light::maximum(Aspect::Go) : 0;
+				this->_lights[1].value = ((const unsigned int)this->_forced & (const unsigned int)Aspect::Halt) ? Light::maximum(Aspect::Halt) : 0;
+				this->_lights[2].value = ((const unsigned int)this->_forced & (const unsigned int)Aspect::ExpectHalt) ? Light::maximum(Aspect::ExpectHalt) : 0;
+				this->_lights[3].value = ((const unsigned int)this->_forced & (const unsigned int)Aspect::ExpectGo) ? Light::maximum(Aspect::ExpectGo) : 0;
+			}
+			return;
+		}*/
 		// Go, Halt, ExpectHalt, ExpectGo
 		this->_lights[0].value = this->shows(Aspect::Go) ? Light::maximum(Aspect::Go) : 0;
 		this->_lights[1].value = this->shows(Aspect::Halt) ? Light::maximum(Aspect::Halt) : 0;

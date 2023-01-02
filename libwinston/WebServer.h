@@ -73,4 +73,8 @@ namespace winston
 		OnMessage onMessage;
 	};
 
+	class WebUI
+	{
+
+	};
 };

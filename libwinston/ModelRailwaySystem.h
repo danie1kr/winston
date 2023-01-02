@@ -159,12 +159,14 @@ namespace winston
 
 		//using SignalFactory = std::function < winston::Signal::Shared(winston::Track::Shared track, winston::Track::Connection connection)>;
 		template<class _Signal>
-		void signalFactory(winston::Track::Shared track, const winston::Track::Connection connection, winston::Distance distance, unsigned int& port, const winston::Railway::Callbacks::SignalUpdateCallback& signalUpdateCallback)
+		Signal::Shared signalFactory(winston::Track::Shared track, const winston::Track::Connection connection, winston::Distance distance, unsigned int& port, const winston::Railway::Callbacks::SignalUpdateCallback& signalUpdateCallback)
 		{
-			track->attachSignal(_Signal::make([track, connection, signalUpdateCallback](const winston::Signal::Aspects aspect)->const winston::State {
+			auto s = _Signal::make([track, connection, signalUpdateCallback](const winston::Signal::Aspects aspect)->const winston::State {
 				return signalUpdateCallback(track, connection, aspect);
-				}, distance, port), connection);
+				}, distance, port);
+			track->attachSignal(s, connection);
 			port += (unsigned int)_Signal::lightsCount();
+			return s;
 
 			/* TODO: ensure port does not overflow
 			return [distance, devPort, this](winston::Track::Shared track, winston::Track::Connection connection)->winston::Signal::Shared {

@@ -310,42 +310,60 @@ winston::Result Kornweinheim::on_http(WebServer::HTTPConnection& connection, con
                 {
                     winston::logger.info("Signal-Test: Resume");
                     for (auto& s : this->signals)
+                    {
                         s->overwrite((const unsigned int)0);
+                        this->signalDevice->update(s);
+                    }
                     return winston::State::Finished;
                 }
                 else if (winston::hal::now() - created > std::chrono::seconds(4* interval))
                 {
                     winston::logger.info("Signal-Test: ExpectGo");
                     for (auto& s : this->signals)
+                    {
                         s->overwrite((const unsigned int)winston::Signal::Aspect::ExpectGo);
+                        this->signalDevice->update(s);
+                    }
                     return winston::State::Running;
                 }
                 else if (winston::hal::now() - created > std::chrono::seconds(3* interval))
                 {
                     winston::logger.info("Signal-Test: ExpectHalt");
                     for (auto& s : this->signals)
+                    {
                         s->overwrite((const unsigned int)winston::Signal::Aspect::ExpectHalt);
+                        this->signalDevice->update(s);
+                    }
                     return winston::State::Running;
                 }
                 else if (winston::hal::now() - created > std::chrono::seconds(2*interval))
                 {
                     winston::logger.info("Signal-Test: Halt");
                     for (auto& s : this->signals)
+                    {
                         s->overwrite((const unsigned int)winston::Signal::Aspect::Halt);
+                        this->signalDevice->update(s);
+                    }
                     return winston::State::Running;
                 }
                 else if (winston::hal::now() - created > std::chrono::seconds(interval))
                 {
                     winston::logger.info("Signal-Test: Go");
                     for (auto& s : this->signals)
+                    {
                         s->overwrite((const unsigned int)winston::Signal::Aspect::Go);
+                        this->signalDevice->update(s);
+                    }
                     return winston::State::Running;
                 }
                 else
                 {
                     winston::logger.info("Signal-Test: Off");
                     for (auto& s : this->signals)
+                    {
                         s->overwrite((const unsigned int)winston::Signal::Aspect::Off);
+                        this->signalDevice->update(s);
+                    }
                     return winston::State::Running;
                 }
             }));

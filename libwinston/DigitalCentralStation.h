@@ -22,13 +22,13 @@ namespace winston
 		class LocoAddressTranslator
 		{
 		public:
-			virtual tl::optional<Locomotive&> locoFromAddress(const Address address) = 0;
-			virtual const Address addressOfLoco(const Locomotive& loco) const = 0;
+			virtual Locomotive::Shared locoFromAddress(const Address address) = 0;
+			virtual const Address addressOfLoco(const Locomotive::Shared loco) const = 0;
 		};
 
 		struct Callbacks : public Railway::Callbacks
 		{
-			using LocomotiveUpdateCallback = std::function<void(Locomotive& loco,
+			using LocomotiveUpdateCallback = std::function<void(Locomotive::Shared loco,
 				bool  busy,
 			//	boolean  doubleTracktion,
 			//	boolean  transpond,
@@ -55,7 +55,7 @@ namespace winston
 		public:
 			DebugInjector(DigitalCentralStation::Shared& station);
 			void injectTurnoutUpdate(Turnout::Shared turnout, const Turnout::Direction direction);
-			void injectLocoUpdate(Locomotive& loco, bool busy, bool forward, unsigned char speed, uint32_t functions);
+			void injectLocoUpdate(Locomotive::Shared loco, bool busy, bool forward, unsigned char speed, uint32_t functions);
 		private:
 			DigitalCentralStation::Shared station;
 		};
@@ -67,7 +67,7 @@ namespace winston
 		virtual const winston::Result tick() = 0;
 
 		virtual void requestTurnoutInfo(Turnout::Shared turnout) = 0;
-		virtual void requestLocoInfo(const Locomotive& loco) = 0;
+		virtual void requestLocoInfo(const Locomotive::Shared loco) = 0;
 		virtual void triggerTurnoutChangeTo(winston::Turnout::Shared turnout, winston::Turnout::Direction direction) = 0;
 		virtual void triggerLocoDrive(const Address address, const unsigned char speed, const bool forward) = 0;
 		virtual void triggerLocoFunction(const Address address, const uint32_t functions) = 0;

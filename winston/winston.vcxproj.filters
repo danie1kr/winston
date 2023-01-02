@@ -86,9 +86,6 @@
     <ClInclude Include="Kornweinheim.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="external\ArduinoJson-v6.19.0.hpp">
-      <Filter>external</Filter>
-    </ClInclude>
     <ClInclude Include="Kornweinheim.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

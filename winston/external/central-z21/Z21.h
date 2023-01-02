@@ -31,7 +31,7 @@ public:
     const winston::Result tick();
 
     void requestTurnoutInfo(winston::Turnout::Shared turnout);
-    void requestLocoInfo(const winston::Locomotive& loco);
+    void requestLocoInfo(const winston::Locomotive::Shared loco);
     void triggerTurnoutChangeTo(winston::Turnout::Shared turnout, winston::Turnout::Direction direction);
     void triggerLocoDrive(const winston::Address address, const unsigned char speed, const bool forward);
     void triggerLocoFunction(const winston::Address address, const uint32_t functions);

@@ -478,7 +478,7 @@ void Z21::requestTurnoutInfo(winston::Turnout::Shared turnout)
     this->getAccessoryInfo((const unsigned short)address);
 }
 
-void Z21::requestLocoInfo(const winston::Locomotive& loco)
+void Z21::requestLocoInfo(const winston::Locomotive::Shared loco)
 {
     const unsigned int address = this->locoAddressTranslator.addressOfLoco(loco);
     this->getLocoInfo(address);
@@ -584,7 +584,7 @@ void Z21::processLocoInfo(uint8_t* data) {
 
     //onLocoInfo(addr, busy, consist, transpond, forward, speed, functions);
     if (auto loco = this->locoAddressTranslator.locoFromAddress(addr))
-        this->callbacks.locomotiveUpdateCallback(*loco, busy, forward, speed, functions);
+        this->callbacks.locomotiveUpdateCallback(loco, busy, forward, speed, functions);
 }
 
 void Z21::processBCPacket(uint8_t* data) {

@@ -7,7 +7,7 @@
 #endif
 
 #include <array>
-#include "../libwinston/better_enum.hpp"
+#include "../libwinston/external/better_enum.hpp"
 #include "../libwinston/Winston.h"
 
 #ifndef WINSTON_PLATFORM_TEENSY

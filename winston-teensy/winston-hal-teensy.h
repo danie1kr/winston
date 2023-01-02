@@ -64,10 +64,12 @@ constexpr const __FlashStringHelper* operator "" _s(const char* in, size_t len)
     return ((const __FlashStringHelper*)(in));
 }
 #else
-constexpr const char* operator "" _s(const char* in, size_t len)
+/*
+const char* operator "" _s(const char* in, size_t len)
 {
-    return in;
+	return in;
 }
+*/
 #endif
 
 class UDPSocketTeensy : public winston::hal::Socket, winston::Shared_Ptr<UDPSocketTeensy>

@@ -14,7 +14,6 @@
         - set maximum light value when setting up signal
 */
 
-
 #ifdef WINSTON_LOCO_TRACKING
 void Kornweinheim::webSocket_sendLocosPosition()
 {
@@ -43,7 +42,7 @@ void Kornweinheim::webSocket_sendLocosPosition()
 #endif
 }
 #endif
-
+/*
 #ifdef WINSTON_WITH_WEBSOCKET
 // send a turnout state via websocket
 void Kornweinheim::turnoutSendState(const std::string turnoutTrackId, const winston::Turnout::Direction dir)
@@ -94,24 +93,7 @@ void Kornweinheim::locoSend(winston::Address address)
         locoSend(*loco);
     }
 }
-#endif
-void Kornweinheim::initNetwork()
-{
-    // z21
-    z21Socket = UDPSocket::make(z21IP, z21Port);
-
-#ifdef WINSTON_WITH_WEBSOCKET
-    // webServer
-    this->webServer.init(
-        [=](WebServer::HTTPConnection& client, const winston::HTTPMethod method, const std::string& resource) {
-            this->on_http(client, method, resource);
-        },
-        [=](WebServer::Client& client, const std::string& resource) {
-            this->on_message(client, resource);
-        },
-        8080);
-#endif
-}
+#endif*/
 
 winston::DigitalCentralStation::Callbacks Kornweinheim::z21Callbacks()
 {
@@ -144,13 +126,13 @@ winston::DigitalCentralStation::Callbacks Kornweinheim::z21Callbacks()
         return winston::State::Finished;
     };
 
-    callbacks.locomotiveUpdateCallback = [=](winston::Locomotive& loco, bool busy, bool  forward, unsigned char  speed, uint32_t functions)
+    callbacks.locomotiveUpdateCallback = [=](winston::Locomotive::Shared loco, bool busy, bool  forward, unsigned char  speed, uint32_t functions)
     {
-        loco.update(busy, forward, speed, functions);
+        loco->update(busy, forward, speed, functions);
 
 
 #ifdef WINSTON_WITH_WEBSOCKET
-        locoSend(loco);
+        this->webUI.locoSend(loco);
 #endif    
     };
 
@@ -191,7 +173,7 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
 
 #ifdef WINSTON_WITH_WEBSOCKET
         // tell the ui what happens
-        turnoutSendState(turnout->name(), direction);
+        this->webUI.turnoutSendState(turnout->name(), direction);
 #endif
         winston::logger.info("Turnout ", turnout->name(), " set to direction ", winston::Turnout::DirectionToString(direction));
 
@@ -209,7 +191,7 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
 
 #ifdef WINSTON_WITH_WEBSOCKET
 // Define a callback to handle incoming messages
-
+/*
 void Kornweinheim::writeSignal(WebServer::HTTPConnection& connection, const winston::Track::Shared track, const winston::Track::Connection trackCon)
 {
     if (auto signal = track->signalGuarding(trackCon))
@@ -260,10 +242,9 @@ void Kornweinheim::writeSignal(WebServer::HTTPConnection& connection, const wins
             connection.body(winston::build(l, signal, "</td><td>", light.port, "</td><td>", light.port == 999 ? "n/a" : winston::build(light.port / 24, " @ ", light.port % 24), "</td></tr>"));
         }
     }
-}
+}*/
 
-void Kornweinheim::on_http(WebServer::HTTPConnection& connection, const winston::HTTPMethod method, const std::string& resource) {
-    const std::string path_index("/");
+winston::Result Kornweinheim::on_http(WebServer::HTTPConnection& connection, const winston::HTTPMethod method, const std::string& resource) {
     const std::string path_railway("/railway");
     const std::string path_log("/log");
     const std::string path_signals("/signals");
@@ -272,14 +253,7 @@ void Kornweinheim::on_http(WebServer::HTTPConnection& connection, const winston:
     const std::string path_confirmation_maybe("/confirm_maybe");
     const std::string path_confirmation_no("/confirm_no");
 
-    if (resource.compare(path_index) == 0)
-    {
-        connection.status(200);
-        connection.header("content-type"_s, "text/html; charset=UTF-8"_s);
-        connection.header("Connection"_s, "close"_s);
-        connection.body("<html>winston</html>\r\n"_s);
-    }
-    else if (resource.compare(path_railway) == 0)
+    if (resource.compare(path_railway) == 0)
     {
         connection.status(200);
         connection.header("content-type"_s, "application/json; charset=UTF-8"_s);
@@ -314,12 +288,12 @@ void Kornweinheim::on_http(WebServer::HTTPConnection& connection, const winston:
             switch (track->type())
             {
             case winston::Track::Type::Bumper:
-                this->writeSignal(connection, track, winston::Track::Connection::DeadEnd);
-                this->writeSignal(connection, track, winston::Track::Connection::A);
+                this->writeSignalHTMLList(connection, track, winston::Track::Connection::DeadEnd);
+                this->writeSignalHTMLList(connection, track, winston::Track::Connection::A);
                 break;
             case winston::Track::Type::Rail:
-                this->writeSignal(connection, track, winston::Track::Connection::A);
-                this->writeSignal(connection, track, winston::Track::Connection::B);
+                this->writeSignalHTMLList(connection, track, winston::Track::Connection::A);
+                this->writeSignalHTMLList(connection, track, winston::Track::Connection::B);
                 break;
             default:
                 break;
@@ -392,8 +366,68 @@ void Kornweinheim::on_http(WebServer::HTTPConnection& connection, const winston:
     {
         this->userConfirmation->confirm(winston::ConfirmationProvider::Answer::No);
     }
+    else
+        return winston::Result::NotFound;
+
+    return winston::Result::OK;
 }
 
+// add a signal to the /signal output
+void Kornweinheim::writeSignalHTMLList(WebServer::HTTPConnection& connection, const winston::Track::Shared track, const winston::Track::Connection trackCon)
+{
+    if (auto signal = track->signalGuarding(trackCon))
+    {
+        unsigned int l = 0;
+        size_t cnt = signal->lights().size();
+        for (const auto& light : signal->lights())
+        {
+            std::string icon = "", color = "black";
+            switch (light.aspect)
+            {
+            default:
+            case winston::Signal::Aspect::Off:
+                icon = "off";
+                break;
+            case winston::Signal::Aspect::Halt:
+                icon = "&#11044;";
+                if (signal->shows(light.aspect))
+                {
+                    color = "red";
+                };
+                break;
+            case winston::Signal::Aspect::Go:
+                icon = "&#11044;";
+                if (signal->shows(light.aspect)) {
+                    color = "green";
+                }; break;
+            case winston::Signal::Aspect::ExpectHalt:
+                icon = "&#9675;";
+                if (signal->shows(light.aspect)) {
+                    color = "red";
+                };
+                break;
+            case winston::Signal::Aspect::ExpectGo:
+                icon = "&#9675;";
+                if (signal->shows(light.aspect)) {
+                    color = "green";
+                }; break;
+            }
+
+            //icon += signal->shows(light.aspect) ? " on" : " off";
+
+            std::string signal = "<span style=\"color:" + color + ";\">" + icon + "</span>";
+
+            if (l == 0)
+                connection.body(winston::build("<tr><td rowspan=", cnt, ">", track->name(), "</td><td rowspan=", cnt, ">", winston::Track::ConnectionToString(trackCon), "</td><td>"));
+            else
+                connection.body(winston::build("<tr><td>"));
+            ++l;
+            connection.body(winston::build(l, signal, "</td><td>", light.port, "</td><td>", light.port == 999 ? "n/a" : winston::build(light.port / 24, " @ ", light.port % 24), "</td></tr>"));
+        }
+    }
+}
+
+/*
 void Kornweinheim::writeAttachedSignal(JsonArray& signals, winston::Track::Shared track, const winston::Track::Connection connection)
 {
     auto signal = track->signalGuarding(connection);
@@ -412,8 +446,8 @@ void Kornweinheim::writeAttachedSignal(JsonArray& signals, winston::Track::Share
             light["port"] = (unsigned int)signalLight.port;
         }
     }
-}
-
+}*/
+/*
 // Define a callback to handle incoming messages
 void Kornweinheim::on_message(WebServer::Client& client, const std::string& message)
 {
@@ -701,7 +735,7 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
                         }, __PRETTY_FUNCTION__));
                 }
             }
-        }*/
+        }*
     }
 #ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
     else if (std::string("\"emu_dcs_inject_detector\"").compare(op) == 0)
@@ -719,7 +753,7 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
         unsigned int block = (unsigned int)data["block"].toInt();
         unsigned int loco = (unsigned int)data["loco"].toInt();
         // this->stationDebugInjector->injectBlockUpdate(block, loco);
-        */
+        *
     }
 #endif
     else
@@ -727,15 +761,18 @@ void Kornweinheim::on_message(WebServer::Client& client, const std::string& mess
         winston::hal::text("Received unknown message: ");
         winston::hal::text(message);
     }
-}
+}*/
 #endif
 
 // setup our model railway system
 void Kornweinheim::systemSetup() {
-    this->initNetwork();
-
     // the user defined railway and its address translator
     this->railway = RAILWAY_CLASS::make(railwayCallbacks());
+    this->populateLocomotiveShed();
+
+    // z21
+    z21Socket = UDPSocket::make(z21IP, z21Port);
+
     this->addressTranslator = RAILWAY_CLASS::AddressTranslator::make(railway);
 
     // the internal signal box
@@ -779,6 +816,34 @@ void Kornweinheim::systemSetup() {
 #endif
 
     this->inventStorylines();
+
+    webUI.init(this->railway, this->locomotiveShed, this->storageLayout, 8080,
+        [=](WebServer::HTTPConnection& client, const winston::HTTPMethod method, const std::string& resource) -> winston::Result {
+            return this->on_http(client, method, resource);
+        },
+        [=](const std::string id) -> winston::Result {
+            auto turnout = std::static_pointer_cast<winston::Turnout>(railway->track(id));
+        auto requestDir = winston::Turnout::otherDirection(turnout->direction());
+        signalBox->order(winston::Command::make([this, id, turnout, requestDir](const winston::TimePoint& created) -> const winston::State
+            {
+#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
+                signalBox->order(winston::Command::make([this, turnout, requestDir](const winston::TimePoint& created) -> const winston::State
+                    {
+                        if (inMilliseconds((winston::hal::now() - created)) > WINSTON_RAILWAY_DEBUG_INJECTOR_DELAY)
+                        {
+                            this->stationDebugInjector->injectTurnoutUpdate(turnout, requestDir);
+                            return winston::State::Finished;
+                        }
+                    return winston::State::Delay;
+                    }, __PRETTY_FUNCTION__));
+#endif
+                // tell the central station to trigger the turnout switch
+                // update internal representation. will inform the UI in its callback, too
+                return this->turnoutChangeTo(turnout, requestDir);
+            }, __PRETTY_FUNCTION__));
+            return winston::Result::OK;
+        }
+    );
 };
 
 void Kornweinheim::setupSignals()
@@ -787,7 +852,7 @@ void Kornweinheim::setupSignals()
     {
 #ifdef WINSTON_WITH_WEBSOCKET
         // send to web socket server
-        signalSendState(track->name(), connection, aspects);
+        this->webUI.signalSendState(track->name(), connection, aspects);
 #endif
 
         // update physical light
@@ -965,7 +1030,7 @@ bool Kornweinheim::systemLoop()
 #ifdef WINSTON_STATISTICS
         winston::StopwatchJournal::Event tracer(this->stopWatchJournal, "webServer");
 #endif
-        this->webServer.step();
+        this->webUI.step();
 #endif
     }
     {

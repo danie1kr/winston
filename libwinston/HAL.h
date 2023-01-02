@@ -8,6 +8,10 @@
 #define __PRETTY_FUNCTION__ __FUNCSIG__
 #endif
 
+//#ifdef WINSTON_PLATFORM_WIN_x64
+const char* operator "" _s(const char* in, size_t len);
+//#endif
+
 namespace winston
 {
 	namespace hal

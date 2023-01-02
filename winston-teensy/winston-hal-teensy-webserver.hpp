@@ -61,7 +61,7 @@ public:
         unsigned char buffer[512];
     };
     using HTTPConnection = HTTPConnectionTeensy;
-    using OnHTTP = std::function<void(HTTPConnection& client, const winston::HTTPMethod method, const std::string& resource)>;
+    using OnHTTP = std::function<winston::Result(HTTPConnection& client, const winston::HTTPMethod method, const std::string& resource)>;
 
     WebServerTeensy();
     virtual ~WebServerTeensy() = default;

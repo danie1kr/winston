@@ -3,6 +3,24 @@
 #include <string>
 #include <map>
 #include <functional>
+#include "external/better_enum.hpp"
+#include "Railway.h"
+#include "Util.h"
+
+#ifdef __GNUC__ 
+#pragma GCC push_options
+#pragma GCC optimize("Os")
+#endif
+#define ARDUINOJSON_ENABLE_STD_STRING 1
+#define ARDUINOJSON_ENABLE_STD_STREAM 0
+#define ARDUINOJSON_ENABLE_ARDUINO_STRING 0
+#define ARDUINOJSON_ENABLE_ARDUINO_STREAM 0
+#define ARDUINOJSON_ENABLE_ARDUINO_PRINT 0
+#include "external/ArduinoJson-v6.19.0.hpp"
+#ifdef __GNUC__ 
+#pragma GCC pop_options
+#endif
+using namespace ArduinoJson;
 
 namespace winston
 {
@@ -20,7 +38,7 @@ namespace winston
 			virtual bool body(const std::string& content) = 0;
 		};
 
-		using OnHTTP = std::function<void(HTTPConnection &client, const HTTPMethod method, const std::string &resource)>;
+		using OnHTTP = std::function<Result(HTTPConnection &client, const HTTPMethod method, const std::string &resource)>;
 		using OnMessage = std::function<void(_WebSocketConnection &client, const std::string &message)>;
 
 		WebServer()
@@ -73,8 +91,445 @@ namespace winston
 		OnMessage onMessage;
 	};
 
+	template<class _WebServer, class _Railway, class _Storage>
 	class WebUI
 	{
+    public:
+        using TurnoutToggleCallback = std::function<Result(const std::string id)>;
+        using LocoControlCallback = std::function<Result()>;
+    private:
+        TurnoutToggleCallback turnoutToggle;
+        LocoControlCallback locoControl;
+        typename _Railway::Shared railway;
+        LocomotiveShed locomotiveShed;
+        typename _Storage::Shared storageLayout;
+	public:
 
+        WebUI()
+        {
+
+        }
+
+        inline void step()
+        {
+            this->webServer.step();
+        }
+
+		Result init(typename _Railway::Shared railway, LocomotiveShed locomotiveShed, typename _Storage::Shared storageLayout, const unsigned int port, typename _WebServer::OnHTTP onHTTP, TurnoutToggleCallback turnoutToggle)
+		{
+            this->railway = railway;
+            this->locomotiveShed = locomotiveShed;
+            this->turnoutToggle = turnoutToggle;
+            this->storageLayout = storageLayout;
+            //this->locoControl = locoControl;
+
+			// webServer
+			this->webServer.init(
+				[=](typename _WebServer::HTTPConnection& client, const winston::HTTPMethod method, const std::string& resource) -> Result {
+					auto result = this->on_http(client, method, resource);
+					if(result == Result::NotFound)
+						return onHTTP(client, method, resource);
+					return result;
+				},
+				[=](typename _WebServer::Client& client, const std::string& resource) {
+					this->on_message(client, resource);
+				},
+				port);
+
+            return Result::OK;
+		}
+
+
+		// send a turnout state via websocket
+		void turnoutSendState(const std::string turnoutTrackId, const winston::Turnout::Direction dir)
+		{
+			DynamicJsonDocument obj(200);
+			obj["op"] = "turnoutState";
+			auto data = obj.createNestedObject("data");
+			data["id"] = turnoutTrackId;
+			data["state"] = (int)dir;
+			std::string json("");
+			serializeJson(obj, json);
+			this->webServer.broadcast(json);
+		}
+
+		// send a signal state via websocket
+		void signalSendState(const std::string trackId, const winston::Track::Connection connection, const winston::Signal::Aspects aspects)
+		{
+			DynamicJsonDocument obj(200);
+			obj["op"] = "signalState";
+			auto data = obj.createNestedObject("data");
+			data["parentTrack"] = trackId;
+			data["guarding"] = winston::Track::ConnectionToString(connection);
+			data["aspects"] = (int)aspects;
+			std::string json("");
+			serializeJson(obj, json);
+			this->webServer.broadcast(json);
+		}
+
+		void locoSend(winston::Locomotive::Shared loco)
+		{
+			DynamicJsonDocument obj(1024);
+			obj["op"] = "loco";
+			auto data = obj.createNestedObject("data");
+			data["address"] = loco->address();
+			data["name"] = loco->name().c_str();
+			data["light"] = loco->light();
+			data["forward"] = loco->forward();
+			data["speed"] = loco->speed();
+			std::string json("");
+			serializeJson(obj, json);
+			this->webServer.broadcast(json);
+		}
+
+		void locoSend(winston::Address address)
+		{
+			if (auto loco = this->locoFromAddress(address))
+				locoSend(*loco);
+		}
+
+	private:
+
+		// Define a callback to handle incoming messages
+        Result on_http(typename _WebServer::HTTPConnection& connection, const winston::HTTPMethod method, const std::string& resource)
+        {
+            const std::string path_index("/");
+
+            if (resource.compare(path_index) == 0)
+            {
+                connection.status(200);
+                connection.header("content-type"_s, "text/html; charset=UTF-8"_s);
+                connection.header("Connection"_s, "close"_s);
+                connection.body("<html>winston</html>\r\n"_s);
+            }
+            else
+                return Result::NotFound;
+
+            return Result::OK;
+        }
+
+		// Define a callback to handle incoming messages
+		void on_message(typename _WebServer::Client& client, const std::string& message)
+		{
+            DynamicJsonDocument msg(32 * 1024);
+            deserializeJson(msg, message);
+            JsonObject obj = msg.as<JsonObject>();
+            std::string op("\"");
+            op.append(obj["op"].as<std::string>());
+            op.append("\"");
+            JsonObject data = obj["data"];
+
+            if (std::string("\"doTurnoutToggle\"").compare(op) == 0)
+            {
+                std::string id = data["id"];
+                this->turnoutToggle(id);
+            }
+            else if (std::string("\"getTurnoutState\"").compare(op) == 0)
+            {
+                std::string id = data["id"];
+                auto turnout = std::static_pointer_cast<winston::Turnout>(railway->track(id));
+                this->turnoutSendState(turnout->name(), turnout->direction());
+            }
+            else if (std::string("\"getSignalState\"").compare(op) == 0)
+            {
+                std::string id = data["parentTrack"];
+                std::string guarding = data["guarding"];
+
+                auto connection = winston::Track::ConnectionFromString(guarding);
+                auto signal = this->railway->track(id)->signalGuarding(connection);
+
+                this->signalSendState(id, connection, signal->aspect());
+            }
+            else if (std::string("\"getRailway\"").compare(op) == 0)
+            {
+                DynamicJsonDocument railwayContent(32 * 1024);
+                auto tracks = railwayContent.createNestedArray("tracks");
+                auto signals = railwayContent.createNestedArray("signals");
+                auto blocks = railwayContent.createNestedArray("blocks");
+                auto detectors = railwayContent.createNestedArray("detectors");
+
+                for (unsigned int i = 0; i < railway->tracksCount(); ++i)
+                {
+                    auto track = railway->track(i);
+                    switch (track->type())
+                    {
+                    case winston::Track::Type::Bumper:
+                    {
+                        winston::Bumper::Shared bumper = std::static_pointer_cast<winston::Bumper>(track);
+                        winston::Track::Shared a;
+                        bumper->connections(a);
+
+                        auto track = tracks.createNestedObject();
+                        track["a"] = a->name();
+                        track["name"] = bumper->name();
+                        track["length"] = bumper->length();
+
+                        writeAttachedSignal(signals, bumper, winston::Track::Connection::A);
+                        writeAttachedSignal(signals, bumper, winston::Track::Connection::DeadEnd);
+
+                        break;
+                    }
+                    case winston::Track::Type::Rail:
+                    {
+                        winston::Rail::Shared rail = std::static_pointer_cast<winston::Rail>(track);
+                        winston::Track::Shared a, b;
+                        rail->connections(a, b);
+
+                        auto track = tracks.createNestedObject();
+                        track["a"] = a->name();
+                        track["b"] = b->name();
+                        track["name"] = rail->name();
+                        track["length"] = rail->length();
+
+                        writeAttachedSignal(signals, rail, winston::Track::Connection::A);
+                        writeAttachedSignal(signals, rail, winston::Track::Connection::B);
+
+                        break;
+                    }
+                    case winston::Track::Type::Turnout:
+                    {
+                        winston::Turnout::Shared turnout = std::static_pointer_cast<winston::Turnout>(track);
+                        winston::Track::Shared a, b, c;
+                        turnout->connections(a, b, c);
+
+                        auto track = tracks.createNestedObject();
+                        track["a"] = a->name();
+                        track["b"] = b->name();
+                        track["c"] = c->name();
+                        track["name"] = turnout->name();
+                        auto length = track.createNestedObject("lengths");
+                        length["a_b"] = turnout->lengthOnDirection(winston::Turnout::Direction::A_B);
+                        length["a_c"] = turnout->lengthOnDirection(winston::Turnout::Direction::A_C);
+
+                        writeAttachedSignal(signals, turnout, winston::Track::Connection::A);
+                        writeAttachedSignal(signals, turnout, winston::Track::Connection::B);
+                        writeAttachedSignal(signals, turnout, winston::Track::Connection::C);
+                        break;
+                    }
+                    }
+                }
+
+                for (auto& block : this->railway->blocks())
+                {
+                    auto b = blocks.createNestedObject();
+                    b["address"] = block.first;
+                    auto bl = block.second;
+
+                    auto blockTracks = b.createNestedArray("tracks");
+                    for (auto& track : bl->tracks())
+                        blockTracks.add(track->name());
+                }
+
+                std::string railwayContentJson("");
+                serializeJson(railwayContent, railwayContentJson);
+
+                const size_t chunkSize = this->webServer.maxMessageSize();
+
+                for (size_t i = 0; i < railwayContentJson.length(); i += chunkSize)
+                {
+                    DynamicJsonDocument railwayMessage(chunkSize + 256);
+                    railwayMessage["op"] = "railway";
+                    auto data = railwayMessage.createNestedObject("data");
+                    data["fullSize"] = (unsigned int)railwayContentJson.length();
+                    data["offset"] = (unsigned int)i;
+
+                    auto part = railwayContentJson.substr(i, chunkSize);
+                    data["railway"] = part;
+
+                    std::string json("");
+                    serializeJson(railwayMessage, json);
+                    this->webServer.send(client, json);
+                }
+            }
+            else if (std::string("\"storeRailwayLayout\"").compare(op) == 0)
+            {
+                std::string layout = data["layout"];
+                size_t offset = (size_t)((unsigned int)data["offset"]);
+                size_t fullSize = (size_t)((unsigned int)data["fullSize"]);
+                size_t address = 0;
+                auto length = layout.size();
+                if (offset == 0)
+                {
+                    this->storageLayout->write(address + 0, (fullSize >> 0) & 0xFF);
+                    this->storageLayout->write(address + 1, (fullSize >> 8) & 0xFF);
+                    this->storageLayout->write(address + 2, (fullSize >> 16) & 0xFF);
+                    this->storageLayout->write(address + 3, (fullSize >> 24) & 0xFF);
+                    address = 4;
+                }
+                else
+                {
+                    address = 4 + offset;
+                }
+                this->storageLayout->write(address, layout);
+
+                this->storageLayout->sync();
+
+                if (offset == fullSize - length)
+                {
+                    DynamicJsonDocument obj(200);
+                    obj["op"] = "storeRailwayLayoutSuccessful";
+                    obj["data"] = true;
+                    std::string json("");
+                    serializeJson(obj, json);
+                    this->webServer.send(client, json);
+                }
+            }
+            else if (std::string("\"getRailwayLayout\"").compare(op) == 0)
+            {
+                size_t address = 0;
+                std::vector<unsigned char> data;
+                auto result = this->storageLayout->read(address, data, 4);
+                if (result != winston::Result::OK)
+                {
+                    winston::logger.err(winston::build("getRailwayLayout could not read layout file."));
+                    return;
+                }
+                size_t length = (data[0] << 0) | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
+                address = 4;
+
+                const size_t sizePerMessage = size_t(0.7f * webServer.maxMessageSize());
+                size_t remaining = length;
+                size_t offset = 0;
+
+                while (remaining > 0)
+                {
+                    size_t sent = remaining > sizePerMessage ? sizePerMessage : remaining;
+                    std::string layout;
+                    this->storageLayout->read(address + offset, layout, sent);
+
+                    DynamicJsonDocument obj(sizePerMessage + 1024);
+                    obj["op"] = "layout";
+                    auto data = obj.createNestedObject("data");
+                    data["offset"] = (int)offset;
+                    data["fullSize"] = (int)length;
+                    data["layout"] = layout;
+                    std::string json("");
+                    serializeJson(obj, json);
+                    this->webServer.send(client, json);
+
+                    offset += sent;
+                    remaining -= sent;
+                }
+
+            }
+            else if (std::string("\"getLocoShed\"").compare(op) == 0)
+            {
+                for (auto& loco : this->locomotiveShed)
+                    this->locoSend(loco);
+            }
+            else if (std::string("\"doControlLoco\"").compare(op) == 0)
+            {
+                /*
+                {
+                    address
+                    light
+                    forward
+                    speed
+                }
+                *
+                * 
+                * 
+                
+                this->locoControl();
+                
+                unsigned int addr;
+                bool light, forward;
+                unsigned int speed;
+                JVal_get(value, error, "{dbbd}", "address", &addr, "light", &light, "forward", &forward, "speed", &speed);
+
+                if (JErr_isError(error) == false)
+                {
+                    winston::Address address = (uint16_t)addr;
+                    if (auto loco = this->get(address))
+                    {
+                        unsigned char speed128 = (unsigned char)(speed & 0xFF);
+                        if (loco->light() != light)
+                        {
+                            signalBox->order(winston::Command::make([this, loco, light](const TimePoint &created) -> const winston::State
+                                {
+        #ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
+                                    signalBox->order(winston::Command::make([this, loco, light](const TimePoint &created) -> const winston::State
+                                        {
+                                            if (winston::hal::now() - created > WINSTON_RAILWAY_DEBUG_INJECTOR_DELAY)
+                                            {
+                                                this->stationDebugInjector->injectLocoUpdate(loco, false, loco->forward(), loco->speed(), light ? 1 : 0);
+                                                return winston::State::Finished;
+                                            }
+                                            return winston::State::Running;
+                                        }, __PRETTY_FUNCTION__));
+        #endif
+                                    return this->locoFunction(loco->address(), light ? 1 : 0);
+                                }, __PRETTY_FUNCTION__));
+                        }
+
+                        if (loco->forward() != forward || loco->speed() != speed128)
+                        {
+                            signalBox->order(winston::Command::make([this, loco, speed128, forward](const TimePoint &created) -> const winston::State
+                                {
+        #ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
+                                    signalBox->order(winston::Command::make([this, loco, speed128, forward](const TimePoint &created) -> const winston::State
+                                        {
+                                            if (winston::hal::now() - created > WINSTON_RAILWAY_DEBUG_INJECTOR_DELAY)
+                                            {
+                                                this->stationDebugInjector->injectLocoUpdate(loco, false, forward, speed128, loco->light() ? 1 : 0);
+                                                return winston::State::Finished;
+                                            }
+                                            return winston::State::Running;
+                                        }, __PRETTY_FUNCTION__));
+        #endif
+                                    return this->locoDrive(loco->address(), speed128, forward);
+                                }, __PRETTY_FUNCTION__));
+                        }
+                    }
+                }*/
+            }
+#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
+            else if (std::string("\"emu_dcs_inject_detector\"").compare(op) == 0)
+            {
+            /*    unsigned int id = data["id"];
+                winston::Address address = data["address"];
+
+                auto loco = this->locoFromAddress(address);
+                // TODO: detector update
+                //if (loco)
+                //    this->detectorUpdate(this->nf[id], *loco);
+                //else
+                //    winston::logger.err(winston::build("error: locomotive ", address, " not in shed"));
+                
+                unsigned int block = (unsigned int)data["block"].toInt();
+                unsigned int loco = (unsigned int)data["loco"].toInt();
+                // this->stationDebugInjector->injectBlockUpdate(block, loco);
+                */
+            }
+#endif
+            else
+            {
+                winston::hal::text("Received unknown message: ");
+                winston::hal::text(message);
+            }
+		}
+		
+		void writeAttachedSignal(JsonArray& signals, winston::Track::Shared track, const winston::Track::Connection connection)
+		{
+			auto signal = track->signalGuarding(connection);
+			if (signal)
+			{
+				auto data = signals.createNestedObject();
+				data["parentTrack"] = track->name();
+				data["guarding"] = winston::Track::ConnectionToString(connection);
+				data["pre"] = signal->preSignal();
+				data["main"] = signal->mainSignal();
+				auto lights = data.createNestedArray("lights");
+				for (const auto& signalLight : signal->lights())
+				{
+					auto light = lights.createNestedObject();
+					light["aspect"] = (unsigned int)signalLight.aspect;
+					light["port"] = (unsigned int)signalLight.port;
+				}
+			}
+		}
+		
+		/* websocket */
+		_WebServer webServer;
 	};
 };

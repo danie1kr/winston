@@ -162,8 +162,8 @@ namespace winston
 		Signal(const Callback callback = defaultCallback(), const Length distance = 0);
 
 		const State aspect(const Aspect aspect);
-		inline const Aspects aspect() const;
-		inline const bool shows(Aspect aspect) const;
+		const Aspects aspect() const;
+		const bool shows(Aspect aspect) const;
 		virtual const bool supports(const Aspect aspect, const bool any) const = 0;
 		virtual const bool preSignal() const = 0;
 		virtual const bool mainSignal() const = 0;

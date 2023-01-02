@@ -1,8 +1,12 @@
+#ifdef WINSTON_PLATFORM_TEENSY
+#define Binary_h
+// keeps binary_h from beeing used which kills our 
+#endif
 
 #include <string>
 #include "../libwinston/Library.h"
 #include "railways.h"
-#include "../libwinston/better_enum.hpp"
+#include "../libwinston/external/better_enum.hpp"
 
 #define BUMPER(track, ...) case Tracks::_enumerated::track: return winston::Bumper::make(#track, __VA_ARGS__); 
 #define RAIL(track, ...) case Tracks::_enumerated::track: return winston::Rail::make(#track, __VA_ARGS__); 

@@ -30,8 +30,6 @@ namespace winston
 
 			this->railway->init(_features & Features::Blocks);
 
-			this->populateLocomotiveShed();
-
 			for(const auto &loco : this->locomotiveShed ) {
 
 				this->signalBox->order(winston::Command::make([this, loco](const TimePoint &created) -> const winston::State
@@ -73,18 +71,18 @@ namespace winston
 			return _Railway::element_type::name();
 		}
 
-		tl::optional<Locomotive&> locoFromAddress(const Address address)
+		Locomotive::Shared locoFromAddress(const Address address)
 		{
-			auto it = std::find_if(this->locomotiveShed.begin(), this->locomotiveShed.end(), [address](const auto& loco) { return loco.address() == address; });
+			auto it = std::find_if(this->locomotiveShed.begin(), this->locomotiveShed.end(), [address](const auto& loco) { return loco->address() == address; });
 			if (it == this->locomotiveShed.end())
-				return tl::nullopt;
+				return nullptr;
 			else
 				return *it;
 		}
 
-		const Address addressOfLoco(const Locomotive& loco) const
+		const Address addressOfLoco(const Locomotive::Shared loco) const
 		{
-			return loco.address();
+			return loco->address();
 		}
 
 		inline const State turnoutChangeTo(winston::Turnout::Shared turnout, winston::Turnout::Direction direction)
@@ -144,7 +142,7 @@ namespace winston
 
 		void addLocomotive(const winston::Locomotive::Callbacks callbacks, const Address address, const Position start, const Locomotive::ThrottleSpeedMap speedMap, const std::string name, const Locomotive::Types types)
 		{
-			this->locomotiveShed.emplace_back(callbacks, address, start, speedMap, name, types);
+			this->locomotiveShed.push_back(Locomotive::make(callbacks, address, start, speedMap, name, types));
 		}
 
 		Result loadLocomotives()
@@ -189,7 +187,7 @@ namespace winston
 		DigitalCentralStation::DebugInjector::Shared stationDebugInjector;
 
 		// the locos
-		std::vector<Locomotive> locomotiveShed;
+		LocomotiveShed locomotiveShed;
 	};
 }
 

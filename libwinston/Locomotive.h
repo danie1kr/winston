@@ -142,5 +142,6 @@ namespace winston
 		SpeedMap speedMap;
 		TimePoint speedTrapStart;
 	};
+	using LocomotiveShed = std::vector<Locomotive::Shared>;
 }
 

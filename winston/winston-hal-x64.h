@@ -8,8 +8,6 @@
 
 #include "FT232_Device.h"
 
-const char* operator "" _s(const char* in, size_t len);
-
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 template<winston::hal::Socket::Type SocketType>

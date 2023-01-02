@@ -6,7 +6,7 @@
 #pragma GCC push_options
 #pragma GCC optimize("Os")
 #endif
-#include "better_enum.hpp"
+#include "external/better_enum.hpp"
 #include <string>
 #include <array>
 #include <vector>

@@ -18,21 +18,6 @@
 #include "../winston-teensy/winston-hal-teensy-webserver.hpp"
 #endif
 
-#ifdef __GNUC__ 
-#pragma GCC push_options
-#pragma GCC optimize("Os")
-#endif
-#define ARDUINOJSON_ENABLE_STD_STRING 1
-#define ARDUINOJSON_ENABLE_STD_STREAM 0
-#define ARDUINOJSON_ENABLE_ARDUINO_STRING 0
-#define ARDUINOJSON_ENABLE_ARDUINO_STREAM 0
-#define ARDUINOJSON_ENABLE_ARDUINO_PRINT 0
-#include "external/ArduinoJson-v6.19.0.hpp"
-#ifdef __GNUC__ 
-#pragma GCC pop_options
-#endif
-using namespace ArduinoJson;
-
 #include "external/central-z21/Z21.h"
 #include "TLC5947_SignalDevice.h"
 #include "PN532_DetectorDevice.h"
@@ -51,18 +36,6 @@ class Kornweinheim : public winston::ModelRailwaySystem<RAILWAY_CLASS::Shared, R
 {
 private:
 
-    // send a turnout state via websocket
-    void turnoutSendState(const std::string turnoutTrackId, const winston::Turnout::Direction dir);
-
-    // send a signal state via websocket
-    void signalSendState(const std::string trackId, const winston::Track::Connection connection, const winston::Signal::Aspects aspects);
-
-    void locoSend(winston::Locomotive& loco);
-
-    void locoSend(winston::Address address);
-
-    void initNetwork();
-
     void setupSignals();
     void setupDetectors();
 
@@ -73,19 +46,23 @@ private:
     winston::Railway::Callbacks railwayCallbacks();
 
 #ifdef WINSTON_WITH_WEBSOCKET
-    /* websocket */
+    winston::WebUI<WebServer, RAILWAY_CLASS, Storage> webUI;
+    
+    /* websocket *
     WebServer webServer;
 
     // add a signal to the /signal output
     void writeSignal(WebServer::HTTPConnection& connection, const winston::Track::Shared track, const winston::Track::Connection trackCon);
-
+    */
     // Define a callback to handle incoming messages
-    void on_http(WebServer::HTTPConnection& connection, const winston::HTTPMethod method, const std::string& resource);
+    winston::Result on_http(WebServer::HTTPConnection& connection, const winston::HTTPMethod method, const std::string& resource);
+    void writeSignalHTMLList(WebServer::HTTPConnection& connection, const winston::Track::Shared track, const winston::Track::Connection trackCon);
 
+    /*
     void writeAttachedSignal(JsonArray& signals, winston::Track::Shared track, const winston::Track::Connection connection);
 
     // Define a callback to handle incoming messages
-    void on_message(WebServer::Client &client, const std::string &message);
+    void on_message(WebServer::Client &client, const std::string &message);*/
 #endif
     // setup our model railway system
     void systemSetup();

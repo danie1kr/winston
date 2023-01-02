@@ -8,6 +8,11 @@ namespace winston
         return hal::__FlashStorageStringtoStd(fsh);
     }
 };
+#else
+const char* operator "" _s(const char* in, size_t len)
+{
+    return in;
+}
 #endif
 
 #include "HAL.h"

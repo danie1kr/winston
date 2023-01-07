@@ -40,6 +40,28 @@ namespace winston
 
 	Callback::Shared nop = Callback::make([]() {});
 
+	std::string hex(unsigned int n)
+	{
+		// see https://www.geeksforgeeks.org/program-decimal-hexadecimal-conversion/
+		std::string ret = n == 0 ? "0" : "";
+
+		while (n != 0) {
+			unsigned int rem = n % 16;
+			char ch = (rem < 10) ? rem + 48 : ch = rem + 55;
+			ret += ch;
+			n = n / 16;
+		}
+
+		int i = 0, j = ret.size() - 1;
+		while (i <= j)
+		{
+			std::swap(ret[i], ret[j]);
+			i++;
+			j--;
+		}
+		return std::string("0x") + ret;
+	}
+
 	std::string build()
 	{
 		return std::string("");

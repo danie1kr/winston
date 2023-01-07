@@ -8,9 +8,6 @@
 #include "Log.h"
 
 #define WINSTON_WITH_HTTP
-#ifndef WINSTON_WITH_TEENSYDEBUG
-#define WINSTON_WITH_TEENSYDEBUG
-#endif
 #define WINSTON_WITH_SDFAT
 
 //#define WINSTON_WITH_QNETHERNET

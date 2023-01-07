@@ -1,4 +1,5 @@
 #include "FT232_Device.h"
+#include "../libwinston/Log.h" 
 
 FT232_Device::FT232_GPIODigitalPinOutputDevice::FT232_GPIODigitalPinOutputDevice(FT232_Device& parent, const Pin pin, const State initial)
     : GPIODigitalPinOutputDevice(pin, initial), winston::Shared_Ptr<FT232_GPIODigitalPinOutputDevice>(), parent(parent)

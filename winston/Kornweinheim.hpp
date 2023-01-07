@@ -939,20 +939,6 @@ void Kornweinheim::setupSignals()
     dncPort = 999; this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::GBF1), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
     dncPort = 999; this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::GBF2a), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
     dncPort = 999; this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::GBF3a), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
-    /*
-    this->railway->track(Y2021RailwayTracks::PBF1a)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::A);
-    this->railway->track(Y2021RailwayTracks::B3)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::B);
-    this->railway->track(Y2021RailwayTracks::B6)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::B);
-    this->railway->track(Y2021RailwayTracks::N1)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::A);
-    this->railway->track(Y2021RailwayTracks::N2)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::A);
-    this->railway->track(Y2021RailwayTracks::GBF1)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::A);
-    this->railway->track(Y2021RailwayTracks::GBF3a)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::A);
-    this->railway->track(Y2021RailwayTracks::GBF3b)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::A);
-    this->railway->track(Y2021RailwayTracks::GBF3b)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::B);
-    this->railway->track(Y2021RailwayTracks::GBF2a)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::A);
-    this->railway->track(Y2021RailwayTracks::GBF2b)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::A);
-    this->railway->track(Y2021RailwayTracks::GBF2b)->attachSignal(winston::SignalKS::make(signalUpdateCallback, 5U, 19), winston::Track::Connection::B);
-*/
 }
 
 winston::Result Kornweinheim::detectorUpdate(winston::Detector::Shared detector, winston::Locomotive& loco)

@@ -21,21 +21,39 @@
 #define NOT_IMPLEMENTED(func) winston::logger.warn(winston::build("Z21: ", func, " not implemented"));
 
 Z21::Z21(winston::hal::Socket::Shared& socket, winston::DigitalCentralStation::TurnoutAddressTranslator::Shared& addressTranslator, LocoAddressTranslator& locoAddressTranslator, winston::SignalBox::Shared& signalBox, winston::DigitalCentralStation::Callbacks callbacks)
-    : winston::DigitalCentralStation(addressTranslator, locoAddressTranslator, signalBox, callbacks), socket(socket), lastMsgSent{}
+    : winston::DigitalCentralStation(addressTranslator, locoAddressTranslator, signalBox, callbacks), lastMsgSent{}, socket(socket)
 {
     this->onBroadcastFlags = [](uint32_t flags) { NOT_IMPLEMENTED("onBroadcastFlags"); };
 
-    this->onBCStopped = []() { NOT_IMPLEMENTED("onBCStopped"); };
-    this->onStatusChanged = [](uint8_t status) { NOT_IMPLEMENTED("onStatusChanged"); };
-    this->onSystemStateDataChanged = [](uint16_t mainCurrent,              // mA
+    this->onBCStopped = []() { winston::logger.info("Z21: Notstop"); };
+    this->onStatusChanged = [](uint8_t status) { 
+        winston::logger.info("Z21: Status");
+        winston::logger.info("     emergency stop: ", (status & Z21_Status::EMERGENCY_STOP) ? "true" : "false");
+        winston::logger.info("     track voltage: ", (status & Z21_Status::TRACK_VOLTAGE_OFF) ? "off" : "enabled");
+        winston::logger.warn("     short circuit: ", (status & Z21_Status::SHORT_CIRCUIT) ? "detected" : "false");
+        winston::logger.info("     programming mode: ", (status & Z21_Status::PROGRAMMING_MODE_ACTIVE) ? "active" : "off");
+    };
+    this->onSystemStateDataChanged = [this](uint16_t mainCurrent,              // mA
         uint16_t progCurrent,              // mA
         uint16_t mainCurrentFiltered,      // mA
         uint16_t temperature,              // °C
         uint16_t voltageSupply,            // mV
         uint16_t voltageVCC,               // mV
         uint8_t  status,                   // See: const in class Z21_Status
-        uint8_t  statisEX) { NOT_IMPLEMENTED("onSystemStateDataChanged"); };
-    this->onUnknownCommand = []() { NOT_IMPLEMENTED("onUnknownCommand"); };
+        uint8_t  statisEX) { 
+            this->onStatusChanged(status);
+            winston::logger.info("     main track current: ", mainCurrent, "mA");
+            winston::logger.info("     programming track current: ", progCurrent, "mA");
+            winston::logger.info("     main track current filtered: ", mainCurrentFiltered, "mA");
+            winston::logger.info("     temperature: ", temperature, "°C");
+            winston::logger.info("     voltage supply: ", voltageSupply, "mV");
+            winston::logger.info("     voltage track: ", voltageVCC, "mV");
+            winston::logger.warn("     high temperature: ", (status & Z21_Status_EX::HIGH_TEMPERATURE) ? "true" : "false");
+            winston::logger.warn("     power lost: ", (status & Z21_Status_EX::POWER_LOST) ? "true" : "false");
+            winston::logger.warn("     short circuit internal: ", (status & Z21_Status_EX::SHORT_CIRCUIT_EXTERNAL) ? "true" : "false");
+            winston::logger.warn("     short circuit external: ", (status & Z21_Status_EX::SHORT_CIRCUIT_INTERNAL) ? "true" : "false");
+    };
+    this->onUnknownCommand = []() { winston::logger.warn("Z21: onUnknownCommand"); };
     this->onLocoMode = [](uint16_t address, uint8_t decoderMode) { NOT_IMPLEMENTED("onLocoMode"); };
     this->onAccessoryMode = [](uint16_t address, uint8_t decoderMode) { NOT_IMPLEMENTED("onAccessoryMode"); };
 

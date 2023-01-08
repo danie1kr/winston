@@ -90,8 +90,12 @@ int gdb_file_io(const char *msg);
 extern int file_io_errno;
 extern int gdb_active_flag;
 
+#ifndef O_CREAT
 #define O_CREAT         0x200
+#endif
+#ifndef O_APPEND
 #define O_APPEND        8
+#endif
 #define O_RDONLY        0
 #define O_WRONLY        1
 #define O_RDWR          2

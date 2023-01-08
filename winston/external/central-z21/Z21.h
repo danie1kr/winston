@@ -74,14 +74,15 @@ public:
     //void (*onTrackProgrammingMode)();
     //void (*onTrackShortCircuit)();
     void (*onStatusChanged)(uint8_t status);                            // See: const in class Z21_Status
-    void (*onSystemStateDataChanged)(uint16_t mainCurrent,              // mA
-                                     uint16_t progCurrent,              // mA
-                                     uint16_t mainCurrentFiltered,      // mA
-                                     uint16_t temperature,              // °C
-                                     uint16_t voltageSupply,            // mV
-                                     uint16_t voltageVCC,               // mV
-                                     uint8_t  status,                   // See: const in class Z21_Status
-                                     uint8_t  statisEX);                // See: const in class Z21_Status_EX
+    std::function<void(uint16_t mainCurrent,              // mA
+        uint16_t progCurrent,              // mA
+        uint16_t mainCurrentFiltered,      // mA
+        uint16_t temperature,              // °C
+        uint16_t voltageSupply,            // mV
+        uint16_t voltageVCC,               // mV
+        uint8_t  status,                   // See: const in class Z21_Status
+        uint8_t  statisEX)>                // See: const in class Z21_Status_EX
+        onSystemStateDataChanged;
     void (*onUnknownCommand)();
 
 // Layout Info

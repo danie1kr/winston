@@ -47,12 +47,12 @@ namespace winston
 
 		while (n != 0) {
 			unsigned int rem = n % 16;
-			char ch = (rem < 10) ? rem + 48 : ch = rem + 55;
+			char ch = (rem < 10) ? rem + 48 : rem + 55;
 			ret += ch;
 			n = n / 16;
 		}
 
-		int i = 0, j = ret.size() - 1;
+		size_t i = 0, j = ret.size() - 1;
 		while (i <= j)
 		{
 			std::swap(ret[i], ret[j]);

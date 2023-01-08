@@ -57,6 +57,11 @@ namespace winston
 		}
 
 		template <typename ...Params>
+		void info(const Params&&... params)
+		{
+			this->info(winston::build(std::forward<const Params>(params)...));
+		}
+		template <typename ...Params>
 		void info(Params&&... params)
 		{
 			this->info(winston::build(std::forward<Params>(params)...));

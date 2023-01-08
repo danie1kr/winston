@@ -383,7 +383,7 @@ namespace winston
 
 	bool Turnout::has(const Connection connection) const
 	{
-		return connection != Connection::DeadEnd;
+		return connection != Connection::D && connection != Connection::DeadEnd;
 	}
 
 	Track::Shared Turnout::on(const Connection connection) const
@@ -440,7 +440,7 @@ namespace winston
 
 	const bool Turnout::canTraverse(const Connection entering) const
 	{
-		return entering == Connection::A ||
+		return (entering == Connection::A && this->dir != Direction::Changing) ||
 			(entering == Connection::B && this->dir == Direction::A_B) ||
 			(entering == Connection::C && this->dir == Direction::A_C);
 	}
@@ -466,6 +466,9 @@ namespace winston
 
 	const Track::Connection Turnout::otherConnection(const Connection connection) const
 	{
+		if (this->dir == Direction::Changing)
+			return Connection::DeadEnd;
+
 		if (connection == Connection::A)
 			return this->dir == Direction::A_B ? Connection::B : Connection::C;
 		else
@@ -506,7 +509,7 @@ namespace winston
 
 	const Result Turnout::validate()
 	{
-		return this->validateSingle(a) == Result::OK && this->validateSingle(b) == Result::OK && this->validateSingle(c) == Result::OK ? Result::OK : Result::ValidationFailed;
+		return (this->validateSingle(a) == Result::OK && this->validateSingle(b) == Result::OK && this->validateSingle(c) == Result::OK) ? Result::OK : Result::ValidationFailed;
 	}
 
 	const Track::Type Turnout::type() const
@@ -552,22 +555,6 @@ namespace winston
 			return Direction::A_B;
 	}
 
-	const Turnout::Direction Turnout::fromConnection(const Connection connection)
-	{
-		if (connection == Connection::B)
-			return Direction::A_B;
-		else if (connection == Connection::C)
-			return Direction::A_C;
-		
-		hal::fatal("cannot derive direction from connection a");
-		return Direction::Changing;
-	}
-
-	void Turnout::fromDirection(Track::Shared& a, Track::Shared& other) const {
-		a = this->a;
-		other = this->dir == Direction::Changing ? nullptr : (this->dir == Direction::A_B ? this->b : this->c);
-	}
-
 	const Track::Connection Turnout::fromDirection() const
 	{
 		return this->dir == Direction::Changing ? Connection::DeadEnd : (this->dir == Direction::A_B ? Connection::B : Connection::C);
@@ -575,11 +562,281 @@ namespace winston
 
 	const Length Turnout::length() const
 	{
-		return this->trackLengthCalculator ? this->trackLengthCalculator(this->dir) : 0;
+		return this->lengthOnDirection(this->dir);
 	}
 
 	const Length Turnout::lengthOnDirection(const Direction dir) const
 	{
-		return this->trackLengthCalculator(dir);
+		return this->trackLengthCalculator ? this->trackLengthCalculator(dir) : 0;
+	}
+
+	DoubleSlipTurnout::DoubleSlipTurnout(const std::string name, const Callback callback)
+		: Track(name, 0), Shared_Ptr<DoubleSlipTurnout>(), callback(callback), trackLengthCalculator(nullptr), dir(Direction::A_B), a(), b(), c(), d()
+	{
+
+	}
+
+	DoubleSlipTurnout::DoubleSlipTurnout(const std::string name, const Callback callback, const TrackLengthCalculator trackLengthCalculator)
+		: Track(name, 0), Shared_Ptr<DoubleSlipTurnout>(), callback(callback), trackLengthCalculator(trackLengthCalculator), dir(Direction::A_B), a(), b(), c(), d()
+	{
+
+	}
+
+	bool DoubleSlipTurnout::has(const Connection connection) const
+	{
+		return connection != Connection::DeadEnd;
+	}
+
+	Track::Shared DoubleSlipTurnout::on(const Connection connection) const
+	{
+		if (connection == Connection::A)
+			return a;
+		else if (connection == Connection::B)
+			return b;
+		else if (connection == Connection::C)
+			return c;
+		else if (connection == Connection::D)
+			return d;
+		return nullptr;
+	}
+
+	const bool DoubleSlipTurnout::traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const
+	{
+		if (!this->has(connection) || this->dir == Direction::Changing)
+		{
+			onto.reset();
+			return false;
+		}
+		if (leavingOnConnection)
+		{
+			/*if ((this->dir == Direction::A_B && connection == Connection::C) || (this->dir == Direction::A_C && connection == Connection::B))
+			{
+				onto.reset();
+				return false;
+			}*/
+
+			switch (connection)
+			{
+			case Connection::A: onto = a; return true; break;
+			case Connection::B: onto = b; return true; break;
+			case Connection::C: onto = c; return true; break;
+			case Connection::D: onto = d; return true; break;
+			default:
+				return false;
+			}
+		}
+		else
+		{
+			if (connection == Connection::A)
+			{
+				if (this->dir == Direction::A_B) onto = b;
+				else if (this->dir == Direction::A_C) onto = c;
+				return true;
+			}
+			else if (connection == Connection::B)
+			{
+				if (this->dir == Direction::A_B) onto = a;
+				else if (this->dir == Direction::B_D) onto = d;
+				return true;
+			}
+			else if (connection == Connection::C)
+			{
+				if (this->dir == Direction::A_C) onto = a;
+				else if (this->dir == Direction::C_D) onto = d;
+				return true;
+			}
+			else if (connection == Connection::D)
+			{
+				if (this->dir == Direction::C_D) onto = c;
+				else if (this->dir == Direction::B_D) onto = d;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	const bool DoubleSlipTurnout::canTraverse(const Connection entering) const
+	{
+		return (entering == Connection::A && (this->dir == Direction::A_B || this->dir == Direction::A_C)) ||
+			(entering == Connection::B && (this->dir == Direction::A_B || this->dir == Direction::B_D)) ||
+			(entering == Connection::C && (this->dir == Direction::A_C || this->dir == Direction::C_D)) ||
+			(entering == Connection::D && (this->dir == Direction::B_D || this->dir == Direction::C_D));
+	}
+
+	void DoubleSlipTurnout::collectAllConnections(std::set<Track::Shared>& tracks) const
+	{
+		tracks.insert(a);
+		tracks.insert(b);
+		tracks.insert(c);
+		tracks.insert(d);
+	}
+
+	const Track::Connection DoubleSlipTurnout::whereConnects(Track::Shared& other) const
+	{
+		if (a == other)
+			return Track::Connection::A;
+		else if (b == other)
+			return Track::Connection::B;
+		else if (c == other)
+			return Track::Connection::C;
+		else if (d == other)
+			return Track::Connection::D;
+		else
+			return Track::Connection::DeadEnd;
+	}
+
+	const Track::Connection DoubleSlipTurnout::otherConnection(const Connection connection) const
+	{
+		if (this->dir == Direction::Changing)
+			return Connection::DeadEnd;
+
+		if (connection == Connection::A)
+		{
+			if (this->dir == Direction::A_B) return Connection::B;
+			else if (this->dir == Direction::A_C) return Connection::C;
+			else return Connection::DeadEnd;
+		}
+		else if (connection == Connection::B)
+		{
+			if (this->dir == Direction::A_B) return Connection::A;
+			else if (this->dir == Direction::B_D) return Connection::D;
+			else return Connection::DeadEnd;
+		}
+		else if (connection == Connection::C)
+		{
+			if (this->dir == Direction::A_C) return Connection::C;
+			else if (this->dir == Direction::C_D) return Connection::D;
+			else return Connection::DeadEnd;
+		}
+		else if (connection == Connection::D)
+		{
+			if (this->dir == Direction::B_D) return Connection::B;
+			else if (this->dir == Direction::C_D) return Connection::C;
+			else return Connection::DeadEnd;
+		}
+		else
+			return Connection::DeadEnd;
+	}
+
+	Track::Shared DoubleSlipTurnout::connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa)
+	{
+		if (local == Connection::A)
+		{
+			if (a)
+				error("Turnout::connect on " + this->name() + ", A already connected");
+			a = to;
+		}
+		else if (local == Connection::B)
+		{
+			if (b)
+				error("Turnout::connect on " + this->name() + ", B already connected");
+			b = to;
+		}
+		else if(local == Connection::C)
+		{
+			if (c)
+				error("Turnout::connect on " + this->name() + ", C already connected");
+			c = to;
+		}
+		else
+		{
+			if (d)
+				error("Turnout::connect on " + this->name() + ", D already connected");
+			d = to;
+		}
+		if (viceVersa)
+		{
+			Track::Shared that = this->shared_from_this();
+			to->connectTo(remote, nullptr, that, local, nullptr, false);
+		}
+		if (guardingSignalFactory)
+			hal::fatal("Cannot attach signal to turnout");
+		if (guardingRemoteSignalFactory)
+			to->attachSignal(guardingRemoteSignalFactory(to, remote), remote);
+		return to;
+	}
+
+	const Result DoubleSlipTurnout::validate()
+	{
+		return (this->validateSingle(a) == Result::OK 
+			&& this->validateSingle(b) == Result::OK 
+			&& this->validateSingle(c) == Result::OK 
+			&& this->validateSingle(d) == Result::OK) ? Result::OK : Result::ValidationFailed;
+	}
+
+	const Track::Type DoubleSlipTurnout::type() const
+	{
+		return Type::DoubleSlipTurnout;
+	}
+
+	const State DoubleSlipTurnout::startChangeTo(const Direction direction)
+	{
+		if (this->dir == direction || this->dir == Direction::Changing)
+			return State::Finished;
+
+		this->dir = Direction::Changing;
+		return this->callback(this->shared_from_this(), this->dir);
+	}
+
+	const State DoubleSlipTurnout::startToggle()
+	{
+		return this->startChangeTo(DoubleSlipTurnout::otherDirection(this->dir));
+	}
+
+	const State DoubleSlipTurnout::finalizeChangeTo(const Direction direction)
+	{
+		if (this->dir == direction)
+			return State::Finished;
+
+		State state = this->callback(this->shared_from_this(), direction);
+		this->dir = direction;
+
+		return state;
+	}
+
+	const DoubleSlipTurnout::Direction DoubleSlipTurnout::direction() const
+	{
+		return this->dir;
+	}
+
+	const DoubleSlipTurnout::Direction DoubleSlipTurnout::otherDirection(const Direction current)
+	{
+		switch (current)
+		{
+		case Direction::A_B: return Direction::A_C;
+		case Direction::A_C: return Direction::B_D;
+		case Direction::B_D: return Direction::C_D;
+		case Direction::C_D: return Direction::A_B;
+		default:
+			return Direction::Changing;
+		}
+	}
+
+	const Track::Connection DoubleSlipTurnout::fromDirection() const
+	{
+		switch (this->dir)
+		{
+		case Direction::A_B:
+			return Connection::A;
+		case Direction::A_C:
+			return Connection::C;
+		case Direction::B_D:
+			return Connection::B;
+		case Direction::C_D:
+			return Connection::D;
+		case Direction::Changing:
+		default:
+			return Connection::DeadEnd;
+		}
+	}
+
+	const Length DoubleSlipTurnout::length() const
+	{
+		return this->lengthOnDirection(this->dir);
+	}
+
+	const Length DoubleSlipTurnout::lengthOnDirection(const Direction dir) const
+	{
+		return this->trackLengthCalculator ? this->trackLengthCalculator(dir) : 0;
 	}
 }

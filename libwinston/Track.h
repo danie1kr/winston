@@ -27,7 +27,7 @@ namespace winston
 
 		enum class Connection : unsigned int
 		{
-			A, B, C, DeadEnd
+			A, B, C, D, DeadEnd
 		};
 
 		static const std::string ConnectionToString(const Connection connection);
@@ -37,7 +37,8 @@ namespace winston
 		{
 			Bumper,
 			Rail,
-			Turnout
+			Turnout,
+			DoubleSlipTurnout
 		};
 
 		using SignalFactory = std::function<Signal::Shared(Track::Shared track, Track::Connection connection)>;
@@ -151,6 +152,7 @@ namespace winston
 		friend class Bumper; 
 		friend class Rail;
 		friend class Turnout;
+		friend class DoubleSlipTurnout;
 
 	private:
 		const std::string _name;
@@ -265,8 +267,6 @@ namespace winston
 
 		const Direction direction() const;
 		static const Direction otherDirection(const Direction current);
-		static const Direction fromConnection(const Connection connection);
-		void fromDirection(Track::Shared& a, Track::Shared& other) const;
 		const Connection fromDirection() const;
 
 		using Shared_Ptr<Turnout>::Shared;
@@ -284,6 +284,70 @@ namespace winston
 		Direction dir;
 
 		Track::Shared a, b, c;
+	};
+
+	// A   D
+	//  \ /
+	//   X
+	//  / \
+	// C   B
+	class DoubleSlipTurnout : public Track, public Shared_Ptr<DoubleSlipTurnout>, public std::enable_shared_from_this<DoubleSlipTurnout>
+	{
+	public:
+		enum class Direction : unsigned int
+		{
+			A_B,
+			A_C,
+			C_D,
+			B_D,
+			Changing
+		};
+
+		static const std::string DirectionToString(const Direction direction);
+
+		using Callback = const std::function<State(Track::Shared turnout, Direction direction)>;
+
+		using TrackLengthCalculator = const std::function<const Length(const Direction)>;
+
+		DoubleSlipTurnout(const std::string name, const Callback callback);
+		DoubleSlipTurnout(const std::string name, const Callback callback, const TrackLengthCalculator trackLengthCalculator);
+
+		bool has(const Connection connection) const;
+		Track::Shared on(const Connection connection) const;
+
+		const bool traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const;
+		const bool canTraverse(const Connection entering) const;
+		void collectAllConnections(std::set<Track::Shared>& tracks) const;
+		const Connection whereConnects(Track::Shared& other) const;
+		const Connection otherConnection(const Connection connection) const;
+
+		const Result validate();
+		const Type type() const;
+
+		void connections(Track::Shared& onA, Track::Shared& onB, Track::Shared& onC);
+
+		const State startChangeTo(const Direction direction);
+		const State startToggle();
+		const State finalizeChangeTo(const Direction direction);
+
+		const Direction direction() const;
+		static const Direction otherDirection(const Direction current);
+		const Connection fromDirection() const;
+
+		using Shared_Ptr<DoubleSlipTurnout>::Shared;
+		using Shared_Ptr<DoubleSlipTurnout>::make;
+		virtual const Length length() const;
+		const Length lengthOnDirection(const Direction dir) const;
+
+	private:
+		Track::Shared connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa = true);
+
+		Callback callback;
+		const TrackLengthCalculator trackLengthCalculator;
+
+		Direction dir;
+
+		Track::Shared a, b, c, d;
 	};
 
 	std::string build(const Track::Connection first);

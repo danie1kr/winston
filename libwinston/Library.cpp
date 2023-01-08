@@ -95,6 +95,20 @@ namespace winston
 
 				return 0;
 			}
+			const Length Roco::DKW15(const winston::DoubleSlipTurnout::Direction direction)
+			{
+				switch (direction)
+				{
+				case winston::DoubleSlipTurnout::Direction::A_B:
+				case winston::DoubleSlipTurnout::Direction::C_D:
+					return G1;
+				case winston::DoubleSlipTurnout::Direction::A_C:
+				case winston::DoubleSlipTurnout::Direction::B_D:
+					return R10 - D12;	// not exactly precise but should be close enough
+				default: return 0;
+				}
+				return 0;
+			}
 		}
 	}
 

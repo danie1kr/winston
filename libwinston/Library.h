@@ -18,6 +18,7 @@ namespace winston
 				static const Length W10(const winston::Turnout::Direction direction);
 				static const Length BW23(const winston::Turnout::Direction direction);
 				static const Length BW34(const winston::Turnout::Direction direction);
+				static const Length DKW15(const winston::DoubleSlipTurnout::Direction direction);
 			};
 		};
 

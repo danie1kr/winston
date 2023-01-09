@@ -139,19 +139,30 @@ namespace winston
             return Result::OK;
 		}
 
+    private:
+        void turnoutSendState(const std::string turnoutTrackId, const int dir)
+        {
+            DynamicJsonDocument obj(200);
+            obj["op"] = "turnoutState";
+            auto data = obj.createNestedObject("data");
+            data["id"] = turnoutTrackId;
+            data["state"] = (int)dir;
+            std::string json("");
+            serializeJson(obj, json);
+            this->webServer.broadcast(json);
+        }
+    public:
+        // send a turnout state via websocket
+        void turnoutSendState(const std::string turnoutTrackId, const winston::Turnout::Direction dir)
+        {
+            turnoutSendState(turnoutTrackId, (int)dir);
+        }
 
-		// send a turnout state via websocket
-		void turnoutSendState(const std::string turnoutTrackId, const winston::Turnout::Direction dir)
-		{
-			DynamicJsonDocument obj(200);
-			obj["op"] = "turnoutState";
-			auto data = obj.createNestedObject("data");
-			data["id"] = turnoutTrackId;
-			data["state"] = (int)dir;
-			std::string json("");
-			serializeJson(obj, json);
-			this->webServer.broadcast(json);
-		}
+        // send a double slip state via websocket
+        void doubleSlipSendState(const std::string turnoutTrackId, const winston::DoubleSlipTurnout::Direction dir)
+        {
+            turnoutSendState(turnoutTrackId, (int)dir);
+        }
 
 		// send a signal state via websocket
 		void signalSendState(const std::string trackId, const winston::Track::Connection connection, const winston::Signal::Aspects aspects)
@@ -227,8 +238,17 @@ namespace winston
             else if (std::string("\"getTurnoutState\"").compare(op) == 0)
             {
                 std::string id = data["id"];
-                auto turnout = std::static_pointer_cast<winston::Turnout>(railway->track(id));
-                this->turnoutSendState(turnout->name(), turnout->direction());
+                auto track = railway->track(id);
+                if (track->type() == Track::Type::Turnout)
+                {
+                    auto turnout = std::static_pointer_cast<winston::Turnout>(track);
+                    this->turnoutSendState(turnout->name(), turnout->direction());
+                }
+                else if(track->type() == Track::Type::DoubleSlipTurnout)
+                {
+                    auto turnout = std::static_pointer_cast<winston::DoubleSlipTurnout>(track);
+                    this->doubleSlipSendState(turnout->name(), turnout->direction());
+                }
             }
             else if (std::string("\"getSignalState\"").compare(op) == 0)
             {
@@ -304,6 +324,30 @@ namespace winston
                         writeAttachedSignal(signals, turnout, winston::Track::Connection::A);
                         writeAttachedSignal(signals, turnout, winston::Track::Connection::B);
                         writeAttachedSignal(signals, turnout, winston::Track::Connection::C);
+                        break;
+                    }
+                    case winston::Track::Type::DoubleSlipTurnout:
+                    {
+                        winston::DoubleSlipTurnout::Shared turnout = std::static_pointer_cast<winston::DoubleSlipTurnout>(track);
+                        winston::Track::Shared a, b, c, d;
+                        turnout->connections(a, b, c, d);
+
+                        auto track = tracks.createNestedObject();
+                        track["a"] = a->name();
+                        track["b"] = b->name();
+                        track["c"] = c->name();
+                        track["d"] = d->name();
+                        track["name"] = turnout->name();
+                        auto length = track.createNestedObject("lengths");
+                        length["a_b"] = turnout->lengthOnDirection(winston::DoubleSlipTurnout::Direction::A_B);
+                        length["a_c"] = turnout->lengthOnDirection(winston::DoubleSlipTurnout::Direction::A_C);
+                        length["b_d"] = turnout->lengthOnDirection(winston::DoubleSlipTurnout::Direction::B_D);
+                        length["c_d"] = turnout->lengthOnDirection(winston::DoubleSlipTurnout::Direction::C_D);
+
+                        writeAttachedSignal(signals, turnout, winston::DoubleSlipTurnout::Connection::A);
+                        writeAttachedSignal(signals, turnout, winston::DoubleSlipTurnout::Connection::B);
+                        writeAttachedSignal(signals, turnout, winston::DoubleSlipTurnout::Connection::C);
+                        writeAttachedSignal(signals, turnout, winston::DoubleSlipTurnout::Connection::D);
                         break;
                     }
                     }

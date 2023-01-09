@@ -19,6 +19,11 @@ namespace winston
 		this->station->turnoutUpdate(turnout, direction);
 	}
 
+	void DigitalCentralStation::DebugInjector::injectDoubleSlipTurnoutUpdate(DoubleSlipTurnout::Shared turnout, const DoubleSlipTurnout::Direction direction)
+	{
+		this->station->doubleSlipUpdate(turnout, direction);
+	}
+
 	void DigitalCentralStation::DebugInjector::injectLocoUpdate(Locomotive::Shared loco, bool busy, bool forward, unsigned char speed, uint32_t functions)
 	{
 		this->station->callbacks.locomotiveUpdateCallback(loco, busy, forward, speed, functions);
@@ -31,9 +36,17 @@ namespace winston
 
 	void DigitalCentralStation::turnoutUpdate(Turnout::Shared turnout, const Turnout::Direction direction)
 	{
-		this->signalBox->order(Command::make([turnout, direction](const TimePoint &created) -> const State 
-			{ 
-				return turnout->finalizeChangeTo(direction);  
+		this->signalBox->order(Command::make([turnout, direction](const TimePoint& created) -> const State
+			{
+				return turnout->finalizeChangeTo(direction);
+			}, __PRETTY_FUNCTION__));
+	}
+
+	void DigitalCentralStation::doubleSlipUpdate(DoubleSlipTurnout::Shared turnout, const DoubleSlipTurnout::Direction direction)
+	{
+		this->signalBox->order(Command::make([turnout, direction](const TimePoint& created) -> const State
+			{
+				return turnout->finalizeChangeTo(direction);
 			}, __PRETTY_FUNCTION__));
 	}
 };

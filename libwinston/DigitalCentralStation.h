@@ -15,7 +15,7 @@ namespace winston
 		class TurnoutAddressTranslator : public Shared_Ptr<TurnoutAddressTranslator>
 		{
 		public:
-			virtual Turnout::Shared turnout(const Address address) const = 0;
+			virtual Track::Shared turnout(const Address address) const = 0;
 			virtual const Address address(winston::Track::Shared track) const = 0;
 		};
 
@@ -55,6 +55,7 @@ namespace winston
 		public:
 			DebugInjector(DigitalCentralStation::Shared& station);
 			void injectTurnoutUpdate(Turnout::Shared turnout, const Turnout::Direction direction);
+			void injectDoubleSlipTurnoutUpdate(DoubleSlipTurnout::Shared turnout, const DoubleSlipTurnout::Direction direction);
 			void injectLocoUpdate(Locomotive::Shared loco, bool busy, bool forward, unsigned char speed, uint32_t functions);
 		private:
 			DigitalCentralStation::Shared station;
@@ -67,13 +68,16 @@ namespace winston
 		virtual const winston::Result tick() = 0;
 
 		virtual void requestTurnoutInfo(Turnout::Shared turnout) = 0;
+		virtual void requestDoubleSlipTurnoutInfo(DoubleSlipTurnout::Shared turnout) = 0;
 		virtual void requestLocoInfo(const Locomotive::Shared loco) = 0;
 		virtual void triggerTurnoutChangeTo(winston::Turnout::Shared turnout, winston::Turnout::Direction direction) = 0;
+		virtual void triggerDoubleSlipTurnoutChangeTo(winston::DoubleSlipTurnout::Shared turnout, winston::DoubleSlipTurnout::Direction direction) = 0;
 		virtual void triggerLocoDrive(const Address address, const unsigned char speed, const bool forward) = 0;
 		virtual void triggerLocoFunction(const Address address, const uint32_t functions) = 0;
 		virtual void keepAlive();
 
 		void turnoutUpdate(Turnout::Shared turnout, const Turnout::Direction direction);
+		void doubleSlipUpdate(DoubleSlipTurnout::Shared turnout, const DoubleSlipTurnout::Direction direction);
 
 	protected:
 		TurnoutAddressTranslator::Shared turnoutAddressTranslator;

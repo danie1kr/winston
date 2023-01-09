@@ -126,6 +126,13 @@ winston::DigitalCentralStation::Callbacks Kornweinheim::z21Callbacks()
         return winston::State::Finished;
     };
 
+    // what to do when the digital central station updated a turnout
+    callbacks.doubleSlipUpdateCallback = [=](winston::DoubleSlipTurnout::Shared turnout, const winston::DoubleSlipTurnout::Direction direction) -> const winston::State
+    {
+        turnout->finalizeChangeTo(direction);
+        return winston::State::Finished;
+    };
+
     callbacks.locomotiveUpdateCallback = [=](winston::Locomotive::Shared loco, bool busy, bool  forward, unsigned char  speed, uint32_t functions)
     {
         loco->update(busy, forward, speed, functions);
@@ -176,6 +183,20 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
         this->webUI.turnoutSendState(turnout->name(), direction);
 #endif
         winston::logger.info("Turnout ", turnout->name(), " set to direction ", winston::Turnout::DirectionToString(direction));
+
+        return winston::State::Finished;
+    };
+
+    callbacks.doubleSlipUpdateCallback = [=](winston::DoubleSlipTurnout::Shared turnout, const winston::DoubleSlipTurnout::Direction direction) -> const winston::State
+    {
+        // tell the signal box to update the signals
+        this->signalBox->setSignalsForChangingDoubleSlipTurnout(turnout, direction);
+
+#ifdef WINSTON_WITH_WEBSOCKET
+        // tell the ui what happens
+        this->webUI.doubleSlipSendState(turnout->name(), direction);
+#endif
+        winston::logger.info("Turnout ", turnout->name(), " set to direction ", winston::DoubleSlipTurnout::DirectionToString(direction));
 
         return winston::State::Finished;
     };
@@ -840,25 +861,51 @@ void Kornweinheim::systemSetup() {
             return this->on_http(client, method, resource);
         },
         [=](const std::string id) -> winston::Result {
-            auto turnout = std::static_pointer_cast<winston::Turnout>(railway->track(id));
-        auto requestDir = winston::Turnout::otherDirection(turnout->direction());
-        signalBox->order(winston::Command::make([this, id, turnout, requestDir](const winston::TimePoint& created) -> const winston::State
+            auto track = railway->track(id);
+            if (track->type() == winston::Track::Type::Turnout)
             {
-#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
-                signalBox->order(winston::Command::make([this, turnout, requestDir](const winston::TimePoint& created) -> const winston::State
+                auto turnout = std::static_pointer_cast<winston::Turnout>(track);
+                auto requestDir = winston::Turnout::otherDirection(turnout->direction());
+                signalBox->order(winston::Command::make([this, id, turnout, requestDir](const winston::TimePoint& created) -> const winston::State
                     {
-                        if (inMilliseconds((winston::hal::now() - created)) > WINSTON_RAILWAY_DEBUG_INJECTOR_DELAY)
-                        {
-                            this->stationDebugInjector->injectTurnoutUpdate(turnout, requestDir);
-                            return winston::State::Finished;
-                        }
-                    return winston::State::Delay;
+#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
+                        signalBox->order(winston::Command::make([this, turnout, requestDir](const winston::TimePoint& created) -> const winston::State
+                            {
+                                if (inMilliseconds((winston::hal::now() - created)) > WINSTON_RAILWAY_DEBUG_INJECTOR_DELAY)
+                                {
+                                    this->stationDebugInjector->injectTurnoutUpdate(turnout, requestDir);
+                                    return winston::State::Finished;
+                                }
+                                return winston::State::Delay;
+                            }, __PRETTY_FUNCTION__));
+#endif
+                        // tell the central station to trigger the turnout switch
+                        // update internal representation. will inform the UI in its callback, too
+                        return this->turnoutChangeTo(turnout, requestDir);
                     }, __PRETTY_FUNCTION__));
+            }
+            else if(track->type() == winston::Track::Type::DoubleSlipTurnout)
+            {
+                auto turnout = std::static_pointer_cast<winston::DoubleSlipTurnout>(track);
+                auto requestDir = winston::DoubleSlipTurnout::nextDirection(turnout->direction());
+                signalBox->order(winston::Command::make([this, id, turnout, requestDir](const winston::TimePoint& created) -> const winston::State
+                    {
+#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
+                        signalBox->order(winston::Command::make([this, turnout, requestDir](const winston::TimePoint& created) -> const winston::State
+                            {
+                                if (inMilliseconds((winston::hal::now() - created)) > WINSTON_RAILWAY_DEBUG_INJECTOR_DELAY)
+                                {
+                                    this->stationDebugInjector->injectDoubleSlipTurnoutUpdate(turnout, requestDir);
+                                    return winston::State::Finished;
+                                }
+                return winston::State::Delay;
+                            }, __PRETTY_FUNCTION__));
 #endif
                 // tell the central station to trigger the turnout switch
                 // update internal representation. will inform the UI in its callback, too
-                return this->turnoutChangeTo(turnout, requestDir);
-            }, __PRETTY_FUNCTION__));
+                return this->doubleSlipChangeTo(turnout, requestDir);
+                    }, __PRETTY_FUNCTION__));
+            }
             return winston::Result::OK;
         }
     );
@@ -1017,6 +1064,14 @@ void Kornweinheim::systemSetupComplete()
     //auto turnouts = this->railway->turnouts();
     this->railway->turnouts([=](const Tracks track, winston::Turnout::Shared turnout) {
         this->stationDebugInjector->injectTurnoutUpdate(turnout, std::rand() % 2 ? winston::Turnout::Direction::A_B : winston::Turnout::Direction::A_C);
+        });
+    this->railway->doubleSlipTurnouts([=](const Tracks track, winston::DoubleSlipTurnout::Shared turnout) {
+        auto v = std::rand() % 4;
+        auto dir = winston::DoubleSlipTurnout::Direction::A_B;
+        if (v == 1) dir = winston::DoubleSlipTurnout::Direction::A_C;
+        else if (v == 2) dir = winston::DoubleSlipTurnout::Direction::B_D;
+        else if (v == 3) dir = winston::DoubleSlipTurnout::Direction::C_D;
+        this->stationDebugInjector->injectDoubleSlipTurnoutUpdate(turnout, dir);
         });
     //for (auto it = turnouts.begin(); it != turnouts.end(); it++)
     //    this->stationDebugInjector->injectTurnoutUpdate(it->second, std::rand() % 2 ? winston::Turnout::Direction::A_B : winston::Turnout::Direction::A_C);

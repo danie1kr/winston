@@ -57,6 +57,18 @@ namespace winston
 					}, __PRETTY_FUNCTION__));
 			});
 
+			this->railway->doubleSlipTurnouts([=](const Tracks track, winston::DoubleSlipTurnout::Shared turnout) {
+
+				this->signalBox->order(winston::Command::make([this, turnout](const TimePoint& created) -> const winston::State
+					{
+						this->digitalCentralStation->requestDoubleSlipTurnoutInfo(turnout);
+						winston::hal::delay(50);
+						this->signalBox->setSignalsForChangingDoubleSlipTurnout(turnout, turnout->direction());
+						winston::hal::delay(100);
+						return winston::State::Finished;
+					}, __PRETTY_FUNCTION__));
+				});
+
 			this->signalBox->order(winston::Command::make([](const TimePoint &created) -> const winston::State
 				{
 					logger.log("Init tasks complete");
@@ -88,6 +100,12 @@ namespace winston
 		inline const State turnoutChangeTo(winston::Turnout::Shared turnout, winston::Turnout::Direction direction)
 		{
 			this->digitalCentralStation->triggerTurnoutChangeTo(turnout, direction);
+			return turnout->startToggle();
+		}
+
+		inline const State doubleSlipChangeTo(winston::DoubleSlipTurnout::Shared turnout, winston::DoubleSlipTurnout::Direction direction)
+		{
+			this->digitalCentralStation->triggerDoubleSlipTurnoutChangeTo(turnout, direction);
 			return turnout->startToggle();
 		}
 

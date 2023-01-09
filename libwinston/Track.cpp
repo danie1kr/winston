@@ -17,6 +17,7 @@ namespace winston
 		case Connection::A: return "a";
 		case Connection::B: return "b";
 		case Connection::C: return "c";
+		case Connection::D: return "d";
 		default:
 		case Connection::DeadEnd: return "deadend";
 		}
@@ -27,6 +28,7 @@ namespace winston
 		if (connection == "A" || connection == "a") return Connection::A;
 		if (connection == "B" || connection == "b") return Connection::B;
 		if (connection == "C" || connection == "c") return Connection::C;
+		if (connection == "D" || connection == "d") return Connection::D;
 		return Connection::DeadEnd;
 	}
 
@@ -222,13 +224,6 @@ namespace winston
 	Signal::Shared Bumper::signalFacing(const Connection facing)
 	{
 		return signals[facing == Connection::A ? 1 : 0];
-	}
-
-	void Turnout::connections(Track::Shared& onA, Track::Shared& onB, Track::Shared& onC)
-	{
-		onA = a;
-		onB = b;
-		onC = c;
 	}
 
 	Rail::Rail(const std::string name, Length tracklength)
@@ -517,6 +512,13 @@ namespace winston
 		return Type::Turnout;
 	}
 
+	void Turnout::connections(Track::Shared& onA, Track::Shared& onB, Track::Shared& onC)
+	{
+		onA = a;
+		onB = b;
+		onC = c;
+	}
+
 	const State Turnout::startChangeTo(const Direction direction)
 	{
 		if (this->dir == direction || this->dir == Direction::Changing)
@@ -568,6 +570,19 @@ namespace winston
 	const Length Turnout::lengthOnDirection(const Direction dir) const
 	{
 		return this->trackLengthCalculator ? this->trackLengthCalculator(dir) : 0;
+	}
+
+	const std::string DoubleSlipTurnout::DirectionToString(const Direction direction)
+	{
+		switch (direction)
+		{
+		case Direction::A_B: return std::string("A_B");
+		case Direction::A_C: return std::string("A_C");
+		case Direction::B_D: return std::string("B_D");
+		case Direction::C_D: return std::string("C_D");
+		default:
+		case Direction::Changing: return std::string("Changing");
+		}
 	}
 
 	DoubleSlipTurnout::DoubleSlipTurnout(const std::string name, const Callback callback)
@@ -704,7 +719,7 @@ namespace winston
 		}
 		else if (connection == Connection::C)
 		{
-			if (this->dir == Direction::A_C) return Connection::C;
+			if (this->dir == Direction::A_C) return Connection::A;
 			else if (this->dir == Direction::C_D) return Connection::D;
 			else return Connection::DeadEnd;
 		}
@@ -769,6 +784,47 @@ namespace winston
 		return Type::DoubleSlipTurnout;
 	}
 
+	void DoubleSlipTurnout::connections(ConnectionCallback open, ConnectionCallback closed)
+	{
+		switch (this->dir)
+		{
+		case Direction::A_B:
+			open(Connection::A, this->a);
+			open(Connection::B, this->b);
+			closed(Connection::C, this->c);
+			closed(Connection::D, this->d);
+			break;
+		case Direction::A_C:
+			open(Connection::A, this->a);
+			open(Connection::C, this->c);
+			closed(Connection::B, this->b);
+			closed(Connection::D, this->d);
+			break;
+		case Direction::B_D:
+			open(Connection::B, this->b);
+			open(Connection::D, this->d);
+			closed(Connection::A, this->a);
+			closed(Connection::C, this->c);
+			break;
+		case Direction::C_D:
+			open(Connection::C, this->c);
+			open(Connection::D, this->d);
+			closed(Connection::A, this->a);
+			closed(Connection::B, this->b);
+			break;
+		case Direction::Changing:
+			return;
+		}
+	}
+
+	void DoubleSlipTurnout::connections(Track::Shared& onA, Track::Shared& onB, Track::Shared& onC, Track::Shared& onD)
+	{
+		onA = a;
+		onB = b;
+		onC = c;
+		onD = d;
+	}
+
 	const State DoubleSlipTurnout::startChangeTo(const Direction direction)
 	{
 		if (this->dir == direction || this->dir == Direction::Changing)
@@ -780,7 +836,7 @@ namespace winston
 
 	const State DoubleSlipTurnout::startToggle()
 	{
-		return this->startChangeTo(DoubleSlipTurnout::otherDirection(this->dir));
+		return this->startChangeTo(DoubleSlipTurnout::nextDirection(this->dir));
 	}
 
 	const State DoubleSlipTurnout::finalizeChangeTo(const Direction direction)
@@ -794,19 +850,52 @@ namespace winston
 		return state;
 	}
 
+	const void DoubleSlipTurnout::toAccessoryStates(unsigned char& a, unsigned char& b) const
+	{
+		switch (this->dir)
+		{
+		case Direction::A_B: a = 1; b = 1; break;
+		case Direction::A_C: a = 0; b = 1; break;
+		case Direction::B_D: a = 1; b = 0; break;
+		case Direction::C_D: a = 0; b = 0; break;
+		}
+	}
+
+	const DoubleSlipTurnout::Direction DoubleSlipTurnout::fromAccessoryState(unsigned char state, bool first) const
+	{
+		unsigned char a, b;
+		this->toAccessoryStates(a, b);
+
+		if (first)
+			a = state ? 1 : 0;
+		else
+			b = state ? 1 : 0;
+
+		if (a && b) 
+			return Direction::A_B;
+		else if (!a && b) 
+			return Direction::A_C;
+		else if (a && !b) 
+			return Direction::B_D;
+		else if (!a && !b) 
+			return Direction::C_D;
+		else 
+			return Direction::Changing;
+	}
+
 	const DoubleSlipTurnout::Direction DoubleSlipTurnout::direction() const
 	{
 		return this->dir;
 	}
 
-	const DoubleSlipTurnout::Direction DoubleSlipTurnout::otherDirection(const Direction current)
+	const DoubleSlipTurnout::Direction DoubleSlipTurnout::nextDirection(const Direction current)
 	{
 		switch (current)
 		{
 		case Direction::A_B: return Direction::A_C;
-		case Direction::A_C: return Direction::B_D;
-		case Direction::B_D: return Direction::C_D;
-		case Direction::C_D: return Direction::A_B;
+		case Direction::A_C: return Direction::C_D;
+		case Direction::C_D: return Direction::B_D;
+		case Direction::B_D: return Direction::A_B;
 		default:
 			return Direction::Changing;
 		}

@@ -157,7 +157,7 @@ public:
     {
     public:
         AddressTranslator(winston::Shared_Ptr<RailwayWithSiding>::Shared railway);
-        virtual winston::Turnout::Shared turnout(const winston::Address address) const;
+        virtual winston::Track::Shared turnout(const winston::Address address) const;
         virtual const winston::Address address(winston::Track::Shared track) const;
 
         using Shared_Ptr<AddressTranslator>::Shared;
@@ -273,7 +273,7 @@ public:
     {
     public:
         AddressTranslator(winston::Shared_Ptr<Y2020Railway>::Shared railway);
-        virtual winston::Turnout::Shared turnout(const winston::Address address) const;
+        virtual winston::Track::Shared turnout(const winston::Address address) const;
         virtual const winston::Address address(winston::Track::Shared track) const;
 
         using Shared_Ptr<AddressTranslator>::Shared;
@@ -300,8 +300,7 @@ BETTER_ENUM(Y2021RailwayTracks, unsigned int,
     Turnout9,
     Turnout10,
     Turnout11,
-    Turnout12,
-    Turnout13,
+    DoubleSlipTurnout12_13,
     Turnout14,
     Turnout15,
     Turnout16,
@@ -330,9 +329,9 @@ class Y2021Railway : public winston::RailwayWithRails<Y2021RailwayTracks>/*, pub
     //           \\                                         \\
     ||  //====Turnout10======B5======Turnout9====Turnout8\\  \\
     ||  ||                          //                \\  \\  \\
-    ||  ||                      Turnout12====N2====|   \\ Turnout7
+    ||  ||                      DS_Turnout12====N2====|   \\ Turnout7
     ||  ||                           //                 \\  ||
-    ||  || |====GBF1====Turnout14==Turnout13            ||  ||
+    ||  || |====GBF1====Turnout14==DS_Turnout13            ||  ||
     ||  ||                 //         //                ||  ||
     B3  B6              GBF2b        GBF3b              ||  ||
     ||  ||               ||           ||                ||  ||
@@ -366,7 +365,7 @@ public:
     {
     public:
         AddressTranslator(winston::Shared_Ptr<Y2021Railway>::Shared railway);
-        virtual winston::Turnout::Shared turnout(const winston::Address address) const;
+        virtual winston::Track::Shared turnout(const winston::Address address) const;
         virtual const winston::Address address(winston::Track::Shared track) const;
 
         using Shared_Ptr<AddressTranslator>::Shared;
@@ -427,7 +426,7 @@ public:
     {
     public:
         AddressTranslator(winston::Shared_Ptr<SignalRailway>::Shared railway);
-        virtual winston::Turnout::Shared turnout(const winston::Address address) const;
+        virtual winston::Track::Shared turnout(const winston::Address address) const;
         virtual const winston::Address address(winston::Track::Shared track) const;
 
         using Shared_Ptr<AddressTranslator>::Shared;

@@ -28,6 +28,9 @@ namespace winston
 		{
 			using TurnoutUpdateCallback = std::function<const State(Turnout::Shared turnout, const Turnout::Direction direction)>;
 			TurnoutUpdateCallback turnoutUpdateCallback;
+			
+			using DoubleSlipUpdateCallback = std::function<const State(DoubleSlipTurnout::Shared turnout, const DoubleSlipTurnout::Direction direction)>;
+			DoubleSlipUpdateCallback doubleSlipUpdateCallback;
 
 			using SignalUpdateCallback = std::function<const State(Track::Shared track, Track::Connection connection, const Signal::Aspects aspect)>;
 			SignalUpdateCallback signalUpdateCallback;
@@ -144,6 +147,13 @@ namespace winston
 			for (size_t i = 0; i < tracksCount(); ++i)
 				if (this->tracks[i]->type() == Track::Type::Turnout)
 					callback(this->trackEnum(i), std::static_pointer_cast<Turnout>(this->tracks[i]));
+		}
+
+		void doubleSlipTurnouts(std::function<void(const Tracks track, DoubleSlipTurnout::Shared turnout)> callback)
+		{
+			for (size_t i = 0; i < tracksCount(); ++i)
+				if (this->tracks[i]->type() == Track::Type::DoubleSlipTurnout)
+					callback(this->trackEnum(i), std::static_pointer_cast<DoubleSlipTurnout>(this->tracks[i]));
 		}
 
 		inline constexpr Tracks trackEnum(size_t index) const

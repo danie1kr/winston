@@ -25,10 +25,16 @@ namespace winston
 		};
 	}
 
-	void SignalBox::initSignalsForTurnouts(std::set<Turnout::Shared> turnouts)
+	void SignalBox::initSignalsForTurnouts(std::set<Turnout::Shared> turnouts, std::set<DoubleSlipTurnout::Shared> doubleSlipTurnouts)
 	{
-		for (auto &turnout: turnouts)
+		for (auto& turnout : turnouts)
 			this->setSignalsFor(turnout, turnout->direction());
+		for (auto& doubleSlipTurnout : doubleSlipTurnouts)
+		{
+			Track::Shared a, b, c, d;
+			doubleSlipTurnout->connections(a, b, c, d);
+			this->setSignalsFor(doubleSlipTurnout, Track::Connection::A, a);
+		}
 	}
 
 	void SignalBox::setSignalOn(Track::Shared track, const Track::Connection signalGuardedConnection, const Signal::Aspect aspect, const Signal::Aspect preAspect)
@@ -124,6 +130,37 @@ namespace winston
 		this->setSignalOn(signalCurrent, signalConnection, aspect, preAspect);
 	}
 
+	void SignalBox::setSignalsFor(DoubleSlipTurnout::Shared turnout, const Track::Connection connectionStartFrom, Track::Shared track)
+	{
+		Track::Shared signalCurrent = turnout;
+		auto signalConnection = connectionStartFrom;
+		auto signalToSet = this->nextSignal(signalCurrent, true, signalConnection, true, true);
+
+		Track::Shared current = signalCurrent;
+		auto connection = signalConnection;
+		Signal::Shared signal;
+
+		Track::TraversalResult result = Track::traverse<Track::TraversalSignalHandling::OppositeDirection>(current, connection, signal);
+
+		auto aspect = Signal::Aspect::Halt;
+		auto preAspect = Signal::Aspect::Off;
+		switch (result)
+		{
+		case Track::TraversalResult::Bumper:
+		case Track::TraversalResult::Looped:
+			aspect = Signal::Aspect::Go;
+			break;
+		case Track::TraversalResult::Signal:
+			aspect = Signal::Aspect::Go;
+			if (signal->shows(Signal::Aspect::Halt))
+				preAspect = Signal::Aspect::ExpectHalt;
+			break;
+		default:
+		case Track::TraversalResult::OpenTurnout: aspect = Signal::Aspect::Halt; break;
+		}
+		this->setSignalOn(signalCurrent, signalConnection, aspect, preAspect);
+	}
+
 	void SignalBox::setSignalsForChangingTurnout(Turnout::Shared turnout, const Turnout::Direction targetDirection)
 	{
 		// A_facing = leave turnout at A, find first main signal facing A
@@ -158,6 +195,45 @@ namespace winston
 			return State::Finished; 
 
 		}, __PRETTY_FUNCTION__));
+	}
+
+	void SignalBox::setSignalsForChangingDoubleSlipTurnout(DoubleSlipTurnout::Shared turnout, const DoubleSlipTurnout::Direction targetDirection)
+	{
+		// A_facing = leave turnout at A, find first main signal facing A
+		// B_guarding = leave turnout at B, find first pre signal if 
+
+		Track::Shared a, b, c, d;
+		turnout->connections(a, b, c, d);
+		this->order(Command::make([this, turnout, connection = Track::Connection::A, track = a](const TimePoint& created) -> const winston::State {
+			this->setSignalsFor(turnout, connection, track);
+		return State::Finished;
+			}, __PRETTY_FUNCTION__));
+		this->order(Command::make([this, turnout, connection = Track::Connection::B, track = b](const TimePoint& created) -> const winston::State {
+			this->setSignalsFor(turnout, connection, track);
+		return State::Finished;
+			}, __PRETTY_FUNCTION__));
+		this->order(Command::make([this, turnout, connection = Track::Connection::C, track = c](const TimePoint& created) -> const winston::State {
+			this->setSignalsFor(turnout, connection, track);
+		return State::Finished;
+			}, __PRETTY_FUNCTION__));
+		this->order(Command::make([this, turnout, connection = Track::Connection::D, track = d](const TimePoint& created) -> const winston::State {
+			this->setSignalsFor(turnout, connection, track);
+		return State::Finished;
+			}, __PRETTY_FUNCTION__));
+
+		/*
+		turnout->connections([this, turnout](winston::DoubleSlipTurnout::Connection connection, Track::Shared track) {
+			this->order(Command::make([this, turnout, connection, track](const TimePoint& created) -> const winston::State {
+				this->setSignalsFor(turnout, connection, track);
+				return State::Finished;
+				}, __PRETTY_FUNCTION__));
+			},
+			[this, turnout](winston::DoubleSlipTurnout::Connection connection, Track::Shared track){
+			this->order(Command::make([this, turnout, connection, track](const TimePoint& created) -> const winston::State {
+					this->setSignalsFor(turnout, connection, track);
+				return State::Finished;
+				}, __PRETTY_FUNCTION__));
+			});*/
 	}
 	
 	Signal::Shared SignalBox::nextSignal(Track::Shared& track, const bool guarding, Track::Connection& leaving, const bool main, const bool includingFirst)

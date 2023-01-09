@@ -31,6 +31,12 @@ namespace winston {
 				CHECK_ENTRY_AND_ADD(Track::Connection::B);
 				CHECK_ENTRY_AND_ADD(Track::Connection::C);
 				break;
+			case Track::Type::DoubleSlipTurnout:
+				CHECK_ENTRY_AND_ADD(Track::Connection::A);
+				CHECK_ENTRY_AND_ADD(Track::Connection::B);
+				CHECK_ENTRY_AND_ADD(Track::Connection::C);
+				CHECK_ENTRY_AND_ADD(Track::Connection::D);
+				break;
 			}
 		}
 		return set;

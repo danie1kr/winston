@@ -91,20 +91,25 @@ namespace winston
 				}
 				if (visited.find(onto) != visited.end())
 					return TraversalResult::Looped;
-				if (onto->type() == Track::Type::Bumper)
-					return TraversalResult::Bumper;
 				visited.insert(onto);
 				successful = current->traverse(connection, onto, true);
-				if (!successful && current->type() == Track::Type::Turnout)
+				if (!successful)
 				{
-					start = current;
-					connection = connection;
-					return TraversalResult::OpenTurnout;
+					if (current->type() == Track::Type::Turnout || current->type() == Track::Type::DoubleSlipTurnout)
+					{
+						start = current;
+						connection = connection;
+						return TraversalResult::OpenTurnout;
+					}
+					else if (current->type() == Track::Type::Bumper)
+					{
+						return TraversalResult::Bumper;
+					}
 				}
 				if(callback)
 					callback(onto, connection);
 				connection = onto->whereConnects(current);
-				if(onto->type() == Track::Type::Turnout && !onto->canTraverse(connection))
+				if((onto->type() == Track::Type::Turnout || onto->type() == Track::Type::DoubleSlipTurnout) && !onto->canTraverse(connection))
 				{
 					start = current;
 					connection = connection;
@@ -121,6 +126,8 @@ namespace winston
 					}
 				}
 				connection = onto->otherConnection(connection);
+				if (connection == Connection::DeadEnd)
+					return TraversalResult::Bumper;
 				if (callback)
 					callback(onto, connection);
 				current = onto;
@@ -324,15 +331,20 @@ namespace winston
 		const Result validate();
 		const Type type() const;
 
-		void connections(Track::Shared& onA, Track::Shared& onB, Track::Shared& onC);
+		using ConnectionCallback = std::function<void(const Connection, Track::Shared track)>;
+		void connections(ConnectionCallback open, ConnectionCallback closed);
+		void connections(Track::Shared& onA, Track::Shared& onB, Track::Shared& onC, Track::Shared& onD);
 
 		const State startChangeTo(const Direction direction);
 		const State startToggle();
 		const State finalizeChangeTo(const Direction direction);
 
+		const Direction fromAccessoryState(unsigned char state, bool first) const;
+		const void toAccessoryStates(unsigned char &a, unsigned char &b) const;
 		const Direction direction() const;
-		static const Direction otherDirection(const Direction current);
+		static const Direction nextDirection(const Direction current);
 		const Connection fromDirection() const;
+
 
 		using Shared_Ptr<DoubleSlipTurnout>::Shared;
 		using Shared_Ptr<DoubleSlipTurnout>::make;

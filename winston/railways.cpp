@@ -11,6 +11,7 @@
 #define BUMPER(track, ...) case Tracks::_enumerated::track: return winston::Bumper::make(#track, __VA_ARGS__); 
 #define RAIL(track, ...) case Tracks::_enumerated::track: return winston::Rail::make(#track, __VA_ARGS__); 
 #define TURNOUT(track, callback, ...) case Tracks::_enumerated::track: return winston::Turnout::make(#track, callback, __VA_ARGS__); 
+#define DOUBLESLIPTURNOUT(track, callback, ...) case Tracks::_enumerated::track: return winston::DoubleSlipTurnout::make(#track, callback, __VA_ARGS__); 
 
 #ifndef WINSTON_PLATFORM_TEENSY
 MiniRailway::MiniRailway(const Callbacks callbacks) : winston::RailwayWithRails<MiniRailwayTracks>(callbacks) {};
@@ -162,13 +163,13 @@ const std::string SignalTestRailway::name()
 RailwayWithSiding::RailwayWithSiding(const Callbacks callbacks) : winston::RailwayWithRails<RailwayWithSidingsTracks>(callbacks) {};
 RailwayWithSiding::AddressTranslator::AddressTranslator(RailwayWithSiding::Shared railway) : winston::DigitalCentralStation::TurnoutAddressTranslator(), Shared_Ptr<AddressTranslator>(), railway(railway) { };
 
-winston::Turnout::Shared RailwayWithSiding::AddressTranslator::turnout(const winston::Address address) const
+winston::Track::Shared RailwayWithSiding::AddressTranslator::turnout(const winston::Address address) const
 {
     switch (address)
     {
     default:
-    case 0: return std::static_pointer_cast<winston::Turnout>(railway->track(Tracks::Turnout1)); break;
-    case 1: return std::static_pointer_cast<winston::Turnout>(railway->track(Tracks::Turnout2)); break;
+    case 0: return railway->track(Tracks::Turnout1); break;
+    case 1: return railway->track(Tracks::Turnout2); break;
     }
 }
 
@@ -288,7 +289,7 @@ const std::string Y2020Railway::name()
 
 Y2020Railway::AddressTranslator::AddressTranslator(Y2020Railway::Shared railway) : winston::DigitalCentralStation::TurnoutAddressTranslator(), Shared_Ptr<AddressTranslator>(), railway(railway) { };
 
-winston::Turnout::Shared Y2020Railway::AddressTranslator::turnout(const winston::Address address) const
+winston::Track::Shared Y2020Railway::AddressTranslator::turnout(const winston::Address address) const
 {
 	Tracks track = Tracks::Turnout1;
     switch (address)
@@ -304,7 +305,7 @@ winston::Turnout::Shared Y2020Railway::AddressTranslator::turnout(const winston:
     case 7: track = Tracks::Turnout8; break;
     case 8: track = Tracks::Turnout9; break;
     }
-    return std::static_pointer_cast<winston::Turnout>(railway->track(track));
+    return railway->track(track);
 }
 
 const winston::Address Y2020Railway::AddressTranslator::address(winston::Track::Shared track) const
@@ -427,7 +428,7 @@ const std::string Y2021Railway::name()
 
 Y2021Railway::AddressTranslator::AddressTranslator(Y2021Railway::Shared railway) : winston::DigitalCentralStation::TurnoutAddressTranslator(), Shared_Ptr<AddressTranslator>(), railway(railway) { };
 
-winston::Turnout::Shared Y2021Railway::AddressTranslator::turnout(const winston::Address address) const
+winston::Track::Shared Y2021Railway::AddressTranslator::turnout(const winston::Address address) const
 {
     Tracks track = Tracks::Turnout1;
     switch (address)
@@ -444,13 +445,13 @@ winston::Turnout::Shared Y2021Railway::AddressTranslator::turnout(const winston:
     case 8: track = Tracks::Turnout9; break;
     case 9: track = Tracks::Turnout10; break;
     case 10: track = Tracks::Turnout11; break;
-    case 11: track = Tracks::Turnout12; break;
-    case 12: track = Tracks::Turnout13; break;
+    case 11: track = Tracks::DoubleSlipTurnout12_13; break;
+    case 12: track = Tracks::DoubleSlipTurnout12_13; break;
     case 13: track = Tracks::Turnout14; break;
     case 14: track = Tracks::Turnout15; break;
     case 15: track = Tracks::Turnout16; break;
     }
-    return std::static_pointer_cast<winston::Turnout>(railway->track(track));
+    return railway->track(track);
 }
 
 const winston::Address Y2021Railway::AddressTranslator::address(winston::Track::Shared track) const
@@ -469,8 +470,8 @@ const winston::Address Y2021Railway::AddressTranslator::address(winston::Track::
     case Tracks::Turnout9: return 8; break;
     case Tracks::Turnout10: return 9; break;
     case Tracks::Turnout11: return 10; break;
-    case Tracks::Turnout12: return 11; break;
-    case Tracks::Turnout13: return 12; break;
+    case Tracks::DoubleSlipTurnout12_13: return 11; break;
+    //case Tracks::Turnout13: return 12; break;
     case Tracks::Turnout14: return 13; break;
     case Tracks::Turnout15: return 14; break;
     case Tracks::Turnout16: return 15; break;
@@ -481,7 +482,16 @@ const winston::Address Y2021Railway::AddressTranslator::address(winston::Track::
 winston::Track::Shared Y2021Railway::define(const Tracks track)
 {
     using namespace winston::library::track;
-    auto turnoutCallback = [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State { winston::Turnout::Shared s = std::static_pointer_cast<winston::Turnout, winston::Track>(turnout); return this->callbacks.turnoutUpdateCallback(s, direction); };
+    auto turnoutCallback = [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State
+    {
+        winston::Turnout::Shared s = std::static_pointer_cast<winston::Turnout, winston::Track>(turnout);
+        return this->callbacks.turnoutUpdateCallback(s, direction);
+    };
+    auto doubleSlipTurnoutCallback = [this, track](winston::Track::Shared turnout, const winston::DoubleSlipTurnout::Direction direction) -> winston::State
+    {
+        winston::DoubleSlipTurnout::Shared s = std::static_pointer_cast<winston::DoubleSlipTurnout, winston::Track>(turnout);
+        return this->callbacks.doubleSlipUpdateCallback(s, direction);
+    };
     switch (track)
     {
         BUMPER(N1, Roco::R2 + Roco::G12 + Roco::R3 + Roco::R10 + Roco::G12 + 2 * Roco::G1);
@@ -508,7 +518,7 @@ winston::Track::Shared Y2021Railway::define(const Tracks track)
         TURNOUT(Turnout3, turnoutCallback, Roco::W15, false);
         TURNOUT(Turnout7, turnoutCallback, Roco::BW23, false);
         TURNOUT(Turnout9, turnoutCallback, Roco::W15, false);
-        TURNOUT(Turnout12, turnoutCallback, Roco::W15, false);
+        DOUBLESLIPTURNOUT(DoubleSlipTurnout12_13, doubleSlipTurnoutCallback, Roco::DKW15);
         TURNOUT(Turnout14, turnoutCallback, Roco::W15, false);
         TURNOUT(Turnout2, turnoutCallback, Roco::BW23, true);
         TURNOUT(Turnout4, turnoutCallback, Roco::W15, true);
@@ -517,7 +527,6 @@ winston::Track::Shared Y2021Railway::define(const Tracks track)
         TURNOUT(Turnout8, turnoutCallback, Roco::BW23, true);
         TURNOUT(Turnout10, turnoutCallback, Roco::W15, true);
         TURNOUT(Turnout11, turnoutCallback, Roco::W15, true);
-        TURNOUT(Turnout13, turnoutCallback, Roco::W15, true);
         TURNOUT(Turnout15, turnoutCallback, Roco::W15, true);
         TURNOUT(Turnout16, turnoutCallback, Roco::W15, true);
     default:
@@ -560,8 +569,7 @@ void Y2021Railway::connect()
     LOCAL_TRACK(Turnout9);
     LOCAL_TRACK(Turnout10);
     LOCAL_TRACK(Turnout11);
-    LOCAL_TRACK(Turnout12);
-    LOCAL_TRACK(Turnout13);
+    LOCAL_TRACK(DoubleSlipTurnout12_13);
     LOCAL_TRACK(Turnout14);
     LOCAL_TRACK(Turnout15);
     LOCAL_TRACK(Turnout16);
@@ -569,6 +577,7 @@ void Y2021Railway::connect()
     const auto A = winston::Track::Connection::A;
     const auto B = winston::Track::Connection::B;
     const auto C = winston::Track::Connection::C;
+    const auto D = winston::Track::Connection::D;
 /*
     size_t device = 0;
     size_t port = 0;
@@ -658,19 +667,18 @@ void Y2021Railway::connect()
         ->connect(B, Turnout5, C);
     Turnout7->connect(C, Turnout8, B);
     Turnout9->connect(C, B_To_GBF, A)
-        ->connect(B, Turnout12, C);
+        ->connect(B, DoubleSlipTurnout12_13, A);
     Turnout10->connect(C, Turnout11, C);
     Turnout15->connect(C, Turnout16, C);
 
     // nebengleise
     Turnout3->connect(C, N1, A);
-    Turnout12->connect(B, N2, A);
+    DoubleSlipTurnout12_13->connect(D, N2, A);
 
     // GBF
-    Turnout12->connect(A, Turnout13, A)
-        ->connect(B, Turnout14, A)
+    DoubleSlipTurnout12_13->connect(C, Turnout14, A)
         ->connect(B, GBF1, A);
-    Turnout13->connect(C, GBF3b, A)
+    DoubleSlipTurnout12_13->connect(B, GBF3b, A)
         ->connect(B, Turnout16, B)
         ->connect(A, GBF3a, A);
     Turnout14->connect(C, GBF2b, A)
@@ -691,7 +699,7 @@ const std::string SignalRailway::name()
 
 SignalRailway::AddressTranslator::AddressTranslator(SignalRailway::Shared railway) : winston::DigitalCentralStation::TurnoutAddressTranslator(), Shared_Ptr<AddressTranslator>(), railway(railway) { };
 
-winston::Turnout::Shared SignalRailway::AddressTranslator::turnout(const winston::Address address) const
+winston::Track::Shared SignalRailway::AddressTranslator::turnout(const winston::Address address) const
 {
     Tracks track = Tracks::Turnout1;
     switch (address)
@@ -703,7 +711,7 @@ winston::Turnout::Shared SignalRailway::AddressTranslator::turnout(const winston
     case 3: track = Tracks::Turnout4; break;
     case 4: track = Tracks::Turnout5; break;
     }
-    return std::static_pointer_cast<winston::Turnout>(railway->track(track));
+    return railway->track(track);
 }
 
 const winston::Address SignalRailway::AddressTranslator::address(winston::Track::Shared track) const

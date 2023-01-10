@@ -86,6 +86,10 @@
             /* height: 8%; */
             overflow: auto;
         }
+
+        .labelTrackNode {
+            font-size: 0.8em;
+        }
     </style>
 
     <script type="text/template" id="template_turnout">
@@ -729,7 +733,7 @@
                     valignBox: "center",
                     halignBox: "center",
                     tpl: function (data) {
-                        return '<p>' + (data.displayName ? data.displayName : data.name) + '</p>';
+                        return '<p class="labelTrackNode">' + (data.address ? data.address : (data.displayName ? data.displayName : data.name)) + '</p>';
                     }
                 },
                 {
@@ -793,7 +797,7 @@
                 event.target.neighborhood(".signalConnector").hide();
             });
 
-            cy.on('position', '.trackNode .signal', function () {
+            cy.on('position', '.trackNode', function () {
                 if (!allowLayoutEdit())
                     return;
             });
@@ -825,7 +829,12 @@
                 if (!allowLayoutEdit())
                     return;
                 let that = event.target;
-                let parentPosition = cy.$("node.connection." + that.data("guarding") + "[track=\"" + that.data("parentTrack") + "\"]").position();
+                let parentTrack = that.data("parentTrack");
+                let $parent = cy.$("#" + parentTrack);
+                let parentPosition =
+                    ($parent.data("type") === "bumper" && that.data("guarding") === "deadend")
+                    ? cy.$("node.trackNode.bumper[track=\"" + that.data("parentTrack") + "\"]").position()
+                    : cy.$("node.connection." + that.data("guarding") + "[track=\"" + that.data("parentTrack") + "\"]").position();
                 that.data("relativePosition", { x: that.position().x - parentPosition.x, y: that.position().y - parentPosition.y });
             });
 
@@ -882,6 +891,7 @@
                     cy.destroy();
                     cy = cytoscapeCreate();
                     cy.add(layout.cy);
+                    cy = cytoscapeUpdateData(cy, railway);
                     cy = cytoscapeUpdateSignals(cy, signals);
                     cy = cytoscapeUpdateBlocks(cy, blocks);
                     cy = cytoscapeUpdateDetectors(cy, detectors);
@@ -980,6 +990,14 @@
             }
             let $edge = cy.$(event.target);
             traverse($edge);
+        }
+
+        function cytoscapeUpdateData(cy, railway) {
+            _.each(railway, function (track, i) {
+                let node = cy.$(".trackNode[name=\"" + track.name + "\"]");
+                node.data("address", track.address);
+            });
+            return cy;
         }
 
         function cytoscapeUpdateRailway(cy, railway) {

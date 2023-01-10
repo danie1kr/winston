@@ -102,6 +102,7 @@ namespace winston
         LocoControlCallback locoControl;
         typename _Railway::Shared railway;
         LocomotiveShed locomotiveShed;
+        typename _Railway::AddressTranslator::Shared addressTranslator;
         typename _Storage::Shared storageLayout;
 	public:
 
@@ -115,12 +116,13 @@ namespace winston
             this->webServer.step();
         }
 
-		Result init(typename _Railway::Shared railway, LocomotiveShed locomotiveShed, typename _Storage::Shared storageLayout, const unsigned int port, typename _WebServer::OnHTTP onHTTP, TurnoutToggleCallback turnoutToggle)
+		Result init(typename _Railway::Shared railway, LocomotiveShed locomotiveShed, typename _Storage::Shared storageLayout, typename _Railway::AddressTranslator::Shared addressTranslator, const unsigned int port, typename _WebServer::OnHTTP onHTTP, TurnoutToggleCallback turnoutToggle)
 		{
             this->railway = railway;
             this->locomotiveShed = locomotiveShed;
             this->turnoutToggle = turnoutToggle;
             this->storageLayout = storageLayout;
+            this->addressTranslator = addressTranslator;
             //this->locoControl = locoControl;
 
 			// webServer
@@ -312,11 +314,14 @@ namespace winston
                         winston::Track::Shared a, b, c;
                         turnout->connections(a, b, c);
 
+                        auto address = this->addressTranslator->address(turnout)+1;
+
                         auto track = tracks.createNestedObject();
                         track["a"] = a->name();
                         track["b"] = b->name();
                         track["c"] = c->name();
                         track["name"] = turnout->name();
+                        track["address"] = winston::build(address);
                         auto length = track.createNestedObject("lengths");
                         length["a_b"] = turnout->lengthOnDirection(winston::Turnout::Direction::A_B);
                         length["a_c"] = turnout->lengthOnDirection(winston::Turnout::Direction::A_C);
@@ -331,6 +336,7 @@ namespace winston
                         winston::DoubleSlipTurnout::Shared turnout = std::static_pointer_cast<winston::DoubleSlipTurnout>(track);
                         winston::Track::Shared a, b, c, d;
                         turnout->connections(a, b, c, d);
+                        auto address = this->addressTranslator->address(turnout)+1;
 
                         auto track = tracks.createNestedObject();
                         track["a"] = a->name();
@@ -338,6 +344,7 @@ namespace winston
                         track["c"] = c->name();
                         track["d"] = d->name();
                         track["name"] = turnout->name();
+                        track["address"] = winston::build(address, " & ", address + 1);
                         auto length = track.createNestedObject("lengths");
                         length["a_b"] = turnout->lengthOnDirection(winston::DoubleSlipTurnout::Direction::A_B);
                         length["a_c"] = turnout->lengthOnDirection(winston::DoubleSlipTurnout::Direction::A_C);

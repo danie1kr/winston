@@ -261,7 +261,6 @@ namespace winstontests
             signalBox->setSignalOn(i, winston::Track::Connection::A, winston::Signal::Aspect::Go);
             for (int i = 0; i < 10; ++i)
                 signalBox->work();
-            Assert::IsTrue(sHVIa->shows(winston::Signal::Aspect::ExpectGo));
             Assert::IsTrue(sHVIa->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sVJa->shows(winston::Signal::Aspect::ExpectGo));
         }

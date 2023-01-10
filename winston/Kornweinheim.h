@@ -92,6 +92,40 @@ private:
 
     std::vector<winston::Signal::Shared> signals;
 
+    /*
+    * cie1931 linear LED-PWM mapping
+    static const size_t TLC5947_LED_Steps = 1 << TLC5947_SignalDevice::bits;
+    
+    template<size_t _N>
+    static constexpr std::array<unsigned short, _N> cie1931() 
+    {
+        // see https://jared.geek.nz/2013/feb/linear-led-pwm and https://stackoverflow.com/a/56383477
+        std::array<unsigned short, _N> a{};
+        for (size_t i = 0; i < _N; ++i)
+        {
+            double L = (double)i/(double)_N * 100.0;
+            a[i] = (L <= 8 ? (L / 903.3) : pow((L + 16.0) / 119.0, 3.0)) * TLC5947_SignalDevice::bits;
+        }
+        return a;
+    };
+    static constexpr std::array<unsigned short, TLC5947_LED_Steps> TLC5947_LED_map = cie1931<TLC5947_LED_Steps>();
+    
+    template <unsigned... i>
+    static constexpr auto init_axis(std::integer_sequence<unsigned, i...>) {
+        return std::array{ (180 + 0.1 * i)... };
+    };
+    template <unsigned short... i>
+    static constexpr auto cie1931(std::integer_sequence<unsigned short, i...>)
+    {
+        constexpr double L = (double)i / (double)TLC5947_LED_Steps * 100.0;
+        constexpr auto v = (unsigned short)((L <= 8 ? (L / 903.3) : pow((L + 16.0) / 119.0, 3.0)) * TLC5947_LED_Steps);
+        return std::array{ v... };
+        //return std::array{ (180 + 0.1 * i)... };
+    };
+
+    //static constexpr auto axis = init_axis(std::make_integer_sequence<unsigned, num_points>{});
+    static constexpr auto TLC5947_LED_map = cie1931(std::make_integer_sequence<unsigned short, TLC5947_LED_Steps>{});
+    */
     /* Storage */
     Storage::Shared storageLayout;
 

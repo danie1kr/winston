@@ -47,7 +47,7 @@ namespace winston
 		else
 		{
 			auto time = inMilliseconds(hal::now() - this->speedTrapStart);
-			this->speedMap.learn(this->throttle(), (1000*distance) / time);
+			this->speedMap.learn(this->throttle(), (const Locomotive::Speed)((1000*std::abs(distance)) / time));
 		}
 	}
 

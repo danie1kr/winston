@@ -50,7 +50,7 @@ namespace winstontests
             Assert::IsTrue(sBA.operator bool() == true);
             Assert::IsTrue(sCA.operator bool() == true);
 
-            signalBox->setSignalsForChangingTurnout(t1, t1->direction());
+            signalBox->setSignalsFor(t1);
             for (int i = 0; i < 10; ++i)
                 signalBox->work();
             Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Go));
@@ -168,7 +168,7 @@ namespace winstontests
             sWA->aspect(winston::Signal::Aspect::Halt);
 
             // S = T3 = T
-            signalBox->setSignalsForChangingTurnout(t3, t3->direction());
+            signalBox->setSignalsFor(t3);
             for (int i = 0; i < 10; ++i)
                 signalBox->work();
             Assert::IsTrue(sTB->shows(winston::Signal::Aspect::Go));

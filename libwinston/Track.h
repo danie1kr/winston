@@ -44,9 +44,6 @@ namespace winston
 		using SignalFactory = std::function<Signal::Shared(Track::Shared track, Track::Connection connection)>;
 
 		Track::Shared connect(const Connection local, Track::Shared& to, const Connection remote);
-		//Track::Shared connect(const Connection local, SignalFactory guardingLocalSignalFactory, Track::Shared& to, const Connection remote);
-		//Track::Shared connect(const Connection local, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory);
-		//Track::Shared connect(const Connection local, SignalFactory guardingLocalSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory);
 		virtual bool has(const Connection connection) const = 0;
 		virtual Track::Shared on(const Connection connection) const = 0;
 		
@@ -143,6 +140,9 @@ namespace winston
 		virtual void collectAllConnections(std::set<Track::Shared>& tracks) const = 0;
 		virtual const Connection whereConnects(Track::Shared& other) const = 0;
 		virtual const Connection otherConnection(const Connection connection) const = 0;
+		using ConnectionCallback = std::function<void(Track::Shared track, const Connection connection)>;
+		virtual void eachConnection(ConnectionCallback callback) = 0;
+
 		virtual const Result validate() = 0;
 		virtual const Type type() const = 0;
 
@@ -183,6 +183,8 @@ namespace winston
 		void collectAllConnections(std::set<Track::Shared>& tracks) const;
 		const Connection whereConnects(Track::Shared& other) const;
 		const Connection otherConnection(const Connection connection) const;
+		void eachConnection(ConnectionCallback callback);
+
 		const Result validate();
 		const Type type() const;
 
@@ -216,6 +218,8 @@ namespace winston
 		void collectAllConnections(std::set<Track::Shared>& tracks) const;
 		const Connection whereConnects(Track::Shared& other) const;
 		const Connection otherConnection(const Connection connection) const;
+		void eachConnection(ConnectionCallback callback);
+
 		const Result validate();
 		const Type type() const;
 
@@ -262,6 +266,7 @@ namespace winston
 		void collectAllConnections(std::set<Track::Shared>& tracks) const;
 		const Connection whereConnects(Track::Shared& other) const;
 		const Connection otherConnection(const Connection connection) const;
+		void eachConnection(ConnectionCallback callback);
 
 		const Result validate();
 		const Type type() const;
@@ -293,11 +298,11 @@ namespace winston
 		Track::Shared a, b, c;
 	};
 
-	// A   D
-	//  \ /
-	//   X
-	//  / \
-	// C   B
+	/* A   D
+	    \ /
+	     X
+	    / \
+	   C   B */
 	class DoubleSlipTurnout : public Track, public Shared_Ptr<DoubleSlipTurnout>, public std::enable_shared_from_this<DoubleSlipTurnout>
 	{
 	public:
@@ -327,12 +332,11 @@ namespace winston
 		void collectAllConnections(std::set<Track::Shared>& tracks) const;
 		const Connection whereConnects(Track::Shared& other) const;
 		const Connection otherConnection(const Connection connection) const;
+		void eachConnection(ConnectionCallback callback);
 
 		const Result validate();
 		const Type type() const;
 
-		using ConnectionCallback = std::function<void(const Connection, Track::Shared track)>;
-		void connections(ConnectionCallback open, ConnectionCallback closed);
 		void connections(Track::Shared& onA, Track::Shared& onB, Track::Shared& onC, Track::Shared& onD);
 
 		const State startChangeTo(const Direction direction);
@@ -344,7 +348,6 @@ namespace winston
 		const Direction direction() const;
 		static const Direction nextDirection(const Direction current);
 		const Connection fromDirection() const;
-
 
 		using Shared_Ptr<DoubleSlipTurnout>::Shared;
 		using Shared_Ptr<DoubleSlipTurnout>::make;

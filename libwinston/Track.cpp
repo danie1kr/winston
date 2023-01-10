@@ -41,21 +41,6 @@ namespace winston
 	{
 		return this->connectTo(local, nullptr, to, remote, nullptr);
 	}
-	/*
-	Track::Shared Track::connect(const Connection local, SignalFactory guardingLocalSignalFactory, Track::Shared& to, const Connection remote)
-	{
-		return this->connectTo(local, guardingLocalSignalFactory, to, remote, nullptr);
-	}
-
-	Track::Shared Track::connect(const Connection local, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory)
-	{
-		return this->connectTo(local, nullptr, to, remote, guardingRemoteSignalFactory);
-	}
-
-	Track::Shared Track::connect(const Connection local, SignalFactory guardingLocalSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory)
-	{
-		return this->connectTo(local, guardingLocalSignalFactory, to, remote, guardingRemoteSignalFactory);
-	}*/
 
 	void Track::block(const Address address)
 	{
@@ -164,6 +149,12 @@ namespace winston
 	const Track::Connection Bumper::otherConnection(const Connection connection) const
 	{
 		return connection == Connection::A ? Connection::DeadEnd : Connection::A;
+	}
+
+	void Bumper::eachConnection(ConnectionCallback callback)
+	{
+		callback(this->shared_from_this(), Connection::A);
+		callback(this->shared_from_this(), Connection::DeadEnd);
 	}
 
 	Track::Shared Bumper::connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa)
@@ -284,6 +275,11 @@ namespace winston
 	const Track::Connection Rail::otherConnection(const Connection connection) const
 	{
 		return connection == Connection::A ? Connection::B : Connection::A;
+	}
+	void Rail::eachConnection(ConnectionCallback callback)
+	{
+		callback(this->shared_from_this(), Connection::A);
+		callback(this->shared_from_this(), Connection::B);
 	}
 
 	Track::Shared Rail::connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa)
@@ -468,6 +464,13 @@ namespace winston
 			return this->dir == Direction::A_B ? Connection::B : Connection::C;
 		else
 			return Connection::A;
+	}
+
+	void Turnout::eachConnection(ConnectionCallback callback)
+	{
+		callback(this->shared_from_this(), Connection::A);
+		callback(this->shared_from_this(), Connection::B);
+		callback(this->shared_from_this(), Connection::C);
 	}
 
 	Track::Shared Turnout::connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa)
@@ -733,6 +736,14 @@ namespace winston
 			return Connection::DeadEnd;
 	}
 
+	void DoubleSlipTurnout::eachConnection(ConnectionCallback callback)
+	{
+		callback(this->shared_from_this(), Connection::A);
+		callback(this->shared_from_this(), Connection::B);
+		callback(this->shared_from_this(), Connection::C);
+		callback(this->shared_from_this(), Connection::D);
+	}
+
 	Track::Shared DoubleSlipTurnout::connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa)
 	{
 		if (local == Connection::A)
@@ -784,39 +795,6 @@ namespace winston
 		return Type::DoubleSlipTurnout;
 	}
 
-	void DoubleSlipTurnout::connections(ConnectionCallback open, ConnectionCallback closed)
-	{
-		switch (this->dir)
-		{
-		case Direction::A_B:
-			open(Connection::A, this->a);
-			open(Connection::B, this->b);
-			closed(Connection::C, this->c);
-			closed(Connection::D, this->d);
-			break;
-		case Direction::A_C:
-			open(Connection::A, this->a);
-			open(Connection::C, this->c);
-			closed(Connection::B, this->b);
-			closed(Connection::D, this->d);
-			break;
-		case Direction::B_D:
-			open(Connection::B, this->b);
-			open(Connection::D, this->d);
-			closed(Connection::A, this->a);
-			closed(Connection::C, this->c);
-			break;
-		case Direction::C_D:
-			open(Connection::C, this->c);
-			open(Connection::D, this->d);
-			closed(Connection::A, this->a);
-			closed(Connection::B, this->b);
-			break;
-		case Direction::Changing:
-			return;
-		}
-	}
-
 	void DoubleSlipTurnout::connections(Track::Shared& onA, Track::Shared& onB, Track::Shared& onC, Track::Shared& onD)
 	{
 		onA = a;
@@ -858,6 +836,9 @@ namespace winston
 		case Direction::A_C: a = 0; b = 1; break;
 		case Direction::B_D: a = 1; b = 0; break;
 		case Direction::C_D: a = 0; b = 0; break;
+		default:
+		case Direction::Changing:
+			break;
 		}
 	}
 

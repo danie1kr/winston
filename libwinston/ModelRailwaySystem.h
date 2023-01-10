@@ -51,7 +51,7 @@ namespace winston
 					{
 						this->digitalCentralStation->requestTurnoutInfo(turnout);
 						winston::hal::delay(50);
-						this->signalBox->setSignalsForChangingTurnout(turnout, turnout->direction());
+						this->signalBox->setSignalsFor(turnout);
 						winston::hal::delay(100);
 						return winston::State::Finished;
 					}, __PRETTY_FUNCTION__));
@@ -63,7 +63,7 @@ namespace winston
 					{
 						this->digitalCentralStation->requestDoubleSlipTurnoutInfo(turnout);
 						winston::hal::delay(50);
-						this->signalBox->setSignalsForChangingDoubleSlipTurnout(turnout, turnout->direction());
+						this->signalBox->setSignalsFor(turnout);
 						winston::hal::delay(100);
 						return winston::State::Finished;
 					}, __PRETTY_FUNCTION__));

@@ -66,7 +66,7 @@ namespace winston
 		{
 			this->info(winston::build(std::forward<Params>(params)...));
 		}
-		inline void info(std::string text)
+		inline void info(const std::string text)
 		{
 			this->log(text, Entry::Level::Info);
 		}

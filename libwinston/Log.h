@@ -46,14 +46,24 @@ namespace winston
 #undef WINSTON_LOG_LEVEL_ENTRY_CASE
 				return "???";
 			}
+
+			const std::string build() const
+			{
+				return winston::build(this->timestamp, " - [", this->levelName(), "]: ", this->text);
+			}
 		};
+
+		using LogEntryCallback = std::function<void(const Entry&)>;
 
 		void log(std::string text, typename Entry::Level level = Entry::Level::Info, const TimePoint timestamp = winston::hal::now())
 		{
 			if (this->_log.size() > _WINSTON_LOG_SIZE)
 				this->_log.pop_front();
-			hal::text(text);
 			this->_log.emplace_back(timestamp, level, text);
+			const Entry& entry = this->_log.back();
+			hal::text(entry.build());
+			if (this->callback)
+				this->callback(entry);
 		}
 
 		template <typename ...Params>
@@ -96,8 +106,14 @@ namespace winston
 			return this->_log;
 		}
 
+		void setCallback(LogEntryCallback callback)
+		{
+			this->callback = callback;
+		}
+
 	private:
 		std::deque<Entry> _log;
+		LogEntryCallback callback = nullptr;
 	};
 	using Logger = Log<WINSTON_LOG_SIZE>;
 	extern Logger logger;

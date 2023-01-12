@@ -79,10 +79,20 @@ namespace winston
 		using Throttle = unsigned char;
 		using Speed = unsigned int;
 		using ThrottleSpeedMap = std::map<Throttle, Speed>;
+
+		struct Function
+		{
+			unsigned int id;
+			std::string name;
+		};
+		using Functions = std::vector<Function>;
 		
-		Locomotive(const Callbacks callbacks, const Address address, const Position start, const ThrottleSpeedMap speedMap, const std::string name, const Types types);
+		Locomotive(const Callbacks callbacks, const Address address, const Functions functions, const Position start, const ThrottleSpeedMap speedMap, const std::string name, const Types types);
 		inline void light(bool on);
 		const bool light();
+		inline void function(const unsigned int id, const bool value);
+		const bool function(const unsigned int id);
+		const Functions& functions();
 		const bool forward();
 		const Speed speed();
 		const Throttle throttle();
@@ -128,6 +138,7 @@ namespace winston
 		struct Details
 		{
 			Address address = { 0 };
+			const Functions functionTable;
 			Position position;
 			TimePoint lastPositionUpdate, lastSpeedUpdate;
 			std::string name = { "" };

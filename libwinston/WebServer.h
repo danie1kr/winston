@@ -182,14 +182,21 @@ namespace winston
 
 		void locoSend(winston::Locomotive::Shared loco)
 		{
-			DynamicJsonDocument obj(1024);
+			DynamicJsonDocument obj(1024+256*loco->functions().size());
 			obj["op"] = "loco";
 			auto data = obj.createNestedObject("data");
 			data["address"] = loco->address();
-			data["name"] = loco->name().c_str();
+			data["name"] = loco->name();
 			data["light"] = loco->light();
 			data["forward"] = loco->forward();
 			data["speed"] = loco->speed();
+            auto functions = data.createNestedArray("functions");
+            for (auto const & function : loco->functions())
+            {
+                auto func = functions.createNestedObject();
+                func["id"] = function.id;
+                func["name"] = function.name;
+            }
 			std::string json("");
 			serializeJson(obj, json);
 			this->webServer.broadcast(json);
@@ -200,6 +207,19 @@ namespace winston
 			if (auto loco = this->locoFromAddress(address))
 				locoSend(*loco);
 		}
+
+        void log(const Logger::Entry &entry)
+        {
+            DynamicJsonDocument obj(256 + entry.text.size());
+            obj["op"] = "log";
+            auto data = obj.createNestedObject("data");
+            data["level"] = entry.levelName();
+            data["timestamp"] = inSeconds(entry.timestamp.time_since_epoch());
+            data["text"] = entry.text;
+            std::string json("");
+            serializeJson(obj, json);
+            this->webServer.broadcast(json);
+        }
 
 	private:
 
@@ -553,6 +573,11 @@ namespace winston
                 */
             }
 #endif
+            else if (std::string("\"getLogs\"").compare(op) == 0)
+            {
+                for (const auto& entry : winston::logger.entries())
+                    this->log(entry);
+            }
             else
             {
                 winston::hal::text("Received unknown message: ");

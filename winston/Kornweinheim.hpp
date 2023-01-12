@@ -412,7 +412,7 @@ void Kornweinheim::systemSetup() {
 
     this->inventStorylines();
 
-    webUI.init(this->railway, this->locomotiveShed, this->storageLayout, this->addressTranslator, 8080,
+    this->webUI.init(this->railway, this->locomotiveShed, this->storageLayout, this->addressTranslator, 8080,
         [=](WebServer::HTTPConnection& client, const winston::HTTPMethod method, const std::string& resource) -> winston::Result {
             return this->on_http(client, method, resource);
         },
@@ -465,6 +465,10 @@ void Kornweinheim::systemSetup() {
             return winston::Result::OK;
         }
     );
+
+    winston::logger.setCallback([this](const winston::Logger::Entry& entry) {
+        this->webUI.log(entry);
+    });
 };
 
 void Kornweinheim::setupSignals()
@@ -662,12 +666,44 @@ void Kornweinheim::populateLocomotiveShed()
 {
     auto callbacks = locoCallbacks();
     winston::Position pos(this->railway->track(Y2021RailwayTracks::N1), winston::Track::Connection::A, 100);
-    this->addLocomotive(callbacks, 3, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 114", (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods | (unsigned char)winston::Locomotive::Type::Shunting);
-    this->addLocomotive(callbacks, 4, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 106", (unsigned char)winston::Locomotive::Type::Shunting | (unsigned char)winston::Locomotive::Type::Goods);
-    this->addLocomotive(callbacks, 5, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 64", (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods);
-    this->addLocomotive(callbacks, 6, pos, winston::Locomotive::defaultThrottleSpeedMap, "E 11", (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods);
-    this->addLocomotive(callbacks, 8, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 218", (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods);
-    this->addLocomotive(callbacks, 7, pos, winston::Locomotive::defaultThrottleSpeedMap, "Gravita", (unsigned char)winston::Locomotive::Type::Shunting | (unsigned char)winston::Locomotive::Type::Goods);
+
+    winston::Locomotive::Functions standardFunctions = { {0, "Light"} };
+    winston::Locomotive::Functions functionsBR114 = { {1, "R&uuml;cklicht"}, {2, "Scheinwerfer"}, {3, "Rangiergang"} };
+    functionsBR114.insert(functionsBR114.begin(), standardFunctions.begin(), standardFunctions.end());
+
+    winston::Locomotive::Functions functionsGravita = {
+        { 1, "Sound"},
+        { 2, "Signalhorn lang"},
+        { 3, "Rotes Licht"}, 
+        { 4, "Kuppeln vorn"}, 
+        { 5, "Kuppeln hinten"},
+        { 6, "L&uuml;fter"},
+        { 7, "F&uuml;hrerstandbeleuchtung"},
+        { 8, "Rangiergang"},
+        { 9, "Fernlicht"},
+        { 10, "Warnsignal"},
+        { 11, "Spezielles Signal"},
+        { 12, "Signalhorn kurz"},
+        { 13, "Funkspruch #1"},
+        { 14, "Funkspruch #2"},
+        { 15, "Pressluft ablassen"},
+        { 16, "Kurzpfiff"},
+        { 17, "Kurvenquietschen"},
+        { 18, "Fahrerstandst&uuml;r"},
+        { 19, "Funkspruch #3"},
+        { 20, "Funkspruch #4"},
+        { 21, "Schienenst&ouml;&szlig;e"},
+        { 22, "Sanden"}
+    };
+    functionsGravita.insert(functionsGravita.begin(), standardFunctions.begin(), standardFunctions.end());
+
+
+    this->addLocomotive(callbacks, 3, functionsBR114, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 114", (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods | (unsigned char)winston::Locomotive::Type::Shunting);
+    this->addLocomotive(callbacks, 4, standardFunctions, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 106", (unsigned char)winston::Locomotive::Type::Shunting | (unsigned char)winston::Locomotive::Type::Goods);
+    this->addLocomotive(callbacks, 5, standardFunctions, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 64", (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods);
+    this->addLocomotive(callbacks, 6, standardFunctions, pos, winston::Locomotive::defaultThrottleSpeedMap, "E 11", (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods);
+    this->addLocomotive(callbacks, 8, standardFunctions, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 218", (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods);
+    this->addLocomotive(callbacks, 7, functionsGravita, pos, winston::Locomotive::defaultThrottleSpeedMap, "Gravita", (unsigned char)winston::Locomotive::Type::Shunting | (unsigned char)winston::Locomotive::Type::Goods);
 }
 
 void Kornweinheim::inventStorylines()

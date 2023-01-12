@@ -589,13 +589,13 @@ namespace winston
 	}
 
 	DoubleSlipTurnout::DoubleSlipTurnout(const std::string name, const Callback callback)
-		: Track(name, 0), Shared_Ptr<DoubleSlipTurnout>(), callback(callback), trackLengthCalculator(nullptr), dir(Direction::A_B), a(), b(), c(), d()
+		: Track(name, 0), Shared_Ptr<DoubleSlipTurnout>(), callback(callback), trackLengthCalculator(nullptr), dir(Direction::A_B), accessoryStates{0xF0, 0x0D}, a(), b(), c(), d()
 	{
 
 	}
 
 	DoubleSlipTurnout::DoubleSlipTurnout(const std::string name, const Callback callback, const TrackLengthCalculator trackLengthCalculator)
-		: Track(name, 0), Shared_Ptr<DoubleSlipTurnout>(), callback(callback), trackLengthCalculator(trackLengthCalculator), dir(Direction::A_B), a(), b(), c(), d()
+		: Track(name, 0), Shared_Ptr<DoubleSlipTurnout>(), callback(callback), trackLengthCalculator(trackLengthCalculator), dir(Direction::A_B), accessoryStates{ 0xF0, 0x0D }, a(), b(), c(), d()
 	{
 
 	}
@@ -826,6 +826,31 @@ namespace winston
 		this->dir = direction;
 
 		return state;
+	}
+
+
+	void DoubleSlipTurnout::setAccessoryState(unsigned char state, bool first)
+	{
+		this->accessoryStates[first ? 0 : 1] = state;
+
+		if (this->isKnownAccessoryState())
+		{
+			if (this->accessoryStates[0] && this->accessoryStates[1])
+				this->dir = Direction::A_B;
+			else if (!this->accessoryStates[0] && this->accessoryStates[1])
+				this->dir = Direction::A_C;
+			else if (this->accessoryStates[0] && !this->accessoryStates[1])
+				this->dir = Direction::B_D;
+			else if (!this->accessoryStates[0] && !this->accessoryStates[1])
+				this->dir = Direction::C_D;
+			State state = this->callback(this->shared_from_this(), this->dir);
+		}
+	}
+
+	const bool DoubleSlipTurnout::isKnownAccessoryState() const
+	{
+		return (this->accessoryStates[0] == 0 || this->accessoryStates[0] == 1) &&
+			(this->accessoryStates[1] == 0 || this->accessoryStates[1] == 1);
 	}
 
 	const void DoubleSlipTurnout::toAccessoryStates(unsigned char& a, unsigned char& b) const

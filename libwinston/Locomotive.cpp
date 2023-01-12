@@ -6,21 +6,37 @@
 namespace winston
 {
 	const Locomotive::ThrottleSpeedMap Locomotive::defaultThrottleSpeedMap = { {0, 0},{255, 50} };
-	Locomotive::Locomotive(const Callbacks callbacks, const Address address, const Position start, const ThrottleSpeedMap throttleSpeedMap, const std::string name, const Types types) :
-		callbacks(callbacks), details{ address, start, hal::now(), hal::now(), name, false, true, 0, 0.f, 0, types }, speedMap(throttleSpeedMap), speedTrapStart(hal::now())
+	Locomotive::Locomotive(const Callbacks callbacks, const Address address, const Functions functionTable, const Position start, const ThrottleSpeedMap throttleSpeedMap, const std::string name, const Types types) :
+		callbacks(callbacks), details{ address, functionTable, start, hal::now(), hal::now(), name, false, true, 0, 0.f, 0, types }, speedMap(throttleSpeedMap), speedTrapStart(hal::now())
 	{
 	}
 
 	void Locomotive::light(bool on)
 	{
-		//this->details.functions = (this->details.functions & ~(1UL << 1)) | ((on ? 1 : 0) << 1);
-		//this->details.functions &= (0xFFFFFFFF & 0b1 | ;
-		this->callbacks.functions(this->address(), this->details.functions);
+		this->function(0, on);
 	}
 
 	const bool Locomotive::light()
 	{
-		return this->details.functions & 0b1;
+		return this->function(0);
+	}
+
+	void Locomotive::function(const unsigned int id, const bool value)
+	{
+#define SET_nth_BIT(data, bit, value) (data & ~(1UL << bit)) | ((value) << bit)
+		this->details.functions = SET_nth_BIT(this->details.functions, id, value ? 1 : 0);
+		this->callbacks.functions(this->address(), this->details.functions);
+#undef SET_nth_BIT
+	}
+
+	const bool Locomotive::function(const unsigned int id)
+	{
+		return this->details.functions & (1 << id);
+	}
+
+	const Locomotive::Functions& Locomotive::functions()
+	{
+		return this->details.functionTable;
 	}
 
 	const bool Locomotive::forward()

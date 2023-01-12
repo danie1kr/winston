@@ -209,7 +209,8 @@ namespace winstontests
             auto pos = winston::Position(N1, winston::Track::Connection::A, 200);
 
             winston::Locomotive::ThrottleSpeedMap map{ {0, 0},{255, 50} };
-            auto loco = winston::Locomotive::make(locoCallbacks(), 0, pos, map, "testloco1", 0);
+            winston::Locomotive::Functions functions{};
+            auto loco = winston::Locomotive::make(locoCallbacks(), 0, functions, pos, map, "testloco1", 0);
 
             auto div = 10;// 00;
             auto distance = 320; // mm

@@ -343,6 +343,8 @@ namespace winston
 		const State startToggle();
 		const State finalizeChangeTo(const Direction direction);
 
+		void setAccessoryState(unsigned char state, bool first);
+		const bool isKnownAccessoryState() const;
 		const Direction fromAccessoryState(unsigned char state, bool first) const;
 		const void toAccessoryStates(unsigned char &a, unsigned char &b) const;
 		const Direction direction() const;
@@ -361,6 +363,7 @@ namespace winston
 		const TrackLengthCalculator trackLengthCalculator;
 
 		Direction dir;
+		unsigned char accessoryStates[2];
 
 		Track::Shared a, b, c, d;
 	};

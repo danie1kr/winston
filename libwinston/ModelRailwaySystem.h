@@ -158,9 +158,9 @@ namespace winston
 		virtual void setupSignals() = 0;
 		virtual void setupDetectors() = 0;
 
-		void addLocomotive(const winston::Locomotive::Callbacks callbacks, const Address address, const Position start, const Locomotive::ThrottleSpeedMap speedMap, const std::string name, const Locomotive::Types types)
+		void addLocomotive(const winston::Locomotive::Callbacks callbacks, const Address address, const winston::Locomotive::Functions functions, const Position start, const Locomotive::ThrottleSpeedMap speedMap, const std::string name, const Locomotive::Types types)
 		{
-			this->locomotiveShed.push_back(Locomotive::make(callbacks, address, start, speedMap, name, types));
+			this->locomotiveShed.push_back(Locomotive::make(callbacks, address, functions, start, speedMap, name, types));
 		}
 
 		Result loadLocomotives()

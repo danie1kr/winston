@@ -30,8 +30,9 @@
 
         #railway {
             position: absolute;
-            min-height: 100vh;
+            /*min-height: 100vh;*/
             width: calc(100% - 600px);
+            height: calc(100% - 64px);
             z-index: 3000;
         }
 
@@ -55,6 +56,27 @@
             width: calc(100% - 600px);
             background-color: white;
             z-index: 10000;
+            padding: 20px 20px 20px 20px;
+        }
+
+        #logsContent {
+            position: fixed;
+            overflow-y: scroll;
+            background-color: white;
+            bottom: 0px;
+            width: calc(100% - 600px);
+            height: 32%;
+            z-index: 10000;
+            padding: 20px 20px 20px 20px;
+        }
+        #logsContent tr td:nth-child(1), #logsContent tr td:nth-child(2) {
+            width: 10%;
+        }
+        #logsContent tr td:last-child {
+            max-width: 0;
+            min-width: fit-content;
+            white-space: nowrap;
+            text-overflow: ellipsis;
         }
 
         body {
@@ -64,19 +86,23 @@
         }
 
         header, main, footer {
-            padding-left: 300px;
-            padding-right: 300px;
-            width: calc(100% - 300px);
+            margin-left: 300px;
+            margin-right: 300px;
+            width: calc(100% - 600px);
         }
 
         main {
             flex: 1 0 auto;
         }
 
-        #console {
-            position: absolute;
-            padding-left: 10px;
-            /* bottom: 30%; */
+        footer {
+            padding-top: 0px;
+            height: 24px;
+            z-index: 4000;
+        }
+
+        #message {
+            margin-left: 8px;
         }
 
         #connection {
@@ -90,6 +116,30 @@
         .labelTrackNode {
             font-size: 0.8em;
         }
+
+        .microButton {
+            padding: 0 0;
+        }
+
+        .microButton > i {
+            margin: 0 0 0 0;
+        }
+
+        .switch.lever {
+            margin: 0 0 0 0;
+        }
+
+        div.collapsible-header {
+        }
+
+        div.collapsible-header > div.row {
+            width: 100%;
+        }
+
+        .brand-logo {
+            margin-left: 16px;
+            margin-right: 16px;
+        }
     </style>
 
     <script type="text/template" id="template_turnout">
@@ -100,36 +150,67 @@
         </div>
     </script>
 
-    <script type="text/template" id="template_loco">
-        <div class="winston-locomotive row" winston-loco-address="<%= address %>" winston-type="locomotive" winston-id="<%= address %>">
-            <div class="row">
-                <div class="name col s3"><%= name %></div>
-                <div class="address col s1"><%= address %></div>
-                <div class="switch col s8">
-                    <i class="small material-icons">highlight</i>
-                    <label>
-                        Off <input type="checkbox" class="light"> <span class="lever"></span> On
-                    </label>
-                </div>
-
+    <script type="text/template" id="template_loco_function">
+        <div class="row">
+            <div class="address col s6"><%= name %></div>
+            <div class="col s6 switch">
+                <label>
+                    <input type="checkbox" class="<%= function_class %>" winston-loco-function="<%= function_id %>">
+                    On <span class="lever"></span> Off
+                </label>
             </div>
-            <div class="row">
-                <div class="col s3">
-                    <label class="speedValue"></label>
-                </div>
-                <div class="col s5"></div>
-                <div class="col s4"><a class="waves-effect waves-light btn">stop</a></div>
-            </div>
-            <div class="row">
-                <input class="speed" type="range" min="-100" max="100" />
-            </div>
-            <hr>
         </div>
     </script>
+    <script type="text/template" id="template_loco">
+        <li>
+            <div class="collapsible-header">
+                <div class="row">
+                    <div class="col s4"><%= name %></div>
+                    <div class="col s6 switch">
+                        <label>
+                            <i class="small material-icons">highlight</i>
+                            <input type="checkbox" class="light">
+                            <span class="lever"></span>
+                        </label>
+                    </div>
+                    <div class="col s2">
+                        <a class="waves-effect waves-light btn-small microButton stop">
+                            <i class="small material-icons">dangerous</i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="collapsible-body">
+                <div class="winston-locomotive row" winston-loco-address="<%= address %>" winston-type="locomotive" winston-id="<%= address %>">
+                    <div class="row">
+                        <div class="address col s4">DCC: <%= address %></div>
+                        <div class="col s4">
+                            <label class="speedValue"></label>
+                        </div>
+                        <div class="col s4"><a class="waves-effect waves-light btn">stop</a></div>
+                    </div>
+                    <div class="row">
+                        <input class="speed" type="range" min="-100" max="100" />
+                    </div>
+                    <div class="functions">
 
+                    </div>
+                    <hr>
+                </div>
+            </div>
+        </li>
+    </script>
 
     <script type="text/template" id="template_detector_debug_loco">
         <option value="<%= id %>"><%= name %></option>
+    </script>
+
+    <script type="text/template" id="template_log_entry">
+        <tr>
+            <td><%= timestamp %></td>
+            <td><%= level %></td>
+            <td><%= text %></td>
+        </tr>
     </script>
 
 </head>
@@ -199,36 +280,41 @@
     </div>
 
     <header>
-        <div>
-            winston <label id="settingsToggle">⚙</label>
-            <div id="settingsContent" class="row">
-                <div class="input-field col s2"><input placeholder="IP" id="ip" type="text" class="validate" value="127.0.0.1"><label for="ip">IP</label></div>
-                <div class="switch col s6">
-                    <div>Grid <label>hide <input id="gridView" type="checkbox"><span class="lever"></span>show</label></div>
-                    <div>Layout <label>fixed <input id="layoutEdit" type="checkbox"><span class="lever"></span>edit</label></div>
-                    <div>Blocks <label>view <input id="blockView" type="checkbox"><span class="lever"></span>off</label></div>
-                    <div>Detector Debug <label>on <input id="detectorDebug" type="checkbox"><span class="lever"></span>off</label> 
-                            <div class="input-field col s12">
-                                <select id="detectorDebugLoco">
-                                    <option value="" disabled selected>Choose a locomotive</option>
-                                </select>
-                                    <label>Detector </label>
-                            </div>
-                    </div>
-                    <a id="saveLayout" class="waves-effect waves-light btn-small">Save Layout</a>
-                    <a id="resetLayout" class="waves-effect waves-light btn-small">Reset Layout</a>
-                </div>
+        <nav>
+            <div class="nav-wrapper white">
+                <a href="#!" class="brand-logo teal-text">winston</a>
+                <ul class="right hide-on-med-and-down">
+                    <li><a class="waves-effect waves-light btn" id="settingsToggle">Settings <i class="material-icons right">settings</i></a></li>
+                    <li><a class="waves-effect waves-light btn" id="logsToggle">Logs <i class="material-icons right">list</i></a></li>
+                </ul>
             </div>
-            <hr>
+        </nav>
+        <div id="settingsContent" class="row z-depth-3">
+            <div class="input-field col s2"><input placeholder="IP" id="ip" type="text" class="validate" value="127.0.0.1"><label for="ip">IP</label></div>
+            <div class="switch col s6">
+                <div>Grid <label>hide <input id="gridView" type="checkbox"><span class="lever"></span>show</label></div>
+                <div>Layout <label>fixed <input id="layoutEdit" type="checkbox"><span class="lever"></span>edit</label></div>
+                <div>Blocks <label>view <input id="blockView" type="checkbox"><span class="lever"></span>off</label></div>
+                <div>
+                    Detector Debug <label>on <input id="detectorDebug" type="checkbox"><span class="lever"></span>off</label>
+                    <div class="input-field col s12">
+                        <select id="detectorDebugLoco">
+                            <option value="" disabled selected>Choose a locomotive</option>
+                        </select>
+                        <label>Detector </label>
+                    </div>
+                </div>
+                <a id="saveLayout" class="waves-effect waves-light btn-small">Save Layout</a>
+                <a id="resetLayout" class="waves-effect waves-light btn-small">Reset Layout</a>
+            </div>
         </div>
         <div id="error"></div>
+    </header>
 
+
+    <main id="container">
         <ul id="sideLoco" class="sidenav sidenav-fixed">
-            <ul class="collapsible expandable">
-                <li id="locoShedContainer" class="active">
-                    <div class="collapsible-header">Locomotives</div>
-                    <div class="collapsible-body"></div>
-                </li>
+            <ul class="collapsible expandable" id="locoShedContainer">
             </ul>
         </ul>
 
@@ -239,26 +325,31 @@
                     <div class="collapsible-body"></div>
                 </li>
             </ul>
-            <div id="console">
-                <h5>Console</h5>
-                <div id="messages"></div>
-            </div>
-            <div id="connection" class="right-align">not connected</div>
         </ul>
-    </header>
 
-
-    <main id="container">
         <div id="railway"></div>
 
+        <div id="logsContent">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Level</th>
+                        <th>Message</th>
+                    </tr>
+                </thead>
+                <tbody id="log">
+                </tbody>
+            </table>
+        </div>
     </main>
-    <!--
-        <footer class="page-footer">
-            <div class="container">
 
-            </div>
-        </footer>
-    -->
+    <footer class="page-footer white black-text">
+        <div id="message">
+
+        </div>
+    </footer>
+
     <script type="text/javascript">
         const SocketClosed = 0;
         const SocketConnecting = 1;
@@ -344,7 +435,7 @@
             let $element = winstonGet(WinstonTypeLocomotive, address);
 
             if ($element === undefined || $element.length === 0) {
-                let $locoShedContainerBody = $("#locoShedContainer>div.collapsible-body");
+                let $locoShedContainer = $("#locoShedContainer");
                 let locoTemplate = _.template($("#template_loco").html());
                 $element = $(locoTemplate({ address: address, name: data.name }));
                 $element.find(".speed").on("change", doControlLoco);
@@ -352,9 +443,23 @@
                 $element.find(".stop").on("click", function (event) {
                     $element.find(".speed").val(0);
                     doControlLoco(event);
+                    return false;
                 });
 
-                $locoShedContainerBody.append($element);
+                let $functions = $element.find(".functions");
+                _.each(data.functions, func => {
+                    if (func.id == 0)
+                        return;
+                    let template = _.template($("#template_loco_function").html());
+                    let $func = $(template({ name: func.name, function_class: "function_" + func.id, function_id: func.id }));
+                    $func.find("input").on("change", event => {
+
+                    });
+                    $functions.append($func);
+                });
+
+                $locoShedContainer.append($element);
+                M.Collapsible.init(document.querySelector('#locoShedContainer'));
             }
 
             let $elementDetectorDebugLoco = $("#detectorDebugLoco>option[value=\"" + address + "\"]");
@@ -484,7 +589,7 @@
         function locoPositions(data) {
             _.each(data, loco => {
                 let locoNode = cy.$("node.locomotive[address=\"" + loco.address + "\"]");
-                
+
             });
         }
 
@@ -747,7 +852,7 @@
                         _.each(data.lights, l => {
                             let color = "black";
                             let symbol = "B";
-                            
+
                             if (l.aspect == 0b00100) { if (l.aspect & data.aspects) { color = "red"; } symbol = "●"; }
                             if (l.aspect == 0b00010) { if (l.aspect & data.aspects) { color = "green"; } symbol = "●"; }
                             if (l.aspect == 0b01000) { if (l.aspect & data.aspects) { color = "orange"; } symbol = "●"; }
@@ -807,7 +912,7 @@
                     return;
                 let that = event.target;
                 cy.$("node.connection[track=\"" + that.data("track") + "\"], node.trackSplitNode[track=\"" + that.data("track") + "\"]").each(function (e) {
-                    if(!e.selected())
+                    if (!e.selected())
                         e.position({ x: that.position().x + e.data("relativePosition").x, y: that.position().y + e.data("relativePosition").y });
                 });
             });
@@ -820,8 +925,8 @@
                 that.data("relativePosition", { x: that.position().x - parentPosition.x, y: that.position().y - parentPosition.y });
 
                 that.neighborhood(".signal").each(function (e) {
-                        if(!e.selected())
-                    e.position({ x: that.position().x + e.data("relativePosition").x, y: that.position().y + e.data("relativePosition").y });
+                    if (!e.selected())
+                        e.position({ x: that.position().x + e.data("relativePosition").x, y: that.position().y + e.data("relativePosition").y });
                 });
             });
 
@@ -833,8 +938,8 @@
                 let $parent = cy.$("#" + parentTrack);
                 let parentPosition =
                     ($parent.data("type") === "bumper" && that.data("guarding") === "deadend")
-                    ? cy.$("node.trackNode.bumper[track=\"" + that.data("parentTrack") + "\"]").position()
-                    : cy.$("node.connection." + that.data("guarding") + "[track=\"" + that.data("parentTrack") + "\"]").position();
+                        ? cy.$("node.trackNode.bumper[track=\"" + that.data("parentTrack") + "\"]").position()
+                        : cy.$("node.connection." + that.data("guarding") + "[track=\"" + that.data("parentTrack") + "\"]").position();
                 that.data("relativePosition", { x: that.position().x - parentPosition.x, y: that.position().y - parentPosition.y });
             });
 
@@ -1130,9 +1235,9 @@
                         */
 
                         // another connector node between other-A and B-that
-                        nodes.push({ group: 'nodes', data: { id: id}, classes: "connector" });
-                        edges.push({ group: 'edges', data: { source: from, target: id, track: that}, classes: "track" });
-                        edges.push({ group: 'edges', data: { source: to, target: id, track: otherTrackName}, classes: "track" });
+                        nodes.push({ group: 'nodes', data: { id: id }, classes: "connector" });
+                        edges.push({ group: 'edges', data: { source: from, target: id, track: that }, classes: "track" });
+                        edges.push({ group: 'edges', data: { source: to, target: id, track: otherTrackName }, classes: "track" });
                     }
                 }
 
@@ -1263,6 +1368,14 @@
             console.log(data);
         }
 
+        function log(data) {
+            let entryTemplate = _.template($("#template_log_entry").html());
+            let $entry = $(entryTemplate({ timestamp: data.timestamp, level: data.level, text: data.text }));
+            $("#log").prepend($entry);
+            $("#message").html("[" + data.level + "]: " + data.text);
+            console.log(data.timestamp + " - [" + data.level + "]: " + data.text);
+        }
+
         function parse(content) {
             let op = content.op;
             let data = content.data;
@@ -1273,6 +1386,7 @@
                 case "railway": { buildRailwayGraph(data); break; }
                 case "layout": { updateRailwayLayout(data); break; }
                 case "loco": { loco(data); break; }
+                case "log": { log(data); break; }
                 case "storeRailwayLayoutSuccessful": {
                     allowLayoutStorage = data;
                     if (allowLayoutStorage)
@@ -1366,13 +1480,13 @@
                     if (distance > 100)
                         neighbor.position({ x: node.position().x + 40, y: node.position().y }).emit("position");
                 }
-                    /*
-                let neighbor = node.openNeighborhood(node.hasClass("connector") ? "node.connection" : "node.connector");
-                let track = neighbor.data("track");
+                /*
+            let neighbor = node.openNeighborhood(node.hasClass("connector") ? "node.connection" : "node.connector");
+            let track = neighbor.data("track");
 
-                cy.$('node.trackNode[track="' + track + '"]').each(function (n) {
-                    n.position({ x: node.position().x + 40, y: node.position().y }).emit("position");
-                });*/
+            cy.$('node.trackNode[track="' + track + '"]').each(function (n) {
+                n.position({ x: node.position().x + 40, y: node.position().y }).emit("position");
+            });*/
             });
             hideContextMenus();
         }
@@ -1393,8 +1507,11 @@
                 cy.$().unselect();
             });
             $("#settingsToggle").on('click', function () { $("#settingsContent").toggle(); });
+            $("#logsToggle").on('click', function () { $("#logsContent").toggle(); });
+            
             hideContextMenus();
             $("#settingsContent").hide();
+            $("#logsContent").hide();
 
             $saveLayout = $("#saveLayout");
             $saveLayout.on('click', function () {
@@ -1463,6 +1580,7 @@
 
             send("getRailway", {});
             send("getLocoShed", {});
+            send("getLogs", {});
         });
 
         function putStateIntoURL() {

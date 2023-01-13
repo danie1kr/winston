@@ -66,16 +66,18 @@ namespace winston
 			ForwardDirection,
 			OppositeDirection
 		};
-		template<TraversalSignalHandling _signalHandling >
+		template<TraversalSignalHandling _signalHandling, bool includingFirst = true >
 		static TraversalResult traverse(Track::Shared& start, Track::Connection& connection, Signal::Shared& signal, TraversalCallback callback = nullptr)
 		{
 			auto& current = start;
+			auto fixedStart = start;
 			Track::Shared onto = current;
 			std::unordered_set<Track::Shared> visited;
 			bool successful = true;
+			bool checkForward = includingFirst;
 			while (true)
 			{
-				if (_signalHandling == TraversalSignalHandling::ForwardDirection)
+				if (checkForward && _signalHandling == TraversalSignalHandling::ForwardDirection)
 				{// the signal faces us
 					auto facingConnection = onto->otherConnection(connection);
 					signal = onto->signalFacing(facingConnection);
@@ -86,6 +88,7 @@ namespace winston
 						return TraversalResult::Signal;
 					}
 				}
+				checkForward = true;
 				if (visited.find(onto) != visited.end())
 					return TraversalResult::Looped;
 				visited.insert(onto);

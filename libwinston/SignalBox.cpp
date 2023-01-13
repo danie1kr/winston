@@ -51,7 +51,7 @@ namespace winston
 				mainSignal->aspect(preAspect);
 			auto otherConnection = current->otherConnection(connection);
 			Signal::Shared preSignal;
-			Track::traverse<Track::TraversalSignalHandling::OppositeDirection>(current, otherConnection, preSignal);
+			Track::traverse<Track::TraversalSignalHandling::OppositeDirection, true>(current, otherConnection, preSignal);
 			if (preSignal)
 				preSignal->aspect(preSignalAspect);
 		}
@@ -66,7 +66,7 @@ namespace winston
 		Track::Shared current = signalCurrent;
 		auto connection = signalConnection;
 		Signal::Shared signal;
-		auto result = Track::traverse<Track::TraversalSignalHandling::OppositeDirection>(current, connection, signal);
+		auto result = Track::traverse<Track::TraversalSignalHandling::ForwardDirection, false>(current, connection, signal);
 
 		auto aspect = Signal::Aspect::Halt;
 		auto preAspect = Signal::Aspect::Off;
@@ -116,11 +116,11 @@ namespace winston
 
 		if (guarding)
 		{
-			result = Track::traverse<Track::TraversalSignalHandling::OppositeDirection>(onto, connection, signal);
+			result = Track::traverse<Track::TraversalSignalHandling::OppositeDirection, true>(onto, connection, signal);
 		}
 		else 
 		{
-			result = Track::traverse<Track::TraversalSignalHandling::ForwardDirection>(onto, connection, signal);
+			result = Track::traverse<Track::TraversalSignalHandling::ForwardDirection, true>(onto, connection, signal);
 		}
 
 		switch (result)

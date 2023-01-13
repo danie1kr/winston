@@ -12,8 +12,8 @@ namespace winston
 		switch (aspect)
 		{
 		case Aspect::Off: return 0;
-		case Aspect::Go: return (range / 8) - 1;
-		case Aspect::Halt: return (range / 4) - 1;
+		case Aspect::Go: return (range / 12) - 1;
+		case Aspect::Halt: return (range / 12) - 1;
 		case Aspect::ExpectGo: return (range / 8) - 1;
 		case Aspect::ExpectHalt: return (range / 4) - 1;
 		}

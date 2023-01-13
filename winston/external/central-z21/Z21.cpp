@@ -586,13 +586,11 @@ void Z21::processXPacket(uint8_t* data) {
                         unsigned char state = accessoryState == Z21_Accessory_State::P0 ? 1 : 0;
                         if (turnout->isKnownAccessoryState())
                         {
+                            // we do this twice potentially...
                             turnout->setAccessoryState(state, firstAddress, false, false);
-                            if (!firstAddress)
-                            {
-                                auto direction = turnout->fromAccessoryState();
-                                this->doubleSlipUpdate(turnout, direction);
-                                winston::logger.log(winston::build("Z21: Turnout ", address, " in state ", winston::DoubleSlipTurnout::DirectionToString(direction)));
-                            }
+                            auto direction = turnout->fromAccessoryState();
+                            this->doubleSlipUpdate(turnout, direction);
+                            winston::logger.log(winston::build("Z21: Turnout ", address, " in state ", winston::DoubleSlipTurnout::DirectionToString(direction)));
                         }
                         else
                         {

@@ -104,6 +104,7 @@ namespace winston
         LocomotiveShed locomotiveShed;
         typename _Railway::AddressTranslator::Shared addressTranslator;
         typename _Storage::Shared storageLayout;
+        DigitalCentralStation::Shared digitalCentralStation;
 	public:
 
         WebUI()
@@ -116,13 +117,14 @@ namespace winston
             this->webServer.step();
         }
 
-		Result init(typename _Railway::Shared railway, LocomotiveShed locomotiveShed, typename _Storage::Shared storageLayout, typename _Railway::AddressTranslator::Shared addressTranslator, const unsigned int port, typename _WebServer::OnHTTP onHTTP, TurnoutToggleCallback turnoutToggle)
+		Result init(typename _Railway::Shared railway, LocomotiveShed locomotiveShed, typename _Storage::Shared storageLayout, typename _Railway::AddressTranslator::Shared addressTranslator, DigitalCentralStation::Shared digitalCentralStation, const unsigned int port, typename _WebServer::OnHTTP onHTTP, TurnoutToggleCallback turnoutToggle)
 		{
             this->railway = railway;
             this->locomotiveShed = locomotiveShed;
             this->turnoutToggle = turnoutToggle;
             this->storageLayout = storageLayout;
             this->addressTranslator = addressTranslator;
+            this->digitalCentralStation = digitalCentralStation;
             //this->locoControl = locoControl;
 
 			// webServer
@@ -573,6 +575,10 @@ namespace winston
                 */
             }
 #endif
+            else if (std::string("\"toggleDCSstop\"").compare(op) == 0)
+            {
+                this->digitalCentralStation->requestEmergencyStop(!this->digitalCentralStation->isEmergencyStop());
+            }
             else if (std::string("\"getLogs\"").compare(op) == 0)
             {
                 for (const auto& entry : winston::logger.entries())

@@ -140,8 +140,14 @@
             margin-left: 16px;
             margin-right: 16px;
         }
+
+        .sideNavTitle {
+            margin: 0 0 0 0;
+            padding: 12px 16px 12px 16px;
+        }
     </style>
 
+    <!-- templates -->
     <script type="text/template" id="template_turnout">
         <div class="winston-turnout row" winston-turnout-track="<%= id %>" winston-turnout-direction="<%= direction %>">
             <div class="name col s4"><%= name %></div><div class="direction col s3"><%= direction %></div>
@@ -161,6 +167,7 @@
             </div>
         </div>
     </script>
+
     <script type="text/template" id="template_loco">
         <li>
             <div class="collapsible-header">
@@ -212,10 +219,10 @@
             <td><%= text %></td>
         </tr>
     </script>
-
 </head>
 
 <body>
+    <!-- overlay -->
     <div id="overlay">
         <div class="row">
             <div class="div col s8 offset-s2 valign-wrapper">
@@ -232,6 +239,7 @@
         </div>
     </div>
 
+    <!-- context menus -->
     <div id="menuTrackEdge" class="contextMenu">
         <a id="splitEdge" class="waves-effect waves-light btn cancel">split track</a>
         <a class="waves-effect waves-light btn cancel">cancel</a>
@@ -280,15 +288,18 @@
     </div>
 
     <header>
+        <!-- top bar -->
         <nav>
             <div class="nav-wrapper white">
                 <a href="#!" class="brand-logo teal-text">winston</a>
                 <ul class="right hide-on-med-and-down">
-                    <li><a class="waves-effect waves-light btn" id="settingsToggle">Settings <i class="material-icons right">settings</i></a></li>
                     <li><a class="waves-effect waves-light btn" id="logsToggle">Logs <i class="material-icons right">list</i></a></li>
+                    <li><a class="waves-effect waves-light btn microButton" id="stop"><i class="material-icons right">dangerous</i></a></li>
+                    <li><a class="waves-effect waves-light btn" id="settingsToggle">Settings <i class="material-icons right">settings</i></a></li>
                 </ul>
             </div>
         </nav>
+        <!-- settings -->
         <div id="settingsContent" class="row z-depth-3">
             <div class="input-field col s2"><input placeholder="IP" id="ip" type="text" class="validate" value="127.0.0.1"><label for="ip">IP</label></div>
             <div class="switch col s6">
@@ -311,13 +322,15 @@
         <div id="error"></div>
     </header>
 
-
     <main id="container">
+        <!-- right side -->
         <ul id="sideLoco" class="sidenav sidenav-fixed">
+            <h6 class="sideNavTitle grey lighten-4">Locomotives</h6>
             <ul class="collapsible expandable" id="locoShedContainer">
             </ul>
         </ul>
 
+        <!-- left side -->
         <ul id="sideTurnout" class="sidenav sidenav-fixed">
             <ul class="collapsible expandable">
                 <li id="turnoutsContainer" class="active">
@@ -327,8 +340,14 @@
             </ul>
         </ul>
 
+        <!-- main view -->
         <div id="railway"></div>
+    </main>
 
+    <!-- bottom -->
+    <footer class="page-footer white black-text">
+        <div id="message">
+        </div>
         <div id="logsContent">
             <table>
                 <thead>
@@ -342,15 +361,11 @@
                 </tbody>
             </table>
         </div>
-    </main>
-
-    <footer class="page-footer white black-text">
-        <div id="message">
-
-        </div>
     </footer>
 
     <script type="text/javascript">
+
+        /* socket */
         const SocketClosed = 0;
         const SocketConnecting = 1;
         const SocketOpen = 2;
@@ -384,6 +399,13 @@
             }
         }
 
+        function onConnect() {
+            send("getRailway", {});
+            send("getLocoShed", {});
+            send("getLogs", {});
+        }
+
+        /* variables and constants */
         let railway, signals, blocks, detectors, layout, $railway, $saveLayout, $resetLayout, cy, uiEditLayout = false, allowLayoutStorage = true, allowLayoutLoading = true;
 
         const WinstonTypeTurnout = "turnout";
@@ -418,6 +440,7 @@
             }
         }
 
+        /* helpers */
         function allowLayoutEdit() {
             return uiEditLayout === true;
         }
@@ -428,6 +451,63 @@
 
         function winstonGet(type, id) {
             return $("[winston-type=\"" + type + "\"][winston-id=\"" + id + "\"]");
+        }
+
+        /* websocket receive */
+
+        function parse(content) {
+            let op = content.op;
+            let data = content.data;
+
+            switch (op) {
+                case "turnoutState": { turnoutState(data); break; }
+                case "signalState": { signalState(data); break; }
+                case "railway": { buildRailwayGraph(data); break; }
+                case "layout": { updateRailwayLayout(data); break; }
+                case "loco": { loco(data); break; }
+                case "log": { log(data); break; }
+                case "storeRailwayLayoutSuccessful": {
+                    allowLayoutStorage = data;
+                    if (allowLayoutStorage)
+                        $saveLayout.removeClass("disabled");
+                    message("layout storage successful: " + data); break;
+                }
+                case "locoPositions": { locoPositions(data); break; }
+                case "error": { error(data); break; }
+                default:
+                    {
+                        error("unparsable op:" + op);
+                        break;
+                    }
+            }
+        }
+
+        function turnoutState(data) {
+            let id = data.id;
+            let direction = data.state;
+
+            let turnout = cy.nodes(".turnout[track=\"" + id + "\"]").data("direction", direction);
+            if (turnout.data("type") === "turnout")
+                turnoutUpdate(turnout);
+            else
+                doubleSlipTurnoutUpdate(turnout);
+        }
+
+        function signalState(data) {
+            let track = data.parentTrack;
+            let guarding = data.guarding;
+            let aspects = data.aspects;
+
+            let colorClass = "black";
+
+            if (aspects & 0b00001) colorClass = "black";        // Off
+            else if (aspects & 0b00100) colorClass = "red";     // Halt
+            else if (aspects & 0b00010) colorClass = "green";   // Go
+            else if (aspects & 0b01000) colorClass = "yellow";  // ExpectHalt
+            else if (aspects & 0b10000) colorClass = "teal";    // ExpectGo
+
+            let signal = cy.nodes(".signal[id=\"" + track + "_signal_" + guarding + "\"]")
+                .data("aspects", aspects);
         }
 
         function loco(data) {
@@ -479,6 +559,40 @@
             $element.find(".speed").val(data.forward ? data.speed : -data.speed);
             $element.find(".speedValue").html(data.value);
             $element.find(".light").prop("checked", data.light ? "checked" : undefined);
+        }
+
+        function log(data) {
+            let entryTemplate = _.template($("#template_log_entry").html());
+            let $entry = $(entryTemplate({ timestamp: data.timestamp, level: data.level, text: data.text }));
+            $("#log").prepend($entry);
+            $("#message").html("[" + data.level + "]: " + data.text);
+            console.log(data.timestamp + " - [" + data.level + "]: " + data.text);
+        }
+
+        function locoPositions(data) {
+            _.each(data, loco => {
+                let locoNode = cy.$("node.locomotive[address=\"" + loco.address + "\"]");
+
+            });
+        }
+
+        function error(data) {
+            $("#error").append($("<p>").html(data));
+            console.error(data);
+        }
+
+        function message(data) {
+            $("#message").append($("<p>").html(data));
+            console.log(data);
+        }
+
+        /* socket send */
+
+        function send(op, data) {
+            if (socketState === SocketOpen)
+                socket.send(JSON.stringify({ op: op, data: data }));
+            else
+                setTimeout(send, 100, op, data);
         }
 
         function turnoutGet(id) {
@@ -547,17 +661,6 @@
             $(".winston-turnout[winston-turnout-track=\"" + track + "\"]>.direction").html(doubleSlipDirectionLabelFromDirection(direction));
         }
 
-        function turnoutState(data) {
-            let id = data.id;
-            let direction = data.state;
-
-            let turnout = cy.nodes(".turnout[track=\"" + id + "\"]").data("direction", direction);
-            if (turnout.data("type") === "turnout")
-                turnoutUpdate(turnout);
-            else
-                doubleSlipTurnoutUpdate(turnout);
-        }
-
         function turnoutToggle(event) {
             sendTurnoutToggle(event.target.data("track"), event.target.data("direction"));
         }
@@ -586,30 +689,6 @@
             send("getSignalState", { parentTrack: parentTrack, guarding: guarding });
         }
 
-        function locoPositions(data) {
-            _.each(data, loco => {
-                let locoNode = cy.$("node.locomotive[address=\"" + loco.address + "\"]");
-
-            });
-        }
-
-        function signalState(data) {
-            let track = data.parentTrack;
-            let guarding = data.guarding;
-            let aspects = data.aspects;
-
-            let colorClass = "black";
-
-            if (aspects & 0b00001) colorClass = "black";        // Off
-            else if (aspects & 0b00100) colorClass = "red";     // Halt
-            else if (aspects & 0b00010) colorClass = "green";   // Go
-            else if (aspects & 0b01000) colorClass = "yellow";  // ExpectHalt
-            else if (aspects & 0b10000) colorClass = "teal";    // ExpectGo
-
-            let signal = cy.nodes(".signal[id=\"" + track + "_signal_" + guarding + "\"]")
-                .data("aspects", aspects);
-        }
-
         function doControlLoco(event) {
             let $target = $(event.target);
             let $loco = $($target.closest(".winston-locomotive"));
@@ -623,6 +702,24 @@
             });
         }
 
+
+        function storeRailwayLayout() {
+            let layout =
+            {
+                viewport: { zoom: cy.zoom(), pan: cy.pan() },
+                cy: cy.$().jsons()
+            }
+
+            let payload = JSON.stringify(layout);
+            let offset = 0;
+            let size = 0;
+            let chunkSize = 32000;
+            for (let i = 0; i < payload.length; i += chunkSize)
+                send("storeRailwayLayout", { layout: payload.substring(i, Math.min(i + chunkSize, payload.length)), offset: i, fullSize: payload.length });
+
+        }
+
+        /* context menus */
         function hideContextMenus() {
             $(".contextMenu").hide();
         }
@@ -695,6 +792,7 @@
             }
         }
 
+        /* cytoscape */
         function cytoscapeCreate() {
             return cy = cytoscape({
                 container: $railway,
@@ -952,7 +1050,7 @@
             cy.$(".turnout").each(function (turnout) {
 
                 let turnoutTemplate = _.template($("#template_turnout").html());
-                let $turnout = $(turnoutTemplate({ id: turnout.data("track"), name: turnout.data("displayName") ? turnout.data("displayName") : turnout.data("name"), direction: turnout.data("direction") }));
+                let $turnout = $(turnoutTemplate({ id: turnout.data("track"), name: turnout.data("address") ? turnout.data("address") : (turnout.data("displayName") ? turnout.data("displayName") : turnout.data("name")), direction: turnout.data("direction") }));
                 $turnout.on('click', function (event) {
                     let $target = $(event.target);
                     let $closest = $($target.closest(".winston-turnout"));
@@ -1017,22 +1115,6 @@
                     cy.viewport({ zoom: layout.viewport.zoom, pan: layout.viewport.pan });
                 }
             }
-        }
-
-        function storeRailwayLayout() {
-            let layout =
-            {
-                viewport: { zoom: cy.zoom(), pan: cy.pan() },
-                cy: cy.$().jsons()
-            }
-
-            let payload = JSON.stringify(layout);
-            let offset = 0;
-            let size = 0;
-            let chunkSize = 32000;
-            for (let i = 0; i < payload.length; i += chunkSize)
-                send("storeRailwayLayout", { layout: payload.substring(i, Math.min(i + chunkSize, payload.length)), offset: i, fullSize: payload.length });
-
         }
 
         function checkGraphIsomorphism(railway, layout) {
@@ -1214,202 +1296,7 @@
             return cy;
         }
 
-        function addTrackToLayout(edges, nodes, tracks, track, xPos) {
-            function connect(that, otherTrackName, connectionName) {
-                let other = _.find(tracks, t => t.name === otherTrackName);
-
-                let thatNode = _.find(nodes, function (n) { return n.data.track === that; });
-                let otherNode = _.find(nodes, function (n) { return n.data.track === otherTrackName; });
-
-                if (thatNode === undefined || otherNode === undefined)
-                    return;
-
-                let from = that + "_" + connectionName;//(thatNode.data.type !== "bumper"/* && connectionName !== "a"*/ ? connectionName : "");
-
-                function connectToOther(otherConnectionName) {
-                    if (other[otherConnectionName] === that) {
-                        let to = otherTrackName + "_" + otherConnectionName; // (otherNode.data.direction !== undefined /*&& otherConnectionName !== "a" */ ? otherConnectionName : "");
-                        let id = from + "-" + to;
-                        /* one edge between other-A and B-that
-                        edges.push({ group: 'edges', data: { id: id, name: id, source: from, target: to }, classes: "" });
-                        */
-
-                        // another connector node between other-A and B-that
-                        nodes.push({ group: 'nodes', data: { id: id }, classes: "connector" });
-                        edges.push({ group: 'edges', data: { source: from, target: id, track: that }, classes: "track" });
-                        edges.push({ group: 'edges', data: { source: to, target: id, track: otherTrackName }, classes: "track" });
-                    }
-                }
-
-                connectToOther("a");
-                connectToOther("b");
-                connectToOther("c");
-                connectToOther("d");
-            }
-
-            let a = track.a;
-            let b = track.b;
-            let c = track.c;
-            let d = track.d;
-            let id = track.name;
-
-            let type = 0;
-            if (d !== undefined)
-                type = 3;
-            else if (c !== undefined)
-                type = 2;
-            else if (b !== undefined)
-                type = 1;
-
-            if (type === 3) {
-                nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, lengths: track.lengths, connections: { a: a, b: b, c: c, d: d }, direction: 1, type: "doubleSlipTurnout", relativePosition: { x: 0, y: 0 } }, position: { x: xPos, y: 0 }, classes: "trackNode turnout" });
-                nodes.push({ group: 'nodes', data: { id: id + "_a", name: id + "_a", track: id, relativePosition: { x: -20, y: 0 } }, position: { x: xPos - 20, y: 0 }, classes: "turnoutConnection connection a" });
-                nodes.push({ group: 'nodes', data: { id: id + "_b", name: id + "_b", track: id, relativePosition: { x: 20, y: 0 } }, position: { x: xPos + 20, y: -20 }, classes: "turnoutConnection connection b" });
-                nodes.push({ group: 'nodes', data: { id: id + "_c", name: id + "_c", track: id, relativePosition: { x: 20, y: 20 } }, position: { x: xPos + 20, y: 20 }, classes: "turnoutConnection connection c" });
-                nodes.push({ group: 'nodes', data: { id: id + "_d", name: id + "_d", track: id, relativePosition: { x: -20, y: 20 } }, position: { x: xPos - 20, y: 20 }, classes: "turnoutConnection connection d" });
-
-                edges.push({ group: 'edges', data: { source: id, target: id + "_a", track: id, connection: "a" }, classes: "internal" });
-                edges.push({ group: 'edges', data: { source: id, target: id + "_b", track: id, connection: "b" }, classes: "internal" });
-                edges.push({ group: 'edges', data: { source: id, target: id + "_c", track: id, connection: "c" }, classes: "internal" });
-                edges.push({ group: 'edges', data: { source: id, target: id + "_d", track: id, connection: "d" }, classes: "internal" });
-            }
-            else if (type === 2) {
-                nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, lengths: track.lengths, connections: { a: a, b: b, c: c }, direction: 1, type: "turnout", relativePosition: { x: 0, y: 0 } }, position: { x: xPos, y: 0 }, classes: "trackNode turnout" });
-                nodes.push({ group: 'nodes', data: { id: id + "_a", name: id + "_a", track: id, relativePosition: { x: -20, y: 0 } }, position: { x: xPos - 20, y: 0 }, classes: "turnoutConnection connection a" });
-                nodes.push({ group: 'nodes', data: { id: id + "_b", name: id + "_b", track: id, relativePosition: { x: 20, y: 0 } }, position: { x: xPos + 20, y: -20 }, classes: "turnoutConnection connection b" });
-                nodes.push({ group: 'nodes', data: { id: id + "_c", name: id + "_c", track: id, relativePosition: { x: 20, y: 20 } }, position: { x: xPos + 20, y: 20 }, classes: "turnoutConnection connection c" });
-
-                edges.push({ group: 'edges', data: { source: id, target: id + "_a", track: id, connection: "a" }, classes: "track" });
-                edges.push({ group: 'edges', data: { source: id, target: id + "_b", track: id, connection: "b" }, classes: "internal" });
-                edges.push({ group: 'edges', data: { source: id, target: id + "_c", track: id, connection: "c" }, classes: "internal" });
-            }
-            else if (type === 1) {
-                nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, length: track.length, connections: { a: a, b: b }, type: "rail", relativePosition: { x: 0, y: 0 } }, position: { x: xPos, y: 0 }, classes: "trackNode rail" });
-                nodes.push({ group: 'nodes', data: { id: id + "_a", name: id + "_a", track: id, relativePosition: { x: -20, y: 0 } }, position: { x: xPos - 20, y: 0 }, classes: "railConnection connection a" });
-                nodes.push({ group: 'nodes', data: { id: id + "_b", name: id + "_b", track: id, relativePosition: { x: 20, y: 0 } }, position: { x: xPos + 20, y: 0 }, classes: "railConnection connection b" });
-
-                edges.push({ group: 'edges', data: { source: id, target: id + "_a", track: id, connection: "a" }, classes: "track" });
-                edges.push({ group: 'edges', data: { source: id, target: id + "_b", track: id, connection: "b" }, classes: "track" });
-            }
-            else {
-                nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, length: track.length, connections: { a: a }, type: "bumper", relativePosition: { x: 0, y: 0 } }, position: { x: xPos, y: 0 }, classes: "trackNode bumper" });
-                nodes.push({ group: 'nodes', data: { id: id + "_a", name: id + "_a", track: id, relativePosition: { x: -20, y: 0 } }, position: { x: xPos - 20, y: 0 }, classes: "bumperConnection connection a" });
-                edges.push({ group: 'edges', data: { source: id, target: id + "_a", track: id, connection: "a" }, classes: "track" });
-            }
-
-            console.log("added track " + id);
-
-            if (a !== undefined) connect(id, a, "a");
-            if (b !== undefined) connect(id, b, "b");
-            if (c !== undefined) connect(id, c, "c");
-            if (d !== undefined) connect(id, d, "d");
-        }
-
-        let railwayString = "";
-        let railwayStringSizeReceived = 0;
-        function buildRailwayGraph(dataMsg) {
-            let offset = dataMsg.offset;
-            let fullSize = dataMsg.fullSize;
-            let partialRailway = dataMsg.railway;
-
-            railwayStringSizeReceived += partialRailway.length;
-
-            if (railwayString.length < fullSize)
-                railwayString = new Array(fullSize + 1).join(" ");
-
-            railwayString = [railwayString.slice(0, offset), partialRailway, railwayString.slice(offset + partialRailway.length)].join('');
-
-            if (railwayStringSizeReceived === fullSize) {
-
-                let data = JSON.parse(railwayString);
-
-                function classFromType(type) {
-                    switch (type) {
-                        case 0: return "bumper";
-                        case 1: return "rail";
-                        case 2: return "turnout";
-                        case 3: return "doubleSlipTurnout";
-                    }
-                }
-
-                let nodes = [];
-                let edges = [];
-                railway = data.tracks;
-                signals = data.signals;
-                blocks = data.blocks;
-                detectors = data.detectors;
-
-                _.each(data.tracks, function (track, i) {
-                    addTrackToLayout(edges, nodes, data.tracks, track, i * 100);
-                });
-
-                cy = cytoscapeCreate();
-                cy.add(nodes);
-                cy.add(edges);
-                cy = cytoscapeUpdateSignals(cy, data.signals);
-                cy = cytoscapeUpdateBlocks(cy, data.blocks);
-                cy = cytoscapeUpdateDetectors(cy, data.detectors);
-                cy = cytoscapePostAdd(cy);
-
-                if (allowLayoutLoading)
-                    send("getRailwayLayout", {});
-                else
-                    allowLayoutLoading = true;
-            }
-        }
-
-        function error(data) {
-            $("#error").append($("<p>").html(data));
-            console.error(data);
-        }
-
-        function message(data) {
-            $("#message").append($("<p>").html(data));
-            console.log(data);
-        }
-
-        function log(data) {
-            let entryTemplate = _.template($("#template_log_entry").html());
-            let $entry = $(entryTemplate({ timestamp: data.timestamp, level: data.level, text: data.text }));
-            $("#log").prepend($entry);
-            $("#message").html("[" + data.level + "]: " + data.text);
-            console.log(data.timestamp + " - [" + data.level + "]: " + data.text);
-        }
-
-        function parse(content) {
-            let op = content.op;
-            let data = content.data;
-
-            switch (op) {
-                case "turnoutState": { turnoutState(data); break; }
-                case "signalState": { signalState(data); break; }
-                case "railway": { buildRailwayGraph(data); break; }
-                case "layout": { updateRailwayLayout(data); break; }
-                case "loco": { loco(data); break; }
-                case "log": { log(data); break; }
-                case "storeRailwayLayoutSuccessful": {
-                    allowLayoutStorage = data;
-                    if (allowLayoutStorage)
-                        $saveLayout.removeClass("disabled");
-                    message("layout storage successful: " + data); break;
-                }
-                case "locoPositions": { locoPositions(data); break; }
-                case "error": { error(data); break; }
-                default:
-                    {
-                        error("unparsable op:" + op);
-                        break;
-                    }
-            }
-        }
-
-        function send(op, data) {
-            if (socketState === SocketOpen)
-                socket.send(JSON.stringify({ op: op, data: data }));
-            else
-                setTimeout(send, 100, op, data);
-        }
-
+        /* cytoscape interaction */
         function cySplitEdge(event) {
             if (!cy || !allowLayoutEdit())
                 return;
@@ -1480,15 +1367,148 @@
                     if (distance > 100)
                         neighbor.position({ x: node.position().x + 40, y: node.position().y }).emit("position");
                 }
-                /*
-            let neighbor = node.openNeighborhood(node.hasClass("connector") ? "node.connection" : "node.connector");
-            let track = neighbor.data("track");
-
-            cy.$('node.trackNode[track="' + track + '"]').each(function (n) {
-                n.position({ x: node.position().x + 40, y: node.position().y }).emit("position");
-            });*/
             });
             hideContextMenus();
+        }
+
+        /* railway and layout creation */
+        let railwayString = "";
+        let railwayStringSizeReceived = 0;
+        function buildRailwayGraph(dataMsg) {
+            let offset = dataMsg.offset;
+            let fullSize = dataMsg.fullSize;
+            let partialRailway = dataMsg.railway;
+
+            railwayStringSizeReceived += partialRailway.length;
+
+            if (railwayString.length < fullSize)
+                railwayString = new Array(fullSize + 1).join(" ");
+
+            railwayString = [railwayString.slice(0, offset), partialRailway, railwayString.slice(offset + partialRailway.length)].join('');
+
+            if (railwayStringSizeReceived === fullSize) {
+
+                let data = JSON.parse(railwayString);
+
+                function classFromType(type) {
+                    switch (type) {
+                        case 0: return "bumper";
+                        case 1: return "rail";
+                        case 2: return "turnout";
+                        case 3: return "doubleSlipTurnout";
+                    }
+                }
+
+                let nodes = [];
+                let edges = [];
+                railway = data.tracks;
+                signals = data.signals;
+                blocks = data.blocks;
+                detectors = data.detectors;
+
+                _.each(data.tracks, function (track, i) {
+                    addTrackToLayout(edges, nodes, data.tracks, track, i * 100);
+                });
+
+                cy = cytoscapeCreate();
+                cy.add(nodes);
+                cy.add(edges);
+                cy = cytoscapeUpdateSignals(cy, data.signals);
+                cy = cytoscapeUpdateBlocks(cy, data.blocks);
+                cy = cytoscapeUpdateDetectors(cy, data.detectors);
+                cy = cytoscapePostAdd(cy);
+
+                if (allowLayoutLoading)
+                    send("getRailwayLayout", {});
+                else
+                    allowLayoutLoading = true;
+            }
+        }
+
+        function addTrackToLayout(edges, nodes, tracks, track, xPos) {
+            function connect(that, otherTrackName, connectionName) {
+                let other = _.find(tracks, t => t.name === otherTrackName);
+
+                let thatNode = _.find(nodes, function (n) { return n.data.track === that; });
+                let otherNode = _.find(nodes, function (n) { return n.data.track === otherTrackName; });
+
+                if (thatNode === undefined || otherNode === undefined)
+                    return;
+
+                let from = that + "_" + connectionName;
+
+                function connectToOther(otherConnectionName) {
+                    if (other[otherConnectionName] === that) {
+                        let to = otherTrackName + "_" + otherConnectionName;
+                        let id = from + "-" + to;
+                        nodes.push({ group: 'nodes', data: { id: id }, classes: "connector" });
+                        edges.push({ group: 'edges', data: { source: from, target: id, track: that }, classes: "track" });
+                        edges.push({ group: 'edges', data: { source: to, target: id, track: otherTrackName }, classes: "track" });
+                    }
+                }
+
+                connectToOther("a");
+                connectToOther("b");
+                connectToOther("c");
+                connectToOther("d");
+            }
+
+            let a = track.a;
+            let b = track.b;
+            let c = track.c;
+            let d = track.d;
+            let id = track.name;
+
+            let type = 0;
+            if (d !== undefined)
+                type = 3;
+            else if (c !== undefined)
+                type = 2;
+            else if (b !== undefined)
+                type = 1;
+
+            if (type === 3) {
+                nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, lengths: track.lengths, connections: { a: a, b: b, c: c, d: d }, direction: 1, type: "doubleSlipTurnout", relativePosition: { x: 0, y: 0 } }, position: { x: xPos, y: 0 }, classes: "trackNode turnout" });
+                nodes.push({ group: 'nodes', data: { id: id + "_a", name: id + "_a", track: id, relativePosition: { x: -20, y: 0 } }, position: { x: xPos - 20, y: 0 }, classes: "turnoutConnection connection a" });
+                nodes.push({ group: 'nodes', data: { id: id + "_b", name: id + "_b", track: id, relativePosition: { x: 20, y: 0 } }, position: { x: xPos + 20, y: -20 }, classes: "turnoutConnection connection b" });
+                nodes.push({ group: 'nodes', data: { id: id + "_c", name: id + "_c", track: id, relativePosition: { x: 20, y: 20 } }, position: { x: xPos + 20, y: 20 }, classes: "turnoutConnection connection c" });
+                nodes.push({ group: 'nodes', data: { id: id + "_d", name: id + "_d", track: id, relativePosition: { x: -20, y: 20 } }, position: { x: xPos - 20, y: 20 }, classes: "turnoutConnection connection d" });
+
+                edges.push({ group: 'edges', data: { source: id, target: id + "_a", track: id, connection: "a" }, classes: "internal" });
+                edges.push({ group: 'edges', data: { source: id, target: id + "_b", track: id, connection: "b" }, classes: "internal" });
+                edges.push({ group: 'edges', data: { source: id, target: id + "_c", track: id, connection: "c" }, classes: "internal" });
+                edges.push({ group: 'edges', data: { source: id, target: id + "_d", track: id, connection: "d" }, classes: "internal" });
+            }
+            else if (type === 2) {
+                nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, lengths: track.lengths, connections: { a: a, b: b, c: c }, direction: 1, type: "turnout", relativePosition: { x: 0, y: 0 } }, position: { x: xPos, y: 0 }, classes: "trackNode turnout" });
+                nodes.push({ group: 'nodes', data: { id: id + "_a", name: id + "_a", track: id, relativePosition: { x: -20, y: 0 } }, position: { x: xPos - 20, y: 0 }, classes: "turnoutConnection connection a" });
+                nodes.push({ group: 'nodes', data: { id: id + "_b", name: id + "_b", track: id, relativePosition: { x: 20, y: 0 } }, position: { x: xPos + 20, y: -20 }, classes: "turnoutConnection connection b" });
+                nodes.push({ group: 'nodes', data: { id: id + "_c", name: id + "_c", track: id, relativePosition: { x: 20, y: 20 } }, position: { x: xPos + 20, y: 20 }, classes: "turnoutConnection connection c" });
+
+                edges.push({ group: 'edges', data: { source: id, target: id + "_a", track: id, connection: "a" }, classes: "track" });
+                edges.push({ group: 'edges', data: { source: id, target: id + "_b", track: id, connection: "b" }, classes: "internal" });
+                edges.push({ group: 'edges', data: { source: id, target: id + "_c", track: id, connection: "c" }, classes: "internal" });
+            }
+            else if (type === 1) {
+                nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, length: track.length, connections: { a: a, b: b }, type: "rail", relativePosition: { x: 0, y: 0 } }, position: { x: xPos, y: 0 }, classes: "trackNode rail" });
+                nodes.push({ group: 'nodes', data: { id: id + "_a", name: id + "_a", track: id, relativePosition: { x: -20, y: 0 } }, position: { x: xPos - 20, y: 0 }, classes: "railConnection connection a" });
+                nodes.push({ group: 'nodes', data: { id: id + "_b", name: id + "_b", track: id, relativePosition: { x: 20, y: 0 } }, position: { x: xPos + 20, y: 0 }, classes: "railConnection connection b" });
+
+                edges.push({ group: 'edges', data: { source: id, target: id + "_a", track: id, connection: "a" }, classes: "track" });
+                edges.push({ group: 'edges', data: { source: id, target: id + "_b", track: id, connection: "b" }, classes: "track" });
+            }
+            else {
+                nodes.push({ group: 'nodes', data: { id: id, displayName: track.name, name: id, track: id, length: track.length, connections: { a: a }, type: "bumper", relativePosition: { x: 0, y: 0 } }, position: { x: xPos, y: 0 }, classes: "trackNode bumper" });
+                nodes.push({ group: 'nodes', data: { id: id + "_a", name: id + "_a", track: id, relativePosition: { x: -20, y: 0 } }, position: { x: xPos - 20, y: 0 }, classes: "bumperConnection connection a" });
+                edges.push({ group: 'edges', data: { source: id, target: id + "_a", track: id, connection: "a" }, classes: "track" });
+            }
+
+            console.log("added track " + id);
+
+            if (a !== undefined) connect(id, a, "a");
+            if (b !== undefined) connect(id, b, "b");
+            if (c !== undefined) connect(id, c, "c");
+            if (d !== undefined) connect(id, d, "d");
         }
 
         $(function () {
@@ -1508,7 +1528,7 @@
             });
             $("#settingsToggle").on('click', function () { $("#settingsContent").toggle(); });
             $("#logsToggle").on('click', function () { $("#logsContent").toggle(); });
-            
+
             hideContextMenus();
             $("#settingsContent").hide();
             $("#logsContent").hide();
@@ -1563,24 +1583,20 @@
 
             $("#reconnect").on('click', function () {
                 connect();
-                send("getRailway", {});
-                send("getLocoShed", {});
+                onConnect();
             });
 
-            //$('#sideLoco').sideNav({edge: "left", isFixed: true});
+            $("#stop").on('click', () => {
+                send("toggleDCSstop");
+            });
 
             M.Sidenav.init($('#sideLoco').get(0), { edge: "right" }).open();
             M.Sidenav.init($('#sideTurnout').get(0), { edge: "left" }).open();
 
             M.AutoInit();
-            //$('select').material_select();
             M.FormSelect.init(document.querySelectorAll('select'));
 
-            //$("#sideLoco").get(0).sidenav();
-
-            send("getRailway", {});
-            send("getLocoShed", {});
-            send("getLogs", {});
+            onConnect();
         });
 
         function putStateIntoURL() {

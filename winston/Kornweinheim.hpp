@@ -412,7 +412,7 @@ void Kornweinheim::systemSetup() {
 
     this->inventStorylines();
 
-    this->webUI.init(this->railway, this->locomotiveShed, this->storageLayout, this->addressTranslator, 8080,
+    this->webUI.init(this->railway, this->locomotiveShed, this->storageLayout, this->addressTranslator, this->digitalCentralStation, 8080,
         [=](WebServer::HTTPConnection& client, const winston::HTTPMethod method, const std::string& resource) -> winston::Result {
             return this->on_http(client, method, resource);
         },

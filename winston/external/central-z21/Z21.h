@@ -40,6 +40,9 @@ public:
 
     void keepAlive();
 
+    bool isEmergencyStop() const;
+    const winston::Result requestEmergencyStop(const bool emergencyStop);
+
     using winston::Shared_Ptr<Z21>::Shared;
     using winston::Shared_Ptr<Z21>::make;
 

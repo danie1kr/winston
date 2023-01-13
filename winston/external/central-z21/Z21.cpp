@@ -111,6 +111,20 @@ void Z21::keepAlive()
     }
 }
 
+
+bool Z21::isEmergencyStop() const
+{
+    return this->emergencyStop;
+}
+
+const winston::Result Z21::requestEmergencyStop(const bool emergencyStop)
+{
+    if(emergencyStop)
+        return this->send(this->setTrackPowerOff());
+    else
+        return this->send(this->setTrackPowerOn());
+}
+
 const winston::Result Z21::tick()
 {
 //    if (this->socketListen->isConnected())
@@ -521,7 +535,7 @@ void Z21::triggerDoubleSlipTurnoutChangeTo(winston::DoubleSlipTurnout::Shared tu
     const unsigned int addressA = this->turnoutAddressTranslator->address(turnout);
     const unsigned int addressB = addressA + 1;
     unsigned char a, b;
-    turnout->toAccessoryStates(a, b);
+    turnout->toAccessoryStates(a, b, direction);
     this->setAccessory((const unsigned short)addressA, (a ? Z21_Accessory_Pos::P0 : Z21_Accessory_Pos::P1), true, true);
     this->setAccessory((const unsigned short)addressB, (b ? Z21_Accessory_Pos::P0 : Z21_Accessory_Pos::P1), true, true);
 }
@@ -572,13 +586,18 @@ void Z21::processXPacket(uint8_t* data) {
                         unsigned char state = accessoryState == Z21_Accessory_State::P0 ? 1 : 0;
                         if (turnout->isKnownAccessoryState())
                         {
-                            auto direction = turnout->fromAccessoryState(state, firstAddress);
-                            this->doubleSlipUpdate(turnout, direction);
-                            winston::logger.log(winston::build("Z21: Turnout ", address, " in state ", winston::DoubleSlipTurnout::DirectionToString(direction)));
+                            //auto direction = turnout->fromAccessoryState(state, firstAddress);
+                            turnout->setAccessoryState(state, firstAddress, false, false);
+                            if (!firstAddress)
+                            {
+                                auto direction = turnout->fromAccessoryState();
+                                this->doubleSlipUpdate(turnout, direction);
+                                winston::logger.log(winston::build("Z21: Turnout ", address, " in state ", winston::DoubleSlipTurnout::DirectionToString(direction)));
+                            }
                         }
                         else
                         {
-                            turnout->setAccessoryState(state, firstAddress);
+                            turnout->setAccessoryState(state, firstAddress, true, true);
                         }
                     }
                     else

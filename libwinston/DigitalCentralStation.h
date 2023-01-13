@@ -76,6 +76,9 @@ namespace winston
 		virtual void triggerLocoFunction(const Address address, const uint32_t functions) = 0;
 		virtual void keepAlive();
 
+		virtual bool isEmergencyStop() const = 0;
+		virtual const winston::Result requestEmergencyStop(const bool emergencyStop) = 0;
+
 		void turnoutUpdate(Turnout::Shared turnout, const Turnout::Direction direction);
 		void doubleSlipUpdate(DoubleSlipTurnout::Shared turnout, const DoubleSlipTurnout::Direction direction);
 
@@ -84,6 +87,7 @@ namespace winston
 		LocoAddressTranslator& locoAddressTranslator;
 		SignalBox::Shared signalBox;
 		const Callbacks callbacks;
+		bool emergencyStop;
 	};
 }
 

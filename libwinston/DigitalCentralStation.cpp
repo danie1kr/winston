@@ -3,7 +3,7 @@
 namespace winston
 {
 	DigitalCentralStation::DigitalCentralStation(TurnoutAddressTranslator::Shared& turnoutAddressTranslator, LocoAddressTranslator& locoAddressTranslator, SignalBox::Shared& signalBox, const Callbacks callbacks)
-		: Shared_Ptr<DigitalCentralStation>(), turnoutAddressTranslator(turnoutAddressTranslator), locoAddressTranslator(locoAddressTranslator), signalBox(signalBox), callbacks(callbacks)
+		: Shared_Ptr<DigitalCentralStation>(), turnoutAddressTranslator(turnoutAddressTranslator), locoAddressTranslator(locoAddressTranslator), signalBox(signalBox), callbacks(callbacks), emergencyStop(false)
 	{
 
 	}

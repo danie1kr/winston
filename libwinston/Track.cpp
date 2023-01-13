@@ -829,11 +829,11 @@ namespace winston
 	}
 
 
-	void DoubleSlipTurnout::setAccessoryState(unsigned char state, bool first)
+	void DoubleSlipTurnout::setAccessoryState(const unsigned char state, const bool first, const bool applyToInternalDirection, const bool doCallback)
 	{
 		this->accessoryStates[first ? 0 : 1] = state;
 
-		if (this->isKnownAccessoryState())
+		if (applyToInternalDirection && this->isKnownAccessoryState())
 		{
 			if (this->accessoryStates[0] && this->accessoryStates[1])
 				this->dir = Direction::A_B;
@@ -843,7 +843,8 @@ namespace winston
 				this->dir = Direction::B_D;
 			else if (!this->accessoryStates[0] && !this->accessoryStates[1])
 				this->dir = Direction::C_D;
-			State state = this->callback(this->shared_from_this(), this->dir);
+			if (doCallback)
+				this->callback(this->shared_from_this(), this->dir);
 		}
 	}
 
@@ -855,7 +856,12 @@ namespace winston
 
 	const void DoubleSlipTurnout::toAccessoryStates(unsigned char& a, unsigned char& b) const
 	{
-		switch (this->dir)
+		this->toAccessoryStates(a, b, this->direction());
+	}
+
+	const void DoubleSlipTurnout::toAccessoryStates(unsigned char& a, unsigned char& b, const Direction direction) const
+	{
+		switch (direction)
 		{
 		case Direction::A_B: a = 1; b = 1; break;
 		case Direction::A_C: a = 0; b = 1; break;
@@ -866,16 +872,35 @@ namespace winston
 			break;
 		}
 	}
-
-	const DoubleSlipTurnout::Direction DoubleSlipTurnout::fromAccessoryState(unsigned char state, bool first) const
+	const DoubleSlipTurnout::Direction DoubleSlipTurnout::fromAccessoryState() const
 	{
-		unsigned char a, b;
-		this->toAccessoryStates(a, b);
+		if (!this->isKnownAccessoryState())
+			return Direction::Changing;
+
+		if (this->accessoryStates[0] && this->accessoryStates[1])
+			return Direction::A_B;
+		else if (!this->accessoryStates[0] && this->accessoryStates[1])
+			return Direction::A_C;
+		else if (this->accessoryStates[0] && !this->accessoryStates[1])
+			return Direction::B_D;
+		else if (!this->accessoryStates[0] && !this->accessoryStates[1])
+			return Direction::C_D;
+	}
+
+	const DoubleSlipTurnout::Direction DoubleSlipTurnout::fromAccessoryState(const unsigned char state, const bool first)
+	{
+		unsigned char a = 99, b = 99;
+		//this->toAccessoryStates(a, b);
+
+		//if (a == 99 || b == 99)
+		//	return Direction::Changing;
 
 		if (first)
 			a = state ? 1 : 0;
 		else
 			b = state ? 1 : 0;
+
+		this->accessoryStates[first ? 0 : 1] = state;
 
 		if (a && b) 
 			return Direction::A_B;

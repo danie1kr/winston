@@ -835,14 +835,7 @@ namespace winston
 
 		if (applyToInternalDirection && this->isKnownAccessoryState())
 		{
-			if (this->accessoryStates[0] && this->accessoryStates[1])
-				this->dir = Direction::A_B;
-			else if (!this->accessoryStates[0] && this->accessoryStates[1])
-				this->dir = Direction::A_C;
-			else if (this->accessoryStates[0] && !this->accessoryStates[1])
-				this->dir = Direction::B_D;
-			else if (!this->accessoryStates[0] && !this->accessoryStates[1])
-				this->dir = Direction::C_D;
+			this->dir = this->fromAccessoryState();
 			if (doCallback)
 				this->callback(this->shared_from_this(), this->dir);
 		}
@@ -853,12 +846,12 @@ namespace winston
 		return (this->accessoryStates[0] == 0 || this->accessoryStates[0] == 1) &&
 			(this->accessoryStates[1] == 0 || this->accessoryStates[1] == 1);
 	}
-
+	/*
 	const void DoubleSlipTurnout::toAccessoryStates(unsigned char& a, unsigned char& b) const
 	{
 		this->toAccessoryStates(a, b, this->direction());
 	}
-
+	*/
 	const void DoubleSlipTurnout::toAccessoryStates(unsigned char& a, unsigned char& b, const Direction direction) const
 	{
 		switch (direction)
@@ -872,12 +865,12 @@ namespace winston
 			break;
 		}
 	}
+
 	const DoubleSlipTurnout::Direction DoubleSlipTurnout::fromAccessoryState() const
 	{
 		if (!this->isKnownAccessoryState())
 			return Direction::Changing;
-
-		if (this->accessoryStates[0] && this->accessoryStates[1])
+		else if (this->accessoryStates[0] && this->accessoryStates[1])
 			return Direction::A_B;
 		else if (!this->accessoryStates[0] && this->accessoryStates[1])
 			return Direction::A_C;
@@ -885,8 +878,9 @@ namespace winston
 			return Direction::B_D;
 		else if (!this->accessoryStates[0] && !this->accessoryStates[1])
 			return Direction::C_D;
+		return Direction::Changing;
 	}
-
+	/*
 	const DoubleSlipTurnout::Direction DoubleSlipTurnout::fromAccessoryState(const unsigned char state, const bool first)
 	{
 		unsigned char a = 99, b = 99;
@@ -913,7 +907,7 @@ namespace winston
 		else 
 			return Direction::Changing;
 	}
-
+	*/
 	const DoubleSlipTurnout::Direction DoubleSlipTurnout::direction() const
 	{
 		return this->dir;

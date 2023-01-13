@@ -586,7 +586,6 @@ void Z21::processXPacket(uint8_t* data) {
                         unsigned char state = accessoryState == Z21_Accessory_State::P0 ? 1 : 0;
                         if (turnout->isKnownAccessoryState())
                         {
-                            //auto direction = turnout->fromAccessoryState(state, firstAddress);
                             turnout->setAccessoryState(state, firstAddress, false, false);
                             if (!firstAddress)
                             {

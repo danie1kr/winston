@@ -240,7 +240,8 @@ namespace winstontests
             auto pos = winston::Position(N1, winston::Track::Connection::A, 200);
 
             winston::Locomotive::ThrottleSpeedMap map{ {0, 0}, {100, 100}, {255, 255} };
-            auto loco = winston::Locomotive::make(locoCallbacks(), 0, pos, map, "testloco1", 0);
+            winston::Locomotive::Functions functions = {};
+            auto loco = winston::Locomotive::make(locoCallbacks(), 0, functions, pos, map, "testloco1", 0);
             auto expectedDistance = 10;
             loco->drive<true>(true, 100);
             loco->position(pos);
@@ -262,7 +263,8 @@ namespace winstontests
             auto target = winston::Position(B4, winston::Track::Connection::A, 50);
 
             winston::Locomotive::ThrottleSpeedMap map{ {0, 0}, {100, 1000}, {255, 2550} };
-            auto loco = winston::Locomotive::make(locoCallbacks(), 0, pos, map, "testloco1", 0);
+            winston::Locomotive::Functions functions = {};
+            auto loco = winston::Locomotive::make(locoCallbacks(), 0, functions, pos, map, "testloco1", 0);
             auto throttle = 100;
             loco->drive<true>(false, throttle);
             loco->position(pos);
@@ -301,7 +303,8 @@ namespace winstontests
             auto expect = winston::Position(PBF3, winston::Track::Connection::A, 60);
 
             winston::Locomotive::ThrottleSpeedMap map{ {0, 0}, {100, 500000}, {255, 2550} };
-            auto loco = winston::Locomotive::make(locoCallbacks(), 0, pos, map, "testloco1", 0);
+            winston::Locomotive::Functions functions = {};
+            auto loco = winston::Locomotive::make(locoCallbacks(), 0, functions, pos, map, "testloco1", 0);
             auto throttle = 100;
             loco->drive<true>(true, throttle);
             loco->position(pos);

@@ -346,8 +346,8 @@ namespace winston
 		void setAccessoryState(const unsigned char state, const bool first, const bool applyToInternalDirection, const bool doCallback);
 		const bool isKnownAccessoryState() const;
 		const Direction fromAccessoryState() const;
-		const Direction fromAccessoryState(const unsigned char state, const bool first);
-		const void toAccessoryStates(unsigned char& a, unsigned char& b) const;
+		/*const Direction fromAccessoryState(const unsigned char state, const bool first);
+		const void toAccessoryStates(unsigned char& a, unsigned char& b) const;*/
 		const void toAccessoryStates(unsigned char& a, unsigned char& b, const Direction direction) const;
 		const Direction direction() const;
 		static const Direction nextDirection(const Direction current);

@@ -266,6 +266,11 @@
     </div>
 
     <div id="infoSignal" class="contextMenu">
+        <div class="row showOnEditOnly">
+            <div class="col">
+                <a class="waves-effect waves-light btn rotate">rotate 45°</a>
+            </div>
+        </div>
         <div class="row>">
             <div class="col">
                 <label for="infoSignalParent">Track</label>
@@ -761,7 +766,18 @@
             hideContextMenus();
             let $info = $("#infoSignal");
             let node = event.target;
-            //$info.find("#infoSignalId").text(node.data("id"));
+
+            if (allowLayoutEdit()) {
+                $info.find(".showOnEditOnly").show();
+                let $rotate = $info.find(".rotate");
+                $rotate.off('click').on('click', () => {
+                    let value = node.data("rotation") || 0;
+                    node.data("rotation", (value + 45) % 360);
+                });
+            }
+            else
+                $info.find(".showOnEditOnly").hide();
+
             $info.find("#infoSignalParent").text(node.data("parentTrack"));
             $info.find("#infoSignalConnection").text(node.data("guarding"));
             let lights = _.map(node.data("lights"), l => " Port: " + l.port)
@@ -959,7 +975,7 @@
                             html += '<span style="color:' + color + ';">' + symbol + '</span>';
                         });
 
-                        return '<p>'
+                        return '<p style="transform: rotate(' + data.rotation + 'deg);">'
                             + html
                             + '</p>';
                     }

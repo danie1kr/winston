@@ -48,6 +48,13 @@ namespace winston
 
 			using ShortCircuitDetectedCallback = std::function<void()>;
 			ShortCircuitDetectedCallback shortCircuitDetectedCallback;
+
+			using ConnectedCallback = std::function<void()>;
+			ConnectedCallback connectedCallback;
+
+			// true: continue processing this address, false skip
+			using SpecialAccessoryProcessingCallback = std::function<const bool(const uint16_t address, const	uint8_t state)>;
+			SpecialAccessoryProcessingCallback specialAccessoryProcessingCallback;
 		};
 
 		class DebugInjector : public Shared_Ptr<DebugInjector>
@@ -57,6 +64,7 @@ namespace winston
 			void injectTurnoutUpdate(Turnout::Shared turnout, const Turnout::Direction direction);
 			void injectDoubleSlipTurnoutUpdate(DoubleSlipTurnout::Shared turnout, const DoubleSlipTurnout::Direction direction);
 			void injectLocoUpdate(Locomotive::Shared loco, bool busy, bool forward, unsigned char speed, uint32_t functions);
+			void injectConnected();
 		private:
 			DigitalCentralStation::Shared station;
 		};
@@ -82,12 +90,20 @@ namespace winston
 		void turnoutUpdate(Turnout::Shared turnout, const Turnout::Direction direction);
 		void doubleSlipUpdate(DoubleSlipTurnout::Shared turnout, const DoubleSlipTurnout::Direction direction);
 
+		const bool connected() const;
+
 	protected:
+
+		const Result onConnected();
+		virtual const Result connectedInternal() = 0;
+
 		TurnoutAddressTranslator::Shared turnoutAddressTranslator;
 		LocoAddressTranslator& locoAddressTranslator;
 		SignalBox::Shared signalBox;
 		const Callbacks callbacks;
 		bool emergencyStop;
+
+		bool connectedToDCS;
 	};
 }
 

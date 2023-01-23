@@ -50,6 +50,7 @@ private:
     const winston::Result send(Z21Packet &packet);
 
     void notImplemented(std::string command);
+    const winston::Result connectedInternal();
 
     winston::TimePoint lastMsgSent;
     const std::chrono::seconds keepAliveTimeout = std::chrono::seconds(24);

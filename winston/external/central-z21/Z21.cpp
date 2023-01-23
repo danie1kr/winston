@@ -86,12 +86,23 @@ const winston::Result Z21::connect()
     winston::hal::delay(100);
 //#endif
     CaR(this->getStatus());
+    /*
     CaR(this->getSerialNumber());
     CaR(this->getHardwareInfo());
     CaR(this->getFirmwareVersion());
     CaR(this->getVersion());
     CaR(this->setBroadcastFlags(this->broadcastFlags));// | Z21_Broadcast::ALL_LOCO_INFO));
+    */
+    return winston::Result::OK;
+}
 
+const winston::Result Z21::connectedInternal()
+{
+    CaR(this->getSerialNumber());
+    CaR(this->getHardwareInfo());
+    CaR(this->getFirmwareVersion());
+    CaR(this->getVersion());
+    CaR(this->setBroadcastFlags(this->broadcastFlags));// | Z21_Broadcast::ALL_LOCO_INFO));
     return winston::Result::OK;
 }
 
@@ -207,6 +218,7 @@ const winston::Result Z21::setBroadcastFlags(uint32_t flags) {
 
 const winston::Result Z21::logoff() {
     Z21Packet packet;
+    this->connectedToDCS = false;
     packet.setHeader(4, Z21_LAN::LOGOFF);
     return this->send(packet);
 }
@@ -559,54 +571,62 @@ void Z21::processXPacket(uint8_t* data) {
             break;
         case Z21RX_LAN_X::TURNOUT_INFO:
             {
-                uint16_t address = Z21Packet::getBEuint16(data, 5);
-                uint8_t accessoryState = Z21Packet::getByte(data, 7);
-                auto track = this->turnoutAddressTranslator->turnout(address);
-                if(track->type() == winston::Track::Type::Turnout)
-                { 
-                    auto turnout = std::static_pointer_cast<winston::Turnout>(track);
-                    if (accessoryState == Z21_Accessory_State::P0 || accessoryState == Z21_Accessory_State::P1)
-                    {
-                        auto direction = accessoryState == Z21_Accessory_State::P1 ? winston::Turnout::Direction::A_B : winston::Turnout::Direction::A_C;
-                        this->turnoutUpdate(turnout, direction);
-                        winston::logger.log(winston::build("Z21: Turnout ", address, " in state ", winston::Turnout::DirectionToString(direction) ));
-                    }
-                    else
-                    {
-                        winston::logger.err(winston::build("Z21: Turnout ", address, " in illegal state ", accessoryState));
-                    }
-                }
-                else if (track->type() == winston::Track::Type::DoubleSlipTurnout)
+                const uint16_t address = Z21Packet::getBEuint16(data, 5);
+                const uint8_t accessoryState = Z21Packet::getByte(data, 7);
+
+                if (this->callbacks.specialAccessoryProcessingCallback(address, accessoryState))
                 {
-                    auto turnout = std::static_pointer_cast<winston::DoubleSlipTurnout>(track);
-                    // returns first address
-                    bool firstAddress = this->turnoutAddressTranslator->address(turnout) == address;
-                    if (accessoryState == Z21_Accessory_State::P0 || accessoryState == Z21_Accessory_State::P1)
+                    auto track = this->turnoutAddressTranslator->turnout(address);
+                    if (track->type() == winston::Track::Type::Turnout)
                     {
-                        unsigned char state = accessoryState == Z21_Accessory_State::P0 ? 1 : 0;
-                        if (turnout->isKnownAccessoryState())
+                        auto turnout = std::static_pointer_cast<winston::Turnout>(track);
+                        if (accessoryState == Z21_Accessory_State::P0 || accessoryState == Z21_Accessory_State::P1)
                         {
-                            // we do this twice potentially...
-                            turnout->setAccessoryState(state, firstAddress, false, false);
-                            auto direction = turnout->fromAccessoryState();
-                            this->doubleSlipUpdate(turnout, direction);
-                            winston::logger.log(winston::build("Z21: Turnout ", address, " in state ", winston::DoubleSlipTurnout::DirectionToString(direction)));
+                            auto direction = accessoryState == Z21_Accessory_State::P1 ? winston::Turnout::Direction::A_B : winston::Turnout::Direction::A_C;
+                            this->turnoutUpdate(turnout, direction);
+                            winston::logger.log(winston::build("Z21: Turnout ", address, " in state ", winston::Turnout::DirectionToString(direction)));
                         }
                         else
                         {
-                            turnout->setAccessoryState(state, firstAddress, true, true);
+                            winston::logger.err(winston::build("Z21: Turnout ", address, " in illegal state ", accessoryState));
                         }
                     }
-                    else
+                    else if (track->type() == winston::Track::Type::DoubleSlipTurnout)
                     {
-                        winston::logger.err(winston::build("Z21: Turnout ", address, " in illegal state ", accessoryState));
+                        auto turnout = std::static_pointer_cast<winston::DoubleSlipTurnout>(track);
+                        // returns first address
+                        bool firstAddress = this->turnoutAddressTranslator->address(turnout) == address;
+                        if (accessoryState == Z21_Accessory_State::P0 || accessoryState == Z21_Accessory_State::P1)
+                        {
+                            unsigned char state = accessoryState == Z21_Accessory_State::P0 ? 1 : 0;
+                            if (turnout->isKnownAccessoryState())
+                            {
+                                // we do this twice potentially...
+                                turnout->setAccessoryState(state, firstAddress, false, false);
+                                auto direction = turnout->fromAccessoryState();
+                                this->doubleSlipUpdate(turnout, direction);
+                                winston::logger.log(winston::build("Z21: Turnout ", address, " in state ", winston::DoubleSlipTurnout::DirectionToString(direction)));
+                            }
+                            else
+                            {
+                                turnout->setAccessoryState(state, firstAddress, true, true);
+                            }
+                        }
+                        else
+                        {
+                            winston::logger.err(winston::build("Z21: Turnout ", address, " in illegal state ", accessoryState));
+                        }
                     }
                 }
                 break;
             }
         case Z21RX_LAN_X::STATUS_CHANGED:
             if (onStatusChanged != NULL && Z21Packet::getDB0(data) == Z21RX_DB0::STATUS_CHANGED)
+            {
+                if (!this->connected())
+                    this->onConnected();
                 onStatusChanged(Z21Packet::getDB1(data));
+            }
             break;
         case Z21RX_LAN_X::GET_VERSION:
             this->callbacks.systemInfoCallback(header, "Version", winston::build(Z21Packet::getDB1(data), Z21Packet::getDB2(data)));

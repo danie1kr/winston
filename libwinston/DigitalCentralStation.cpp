@@ -3,7 +3,7 @@
 namespace winston
 {
 	DigitalCentralStation::DigitalCentralStation(TurnoutAddressTranslator::Shared& turnoutAddressTranslator, LocoAddressTranslator& locoAddressTranslator, SignalBox::Shared& signalBox, const Callbacks callbacks)
-		: Shared_Ptr<DigitalCentralStation>(), turnoutAddressTranslator(turnoutAddressTranslator), locoAddressTranslator(locoAddressTranslator), signalBox(signalBox), callbacks(callbacks), emergencyStop(false)
+		: Shared_Ptr<DigitalCentralStation>(), turnoutAddressTranslator(turnoutAddressTranslator), locoAddressTranslator(locoAddressTranslator), signalBox(signalBox), callbacks(callbacks), emergencyStop(false), connectedToDCS(false)
 	{
 
 	}
@@ -29,6 +29,11 @@ namespace winston
 		this->station->callbacks.locomotiveUpdateCallback(loco, busy, forward, speed, functions);
 	}
 
+	void DigitalCentralStation::DebugInjector::injectConnected()
+	{
+		this->station->onConnected();
+	}
+
 	void DigitalCentralStation::keepAlive()
 	{
 
@@ -48,5 +53,18 @@ namespace winston
 			{
 				return turnout->finalizeChangeTo(direction);
 			}, __PRETTY_FUNCTION__));
+	}
+
+	const bool DigitalCentralStation::connected() const
+	{
+		return this->connectedToDCS;
+	}
+
+	const Result DigitalCentralStation::onConnected()
+	{
+		const auto result = this->connectedInternal();
+		this->connectedToDCS = result == Result::OK;
+		this->callbacks.connectedCallback();
+		return result;
 	}
 };

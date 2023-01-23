@@ -98,6 +98,15 @@ winston::DigitalCentralStation::Callbacks Kornweinheim::z21Callbacks()
 #endif    
     };
 
+    callbacks.connectedCallback = [=]() {
+        this->digitalCentralStationConnected();
+    };
+
+    callbacks.specialAccessoryProcessingCallback = [=](const uint16_t address, const uint8_t state) -> const bool {
+        if (address == 500)
+            this->digitalCentralStationConnected();
+    };
+
     return callbacks;
 }
 
@@ -645,6 +654,8 @@ void Kornweinheim::setupDetectors()
 void Kornweinheim::systemSetupComplete()
 {
 #ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
+    this->stationDebugInjector->injectConnected();
+
     this->railway->turnouts([=](const Tracks track, winston::Turnout::Shared turnout) {
         this->stationDebugInjector->injectTurnoutUpdate(turnout, std::rand() % 2 ? winston::Turnout::Direction::A_B : winston::Turnout::Direction::A_C);
         });

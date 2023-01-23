@@ -28,7 +28,7 @@ namespace winston
 		void setup() {
 			this->systemSetup();
 
-			this->railway->init(_features & Features::Blocks);
+			this->railway->init(_features & Features::Blocks);/*
 
 			for(const auto &loco : this->locomotiveShed ) {
 
@@ -38,13 +38,13 @@ namespace winston
 						winston::hal::delay(150);
 						return winston::State::Finished;
 					}, __PRETTY_FUNCTION__));
-			}
+			}*/
 
 			this->setupSignals();
 			this->setupDetectors();
 			
 			this->digitalCentralStation->connect();
-
+			/*
 			this->railway->turnouts([=](const Tracks track, winston::Turnout::Shared turnout) {
 				
 				this->signalBox->order(winston::Command::make([this, turnout](const TimePoint &created) -> const winston::State
@@ -67,7 +67,7 @@ namespace winston
 						winston::hal::delay(100);
 						return winston::State::Finished;
 					}, __PRETTY_FUNCTION__));
-				});
+				});*/
 
 			this->signalBox->order(winston::Command::make([](const TimePoint &created) -> const winston::State
 				{
@@ -119,6 +119,43 @@ namespace winston
 		{
 			this->digitalCentralStation->triggerLocoDrive(address, speed, forward);
 			return winston::State::Finished;
+		}
+
+		void digitalCentralStationConnected()
+		{
+			this->railway->turnouts([=](const Tracks track, winston::Turnout::Shared turnout) {
+
+				this->signalBox->order(winston::Command::make([this, turnout](const TimePoint& created) -> const winston::State
+					{
+						this->digitalCentralStation->requestTurnoutInfo(turnout);
+			winston::hal::delay(50);
+			this->signalBox->setSignalsFor(turnout);
+			winston::hal::delay(100);
+			return winston::State::Finished;
+					}, __PRETTY_FUNCTION__));
+				});
+
+			this->railway->doubleSlipTurnouts([=](const Tracks track, winston::DoubleSlipTurnout::Shared turnout) {
+
+				this->signalBox->order(winston::Command::make([this, turnout](const TimePoint& created) -> const winston::State
+					{
+						this->digitalCentralStation->requestDoubleSlipTurnoutInfo(turnout);
+			winston::hal::delay(50);
+			this->signalBox->setSignalsFor(turnout);
+			winston::hal::delay(100);
+			return winston::State::Finished;
+					}, __PRETTY_FUNCTION__));
+				});
+
+			for (const auto& loco : this->locomotiveShed) {
+
+				this->signalBox->order(winston::Command::make([this, loco](const TimePoint& created) -> const winston::State
+					{
+						this->digitalCentralStation->requestLocoInfo(loco);
+				winston::hal::delay(150);
+				return winston::State::Finished;
+					}, __PRETTY_FUNCTION__));
+			}
 		}
 
 		bool loop()

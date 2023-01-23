@@ -95,6 +95,9 @@
     <ClInclude Include="IC74HC695_SignalDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resources.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\winston.html">

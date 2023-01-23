@@ -41,6 +41,7 @@ public:
         bool status(const unsigned int HTTPStatus);
         bool header(const std::string& key, const std::string& value);
         bool body(const std::string& content);
+        bool body(const unsigned char* content, size_t length, size_t chunked);
 #ifdef WINSTON_TEENSY_FLASHSTRING
         bool header(const __FlashStringHelper* key, const __FlashStringHelper* value);
         bool body(const __FlashStringHelper* content);
@@ -98,7 +99,6 @@ bool WebServerTeensy::HTTPConnectionTeensy::status(const unsigned int HTTPStatus
         return false;
     std::string line(winston::build("HTTP/1.1 ", HTTPStatus, " OK\r\n"));
     this->connection.write(line.c_str());
-    Serial.print(line.c_str());
     this->guard |= (unsigned char)HTTPConnectionTeensy::State::STATUS;
     return true;
 }
@@ -109,7 +109,6 @@ bool WebServerTeensy::HTTPConnectionTeensy::header(const std::string& key, const
         return false;
     std::string line(winston::build(key, ": ", value, "\r\n"));
     this->connection.write(line.c_str());
-    Serial.print(line.c_str());
     this->guard |= (unsigned char)HTTPConnectionTeensy::State::HEADER;
     return true;
 }
@@ -121,10 +120,33 @@ bool WebServerTeensy::HTTPConnectionTeensy::body(const std::string& content)
     if (!(this->guard & (unsigned char)HTTPConnectionTeensy::State::BODY))
     {
         this->connection.write("\r\n");
-        Serial.print("\r\n");
     }
     this->connection.write(content.c_str());
-    Serial.print(content.c_str());
+    this->guard |= (unsigned char)HTTPConnectionTeensy::State::BODY;
+    return true;
+}
+
+bool WebServerTeensy::HTTPConnectionTeensy::body(const unsigned char* content, size_t length, size_t chunked)
+{
+    if (!(this->guard & (unsigned char)HTTPConnectionTeensy::State::HEADER))
+        return false;
+    if (!(this->guard & (unsigned char)HTTPConnectionTeensy::State::BODY))
+    {
+        this->connection.write("\r\n");
+        Serial.print("\r\n");
+    }
+
+    if (chunked > 0)
+    {
+        for (size_t i = 0; i < length; i += chunked)
+        {
+            size_t chunkSize = (i + chunked < length) ? chunked : length - i;
+            this->connection.write((const char*)(&content[i]), chunkSize);
+        }
+    }
+    else
+        this->connection.write((const char*)content, length);
+
     this->guard |= (unsigned char)HTTPConnectionTeensy::State::BODY;
     return true;
 }

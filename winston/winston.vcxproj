@@ -82,6 +82,9 @@
       <AdditionalDependencies>Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4099</AdditionalOptions>
     </Link>
+    <PreBuildEvent>
+      <Command>external\include.exe --outfile resources.h cpp --http-content-type-deduction --namespace resources --storage-qualifier FLASHMEM --generate-get --generate-list resources\cytoscape-grid-guide.js resources\cytoscape-node-html-label.min.js resources\cytoscape.min.js resources\lodash.min.js resources\MaterialIcons-Regular.woff2 resources\materialicons.css resources\materialize.min.css resources\materialize.min.js resources\winston.html resources\zepto.min.js</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Realworld|x64'">
     <ClCompile>
@@ -99,6 +102,9 @@
       <AdditionalDependencies>Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4099</AdditionalOptions>
     </Link>
+    <PreBuildEvent>
+      <Command>external\include.exe --outfile resources.h cpp --http-content-type-deduction --namespace resources --storage-qualifier FLASHMEM --generate-get --generate-list resources\cytoscape-grid-guide.js resources\cytoscape-node-html-label.min.js resources\cytoscape.min.js resources\lodash.min.js resources\MaterialIcons-Regular.woff2 resources\materialicons.css resources\materialize.min.css resources\materialize.min.js resources\winston.html resources\zepto.min.js</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -121,6 +127,9 @@
       <AdditionalDependencies>Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4099</AdditionalOptions>
     </Link>
+    <PreBuildEvent>
+      <Command>external\include.exe --outfile resources.h cpp --http-content-type-deduction --namespace resources --storage-qualifier FLASHMEM --generate-get --generate-list resources\cytoscape-grid-guide.js resources\cytoscape-node-html-label.min.js resources\cytoscape.min.js resources\lodash.min.js resources\MaterialIcons-Regular.woff2 resources\materialicons.css resources\materialize.min.css resources\materialize.min.js resources\winston.html resources\zepto.min.js</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="external\central-z21\Z21.cpp" />
@@ -149,6 +158,7 @@
     <ClInclude Include="mio.hpp" />
     <ClInclude Include="PN532_DetectorDevice.h" />
     <ClInclude Include="railways.h" />
+    <ClInclude Include="resources.h" />
     <ClInclude Include="TLC5947_SignalDevice.h" />
     <ClInclude Include="winston-hal-x64.h" />
     <ClInclude Include="winston-main.h" />

@@ -5,6 +5,14 @@
 
 #include "Kornweinheim.h"
 
+#ifdef WINSTON_PLATFORM_WIN_x64
+#define FLASHMEM
+#endif
+
+#ifdef WINSTON_PACKED_WEBFILES
+#include "resources.h"
+#endif 
+
 /*
     TODO: 
         - retry commands if no answer came
@@ -300,7 +308,24 @@ winston::Result Kornweinheim::on_http(WebServer::HTTPConnection& connection, con
         this->userConfirmation->confirm(winston::ConfirmationProvider::Answer::No);
     }
     else
-        return winston::Result::NotFound;
+    {
+#ifdef WINSTON_PACKED_WEBFILES
+        const auto file = resource.substr(0, resource.find("?"));
+        auto resourceFile = resources::get(file);
+        if (resourceFile != nullptr)
+        {
+            connection.status(200);
+            if(resourceFile->content_type.compare("font/woff2") == 0)
+                connection.header("content-type"_s, "application/octet-stream");// +"; charset = UTF - 8"_s);
+            else
+                connection.header("content-type"_s, resourceFile->content_type);// +"; charset = UTF - 8"_s);
+            //connection.header("Connection"_s, "close"_s);
+            connection.body(resourceFile->data, resourceFile->size, 64);
+        }
+        else
+#endif
+            return winston::Result::NotFound;
+    }
 
     return winston::Result::OK;
 }

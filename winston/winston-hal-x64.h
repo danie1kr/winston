@@ -167,6 +167,7 @@ public:
 		bool status(const unsigned int HTTPStatus);
 		bool header(const std::string& key, const std::string& value);
 		bool body(const std::string& content);
+		bool body(const unsigned char* content, size_t length, size_t chunked);
 	private:
 		HTTPClient& connection;
 		std::string fullBody;

@@ -35,8 +35,12 @@ bool WebServerWSPP::HTTPConnectionWSPP::header(const std::string& key, const std
 }
 bool WebServerWSPP::HTTPConnectionWSPP::body(const std::string& content)
 {
-    fullBody.append(content);
-    this->connection->set_body(fullBody);
+    this->connection->set_body(content);
+    return true;
+}
+bool WebServerWSPP::HTTPConnectionWSPP::body(const unsigned char* content, size_t length, size_t chunked)
+{
+    this->connection->set_body((const char*)content);
     return true;
 }
 

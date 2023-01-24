@@ -224,7 +224,13 @@
 <body>
     <!-- overlay -->
     <div id="overlay">
-        <div class="row">
+        <div class="row status">
+            <div class="div col s8 offset-s2 valign-wrapper">
+                <div class="content">
+                </div>
+            </div>
+        </div>
+        <div class="row prog">
             <div class="div col s8 offset-s2 valign-wrapper">
                 <div class="progress">
                     <div class="indeterminate">
@@ -232,7 +238,7 @@
                 </div>
             </div>
         </div>
-        <div class="row">
+        <div class="row button">
             <div class="div col s8 offset-s5 valign-wrapper">
                 <a class="waves-effect waves-light btn" id="reconnect">reconnect</a>
             </div>
@@ -390,6 +396,7 @@
             socket.onopen = function (event) {
                 socketState = SocketOpen;
                 $("#connection").html("connected");
+                $("#overlay .status").hide();
                 $("#overlay").hide();
             }
 
@@ -400,11 +407,13 @@
 
                 socketState = SocketClosed;
                 $("#connection").html("not connected");
+                $("#overlay .status").hide();
                 $("#overlay").show();
             }
         }
 
         function onConnect() {
+            send("getStatus", {});
             send("getRailway", {});
             send("getLocoShed", {});
             send("getLogs", {});
@@ -471,6 +480,7 @@
                 case "layout": { updateRailwayLayout(data); break; }
                 case "loco": { loco(data); break; }
                 case "log": { log(data); break; }
+                case "status": { status(data); break; }
                 case "storeRailwayLayoutSuccessful": {
                     allowLayoutStorage = data;
                     if (allowLayoutStorage)
@@ -572,6 +582,17 @@
             $("#log").prepend($entry);
             $("#message").html("[" + data.level + "]: " + data.text);
             console.log(data.timestamp + " - [" + data.level + "]: " + data.text);
+        }
+
+        function status(data) {
+            if (data.connected) {
+                $("#overlay").hide();
+            }
+            else {
+                $("#overlay .status .content").text("digital station not connected");
+                $("#overlay .status").show();
+                $("#overlay").show();
+            }
         }
 
         function locoPositions(data) {

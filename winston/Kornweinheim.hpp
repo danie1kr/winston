@@ -103,8 +103,17 @@ winston::DigitalCentralStation::Callbacks Kornweinheim::z21Callbacks()
     };
 
     callbacks.specialAccessoryProcessingCallback = [=](const uint16_t address, const uint8_t state) -> const bool {
-        if (address == 500)
-            this->digitalCentralStationConnected();
+        switch (address)
+        {
+            case 500:
+            {
+                this->digitalCentralStationConnected();
+                break;
+            }
+        default: return true;
+        }
+        
+        return false;
     };
 
     return callbacks;

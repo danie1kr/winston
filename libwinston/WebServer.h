@@ -224,6 +224,17 @@ namespace winston
             this->webServer.broadcast(json);
         }
 
+        void statusSend()
+        {
+            DynamicJsonDocument obj(256);
+            obj["op"] = "status";
+            auto data = obj.createNestedObject("data");
+            data["connected"] = this->digitalCentralStation->connected();
+            std::string json("");
+            serializeJson(obj, json);
+            this->webServer.broadcast(json);
+        }
+
 	private:
 
 		// Define a callback to handle incoming messages
@@ -584,6 +595,10 @@ namespace winston
             {
                 for (const auto& entry : winston::logger.entries())
                     this->log(entry);
+            }
+            else if (std::string("\"getStatus\"").compare(op) == 0)
+            {
+                this->statusSend();
             }
             else
             {

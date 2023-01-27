@@ -40,9 +40,7 @@ private:
     void setupDetectors();
 
     winston::DigitalCentralStation::Callbacks z21Callbacks();
-
     winston::Locomotive::Callbacks locoCallbacks();
-
     winston::Railway::Callbacks railwayCallbacks();
 
 #ifdef WINSTON_WITH_WEBSOCKET
@@ -67,6 +65,11 @@ private:
     // setup our model railway system
     void systemSetup();
 
+    const winston::Result orderRouteSet(winston::Route::Shared route, const bool set);
+    std::vector<winston::Route::Shared> routesInProgress;
+
+    void orderTurnoutToggle(winston::Turnout::Shared turnout, winston::Turnout::Direction direction);
+    void orderDoubleSlipTurnoutToggle(winston::DoubleSlipTurnout::Shared turnout, winston::DoubleSlipTurnout::Direction direction);
     void systemSetupComplete();
 
     // accept new requests and loop over what the signal box has to do

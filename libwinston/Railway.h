@@ -11,13 +11,16 @@
 #include <map>
 #include <algorithm>
 #include <memory>
+#include <tuple>
 
 #include "WinstonTypes.h"
 #include "Detector.h"
 #include "Util.h"
 #include "Track.h"
 #include "Block.h"
+#include "Route.h"
 #include "HAL.h"
+#include "Log.h"
 
 namespace winston
 {
@@ -58,8 +61,14 @@ namespace winston
 		SignalFactory H(const Length distance, size_t& device, size_t& port);*/
 
 		void block(const Address address, const Trackset trackset, const Block::Type type);
-		Block::Shared block(Address address);
+		Block::Shared block(Address address) const;
 		const Blockmap blocks() const;
+		virtual void buildBlocks(const bool simple = true);
+
+		virtual const bool supportsBlocks() const;
+		virtual const bool supportsRoutes() const;
+
+		virtual const Result init() = 0;
 
 	protected:
 		const Callbacks callbacks;
@@ -90,20 +99,15 @@ namespace winston
 
 		using Tracks = _TracksClass;
 
-		Result init(bool blocks = false)
+		const Result initRails()
 		{
 			for (Tracks track : Tracks::_values())
 				this->tracks[track] = this->define(track);
 			this->connect();
-			if (!blocks)
-			{
-				Trackset set;
-				for (Tracks track : Tracks::_values())
-					set.insert(this->track(track));
-				this->block(1, set, Block::Type::Free);
-			}
+
 			return this->validate();
 		}
+
 		static constexpr size_t tracksCount() noexcept {
 			return Tracks::_size();
 		}
@@ -229,5 +233,94 @@ namespace winston
 
 	protected:
 		std::array<Track::Shared, tracksCount()> tracks;
+	};
+
+	template<typename _RoutesEnum>
+	class RailwayAddonRoutes
+	{
+	public:
+		using Routes = _RoutesEnum;
+		static constexpr size_t routesCount() noexcept {
+			return Routes::_size();
+		}
+		using RouteArray = std::array<Route::Shared, routesCount()>;
+
+		virtual Route::Shared define(const Routes route) = 0;
+
+		Route::Shared route(const int i) const
+		{
+			if (Routes::_is_valid(i))
+				return this->routes[i];
+			else
+				return nullptr;
+		}
+
+		Route::Shared route(const _RoutesEnum id) const
+		{
+			return this->routes[id];
+		}
+
+		const Result initRoutes()
+		{
+			for (Routes route: Routes::_values())
+				this->routes[route] = this->define(route);
+			// TODO: simulate signals
+
+			return this->validate();
+		}
+
+		const bool supportsRoutes() const
+		{
+			return true;
+		}
+
+		using EachRouteCallback = std::function<void(const Route::Shared&)>;
+		void eachRoute(EachRouteCallback callback) const
+		{
+			for (size_t i = 0; i < routesCount(); ++i)
+				callback(this->routes[i]);
+		}
+
+	private:
+		const std::string enumIntegralToString(const int i)
+		{
+			try
+			{
+				Routes r = Routes::_from_integral(i);
+				return r._to_string();
+			}
+			catch (std::exception &e)
+			{
+				(void)e;
+			}
+			
+			return "unknown";
+		}
+
+		Result validate()
+		{
+			bool passed = true;
+
+			for (size_t i = 0; i < routesCount() && passed; ++i)
+			{
+				auto current = this->routes[i];
+				if (!current)
+				{
+					logger.warn("Route validation, #", enumIntegralToString((int)i), " is null");
+					return Result::ValidationFailed;
+				}
+				auto result = current->validate();
+				if (result != Result::OK)
+				{
+					logger.err("Route validation, #", enumIntegralToString((int)i), " faild with ", result);
+					return Result::ValidationFailed;
+				}
+				passed = result == Result::OK;
+			}
+
+			return passed ? Result::OK : Result::InternalError;
+		}
+
+		RouteArray routes;
 	};
 }

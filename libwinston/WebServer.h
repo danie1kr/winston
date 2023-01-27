@@ -97,10 +97,12 @@ namespace winston
 	{
     public:
         using TurnoutToggleCallback = std::function<Result(const std::string id)>;
+        using RouteSetCallback = std::function<Result(const int id, const bool set)>;
         using LocoControlCallback = std::function<Result()>;
     private:
         TurnoutToggleCallback turnoutToggle;
         LocoControlCallback locoControl;
+        RouteSetCallback routeSet;
         typename _Railway::Shared railway;
         LocomotiveShed locomotiveShed;
         typename _Railway::AddressTranslator::Shared addressTranslator;
@@ -118,11 +120,12 @@ namespace winston
             this->webServer.step();
         }
 
-		Result init(typename _Railway::Shared railway, LocomotiveShed locomotiveShed, typename _Storage::Shared storageLayout, typename _Railway::AddressTranslator::Shared addressTranslator, DigitalCentralStation::Shared digitalCentralStation, const unsigned int port, typename _WebServer::OnHTTP onHTTP, TurnoutToggleCallback turnoutToggle)
+		Result init(typename _Railway::Shared railway, LocomotiveShed locomotiveShed, typename _Storage::Shared storageLayout, typename _Railway::AddressTranslator::Shared addressTranslator, DigitalCentralStation::Shared digitalCentralStation, const unsigned int port, typename _WebServer::OnHTTP onHTTP, TurnoutToggleCallback turnoutToggle, RouteSetCallback routeSet)
 		{
             this->railway = railway;
             this->locomotiveShed = locomotiveShed;
             this->turnoutToggle = turnoutToggle;
+            this->routeSet = routeSet;
             this->storageLayout = storageLayout;
             this->addressTranslator = addressTranslator;
             this->digitalCentralStation = digitalCentralStation;
@@ -167,6 +170,19 @@ namespace winston
         void doubleSlipSendState(const std::string turnoutTrackId, const winston::DoubleSlipTurnout::Direction dir)
         {
             turnoutSendState(turnoutTrackId, (int)dir);
+        }
+
+        // send route state via websocket
+        void routeState(const Route &route, const Route::State state)
+        {
+            DynamicJsonDocument obj(200);
+            obj["op"] = "routeState";
+            auto data = obj.createNestedObject("data");
+            data["id"] = route.id;
+            data["state"] = (int)state;
+            std::string json("");
+            serializeJson(obj, json);
+            this->webServer.broadcast(json);
         }
 
 		// send a signal state via websocket
@@ -268,12 +284,18 @@ namespace winston
 
             if (std::string("\"doTurnoutToggle\"").compare(op) == 0)
             {
-                std::string id = data["id"];
+                const std::string id = data["id"];
                 this->turnoutToggle(id);
+            }
+            else if (std::string("\"doRouteSet\"").compare(op) == 0)
+            {
+                const int id = data["id"];
+                const bool set = data["set"];
+                this->routeSet(id, set);
             }
             else if (std::string("\"getTurnoutState\"").compare(op) == 0)
             {
-                std::string id = data["id"];
+                const std::string id = data["id"];
                 auto track = railway->track(id);
                 if (track->type() == Track::Type::Turnout)
                 {
@@ -302,6 +324,7 @@ namespace winston
                 auto tracks = railwayContent.createNestedArray("tracks");
                 auto signals = railwayContent.createNestedArray("signals");
                 auto blocks = railwayContent.createNestedArray("blocks");
+                auto routes = railwayContent.createNestedArray("routes");
                 auto detectors = railwayContent.createNestedArray("detectors");
 
                 for (unsigned int i = 0; i < railway->tracksCount(); ++i)
@@ -403,6 +426,38 @@ namespace winston
                     auto blockTracks = b.createNestedArray("tracks");
                     for (auto& track : bl->tracks())
                         blockTracks.add(track->name());
+                }
+
+                if (this->railway->supportsRoutes())
+                {
+                    this->railway->eachRoute([=](const Route::Shared& route) {
+                        auto r = routes.createNestedObject();
+                        r["id"] = route->id;
+                        r["name"] = route->name;
+                        r["start"] = Track::ConnectionToString(route->start());
+                        auto routePath = r.createNestedArray("path");
+                        for (auto& path : route->path)
+                        {
+                            auto p = routePath.createNestedObject();
+                            switch (path->type)
+                            {
+                            case Route::Track::Type::Track:
+                                p["type"] = "Track";
+                                p["track"] = path->track()->name();
+                                break;
+                            case Route::Track::Type::Turnout:
+                                p["type"] = "Turnout";
+                                p["track"] = path->track()->name();
+                                p["direction"] = (int)(std::dynamic_pointer_cast<Route::Turnout>(path))->direction;
+                                break;
+                            case Route::Track::Type::DoubleSlipTurnout:
+                                p["type"] = "DoubleSlipTurnout";
+                                p["track"] = path->track()->name();
+                                p["direction"] = (int)(std::dynamic_pointer_cast<Route::DoubleSlipTurnout>(path))->direction;
+                                break;
+                            }
+                        }
+                    });
                 }
 
                 std::string railwayContentJson("");

@@ -141,7 +141,7 @@ namespace winston
 		}
 
 		virtual void collectAllConnections(std::set<Track::Shared>& tracks) const = 0;
-		virtual const Connection whereConnects(Track::Shared& other) const = 0;
+		virtual const Connection whereConnects(const Track::Shared& other) const = 0;
 		virtual const Connection otherConnection(const Connection connection) const = 0;
 		using ConnectionCallback = std::function<void(Track::Shared track, const Connection connection)>;
 		virtual void eachConnection(ConnectionCallback callback) = 0;
@@ -184,7 +184,7 @@ namespace winston
 		const bool traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const;
 		const bool canTraverse(const Connection entering) const;
 		void collectAllConnections(std::set<Track::Shared>& tracks) const;
-		const Connection whereConnects(Track::Shared& other) const;
+		const Connection whereConnects(const Track::Shared& other) const;
 		const Connection otherConnection(const Connection connection) const;
 		void eachConnection(ConnectionCallback callback);
 
@@ -219,7 +219,7 @@ namespace winston
 		const bool canTraverse(const Connection entering) const;
 
 		void collectAllConnections(std::set<Track::Shared>& tracks) const;
-		const Connection whereConnects(Track::Shared& other) const;
+		const Connection whereConnects(const Track::Shared& other) const;
 		const Connection otherConnection(const Connection connection) const;
 		void eachConnection(ConnectionCallback callback);
 
@@ -267,8 +267,9 @@ namespace winston
 		const bool traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const;
 		const bool canTraverse(const Connection entering) const;
 		void collectAllConnections(std::set<Track::Shared>& tracks) const;
-		const Connection whereConnects(Track::Shared& other) const;
+		const Connection whereConnects(const Track::Shared& other) const;
 		const Connection otherConnection(const Connection connection) const;
+		const Connection otherConnection(const Connection connection, const Direction direction) const;
 		void eachConnection(ConnectionCallback callback);
 
 		const Result validate();
@@ -333,8 +334,9 @@ namespace winston
 		const bool traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const;
 		const bool canTraverse(const Connection entering) const;
 		void collectAllConnections(std::set<Track::Shared>& tracks) const;
-		const Connection whereConnects(Track::Shared& other) const;
+		const Connection whereConnects(const Track::Shared& other) const;
 		const Connection otherConnection(const Connection connection) const;
+		const Connection otherConnection(const Connection connection, const Direction direction) const;
 		void eachConnection(ConnectionCallback callback);
 
 		const Result validate();

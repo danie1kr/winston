@@ -44,6 +44,10 @@ const std::string MiniRailway::name()
 {
     return std::string("MiniRailway");
 }
+const winston::Result MiniRailway::init()
+{
+    return this->initRails();
+}
 
 SignalTestRailway::SignalTestRailway(const Callbacks callbacks) : winston::RailwayWithRails<SignalTestRailwayTracks>(callbacks) {};
 
@@ -160,6 +164,11 @@ const std::string SignalTestRailway::name()
     return std::string("SignalTestRailway");
 }
 
+const winston::Result SignalTestRailway::init()
+{
+    return this->initRails();
+}
+
 RailwayWithSiding::RailwayWithSiding(const Callbacks callbacks) : winston::RailwayWithRails<RailwayWithSidingsTracks>(callbacks) {};
 RailwayWithSiding::AddressTranslator::AddressTranslator(RailwayWithSiding::Shared railway) : winston::DigitalCentralStation::TurnoutAddressTranslator(), Shared_Ptr<AddressTranslator>(), railway(railway) { };
 
@@ -222,6 +231,11 @@ const std::string RailwayWithSiding::name()
     return std::string("RailwayWithSiding");
 }
 
+const winston::Result RailwayWithSiding::init()
+{
+    return this->initRails();
+}
+
 TimeSaverRailway::TimeSaverRailway(const Callbacks callbacks) : winston::RailwayWithRails<TimeSaverRailwayTracks>(callbacks) {};
 winston::Track::Shared TimeSaverRailway::define(const Tracks track)
 {
@@ -281,10 +295,20 @@ const std::string TimeSaverRailway::name()
     return std::string("TimeSaverRailway");
 }
 
+const winston::Result TimeSaverRailway::init()
+{
+    return winston::Result::OK;
+}
+
 Y2020Railway::Y2020Railway(const Callbacks callbacks) : winston::RailwayWithRails<Y2020RailwayTracks>(callbacks) {};
 const std::string Y2020Railway::name()
 {
     return std::string("Y2020Railway");
+}
+
+const winston::Result Y2020Railway::init()
+{
+    return this->initRails();
 }
 
 Y2020Railway::AddressTranslator::AddressTranslator(Y2020Railway::Shared railway) : winston::DigitalCentralStation::TurnoutAddressTranslator(), Shared_Ptr<AddressTranslator>(), railway(railway) { };
@@ -479,6 +503,16 @@ const winston::Address Y2021Railway::AddressTranslator::address(winston::Track::
     return 0;
 }
 
+winston::Route::Shared Y2021Railway::AddressTranslator::route(const winston::Address address) const
+{
+    return nullptr;
+}
+
+const winston::Address Y2021Railway::AddressTranslator::address(winston::Route::Shared track) const
+{
+    return 0;
+}
+
 winston::Track::Shared Y2021Railway::define(const Tracks track)
 {
     using namespace winston::library::track;
@@ -538,6 +572,8 @@ winston::Track::Shared Y2021Railway::define(const Tracks track)
 void Y2021Railway::connect()
 {
 #define LOCAL_TRACK(var)  auto var = this->track(Tracks::var);
+#define LOCAL_TURNOUT(var)  auto var = std::dynamic_pointer_cast<winston::Turnout>(this->track(Tracks::var));
+#define LOCAL_DOUBLESLIPTURNOUT(var)  auto var = std::dynamic_pointer_cast<winston::DoubleSlipTurnout>(this->track(Tracks::var));
     LOCAL_TRACK(PBF1a);
     LOCAL_TRACK(PBF1);
     LOCAL_TRACK(PBF2a);
@@ -578,62 +614,8 @@ void Y2021Railway::connect()
     const auto B = winston::Track::Connection::B;
     const auto C = winston::Track::Connection::C;
     const auto D = winston::Track::Connection::D;
-/*
-    size_t device = 0;
-    size_t port = 0;
-    
+
     // outer loop
-    Turnout1->connect(B, PBF2a, A)
-        ->connect(B, Turnout4, A)
-        ->connect(B, PBF2, A)
-        ->connect(B, H(5, port, device), Turnout6, C)
-        ->connect(A, B1, A)
-        ->connect(B, Turnout7, A)
-        ->connect(B, B2, A)
-        ->connect(B, Turnout11, B)
-        ->connect(A, B3, A)
-        ->connect(B, KS_dummy(), Turnout1, A);
-
-    // inner loop
-    Turnout2->connect(A, Turnout3, A)
-        ->connect(B, PBF3, A)
-        ->connect(B, H(5, port, device), B4, A)
-        ->connect(B, Turnout8, C)
-        ->connect(A, Turnout9, A)
-        ->connect(B, B5, A)
-        ->connect(B, Turnout10, A)
-        ->connect(B, B6, A)
-        ->connect(B, KS_dummy(), Turnout2, C);
-
-    // lower track
-    PBF1a->connect(A, KS_dummy(0), Turnout5, B)
-        ->connect(A, PBF1, A)
-        ->connect(B, H(5, port, device), Turnout6, B);
-
-    // inner turnouts
-    Turnout1->connect(C, Turnout2, B);
-    Turnout4->connect(C, Turnout5, C);
-    Turnout7->connect(C, Turnout8, B);
-    Turnout9->connect(C, Turnout12, C);
-    Turnout10->connect(C, Turnout11, C);
-    Turnout15->connect(C, Turnout16, C);
-
-    // nebengleise
-    Turnout3->connect(C, N1, A, KS_dummy(0));
-    Turnout12->connect(B, N2, A, KS_dummy(0));
-
-    // GBF
-   Turnout12->connect(A, Turnout13, A)
-        ->connect(B, Turnout14, A)
-        ->connect(B, GBF1, A, KS_dummy(0));
-   Turnout13->connect(C, GBF3b, A, KS_dummy(0))
-       ->connect(B, KS_dummy(0), Turnout16, A)
-       ->connect(B, GBF3a, A, KS_dummy(0));
-   Turnout14->connect(C, GBF2b, A, KS_dummy(0))
-       ->connect(B, KS_dummy(0), Turnout15, B)
-       ->connect(A, GBF2a, A, KS_dummy(0));*/
-
-       // outer loop
     Turnout1->connect(B, PBF2a, A)
         ->connect(B, Turnout4, A)
         ->connect(B, PBF2, A)
@@ -686,8 +668,162 @@ void Y2021Railway::connect()
         ->connect(B, GBF2a, A);
 }
 
+winston::Route::Shared Y2021Railway::define(const Routes route)
+{
+    LOCAL_TRACK(PBF1a);
+    LOCAL_TRACK(PBF1);
+    LOCAL_TRACK(PBF2a);
+    LOCAL_TRACK(PBF2);
+    LOCAL_TRACK(PBF3);
+    LOCAL_TRACK(GBF1);
+    LOCAL_TRACK(GBF2a);
+    LOCAL_TRACK(GBF2b);
+    LOCAL_TRACK(GBF3a);
+    LOCAL_TRACK(GBF3b);
+    LOCAL_TRACK(B1);
+    LOCAL_TRACK(B2);
+    LOCAL_TRACK(B3);
+    LOCAL_TRACK(B4);
+    LOCAL_TRACK(B5);
+    LOCAL_TRACK(B6);
+    LOCAL_TRACK(B_PBF2_PBF1);
+    LOCAL_TRACK(B_To_GBF);
+    LOCAL_TRACK(N1);
+    LOCAL_TRACK(N2);
+    LOCAL_TURNOUT(Turnout1);
+    LOCAL_TURNOUT(Turnout2);
+    LOCAL_TURNOUT(Turnout3);
+    LOCAL_TURNOUT(Turnout4);
+    LOCAL_TURNOUT(Turnout5);
+    LOCAL_TURNOUT(Turnout6);
+    LOCAL_TURNOUT(Turnout7);
+    LOCAL_TURNOUT(Turnout8);
+    LOCAL_TURNOUT(Turnout9);
+    LOCAL_TURNOUT(Turnout10);
+    LOCAL_TURNOUT(Turnout11);
+    LOCAL_DOUBLESLIPTURNOUT(DoubleSlipTurnout12_13);
+    LOCAL_TURNOUT(Turnout14);
+    LOCAL_TURNOUT(Turnout15);
+    LOCAL_TURNOUT(Turnout16);
+
+    const auto A = winston::Track::Connection::A;
+    const auto B = winston::Track::Connection::B;
+    const auto C = winston::Track::Connection::C;
+    const auto D = winston::Track::Connection::D;
+
+#define ROUTE(id, ...)  case Routes::id: { return winston::Route::make((int)Routes::id, __VA_ARGS__); }
+#define PATH(...)   winston::Route::Path{__VA_ARGS__}
+#define PROTECTIONS(...)   winston::Route::Protections{__VA_ARGS__}
+#define PATH_TRACK(x) winston::Route::Track::make(x)
+#define PATH_TURNOUT(x, dir) winston::Route::Turnout::make(x, winston::Turnout::Direction::dir)
+
+    switch (route)
+    {
+    ROUTE(B3_PBF1, 
+        "B3 --> PBF1", B,
+        PATH(
+            PATH_TRACK(B3),
+            PATH_TURNOUT(Turnout1, A_B),
+            PATH_TRACK(PBF2a),
+            PATH_TURNOUT(Turnout4, A_C),
+            PATH_TRACK(B_PBF2_PBF1),
+            PATH_TURNOUT(Turnout5, A_C),
+            PATH_TRACK(PBF1)
+        ),
+        PROTECTIONS(
+            PATH_TURNOUT(Turnout2, A_B)
+    )) 
+    ROUTE(B3_PBF2,
+        "B3 --> PBF2", B,
+        PATH(
+            PATH_TRACK(B3),
+            PATH_TURNOUT(Turnout1, A_B),
+            PATH_TRACK(PBF2a),
+            PATH_TURNOUT(Turnout4, A_B),
+            PATH_TRACK(PBF2)
+        ),
+        PROTECTIONS(
+            PATH_TURNOUT(Turnout2, A_B),
+            PATH_TURNOUT(Turnout5, A_B)
+        ))
+    ROUTE(B3_PBF3,
+        "B3 --> PBF3", B,
+        PATH(
+            PATH_TRACK(B3),
+            PATH_TURNOUT(Turnout1, A_C),
+            PATH_TURNOUT(Turnout2, A_B),
+            PATH_TURNOUT(Turnout3, A_B),
+            PATH_TRACK(PBF3)
+        )) 
+
+    ROUTE(B3_N1,
+        "B3 --> N1", B,
+        PATH(
+            PATH_TRACK(B3),
+            PATH_TURNOUT(Turnout1, A_C),
+            PATH_TURNOUT(Turnout2, A_B),
+            PATH_TURNOUT(Turnout3, A_C),
+            PATH_TRACK(N1)
+        ))
+    ROUTE(B6_PBF3,
+        "B6 --> PBF3", B,
+        PATH(
+            PATH_TRACK(B6),
+            PATH_TURNOUT(Turnout2, A_C),
+            PATH_TURNOUT(Turnout3, A_B),
+            PATH_TRACK(PBF3)
+        ),
+        PROTECTIONS(
+            PATH_TURNOUT(Turnout1, A_B),
+        ))
+
+    ROUTE(B6_N1,
+        "B6 --> N1", B,
+        PATH(
+            PATH_TRACK(B6),
+            PATH_TURNOUT(Turnout2, A_C),
+            PATH_TURNOUT(Turnout3, A_C),
+            PATH_TRACK(N1)
+        ),
+        PROTECTIONS(
+            PATH_TURNOUT(Turnout1, A_B),
+            ))
+    default:
+        winston::logger.warn("unsupported route: ", route._to_string());
+        break;
+    }
+
+    return nullptr;
+}
+
 void Y2021Railway::attachDetectors()
 {
+}
+/*
+void Y2021Railway::buildBlocks() 
+{
+    winston::Trackset set;
+    for (Tracks track : Tracks::_values())
+        set.insert(this->track(track));
+    this->block(1, set, winston::Block::Type::Free);
+}*/
+
+const winston::Result Y2021Railway::init()
+{
+    auto result = this->initRails();
+    if (result != winston::Result::OK)
+    {
+        winston::logger.err("Y2021Railway initRails failed with ", result);
+        return result;
+    }
+    result = this->initRoutes();
+    if (result != winston::Result::OK)
+    {
+        winston::logger.err("Y2021Railway initRoutes failed with ", result);
+        return result;
+    }
+
+    return winston::Result::OK;
 }
 
 #ifndef WINSTON_PLATFORM_TEENSY
@@ -695,6 +831,11 @@ SignalRailway::SignalRailway(const Callbacks callbacks) : winston::RailwayWithRa
 const std::string SignalRailway::name()
 {
     return std::string("SignalRailway");
+}
+
+const winston::Result SignalRailway::init()
+{
+    return this->initRails();
 }
 
 SignalRailway::AddressTranslator::AddressTranslator(SignalRailway::Shared railway) : winston::DigitalCentralStation::TurnoutAddressTranslator(), Shared_Ptr<AddressTranslator>(), railway(railway) { };

@@ -17,6 +17,9 @@ namespace winston
 		public:
 			virtual Track::Shared turnout(const Address address) const = 0;
 			virtual const Address address(winston::Track::Shared track) const = 0;
+
+			virtual Route::Shared route(const Address address) const = 0;
+			virtual const Address address(winston::Route::Shared track) const = 0;
 		};
 
 		class LocoAddressTranslator

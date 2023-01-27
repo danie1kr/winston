@@ -7,6 +7,16 @@ namespace winston
 	{
 	}
 
+	const bool Railway::supportsBlocks() const
+	{
+		return false;
+	}
+
+	const bool Railway::supportsRoutes() const
+	{
+		return false;
+	}
+
 	void Railway::block(const Address address, const Trackset trackset, const Block::Type type)
 	{
 		if (this->_blocks.find(address) != this->_blocks.end())
@@ -18,28 +28,18 @@ namespace winston
 		this->_blocks.insert(std::make_pair(address, Block::make(address, trackset, type)));
 	}
 
-	Block::Shared Railway::block(Address address)
+	Block::Shared Railway::block(Address address) const
 	{
-		return this->_blocks[address];
+		auto it = this->_blocks.find(address);
+		if (it != this->_blocks.end())
+			return it->second;
+		return nullptr;
 	}
 
 	const Blockmap Railway::blocks() const
 	{
 		return this->_blocks;
 	}
-	/*
-	Railway::SignalFactory Railway::KS_dummy(const Length distance, const Port port)
-	{
-		winston::logger.warn("warn: KS_dummy signal on HW 0#21-23");
-		return [distance, this](winston::Track::Shared track, winston::Track::Connection connection)->winston::Signal::Shared {
-			return winston::SignalKS::make([=](const winston::Signal::Aspects aspect)->const winston::State {
-				return this->callbacks.signalUpdateCallback(track, connection, aspect);
-				}, distance, Port(0, 21));
-		};
-	}
 
-	Railway::SignalFactory Railway::H(const Length distance, size_t& device, size_t& port)
-	{
-		return S<SignalH>(distance, device, port);
-	}*/
+	void Railway::buildBlocks(const bool simple) { }
 }

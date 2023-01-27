@@ -52,9 +52,10 @@ namespace winston
 
 	enum class Features : unsigned int
 	{
-		None =		0b00,
-		Blocks =	0b01,
-		Detectors = 0b10
+		None =		0b000,
+		Blocks =	0b001,
+		Detectors = 0b010,
+		Routes	  = 0b100
 	};
 
 	inline Features operator|(Features a, Features b)
@@ -258,7 +259,7 @@ namespace winston
 	class SignalBox;
 
 	class DigitalCentralStation;
-	template<typename _Railway, class _AddressTranslator, class _DigitalCentralStation, Features _features>
+	template<typename _Railway, class _AddressTranslator, class _DigitalCentralStation>
 	class ModelRailwaySystem;
 
 	class Block;

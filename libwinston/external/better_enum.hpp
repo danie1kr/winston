@@ -6,6 +6,8 @@
 #ifndef BETTER_ENUMS_ENUM_H
 #define BETTER_ENUMS_ENUM_H
 
+
+
 #include <cstddef>
 #include <cstring>
 #include <iosfwd>

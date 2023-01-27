@@ -69,15 +69,17 @@
             z-index: 10000;
             padding: 20px 20px 20px 20px;
         }
-        #logsContent tr td:nth-child(1), #logsContent tr td:nth-child(2) {
-            width: 10%;
-        }
-        #logsContent tr td:last-child {
-            max-width: 0;
-            min-width: fit-content;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-        }
+
+            #logsContent tr td:nth-child(1), #logsContent tr td:nth-child(2) {
+                width: 10%;
+            }
+
+            #logsContent tr td:last-child {
+                max-width: 0;
+                min-width: fit-content;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
 
         body {
             display: flex;
@@ -121,9 +123,9 @@
             padding: 0 0;
         }
 
-        .microButton > i {
-            margin: 0 0 0 0;
-        }
+            .microButton > i {
+                margin: 0 0 0 0;
+            }
 
         .switch.lever {
             margin: 0 0 0 0;
@@ -132,9 +134,9 @@
         div.collapsible-header {
         }
 
-        div.collapsible-header > div.row {
-            width: 100%;
-        }
+            div.collapsible-header > div.row {
+                width: 100%;
+            }
 
         .brand-logo {
             margin-left: 16px;
@@ -218,6 +220,16 @@
             <td><%= level %></td>
             <td><%= text %></td>
         </tr>
+    </script>
+
+    <script type="text/template" id="template_route">
+        <div class="col s6 switch winston-route" winston-route="<%= id %>">
+            <label>
+                <%= name %>
+                <input type="checkbox" class="set">
+                <span class="lever"></span>
+            </label>
+        </div>
     </script>
 </head>
 
@@ -344,7 +356,11 @@
         <!-- left side -->
         <ul id="sideTurnout" class="sidenav sidenav-fixed">
             <ul class="collapsible expandable">
-                <li id="turnoutsContainer" class="active">
+                <li id="routesContainer" class="active">
+                    <div class="collapsible-header">Routes</div>
+                    <div class="collapsible-body"></div>
+                </li>
+                <li id="turnoutsContainer" class="">
                     <div class="collapsible-header">Turnouts</div>
                     <div class="collapsible-body"></div>
                 </li>
@@ -420,7 +436,7 @@
         }
 
         /* variables and constants */
-        let railway, signals, blocks, detectors, layout, $railway, $saveLayout, $resetLayout, cy, uiEditLayout = false, allowLayoutStorage = true, allowLayoutLoading = true;
+        let railway, signals, blocks, detectors, routes, layout, $railway, $saveLayout, $resetLayout, cy, uiEditLayout = false, allowLayoutStorage = true, allowLayoutLoading = true;
 
         const WinstonTypeTurnout = "turnout";
         const WinstonTypeLocomotive = "locomotive";
@@ -433,6 +449,10 @@
         const DoubleSlipTurnoutState_C_D = 2;
         const DoubleSlipTurnoutState_B_D = 3;
         const DoubleSlipTurnoutState_Changing = 4;
+
+        const RouteState_Unset = 0;
+        const RouteState_Setting = 1;
+        const RouteState_Set = 2;
 
         function turnoutDirectionLabelFromDirection(direction) {
             switch (direction) {
@@ -468,7 +488,6 @@
         }
 
         /* websocket receive */
-
         function parse(content) {
             let op = content.op;
             let data = content.data;
@@ -476,6 +495,7 @@
             switch (op) {
                 case "turnoutState": { turnoutState(data); break; }
                 case "signalState": { signalState(data); break; }
+                case "routeState": { routeState(data); break; }
                 case "railway": { buildRailwayGraph(data); break; }
                 case "layout": { updateRailwayLayout(data); break; }
                 case "loco": { loco(data); break; }
@@ -523,6 +543,21 @@
 
             let signal = cy.nodes(".signal[id=\"" + track + "_signal_" + guarding + "\"]")
                 .data("aspects", aspects);
+        }
+
+        function routeState(data) {
+            let $route = $(".winston-route[winston-route=\"" + data.id + "\"]");
+            switch (data.state) {
+                case RouteState_Unset:
+                    $route.find("input").prop("disabled", "").prop("checked", "");
+                    break;
+                case RouteState_Setting:
+                    $route.find("input").prop("disabled", "disabled").prop("checked", "checked");
+                    break;
+                case RouteState_Set:
+                    $route.find("input").prop("disabled", "").prop("checked", "checked");
+                    break;
+            }
         }
 
         function loco(data) {
@@ -576,6 +611,22 @@
             $element.find(".light").prop("checked", data.light ? "checked" : undefined);
         }
 
+        function populateRoutesUI(routes) {
+            let $routesContainerBody = $("#routesContainer>div.collapsible-body");
+            $routesContainerBody.empty();
+            _.each(routes, route => {
+                let routeTemplate = _.template($("#template_route").html());
+                let $route = $(routeTemplate({ id: route.id, name: route.name }));
+                $route.find(".set").on("change", function (event) {
+                    let $target = $(event.target);
+                    let $closest = $($target.closest(".winston-route"));
+                    sendRoute($closest.attr("winston-route"), $target.prop("checked"));
+                    $target.prop("disabled", "disabled");
+                });
+                $routesContainerBody.append($route);
+            });
+        }
+
         function log(data) {
             let entryTemplate = _.template($("#template_log_entry").html());
             let $entry = $(entryTemplate({ timestamp: data.timestamp, level: data.level, text: data.text }));
@@ -613,7 +664,6 @@
         }
 
         /* socket send */
-
         function send(op, data) {
             if (socketState === SocketOpen)
                 socket.send(JSON.stringify({ op: op, data: data }));
@@ -703,6 +753,12 @@
                 send("doTurnoutToggle", { id: id });
         }
 
+        function sendRoute(id, set) {
+            if (!allowWinstonSubmit())
+                return;
+            send("doRouteSet", { id: id, set: set });
+        }
+
         function turnoutRequestStatus(track) {
             if (!allowWinstonSubmit())
                 return;
@@ -727,7 +783,6 @@
                 speed: speed
             });
         }
-
 
         function storeRailwayLayout() {
             let layout =
@@ -914,7 +969,12 @@
                             "height": 10,
                             "shape": "octagon",
                         }
-
+                    },
+                    {
+                        selector: ".signal.routeStart",
+                        style: {
+                            "background-color": "skyblue"
+                        }
                     },
                     {
                         selector: "node.detector",
@@ -1137,6 +1197,9 @@
                     cy = cytoscapeUpdateDetectors(cy, detectors);
                     cy = cytoscapePostAdd(cy);
 
+                    populateRoutesUI(routes);
+                    cy = cytoscapeMarkSignalStartingRoute(routes, cy);
+
                     cy.viewport({ zoom: layout.viewport.zoom, pan: layout.viewport.pan });
                 }
                 else {
@@ -1286,6 +1349,15 @@
             return cy;
         }
 
+        function cytoscapeMarkSignalStartingRoute(routes, cy) {
+            _.each(routes, route => {
+                let guarding = route.start;
+                let track = route.path[0].track;
+                cy.$("node.signal[parentTrack=\"" + track + "\"][guarding=\"" + guarding + "\"]").addClass("routeStart");
+            });
+            return cy;
+        }
+
         function cytoscapeUpdateBlocks(cy, blocks) {
             _.each(blocks, function (block, i) {
                 _.each(block.tracks, function (track, j) {
@@ -1298,7 +1370,6 @@
 
             return cy;
         }
-
 
         function cytoscapeUpdateDetectors(cy, detectors) {
             let nodes = [];
@@ -1442,6 +1513,7 @@
                 signals = data.signals;
                 blocks = data.blocks;
                 detectors = data.detectors;
+                routes = data.routes;
 
                 _.each(data.tracks, function (track, i) {
                     addTrackToLayout(edges, nodes, data.tracks, track, i * 100);
@@ -1454,6 +1526,9 @@
                 cy = cytoscapeUpdateBlocks(cy, data.blocks);
                 cy = cytoscapeUpdateDetectors(cy, data.detectors);
                 cy = cytoscapePostAdd(cy);
+
+                populateRoutesUI(routes);
+                cy = cytoscapeMarkSignalStartingRoute(routes, cy);
 
                 if (allowLayoutLoading)
                     send("getRailwayLayout", {});

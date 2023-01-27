@@ -69,10 +69,6 @@ namespace winston
 
 	Result Track::validateSingle(Track::Shared track)
 	{
-		if (track->block() == 0)
-			return Result::ValidationFailed;
-
-
 		std::set<Track::Shared> others;
 		track->collectAllConnections(others);
 
@@ -138,7 +134,7 @@ namespace winston
 		tracks.insert(a);
 	}
 
-	const Track::Connection Bumper::whereConnects(Track::Shared& other) const
+	const Track::Connection Bumper::whereConnects(const Track::Shared& other) const
 	{
 		if (other == a)
 			return Connection::A;
@@ -262,7 +258,7 @@ namespace winston
 		tracks.insert(b);
 	}
 
-	const Track::Connection Rail::whereConnects(Track::Shared& other) const
+	const Track::Connection Rail::whereConnects(const Track::Shared& other) const
 	{
 		if (a == other)
 			return Track::Connection::A;
@@ -443,7 +439,7 @@ namespace winston
 		tracks.insert(c);
 	}
 
-	const Track::Connection Turnout::whereConnects(Track::Shared& other) const
+	const Track::Connection Turnout::whereConnects(const Track::Shared& other) const
 	{
 		if (a == other)
 			return Track::Connection::A;
@@ -457,11 +453,16 @@ namespace winston
 
 	const Track::Connection Turnout::otherConnection(const Connection connection) const
 	{
-		if (this->dir == Direction::Changing)
+		return this->otherConnection(connection, this->dir);
+	}
+
+	const Track::Connection Turnout::otherConnection(const Connection connection, const Direction direction) const
+	{
+		if (direction == Direction::Changing)
 			return Connection::DeadEnd;
 
 		if (connection == Connection::A)
-			return this->dir == Direction::A_B ? Connection::B : Connection::C;
+			return direction == Direction::A_B ? Connection::B : Connection::C;
 		else
 			return Connection::A;
 	}
@@ -689,7 +690,7 @@ namespace winston
 		tracks.insert(d);
 	}
 
-	const Track::Connection DoubleSlipTurnout::whereConnects(Track::Shared& other) const
+	const Track::Connection DoubleSlipTurnout::whereConnects(const Track::Shared& other) const
 	{
 		if (a == other)
 			return Track::Connection::A;
@@ -704,6 +705,11 @@ namespace winston
 	}
 
 	const Track::Connection DoubleSlipTurnout::otherConnection(const Connection connection) const
+	{
+		return this->otherConnection(connection, this->dir);
+	}
+
+	const Track::Connection DoubleSlipTurnout::otherConnection(const Connection connection, const Direction direction) const
 	{
 		if (this->dir == Direction::Changing)
 			return Connection::DeadEnd;

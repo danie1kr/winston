@@ -14,7 +14,7 @@
 
 namespace winston
 {
-	template<typename _Railway, class _AddressTranslator, class _DigitalCentralStation, Features _features = Features::None>
+	template<typename _Railway, class _AddressTranslator, class _DigitalCentralStation>
 	class ModelRailwaySystem : public DigitalCentralStation::LocoAddressTranslator
 	{
 	public:
@@ -28,7 +28,7 @@ namespace winston
 		void setup() {
 			this->systemSetup();
 
-			this->railway->init(_features & Features::Blocks);/*
+			this->railway->init();/*
 
 			for(const auto &loco : this->locomotiveShed ) {
 

@@ -34,6 +34,7 @@ public:
     virtual ~MiniRailway() = default;
 
     static const std::string name();
+    const winston::Result init();
 
     using winston::Shared_Ptr<MiniRailway>::Shared;
     using winston::Shared_Ptr<MiniRailway>::make;
@@ -108,6 +109,7 @@ public:
     virtual ~SignalTestRailway() = default;
 
     static const std::string name();
+    const winston::Result init();
 
     using winston::Shared_Ptr<SignalTestRailway>::Shared;
     using winston::Shared_Ptr<SignalTestRailway>::make;
@@ -145,6 +147,7 @@ public:
     virtual ~RailwayWithSiding() = default;
 
     static const std::string name();
+    const winston::Result init();
 
     using winston::Shared_Ptr<RailwayWithSiding>::Shared;
     using winston::Shared_Ptr<RailwayWithSiding>::make;
@@ -208,6 +211,7 @@ public:
     virtual ~TimeSaverRailway() = default;
 
     static const std::string name();
+    const winston::Result init();
 
     using winston::Shared_Ptr<TimeSaverRailway>::Shared;
     using winston::Shared_Ptr<TimeSaverRailway>::make;
@@ -264,6 +268,7 @@ public:
     virtual ~Y2020Railway() = default;
 
     static const std::string name();
+    const winston::Result init();
 
     using winston::Shared_Ptr<Y2020Railway>::Shared;
     using winston::Shared_Ptr<Y2020Railway>::make;
@@ -317,12 +322,16 @@ BETTER_ENUM(Y2021RailwayTracks, unsigned int,
     B1, B2, B3, B4, B5, B6,
     B_PBF2_PBF1, B_To_GBF
 );
+BETTER_ENUM(Y2021RailwayRoutes, unsigned int,
+    B3_PBF1, B3_PBF2, B3_PBF3, B3_N1,
+    B6_PBF3, B6_N1
+);
 enum class Y2021RailwayDetectors : unsigned int
 {
     B1, B4, B3, B6, B2_Speedtrap_A, B2_Speedtrap_B, PBF1
 };
 
-class Y2021Railway : public winston::RailwayWithRails<Y2021RailwayTracks>/*, public winston::RailwayWithDetector<Y2021RailwayDetectors>*/, public winston::Shared_Ptr<Y2021Railway>
+class Y2021Railway : public winston::RailwayWithRails<Y2021RailwayTracks>, public winston::RailwayAddonRoutes<Y2021RailwayRoutes>, public winston::Shared_Ptr<Y2021Railway>
 {
     /*
      //====Turnout11======================B2===============\\
@@ -355,7 +364,10 @@ public:
     virtual ~Y2021Railway() = default;
 
     static const std::string name();
+    const winston::Result init();
     void attachDetectors();
+
+    using winston::RailwayAddonRoutes<Y2021RailwayRoutes>::supportsRoutes;
 
     using winston::Shared_Ptr<Y2021Railway>::Shared;
     using winston::Shared_Ptr<Y2021Railway>::make;
@@ -368,6 +380,9 @@ public:
         virtual winston::Track::Shared turnout(const winston::Address address) const;
         virtual const winston::Address address(winston::Track::Shared track) const;
 
+        virtual winston::Route::Shared route(const winston::Address address) const;
+        virtual const winston::Address address(winston::Route::Shared track) const;
+
         using Shared_Ptr<AddressTranslator>::Shared;
         using Shared_Ptr<AddressTranslator>::make;
 
@@ -377,6 +392,7 @@ public:
     };
 private:
     winston::Track::Shared define(const Tracks track);
+    winston::Route::Shared define(const Routes route);
     void connect();
 };
 #ifndef WINSTON_PLATFORM_TEENSY
@@ -417,6 +433,7 @@ public:
     virtual ~SignalRailway() = default;
 
     static const std::string name();
+    const winston::Result init();
 
     using winston::Shared_Ptr<SignalRailway>::Shared;
     using winston::Shared_Ptr<SignalRailway>::make;

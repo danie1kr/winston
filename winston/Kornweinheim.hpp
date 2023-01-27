@@ -103,14 +103,20 @@ winston::DigitalCentralStation::Callbacks Kornweinheim::z21Callbacks()
     };
 
     callbacks.specialAccessoryProcessingCallback = [=](const uint16_t address, const uint8_t state) -> const bool {
-        switch (address)
+        
+        if(address == 500)
         {
-            case 500:
-            {
-                this->digitalCentralStationConnected();
-                break;
-            }
-        default: return true;
+            this->digitalCentralStationConnected();
+        }
+        else if (address >= 400 && address < 400 + this->railway->routesCount())
+        {
+            auto route = this->railway->route(address - 400);
+            if (route)
+                this->orderRouteSet(route, true);
+        }
+        else
+        {
+            return true;
         }
         
         return false;
@@ -155,6 +161,18 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
         // tell the ui what happens
         this->webUI.turnoutSendState(turnout->name(), direction);
 #endif
+        for(auto route : this->routesInProgress)
+        {
+            auto state = route->reportTurnout(turnout, direction);
+            if (state == winston::Route::State::Set)
+            {
+                this->routesInProgress.erase(std::remove(this->routesInProgress.begin(), this->routesInProgress.end(), route), this->routesInProgress.end());
+#ifdef WINSTON_WITH_WEBSOCKET
+                this->webUI.routeState(*route, state);
+#endif
+            }
+        }
+
         winston::logger.info("Turnout ", turnout->name(), " set to direction ", winston::Turnout::DirectionToString(direction));
 
         return winston::State::Finished;
@@ -169,6 +187,18 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
         // tell the ui what happens
         this->webUI.doubleSlipSendState(turnout->name(), direction);
 #endif
+        for (auto route : this->routesInProgress)
+        {
+            auto state = route->reportTurnout(turnout, direction);
+            if (state == winston::Route::State::Set)
+            {
+                this->routesInProgress.erase(std::remove(this->routesInProgress.begin(), this->routesInProgress.end(), route), this->routesInProgress.end());
+#ifdef WINSTON_WITH_WEBSOCKET
+                this->webUI.routeState(*route, state);
+#endif
+            }
+        }
+
         winston::logger.info("Turnout ", turnout->name(), " set to direction ", winston::DoubleSlipTurnout::DirectionToString(direction));
 
         return winston::State::Finished;
@@ -402,6 +432,68 @@ void Kornweinheim::writeSignalHTMLList(WebServer::HTTPConnection& connection, co
 }
 #endif
 
+const winston::Result Kornweinheim::orderRouteSet(winston::Route::Shared route, const bool set)
+{
+    if (route->set(set) == winston::Route::State::Setting)
+    {
+        this->routesInProgress.push_back(route);
+        route->eachTurnout<true, true>([this](const winston::Route::Turnout& turnout)
+            {
+                this->orderTurnoutToggle(turnout.turnout(), turnout.direction);
+            },
+            [this](const winston::Route::DoubleSlipTurnout& turnout)
+            {
+                this->orderDoubleSlipTurnoutToggle(turnout.doubleSlipTurnout(), turnout.direction);
+            }
+            );
+    }
+    this->webUI.routeState(*route, route->state());
+
+    return winston::Result::OK;
+}
+
+void Kornweinheim::orderTurnoutToggle(winston::Turnout::Shared turnout, winston::Turnout::Direction direction)
+{
+    this->signalBox->order(winston::Command::make([this, turnout, direction](const winston::TimePoint& created) -> const winston::State
+        {
+#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
+            this->signalBox->order(winston::Command::make([this, turnout, direction](const winston::TimePoint& created) -> const winston::State
+                {
+                    if (inMilliseconds((winston::hal::now() - created)) > WINSTON_RAILWAY_DEBUG_INJECTOR_DELAY)
+                    {
+                        this->stationDebugInjector->injectTurnoutUpdate(turnout, direction);
+                        return winston::State::Finished;
+                    }
+    return winston::State::Delay;
+                }, __PRETTY_FUNCTION__));
+#endif
+    // tell the central station to trigger the turnout switch
+    // update internal representation. will inform the UI in its callback, too
+    return this->turnoutChangeTo(turnout, direction);
+        }, __PRETTY_FUNCTION__));
+}
+
+void Kornweinheim::orderDoubleSlipTurnoutToggle(winston::DoubleSlipTurnout::Shared turnout, winston::DoubleSlipTurnout::Direction direction)
+{
+    this->signalBox->order(winston::Command::make([this, turnout, direction](const winston::TimePoint& created) -> const winston::State
+    {
+#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
+            this->signalBox->order(winston::Command::make([this, turnout, direction](const winston::TimePoint& created) -> const winston::State
+                {
+                    if (inMilliseconds((winston::hal::now() - created)) > WINSTON_RAILWAY_DEBUG_INJECTOR_DELAY)
+                    {
+                        this->stationDebugInjector->injectDoubleSlipTurnoutUpdate(turnout, direction);
+                        return winston::State::Finished;
+                    }
+    return winston::State::Delay;
+                }, __PRETTY_FUNCTION__));
+#endif
+    // tell the central station to trigger the turnout switch
+    // update internal representation. will inform the UI in its callback, too
+    return this->doubleSlipChangeTo(turnout, direction);
+    }, __PRETTY_FUNCTION__));
+}
+
 // setup our model railway system
 void Kornweinheim::systemSetup() {
     // the user defined railway and its address translator
@@ -452,7 +544,7 @@ void Kornweinheim::systemSetup() {
     this->serial = SerialDeviceWin::make();
     this->serial->init(5);
 #endif
-
+    this->routesInProgress.clear();
     this->inventStorylines();
 
     this->webUI.init(this->railway, this->locomotiveShed, this->storageLayout, this->addressTranslator, this->digitalCentralStation, 8080,
@@ -465,47 +557,22 @@ void Kornweinheim::systemSetup() {
             {
                 auto turnout = std::static_pointer_cast<winston::Turnout>(track);
                 auto requestDir = winston::Turnout::otherDirection(turnout->direction());
-                signalBox->order(winston::Command::make([this, id, turnout, requestDir](const winston::TimePoint& created) -> const winston::State
-                    {
-#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
-                        signalBox->order(winston::Command::make([this, turnout, requestDir](const winston::TimePoint& created) -> const winston::State
-                            {
-                                if (inMilliseconds((winston::hal::now() - created)) > WINSTON_RAILWAY_DEBUG_INJECTOR_DELAY)
-                                {
-                                    this->stationDebugInjector->injectTurnoutUpdate(turnout, requestDir);
-                                    return winston::State::Finished;
-                                }
-                                return winston::State::Delay;
-                            }, __PRETTY_FUNCTION__));
-#endif
-                        // tell the central station to trigger the turnout switch
-                        // update internal representation. will inform the UI in its callback, too
-                        return this->turnoutChangeTo(turnout, requestDir);
-                    }, __PRETTY_FUNCTION__));
+                this->orderTurnoutToggle(turnout, requestDir);
             }
             else if(track->type() == winston::Track::Type::DoubleSlipTurnout)
             {
                 auto turnout = std::static_pointer_cast<winston::DoubleSlipTurnout>(track);
                 auto requestDir = winston::DoubleSlipTurnout::nextDirection(turnout->direction());
-                signalBox->order(winston::Command::make([this, id, turnout, requestDir](const winston::TimePoint& created) -> const winston::State
-                    {
-#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
-                        signalBox->order(winston::Command::make([this, turnout, requestDir](const winston::TimePoint& created) -> const winston::State
-                            {
-                                if (inMilliseconds((winston::hal::now() - created)) > WINSTON_RAILWAY_DEBUG_INJECTOR_DELAY)
-                                {
-                                    this->stationDebugInjector->injectDoubleSlipTurnoutUpdate(turnout, requestDir);
-                                    return winston::State::Finished;
-                                }
-                return winston::State::Delay;
-                            }, __PRETTY_FUNCTION__));
-#endif
-                // tell the central station to trigger the turnout switch
-                // update internal representation. will inform the UI in its callback, too
-                return this->doubleSlipChangeTo(turnout, requestDir);
-                    }, __PRETTY_FUNCTION__));
+                this->orderDoubleSlipTurnoutToggle(turnout, requestDir);
             }
             return winston::Result::OK;
+        },
+        [=](const int id, const bool set) -> winston::Result {
+            auto route = railway->route(id);
+            if (!route)
+                return winston::Result::NotFound;
+
+            return this->orderRouteSet(route, set);
         }
     );
 

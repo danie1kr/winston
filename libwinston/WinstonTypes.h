@@ -17,15 +17,13 @@
 #include <memory>
 
 #include <chrono>
+using namespace std::chrono_literals;
 
 namespace winston
 {
 	using Address = uint16_t;
-
 	using Id = unsigned int;
-
 	using TrackIndex = size_t;
-
 
 	enum class State
 	{

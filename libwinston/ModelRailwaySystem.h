@@ -12,6 +12,15 @@
 #include "Log.h"
 #include "DigitalCentralStation.h"
 
+#ifdef WINSTON_TURNOUT_TOGGLE_INTERVAL
+#define WINSTON_TURNOUT_TOGGLE_GUARD	\
+if (winston::hal::now() - this->lastTurnoutToggleRequest < WINSTON_TURNOUT_TOGGLE_INTERVAL) \
+	return winston::State::Delay;	\
+lastTurnoutToggleRequest = winston::hal::now();
+#else
+#define WINSTON_TURNOUT_TOGGLE_GUARD	;
+#endif
+
 namespace winston
 {
 	template<typename _Railway, class _AddressTranslator, class _DigitalCentralStation>
@@ -20,7 +29,7 @@ namespace winston
 	public:
 		ModelRailwaySystem()
 #ifdef WINSTON_STATISTICS
-			: stopWatchJournal("MRS") 
+			, stopWatchJournal("MRS")
 #endif
 		{ };
 		virtual ~ModelRailwaySystem() { } ;
@@ -243,6 +252,8 @@ namespace winston
 
 		// the locos
 		LocomotiveShed locomotiveShed;
+
+		TimePoint lastTurnoutToggleRequest{ winston::hal::now() };
 	};
 }
 

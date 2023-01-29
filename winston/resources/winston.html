@@ -284,27 +284,49 @@
     </div>
 
     <div id="infoSignal" class="contextMenu">
-        <div class="row showOnEditOnly">
-            <div class="col">
-                <a class="waves-effect waves-light btn rotate">rotate 45°</a>
-            </div>
-        </div>
-        <div class="row>">
-            <div class="col">
-                <label for="infoSignalParent">Track</label>
-                <p id="infoSignalParent"></p>
-            </div>
-            <div class="col">
-                <label for="infoSignalConnection">Connection</label>
-                <p id="infoSignalConnection"></p>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col">
-                <label for="infoSignalLights">Lights</label>
-                <p id="infoSignalLights"></p>
-            </div>
-        </div>
+        <ul class="collapsible expandable">
+            <li class="active showOnEditOnly">
+                <div class="collapsible-header">Layout</div>
+                <div class="collapsible-body">
+                    <div class="row showOnEditOnly">
+                        <div class="col">
+                            <a class="waves-effect waves-light btn rotate">rotate 45°</a>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="collapsible-header">Info</div>
+                <div class="collapsible-body">
+                    <div class="row>">
+                        <div class="col">
+                            <label for="infoSignalParent">Track</label>
+                            <p id="infoSignalParent"></p>
+                        </div>
+                        <div class="col">
+                            <label for="infoSignalConnection">Connection</label>
+                            <p id="infoSignalConnection"></p>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            <li class="showIfRoutes">
+                <div class="collapsible-header">Routes</div>
+                <div class="collapsible-body">
+                </div>
+            </li>
+            <li>
+                <div class="collapsible-header">Lights</div>
+                <div class="collapsible-body">
+                    <div class="row">
+                        <div class="col">
+                            <label for="infoSignalLights">Lights</label>
+                            <p id="infoSignalLights"></p>
+                        </div>
+                    </div>
+                </div>
+            </li>
+        </ul>
     </div>
 
     <div id="infoDebugDetector" class="contextMenu">
@@ -854,6 +876,25 @@
             else
                 $info.find(".showOnEditOnly").hide();
 
+            if (node.data("routes")) {
+                $info.find(".showIfRoutes").show();
+                let $routesContainer = $info.find(".showIfRoutes div.collapsible-body");
+                $routesContainer.empty();
+                _.each(node.data("routes"), route => {
+                    let routeTemplate = _.template($("#template_route").html());
+                    let $route = $(routeTemplate({ id: route.id, name: route.name }));
+                    $route.find(".set").on("change", function (event) {
+                        let $target = $(event.target);
+                        let $closest = $($target.closest(".winston-route"));
+                        sendRoute($closest.attr("winston-route"), $target.prop("checked"));
+                        $target.prop("disabled", "disabled");
+                    });
+                    $routesContainer.append($route);
+                });
+            }
+            else
+                $info.find(".showIfRoutes").hide();
+
             $info.find("#infoSignalParent").text(node.data("parentTrack"));
             $info.find("#infoSignalConnection").text(node.data("guarding"));
             let lights = _.map(node.data("lights"), l => " Port: " + l.port)
@@ -1353,7 +1394,15 @@
             _.each(routes, route => {
                 let guarding = route.start;
                 let track = route.path[0].track;
-                cy.$("node.signal[parentTrack=\"" + track + "\"][guarding=\"" + guarding + "\"]").addClass("routeStart");
+                let cySignal = cy.$("node.signal[parentTrack=\"" + track + "\"][guarding=\"" + guarding + "\"]");
+
+                cySignal.addClass("routeStart");
+
+                let knownRoutes = cySignal.data("routes");
+                if (!knownRoutes)
+                    knownRoutes = [];
+                knownRoutes.push({id: route.id, name: route.name});
+                cySignal.data("routes", knownRoutes);
             });
             return cy;
         }

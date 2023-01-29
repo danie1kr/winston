@@ -456,6 +456,8 @@ void Kornweinheim::orderTurnoutToggle(winston::Turnout::Shared turnout, winston:
 {
     this->signalBox->order(winston::Command::make([this, turnout, direction](const winston::TimePoint& created) -> const winston::State
         {
+            WINSTON_TURNOUT_TOGGLE_GUARD;
+
 #ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
             this->signalBox->order(winston::Command::make([this, turnout, direction](const winston::TimePoint& created) -> const winston::State
                 {
@@ -476,7 +478,9 @@ void Kornweinheim::orderTurnoutToggle(winston::Turnout::Shared turnout, winston:
 void Kornweinheim::orderDoubleSlipTurnoutToggle(winston::DoubleSlipTurnout::Shared turnout, winston::DoubleSlipTurnout::Direction direction)
 {
     this->signalBox->order(winston::Command::make([this, turnout, direction](const winston::TimePoint& created) -> const winston::State
-    {
+        {
+            WINSTON_TURNOUT_TOGGLE_GUARD;
+
 #ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
             this->signalBox->order(winston::Command::make([this, turnout, direction](const winston::TimePoint& created) -> const winston::State
                 {

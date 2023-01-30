@@ -39,7 +39,7 @@ namespace winston {
 	}
 
 	Route::Route(const unsigned int id, const std::string name, const winston::Track::Connection signalConnection, const Path path, const Protections protections)
-		: Shared_Ptr<Route>(), id{ id }, name{ name }, path{ path }, protections{ protections }, _state{ State::Unset }, turnoutsSet{ 0 }, turnoutsSetRequired{ 0 }, signalConnection{ signalConnection }
+		: Shared_Ptr<Route>(), id{ id }, name{ name }, path{ path }, protections{ protections }, _state{ State::Unset }, _disabled{ false }, turnoutsSet{ 0 }, turnoutsSetRequired{ 0 }, signalConnection{ signalConnection }
 	{
 
 	}
@@ -167,14 +167,44 @@ namespace winston {
 
 	const Route::State Route::set(const bool set)
 	{
-		this->_state = set ? State::Setting : State::Unset;
-		this->turnoutsSet = 0;
+		if(this->disabled())
+			this->_state = State::Unset;
+		else
+		{
+			this->_state = set ? State::Setting : State::Unset;
+			this->turnoutsSet = 0;
+		}
 		return this->state();
+	}
+
+	const bool Route::disabled() const
+	{
+		return this->_disabled;
+	}
+
+	const bool Route::disable(const bool disable)
+	{
+		if (this->_state == State::Unset)
+		{
+			this->_disabled = disable;
+			this->_state = State::Unset;
+		}
+		return this->disabled();
 	}
 
 	const Route::State Route::state() const
 	{
 		return this->_state;
+	}
+
+	void Route::registerConflictingRoute(Route::Shared route)
+	{
+		this->conflictingRoutes.push_back(route);
+	}
+
+	const Route::ConflictingRoutes Route::getConflictingRoutes() const
+	{
+		return this->conflictingRoutes;
 	}
 
 	const Track::Connection Route::start() const

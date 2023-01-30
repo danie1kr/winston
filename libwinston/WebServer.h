@@ -173,13 +173,14 @@ namespace winston
         }
 
         // send route state via websocket
-        void routeState(const Route &route, const Route::State state)
+        void routeState(const Route &route)
         {
             DynamicJsonDocument obj(200);
             obj["op"] = "routeState";
             auto data = obj.createNestedObject("data");
             data["id"] = route.id;
-            data["state"] = (int)state;
+            data["state"] = (int)route.state();
+            data["disabled"] = route.disabled();
             std::string json("");
             serializeJson(obj, json);
             this->webServer.broadcast(json);

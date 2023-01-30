@@ -168,7 +168,7 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
             {
                 this->routesInProgress.erase(std::remove(this->routesInProgress.begin(), this->routesInProgress.end(), route), this->routesInProgress.end());
 #ifdef WINSTON_WITH_WEBSOCKET
-                this->webUI.routeState(*route, state);
+                this->webUI.routeState(*route);
 #endif
             }
         }
@@ -194,7 +194,7 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
             {
                 this->routesInProgress.erase(std::remove(this->routesInProgress.begin(), this->routesInProgress.end(), route), this->routesInProgress.end());
 #ifdef WINSTON_WITH_WEBSOCKET
-                this->webUI.routeState(*route, state);
+                this->webUI.routeState(*route);
 #endif
             }
         }
@@ -434,9 +434,19 @@ void Kornweinheim::writeSignalHTMLList(WebServer::HTTPConnection& connection, co
 
 const winston::Result Kornweinheim::orderRouteSet(winston::Route::Shared route, const bool set)
 {
-    if (route->set(set) == winston::Route::State::Setting)
+    auto state = route->set(set);
+    if (state == winston::Route::State::Setting)
     {
         this->routesInProgress.push_back(route);
+
+        for (auto conflicting : route->getConflictingRoutes())
+        {
+            conflicting->disable(true);
+#ifdef WINSTON_WITH_WEBSOCKET
+            this->webUI.routeState(*conflicting);
+#endif
+        }
+
         route->eachTurnout<true, true>([this](const winston::Route::Turnout& turnout)
             {
                 this->orderTurnoutToggle(turnout.turnout(), turnout.direction);
@@ -447,7 +457,22 @@ const winston::Result Kornweinheim::orderRouteSet(winston::Route::Shared route, 
             }
             );
     }
-    this->webUI.routeState(*route, route->state());
+    else if (state == winston::Route::State::Unset)
+    {
+        this->railway->evaluateConflictingRoutes([this](winston::Route::Shared& route)
+            {
+#ifdef WINSTON_WITH_WEBSOCKET
+                signalBox->order(winston::Command::make([this, route](const winston::TimePoint& created) -> const winston::State
+                    {
+                        this->webUI.routeState(*route);
+                        return winston::State::Finished;
+                    }, __PRETTY_FUNCTION__));
+#endif
+            });
+    }
+#ifdef WINSTON_WITH_WEBSOCKET
+    this->webUI.routeState(*route);
+#endif
 
     return winston::Result::OK;
 }

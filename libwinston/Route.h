@@ -63,6 +63,7 @@ namespace winston {
 
 		using Path = std::deque<Track::Shared>;
 		using Protections = std::vector<Track::Shared>;
+		using ConflictingRoutes = std::vector<Route::Shared>;
 
 		Route(const unsigned int id, const std::string name, const winston::Track::Connection signalConnection, const Path path, const Protections protections = {});
 		~Route() = default;
@@ -72,33 +73,42 @@ namespace winston {
 		const bool set() const;
 		const State set(const bool set);
 
+		const bool disabled() const;
+		const bool disable(const bool disable);
+
 		const State reportTurnout(winston::Turnout::Shared turnout, winston::Turnout::Direction direction)
 		{
-			this->eachTurnout<true, true>(
-				[=](const Turnout& routeTurnout) 
-				{
-					if (routeTurnout.turnout() == turnout && routeTurnout.direction == direction)
+			if (!this->disabled())
+			{
+				this->eachTurnout<true, true>(
+					[=](const Turnout& routeTurnout)
+					{
+						if (routeTurnout.turnout() == turnout && routeTurnout.direction == direction)
 						++this->turnoutsSet;
-				}, 
-				[](const DoubleSlipTurnout&) {});
+					},
+					[](const DoubleSlipTurnout&) {});
 
-			if (this->state() == State::Setting && this->turnoutsSet == this->turnoutsSetRequired)
-				this->_state = State::Set;
+				if (this->state() == State::Setting && this->turnoutsSet == this->turnoutsSetRequired)
+					this->_state = State::Set;
+			}
 
 			return this->state();
 		}
 
 		const State reportTurnout(winston::DoubleSlipTurnout::Shared turnout, winston::DoubleSlipTurnout::Direction direction)
 		{
-			this->eachTurnout<true, true>([](const Turnout&) {},
-				[=](const DoubleSlipTurnout& routeTurnout)
-				{
-					if (routeTurnout.doubleSlipTurnout() == turnout && routeTurnout.direction == direction)
-						++this->turnoutsSet; 
-				});
+			if (!this->disabled())
+			{
+				this->eachTurnout<true, true>([](const Turnout&) {},
+					[=](const DoubleSlipTurnout& routeTurnout)
+					{
+						if (routeTurnout.doubleSlipTurnout() == turnout && routeTurnout.direction == direction)
+						++this->turnoutsSet;
+					});
 
-			if (this->state() == State::Setting && this->turnoutsSet == this->turnoutsSetRequired)
-				this->_state = State::Set;
+				if (this->state() == State::Setting && this->turnoutsSet == this->turnoutsSetRequired)
+					this->_state = State::Set;
+			}
 
 			return this->state();
 		}
@@ -167,11 +177,17 @@ namespace winston {
 		const Protections protections;
 
 		const State state() const;
+
+		void registerConflictingRoute(Route::Shared route);
+		const ConflictingRoutes getConflictingRoutes() const;
 	private:	
 		State _state;
+		bool _disabled;
 		unsigned int turnoutsSet;
 		unsigned int turnoutsSetRequired;
 		const winston::Track::Connection signalConnection;
+
+		ConflictingRoutes conflictingRoutes;
 	};
 	using Routemap = std::unordered_map<Address, Route::Shared>;
 }

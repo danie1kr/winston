@@ -731,7 +731,7 @@ winston::Route::Shared Y2021Railway::define(const Routes route)
             PATH_TRACK(PBF1)
         ),
         PROTECTIONS(
-            PATH_TURNOUT(Turnout2, A_B)
+            PATH_TURNOUT(Turnout2, A_C)
     )) 
     ROUTE(B3_PBF2,
         "B3 --> PBF2", B,
@@ -743,7 +743,7 @@ winston::Route::Shared Y2021Railway::define(const Routes route)
             PATH_TRACK(PBF2)
         ),
         PROTECTIONS(
-            PATH_TURNOUT(Turnout2, A_B),
+            PATH_TURNOUT(Turnout2, A_C),
             PATH_TURNOUT(Turnout5, A_B)
         ))
     ROUTE(B3_PBF3,

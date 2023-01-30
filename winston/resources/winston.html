@@ -580,6 +580,11 @@
                     $route.find("input").prop("disabled", "").prop("checked", "checked");
                     break;
             }
+
+            if (data.disabled)
+                $route.find("input").prop("disabled", "disabled");
+
+            $route.attr("winston-route-disabled", data.disabled);
         }
 
         function loco(data) {
@@ -881,6 +886,9 @@
                 let $routesContainer = $info.find(".showIfRoutes div.collapsible-body");
                 $routesContainer.empty();
                 _.each(node.data("routes"), route => {
+                    let $routeNavMenu = $(".winston-route[winston-route=\"" + route.id + "\"]");
+                    if ($routeNavMenu.prop("winston-route-disabled") === true)
+                        return;
                     let routeTemplate = _.template($("#template_route").html());
                     let $route = $(routeTemplate({ id: route.id, name: route.name }));
                     $route.find(".set").on("change", function (event) {

@@ -274,11 +274,30 @@ namespace winston
 			return true;
 		}
 
-		using EachRouteCallback = std::function<void(const Route::Shared&)>;
-		void eachRoute(EachRouteCallback callback) const
+		using EachRouteCallback = std::function<void(Route::Shared&)>;
+		void eachRoute(EachRouteCallback callback)
 		{
 			for (size_t i = 0; i < routesCount(); ++i)
 				callback(this->routes[i]);
+		}
+
+		void evaluateConflictingRoutes(EachRouteCallback callback)
+		{
+			this->eachRoute([callback](Route::Shared& route)
+			{
+				bool isConflictingSet = false;
+				for (auto conflicting : route->getConflictingRoutes())
+				{
+					isConflictingSet |= conflicting->state() != Route::State::Unset;
+					if (isConflictingSet)
+						break;
+				}
+
+				if (!isConflictingSet)
+					route->disable(false);
+
+				callback(route);
+			});
 		}
 
 	private:
@@ -317,6 +336,148 @@ namespace winston
 				}
 				passed = result == Result::OK;
 			}
+
+			for (size_t i = 0; i < routesCount() - 1; ++i)
+			{
+				auto current = this->routes[i];
+				for (size_t j = i + 1; j < routesCount(); ++j)
+				{
+					auto other = this->routes[j];
+
+					bool conflicting = false;
+
+					// conflicting routes must not share path elements
+					if (!conflicting)
+					{
+						auto it = current->path.begin();
+						while (it != current->path.end() && !conflicting)
+						{
+							auto jt = other->path.begin();
+							while (jt != other->path.end() && !conflicting)
+							{
+								if ((*it)->track() == (*jt)->track())
+									conflicting = true;
+								++jt;
+							}
+							++it;
+						}
+					}
+
+					// protections on conflicting routes must not contradict each other
+					if (!conflicting)
+					{
+						auto it = current->protections.begin();
+						while (it != current->protections.end() && !conflicting)
+						{
+							auto jt = other->protections.begin();
+							while (jt != other->protections.end() && !conflicting)
+							{
+								if ((*it)->track() == (*jt)->track())
+								{
+									if ((*it)->type == winston::Route::Track::Type::Turnout)
+									{
+										auto iTurnout = std::dynamic_pointer_cast<winston::Route::Turnout>(*it);
+										auto jTurnout = std::dynamic_pointer_cast<winston::Route::Turnout>(*jt);
+										conflicting = conflicting || (iTurnout->direction != jTurnout->direction);
+
+									}
+									else if ((*it)->type == winston::Route::Track::Type::DoubleSlipTurnout)
+									{
+										auto iTurnout = std::dynamic_pointer_cast<winston::Route::DoubleSlipTurnout>(*it);
+										auto jTurnout = std::dynamic_pointer_cast<winston::Route::DoubleSlipTurnout>(*jt);
+										conflicting = conflicting || (iTurnout->direction != jTurnout->direction);
+									}
+								}
+								++jt;
+							}
+							++it;
+						}
+					}
+
+					// protections of a may be part of path of b if they are the same direction
+					if (!conflicting)
+					{
+						auto it = current->protections.begin();
+						while (it != current->protections.end() && !conflicting)
+						{
+							auto jt = other->path.begin();
+							while (jt != other->path.end() && !conflicting)
+							{
+								if ((*it)->track() == (*jt)->track())
+								{
+									if ((*it)->type == winston::Route::Track::Type::Turnout)
+									{
+										auto iTurnout = std::dynamic_pointer_cast<winston::Route::Turnout>(*it);
+										auto jTurnout = std::dynamic_pointer_cast<winston::Route::Turnout>(*jt);
+										conflicting = conflicting || (iTurnout->direction != jTurnout->direction);
+
+									}
+									else if ((*it)->type == winston::Route::Track::Type::DoubleSlipTurnout)
+									{
+										auto iTurnout = std::dynamic_pointer_cast<winston::Route::DoubleSlipTurnout>(*it);
+										auto jTurnout = std::dynamic_pointer_cast<winston::Route::DoubleSlipTurnout>(*jt);
+										conflicting = conflicting || (iTurnout->direction != jTurnout->direction);
+									}
+								}
+								++jt;
+							}
+							++it;
+						}
+					}
+					// protections of a may be part of path of b if they are the same direction
+					if (!conflicting)
+					{
+						auto it = current->path.begin();
+						while (it != current->path.end() && !conflicting)
+						{
+							auto jt = other->protections.begin();
+							while (jt != other->protections.end() && !conflicting)
+							{
+								if ((*it)->track() == (*jt)->track())
+								{
+									if ((*it)->type == winston::Route::Track::Type::Turnout)
+									{
+										auto iTurnout = std::dynamic_pointer_cast<winston::Route::Turnout>(*it);
+										auto jTurnout = std::dynamic_pointer_cast<winston::Route::Turnout>(*jt);
+										conflicting = conflicting || (iTurnout->direction != jTurnout->direction);
+
+									}
+									else if ((*it)->type == winston::Route::Track::Type::DoubleSlipTurnout)
+									{
+										auto iTurnout = std::dynamic_pointer_cast<winston::Route::DoubleSlipTurnout>(*it);
+										auto jTurnout = std::dynamic_pointer_cast<winston::Route::DoubleSlipTurnout>(*jt);
+										conflicting = conflicting || (iTurnout->direction != jTurnout->direction);
+									}
+								}
+								++jt;
+							}
+							++it;
+						}
+					}
+
+					if (conflicting)
+					{
+						current->registerConflictingRoute(other);
+						other->registerConflictingRoute(current);
+					}
+				}
+			}
+
+			// compute exclusives
+			// what route can be safely activated if another route is already set?
+			/*
+			
+			each(route, r => {
+				each(route, other => {
+				
+					if(r.path intersects other.path || r.protections intersect r.protections || r.path intersects other.path || r.protections intersects other.protections)
+					if(r.path darf r.protections enthalten, wenn direction stimmt)
+						r.excludes.add(other);
+				
+				});
+			});
+			
+			*/
 
 			return passed ? Result::OK : Result::InternalError;
 		}

@@ -720,7 +720,7 @@ winston::Route::Shared Y2021Railway::define(const Routes route)
     switch (route)
     {
     ROUTE(B3_PBF1, 
-        "B3 --> PBF1", B,
+        "B3 --> PBF1",
         PATH(
             PATH_TRACK(B3),
             PATH_TURNOUT(Turnout1, A_B),
@@ -734,7 +734,7 @@ winston::Route::Shared Y2021Railway::define(const Routes route)
             PATH_TURNOUT(Turnout2, A_C)
     )) 
     ROUTE(B3_PBF2,
-        "B3 --> PBF2", B,
+        "B3 --> PBF2",
         PATH(
             PATH_TRACK(B3),
             PATH_TURNOUT(Turnout1, A_B),
@@ -747,7 +747,7 @@ winston::Route::Shared Y2021Railway::define(const Routes route)
             PATH_TURNOUT(Turnout5, A_B)
         ))
     ROUTE(B3_PBF3,
-        "B3 --> PBF3", B,
+        "B3 --> PBF3",
         PATH(
             PATH_TRACK(B3),
             PATH_TURNOUT(Turnout1, A_C),
@@ -757,7 +757,7 @@ winston::Route::Shared Y2021Railway::define(const Routes route)
         )) 
 
     ROUTE(B3_N1,
-        "B3 --> N1", B,
+        "B3 --> N1",
         PATH(
             PATH_TRACK(B3),
             PATH_TURNOUT(Turnout1, A_C),
@@ -766,7 +766,7 @@ winston::Route::Shared Y2021Railway::define(const Routes route)
             PATH_TRACK(N1)
         ))
     ROUTE(B6_PBF3,
-        "B6 --> PBF3", B,
+        "B6 --> PBF3",
         PATH(
             PATH_TRACK(B6),
             PATH_TURNOUT(Turnout2, A_C),
@@ -778,7 +778,7 @@ winston::Route::Shared Y2021Railway::define(const Routes route)
         ))
 
     ROUTE(B6_N1,
-        "B6 --> N1", B,
+        "B6 --> N1",
         PATH(
             PATH_TRACK(B6),
             PATH_TURNOUT(Turnout2, A_C),
@@ -824,6 +824,15 @@ const winston::Result Y2021Railway::init()
     }
 
     return winston::Result::OK;
+}
+
+const winston::Result Y2021Railway::validateFinal()
+{
+    auto result = winston::RailwayWithRails<Y2021RailwayTracks>::validateFinal();
+    if (result != winston::Result::OK)
+        return result;
+
+    return winston::RailwayAddonRoutes<Y2021RailwayRoutes>::validateFinal();
 }
 
 #ifndef WINSTON_PLATFORM_TEENSY

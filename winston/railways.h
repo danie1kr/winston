@@ -369,6 +369,8 @@ public:
 
     using winston::RailwayAddonRoutes<Y2021RailwayRoutes>::supportsRoutes;
 
+    const winston::Result validateFinal();
+
     using winston::Shared_Ptr<Y2021Railway>::Shared;
     using winston::Shared_Ptr<Y2021Railway>::make;
 

@@ -65,9 +65,10 @@ namespace winston {
 		using Protections = std::vector<Track::Shared>;
 		using ConflictingRoutes = std::vector<Route::Shared>;
 
-		Route(const unsigned int id, const std::string name, const winston::Track::Connection signalConnection, const Path path, const Protections protections = {});
+		Route(const unsigned int id, const std::string name, const Path path, const Protections protections = {});
 		~Route() = default;
 
+		const Result validateSignalPlacemet();
 		const Result validate();
 
 		const bool set() const;
@@ -167,6 +168,9 @@ namespace winston {
 		}
 
 		const winston::Track::Connection start() const;
+		const winston::Track::Connection end() const;
+		const winston::Track::Connection start(winston::Track::Shared& track) const;
+		const winston::Track::Connection end(winston::Track::Shared& track) const;
 
 		using Shared_Ptr<Route>::Shared;
 		using Shared_Ptr<Route>::make;
@@ -185,7 +189,7 @@ namespace winston {
 		bool _disabled;
 		unsigned int turnoutsSet;
 		unsigned int turnoutsSetRequired;
-		const winston::Track::Connection signalConnection;
+		winston::Track::Connection _start, _end;
 
 		ConflictingRoutes conflictingRoutes;
 	};

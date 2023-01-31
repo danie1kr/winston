@@ -38,10 +38,35 @@ namespace winston {
 		return std::dynamic_pointer_cast<winston::DoubleSlipTurnout>(this->_track);
 	}
 
-	Route::Route(const unsigned int id, const std::string name, const winston::Track::Connection signalConnection, const Path path, const Protections protections)
-		: Shared_Ptr<Route>(), id{ id }, name{ name }, path{ path }, protections{ protections }, _state{ State::Unset }, _disabled{ false }, turnoutsSet{ 0 }, turnoutsSetRequired{ 0 }, signalConnection{ signalConnection }
+	Route::Route(const unsigned int id, const std::string name, const Path path, const Protections protections)
+		: Shared_Ptr<Route>(), id{ id }, name{ name }, path{ path }, protections{ protections }, _state{ State::Unset }, _disabled{ false }, turnoutsSet{ 0 }, turnoutsSetRequired{ 0 }, _start{ winston::Track::Connection::DeadEnd }, _end{ winston::Track::Connection::DeadEnd }
 	{
 
+	}
+
+	const Result Route::validateSignalPlacemet()
+	{
+		auto it = path.begin();
+		auto firstTrack = (*it)->track();
+		auto secondTrack = (*(++it))->track();
+		this->_start = firstTrack->whereConnects(secondTrack);
+		if (firstTrack->signalGuarding(this->start()) == nullptr)
+		{
+			logger.warn("Route validation failed: No signal on start of " + this->name);
+			return Result::ValidationFailed;
+		}
+
+		auto jt = path.rbegin();
+		auto lastTrack = (*jt)->track();
+		auto secondToLastTrack = (*(++jt))->track();
+		this->_end = lastTrack->otherConnection(lastTrack->whereConnects(secondToLastTrack));
+		if (lastTrack->signalGuarding(this->end()) == nullptr)
+		{
+			logger.warn("Route validation failed: No signal on end of " + this->name);
+			return Result::ValidationFailed;
+		}
+
+		return Result::OK;
 	}
 
 	const Result Route::validate()
@@ -209,6 +234,22 @@ namespace winston {
 
 	const Track::Connection Route::start() const
 	{
-		return this->signalConnection;
+		return this->_start;
+	}
+
+	const Track::Connection Route::end() const
+	{
+		return this->_end;
+	}
+
+	const Track::Connection Route::start(winston::Track::Shared& track) const
+	{
+		track = this->path.begin()->get()->track();
+		return this->start();
+	}
+	const Track::Connection Route::end(winston::Track::Shared& track) const
+	{
+		track = this->path.rbegin()->get()->track();
+		return this->end();
 	}
 }

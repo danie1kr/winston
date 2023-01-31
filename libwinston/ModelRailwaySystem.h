@@ -51,7 +51,8 @@ namespace winston
 
 			this->setupSignals();
 			this->setupDetectors();
-			
+
+			this->railway->validateFinal();
 			this->digitalCentralStation->connect();
 			/*
 			this->railway->turnouts([=](const Tracks track, winston::Turnout::Shared turnout) {

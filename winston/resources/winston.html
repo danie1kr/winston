@@ -123,9 +123,9 @@
             padding: 0 0;
         }
 
-            .microButton > i {
-                margin: 0 0 0 0;
-            }
+        .microButton > i {
+            margin: 0 0 0 0;
+        }
 
         .switch.lever {
             margin: 0 0 0 0;
@@ -134,9 +134,9 @@
         div.collapsible-header {
         }
 
-            div.collapsible-header > div.row {
-                width: 100%;
-            }
+        div.collapsible-header > div.row {
+            width: 100%;
+        }
 
         .brand-logo {
             margin-left: 16px;
@@ -865,6 +865,15 @@
             }
         }
 
+        function signalClick(event) {
+            if (allowLayoutEdit())
+                return signalInfo(event);
+            else
+            {
+                // get all not-disabled possible routs and highlight their end signal
+            }
+        }
+
         function signalInfo(event) {
             hideContextMenus();
             let $info = $("#infoSignal");
@@ -879,7 +888,8 @@
                 });
             }
             else
-                $info.find(".showOnEditOnly").hide();
+                return;
+                //$info.find(".showOnEditOnly").hide();
 
             if (node.data("routes")) {
                 $info.find(".showIfRoutes").show();
@@ -1123,7 +1133,7 @@
                 click("menuEditNode", event);
             })
             cy.on('click', '.signal', function (event) {
-                signalInfo(event);
+                signalClick(event);
             });
             cy.on('click', 'node.detector', function (event) {
                 detectorClick(event);

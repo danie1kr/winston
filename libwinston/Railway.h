@@ -215,7 +215,7 @@ namespace winston
 			return this->track(s);
 		}
 	private:
-		Result validate()
+		const Result validate() const
 		{
 			bool passed = true;
 
@@ -230,9 +230,13 @@ namespace winston
 
 			return passed ? Result::OK : Result::InternalError;
 		}
-
 	protected:
 		std::array<Track::Shared, tracksCount()> tracks;
+
+		virtual const Result validateFinal()
+		{
+			return Result::OK;
+		};
 	};
 
 	template<typename _RoutesEnum>
@@ -298,6 +302,19 @@ namespace winston
 
 				callback(route);
 			});
+		}
+
+	protected:
+		const Result validateFinal()
+		{
+			for (auto route : this->routes)
+			{
+				auto result = route->validateSignalPlacemet();
+				if (result != Result::OK)
+					return result;
+			}
+
+			return Result::OK;
 		}
 
 	private:
@@ -462,22 +479,6 @@ namespace winston
 					}
 				}
 			}
-
-			// compute exclusives
-			// what route can be safely activated if another route is already set?
-			/*
-			
-			each(route, r => {
-				each(route, other => {
-				
-					if(r.path intersects other.path || r.protections intersect r.protections || r.path intersects other.path || r.protections intersects other.protections)
-					if(r.path darf r.protections enthalten, wenn direction stimmt)
-						r.excludes.add(other);
-				
-				});
-			});
-			
-			*/
 
 			return passed ? Result::OK : Result::InternalError;
 		}

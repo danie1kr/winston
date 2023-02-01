@@ -30,8 +30,7 @@
 
         #railway {
             position: absolute;
-            /*min-height: 100vh;*/
-            width: calc(100% - 600px);
+            width: calc(100% - 500px);
             height: calc(100% - 64px);
             z-index: 3000;
         }
@@ -53,7 +52,7 @@
 
         #settingsContent {
             position: fixed;
-            width: calc(100% - 600px);
+            width: calc(100% - 500px);
             background-color: white;
             z-index: 10000;
             padding: 20px 20px 20px 20px;
@@ -64,22 +63,22 @@
             overflow-y: scroll;
             background-color: white;
             bottom: 0px;
-            width: calc(100% - 600px);
+            width: calc(100% - 500px);
             height: 32%;
             z-index: 10000;
             padding: 20px 20px 20px 20px;
         }
 
-            #logsContent tr td:nth-child(1), #logsContent tr td:nth-child(2) {
-                width: 10%;
-            }
+        #logsContent tr td:nth-child(1), #logsContent tr td:nth-child(2) {
+            width: 10%;
+        }
 
-            #logsContent tr td:last-child {
-                max-width: 0;
-                min-width: fit-content;
-                white-space: nowrap;
-                text-overflow: ellipsis;
-            }
+        #logsContent tr td:last-child {
+            max-width: 0;
+            min-width: fit-content;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
 
         body {
             display: flex;
@@ -88,9 +87,9 @@
         }
 
         header, main, footer {
-            margin-left: 300px;
+            margin-left: 200px;
             margin-right: 300px;
-            width: calc(100% - 600px);
+            width: calc(100% - 500px);
         }
 
         main {
@@ -147,14 +146,18 @@
             margin: 0 0 0 0;
             padding: 12px 16px 12px 16px;
         }
+
+        #sideTurnout {
+            width: 200px
+        }
     </style>
 
     <!-- templates -->
     <script type="text/template" id="template_turnout">
         <div class="winston-turnout row" winston-turnout-track="<%= id %>" winston-turnout-direction="<%= direction %>">
-            <div class="name col s4"><%= name %></div><div class="direction col s3"><%= direction %></div>
-
-            <div class="col s2"><a class="waves-effect waves-light btn">toggle</a></div>
+            <div class="name col s2"><%= name %></div>
+            <div class="direction col s4"><%= direction %></div>
+            <div class="col s6"><a class="waves-effect waves-light btn">toggle</a></div>
         </div>
     </script>
 
@@ -223,12 +226,14 @@
     </script>
 
     <script type="text/template" id="template_route">
-        <div class="col s6 switch winston-route" winston-route="<%= id %>">
-            <label>
-                <%= name %>
-                <input type="checkbox" class="set">
-                <span class="lever"></span>
-            </label>
+        <div class="row">
+            <div class="name col s8"><%= name %></div>
+            <div class="col s4 switch winston-route" winston-route="<%= id %>">
+                <label>
+                    <input type="checkbox" class="set">
+                    <span class="lever"></span>
+                </label>
+            </div>
         </div>
     </script>
 </head>
@@ -376,17 +381,19 @@
         </ul>
 
         <!-- left side -->
-        <ul id="sideTurnout" class="sidenav sidenav-fixed">
-            <ul class="collapsible expandable">
-                <li id="routesContainer" class="active">
-                    <div class="collapsible-header">Routes</div>
-                    <div class="collapsible-body"></div>
-                </li>
-                <li id="turnoutsContainer" class="">
-                    <div class="collapsible-header">Turnouts</div>
-                    <div class="collapsible-body"></div>
-                </li>
-            </ul>
+        <ul id="sideTurnout" class="sidenav">
+            <li>
+                <ul class="collapsible expandable">
+                    <li id="routesContainer" class="active">
+                        <div class="collapsible-header">Routes</div>
+                        <div class="collapsible-body"></div>
+                    </li>
+                    <li id="turnoutsContainer" class="">
+                        <div class="collapsible-header">Turnouts</div>
+                        <div class="collapsible-body"></div>
+                    </li>
+                </ul>
+            </li>
         </ul>
 
         <!-- main view -->
@@ -543,7 +550,7 @@
             let id = data.id;
             let direction = data.state;
 
-            let turnout = cy.nodes(".turnout[track=\"" + id + "\"]").data("direction", direction);
+            let turnout = cy.nodes(".turnout[track=\"" + id + "\"]").data("direction", direction).data("locked", data.locked);
             if (turnout.data("type") === "turnout")
                 turnoutUpdate(turnout);
             else
@@ -567,8 +574,7 @@
                 .data("aspects", aspects);
         }
 
-        function routeState(data) {
-            let $route = $(".winston-route[winston-route=\"" + data.id + "\"]");
+        function routeStateUI(data, $route) {
             switch (data.state) {
                 case RouteState_Unset:
                     $route.find("input").prop("disabled", "").prop("checked", "");
@@ -585,6 +591,11 @@
                 $route.find("input").prop("disabled", "disabled");
 
             $route.attr("winston-route-disabled", data.disabled);
+        }
+
+        function routeState(data) {
+            let $route = $(".winston-route[winston-route=\"" + data.id + "\"]");
+            routeStateUI(data, $route);
         }
 
         function loco(data) {
@@ -651,6 +662,7 @@
                     $target.prop("disabled", "disabled");
                 });
                 $routesContainerBody.append($route);
+                routeRequestStatus(route.id);
             });
         }
 
@@ -704,6 +716,7 @@
 
         function turnoutUpdate(turnout) {
             let direction = turnout.data("direction");
+            let locked = turnout.data("locked");
             let track = turnout.data("track");
             switch (direction) {
                 case TurnoutState_A_B:
@@ -721,11 +734,21 @@
                     break;
             }
 
+            if (locked) {
+                turnout.neighborhood(".internal").addClass("locked");
+                $(".winston-turnout[winston-turnout-track=\"" + track + "\"] .btn").addClass("disabled");
+            }
+            else {
+                turnout.neighborhood(".internal").removeClass("locked");
+                $(".winston-turnout[winston-turnout-track=\"" + track + "\"] .btn").removeClass("disabled");
+            }
+
             $(".winston-turnout[winston-turnout-track=\"" + track + "\"]>.direction").html(turnoutDirectionLabelFromDirection(direction));
         }
 
         function doubleSlipTurnoutUpdate(turnout) {
             let direction = turnout.data("direction");
+            let locked = turnout.data("locked");
             let track = turnout.data("track");
             switch (direction) {
                 case DoubleSlipTurnoutState_A_B:
@@ -761,10 +784,21 @@
                     break;
             }
 
+            if (locked) {
+                turnout.neighborhood(".internal").addClass("locked");
+                $(".winston-turnout[winston-turnout-track=\"" + track + "\"] .btn").addClass("disabled");
+            }
+            else {
+                turnout.neighborhood(".internal").removeClass("locked");
+                $(".winston-turnout[winston-turnout-track=\"" + track + "\"] .btn").removeClass("disabled");
+            }
+
             $(".winston-turnout[winston-turnout-track=\"" + track + "\"]>.direction").html(doubleSlipDirectionLabelFromDirection(direction));
         }
 
         function turnoutToggle(event) {
+            if (event.target.data("locked"))
+                return;
             sendTurnoutToggle(event.target.data("track"), event.target.data("direction"));
         }
 
@@ -784,6 +818,12 @@
             if (!allowWinstonSubmit())
                 return;
             send("doRouteSet", { id: id, set: set });
+        }
+
+        function routeRequestStatus(route) {
+            if (!allowWinstonSubmit())
+                return;
+            send("getRouteState", { id: route });
         }
 
         function turnoutRequestStatus(track) {
@@ -871,6 +911,32 @@
             else
             {
                 // get all not-disabled possible routs and highlight their end signal
+                hideContextMenus();
+                let cySignal = event.target;
+
+                if (cySignal.hasClass("routeEnd")) {
+                    let cyStartSignal = cy.$("node.signal.routeStartFromHere");
+
+                    let start = { track: cyStartSignal.data("parentTrack"), connection: cyStartSignal.data("guarding") };
+                    let end = { track: cySignal.data("parentTrack"), connection: cySignal.data("guarding") };
+
+                    let routes = cyStartSignal.data("routes");
+                    let route = _.find(routes, route => {
+                        return route.start.track == start.track && route.start.connection == start.connection &&
+                            route.end.track == end.track && route.end.connection == end.connection;
+                    });
+                    if (route)
+                        sendRoute(route.id, true);
+                    else
+                        console.log("no route found from ", start, " to ", end);
+                }
+                else {
+                    let routes = cySignal.data("routes");
+                    _.each(routes, route => {
+                        cy.$("node.signal[parentTrack=\"" + route.end.track + "\"][guarding=\"" + route.end.connection + "\"]").addClass("routeEnd");
+                    });
+                    cySignal.addClass("routeStartFromHere");
+                }
             }
         }
 
@@ -966,6 +1032,12 @@
                         }
                     },
                     {
+                        selector: ".internal.locked",
+                        style: {
+                            "line-color": 'grey',
+                            }
+                    },
+                    {
                         selector: ".trackNode",
                         style: {
                             "width": 20,
@@ -1033,6 +1105,20 @@
                         selector: ".signal.routeStart",
                         style: {
                             "background-color": "skyblue"
+                        }
+                    },
+                    {
+                        selector: ".signal.routeEnd",
+                        style: {
+                            "border-width": "12px",
+                            "border-color": "skyblue"
+                            }
+                    },
+                    {
+                        selector: ".signal.routeStartFromHere",
+                        style: {
+                            "border-width": "12px",
+                            "border-color": "skyblue"
                         }
                     },
                     {
@@ -1140,6 +1226,8 @@
             });
             cy.on('unselect', '.track, .trackNode, .track, .signal, .detector', function () {
                 cy.elements().removeClass("reachable");
+                cy.elements().removeClass("routeEnd");
+                cy.elements().removeClass("routeStartFromHere");
                 hideContextMenus();
             });
             cy.on('mouseover', '.turnout', function (event) {
@@ -1410,8 +1498,8 @@
 
         function cytoscapeMarkSignalStartingRoute(routes, cy) {
             _.each(routes, route => {
-                let guarding = route.start;
-                let track = route.path[0].track;
+                let guarding = route.start.connection;
+                let track = route.start.track;
                 let cySignal = cy.$("node.signal[parentTrack=\"" + track + "\"][guarding=\"" + guarding + "\"]");
 
                 cySignal.addClass("routeStart");
@@ -1419,7 +1507,7 @@
                 let knownRoutes = cySignal.data("routes");
                 if (!knownRoutes)
                     knownRoutes = [];
-                knownRoutes.push({id: route.id, name: route.name});
+                knownRoutes.push({ id: route.id, name: route.name, start: route.start, end: route.end });
                 cySignal.data("routes", knownRoutes);
             });
             return cy;

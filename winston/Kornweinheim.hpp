@@ -159,7 +159,7 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
 
 #ifdef WINSTON_WITH_WEBSOCKET
         // tell the ui what happens
-        this->webUI.turnoutSendState(turnout->name(), direction);
+        this->webUI.turnoutSendState(turnout->name(), direction, turnout->locked());
 #endif
         for(auto route : this->routesInProgress)
         {
@@ -185,7 +185,7 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
 
 #ifdef WINSTON_WITH_WEBSOCKET
         // tell the ui what happens
-        this->webUI.doubleSlipSendState(turnout->name(), direction);
+        this->webUI.doubleSlipSendState(turnout->name(), direction, turnout->locked());
 #endif
         for (auto route : this->routesInProgress)
         {
@@ -363,12 +363,14 @@ winston::Result Kornweinheim::on_http(WebServer::HTTPConnection& connection, con
         if (resourceFile != nullptr)
         {
             connection.status(200);
-            if(resourceFile->content_type.compare("font/woff2") == 0)
-                connection.header("content-type"_s, "application/octet-stream");// +"; charset = UTF - 8"_s);
-            else
-                connection.header("content-type"_s, resourceFile->content_type);// +"; charset = UTF - 8"_s);
-            //connection.header("Connection"_s, "close"_s);
+            connection.header("content-type"_s, resourceFile->content_type);// +"; charset = UTF - 8"_s);
+#ifdef WINSTON_PLATFORM_WIN_x64
+            std::string payload;
+            payload.append((char*)resourceFile->data, resourceFile->size);
+            connection.body(payload);
+#else
             connection.body(resourceFile->data, resourceFile->size, 64);
+#endif
         }
         else
 #endif
@@ -447,13 +449,15 @@ const winston::Result Kornweinheim::orderRouteSet(winston::Route::Shared route, 
 #endif
         }
 
-        route->eachTurnout<true, true>([this](const winston::Route::Turnout& turnout)
+        route->eachTurnout<true, true>([this, id=route->id](const winston::Route::Turnout& turnout)
             {
                 this->orderTurnoutToggle(turnout.turnout(), turnout.direction);
+                turnout.turnout()->lock(id);
             },
-            [this](const winston::Route::DoubleSlipTurnout& turnout)
+            [this, id = route->id](const winston::Route::DoubleSlipTurnout& turnout)
             {
                 this->orderDoubleSlipTurnoutToggle(turnout.doubleSlipTurnout(), turnout.direction);
+                turnout.doubleSlipTurnout()->lock(id);
             }
             );
     }

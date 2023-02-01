@@ -298,7 +298,22 @@ namespace winston
 				}
 
 				if (!isConflictingSet)
+				{
 					route->disable(false);
+				}
+
+				if (route->state() == Route::State::Unset)
+				{
+					route->eachTurnout<true, true>([id = route->id](const winston::Route::Turnout& turnout)
+						{
+							turnout.turnout()->unlock(id);
+						},
+						[id = route->id](const winston::Route::DoubleSlipTurnout& turnout)
+						{
+							turnout.doubleSlipTurnout()->unlock(id);
+						}
+						);
+				}
 
 				callback(route);
 			});

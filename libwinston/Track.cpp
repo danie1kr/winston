@@ -357,13 +357,13 @@ namespace winston
 	}
 
 	Turnout::Turnout(const std::string name, const Callback callback, const bool leftTurnout)
-		: Track(name, 0), Shared_Ptr<Turnout>(), callback(callback), trackLengthCalculator(nullptr), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c()
+		: Track(name, 0), Shared_Ptr<Turnout>(), callback(callback), trackLengthCalculator(nullptr), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c(), lockingRoutes()
 	{
 
 	}
 
 	Turnout::Turnout(const std::string name, const Callback callback, const TrackLengthCalculator trackLengthCalculator, const bool leftTurnout)
-		: Track(name, 0), Shared_Ptr<Turnout>(), callback(callback), trackLengthCalculator(trackLengthCalculator), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c()
+		: Track(name, 0), Shared_Ptr<Turnout>(), callback(callback), trackLengthCalculator(trackLengthCalculator), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c(), lockingRoutes()
 	{
 
 	}
@@ -525,6 +525,9 @@ namespace winston
 
 	const State Turnout::startChangeTo(const Direction direction)
 	{
+		if (this->locked())
+			return State::Finished;
+
 		if (this->dir == direction || this->dir == Direction::Changing)
 			return State::Finished;
 
@@ -546,6 +549,24 @@ namespace winston
 		this->dir = direction;
 
 		return state;
+	}
+
+	void Turnout::lock(const int route)
+	{
+		this->lockingRoutes.insert(route);
+		this->callback(this->shared_from_this(), this->dir);
+	}
+
+	void Turnout::unlock(const int route)
+	{
+		this->lockingRoutes.erase(route);
+		if (!this->locked())
+			this->callback(this->shared_from_this(), this->dir);
+	}
+
+	bool Turnout::locked() const
+	{
+		return this->lockingRoutes.size() > 0;
 	}
 
 	const Turnout::Direction Turnout::direction() const
@@ -590,13 +611,13 @@ namespace winston
 	}
 
 	DoubleSlipTurnout::DoubleSlipTurnout(const std::string name, const Callback callback)
-		: Track(name, 0), Shared_Ptr<DoubleSlipTurnout>(), callback(callback), trackLengthCalculator(nullptr), dir(Direction::A_B), accessoryStates{0xF0, 0x0D}, a(), b(), c(), d()
+		: Track(name, 0), Shared_Ptr<DoubleSlipTurnout>(), callback(callback), trackLengthCalculator(nullptr), dir(Direction::A_B), accessoryStates{0xF0, 0x0D}, a(), b(), c(), d(), lockingRoutes()
 	{
 
 	}
 
 	DoubleSlipTurnout::DoubleSlipTurnout(const std::string name, const Callback callback, const TrackLengthCalculator trackLengthCalculator)
-		: Track(name, 0), Shared_Ptr<DoubleSlipTurnout>(), callback(callback), trackLengthCalculator(trackLengthCalculator), dir(Direction::A_B), accessoryStates{ 0xF0, 0x0D }, a(), b(), c(), d()
+		: Track(name, 0), Shared_Ptr<DoubleSlipTurnout>(), callback(callback), trackLengthCalculator(trackLengthCalculator), dir(Direction::A_B), accessoryStates{ 0xF0, 0x0D }, a(), b(), c(), d(), lockingRoutes()
 	{
 
 	}
@@ -811,6 +832,9 @@ namespace winston
 
 	const State DoubleSlipTurnout::startChangeTo(const Direction direction)
 	{
+		if (this->locked())
+			return State::Finished;
+
 		if (this->dir == direction || this->dir == Direction::Changing)
 			return State::Finished;
 
@@ -834,6 +858,23 @@ namespace winston
 		return state;
 	}
 
+	void DoubleSlipTurnout::lock(const int route)
+	{
+		this->lockingRoutes.insert(route);
+		this->callback(this->shared_from_this(), this->dir);
+	}
+
+	void DoubleSlipTurnout::unlock(const int route)
+	{
+		this->lockingRoutes.erase(route);
+		if(!this->locked())
+			this->callback(this->shared_from_this(), this->dir);
+	}
+
+	bool DoubleSlipTurnout::locked() const
+	{
+		return this->lockingRoutes.size() > 0;
+	}
 
 	void DoubleSlipTurnout::setAccessoryState(const unsigned char state, const bool first, const bool applyToInternalDirection, const bool doCallback)
 	{

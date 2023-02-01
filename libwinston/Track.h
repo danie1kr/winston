@@ -281,6 +281,10 @@ namespace winston
 		const State startToggle();
 		const State finalizeChangeTo(const Direction direction);
 
+		void lock(const int route);
+		void unlock(const int route);
+		bool locked() const;
+
 		const Direction direction() const;
 		static const Direction otherDirection(const Direction current);
 		const Connection fromDirection() const;
@@ -300,6 +304,8 @@ namespace winston
 		Direction dir;
 
 		Track::Shared a, b, c;
+
+		std::unordered_set<unsigned int> lockingRoutes;
 	};
 
 	/* A   D
@@ -348,6 +354,10 @@ namespace winston
 		const State startToggle();
 		const State finalizeChangeTo(const Direction direction);
 
+		void lock(const int route);
+		void unlock(const int route);
+		bool locked() const;
+
 		void setAccessoryState(const unsigned char state, const bool first, const bool applyToInternalDirection, const bool doCallback);
 		const bool isKnownAccessoryState() const;
 		const Direction fromAccessoryState() const;
@@ -373,6 +383,8 @@ namespace winston
 		unsigned char accessoryStates[2];
 
 		Track::Shared a, b, c, d;
+
+		std::unordered_set<unsigned int> lockingRoutes;
 	};
 
 	std::string build(const Track::Connection first);

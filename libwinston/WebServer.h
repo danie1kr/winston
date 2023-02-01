@@ -148,28 +148,29 @@ namespace winston
 		}
 
     private:
-        void turnoutSendState(const std::string turnoutTrackId, const int dir)
+        void turnoutSendState(const std::string turnoutTrackId, const int dir, const bool locked)
         {
             DynamicJsonDocument obj(200);
             obj["op"] = "turnoutState";
             auto data = obj.createNestedObject("data");
             data["id"] = turnoutTrackId;
             data["state"] = (int)dir;
+            data["locked"] = locked;
             std::string json("");
             serializeJson(obj, json);
             this->webServer.broadcast(json);
         }
     public:
         // send a turnout state via websocket
-        void turnoutSendState(const std::string turnoutTrackId, const winston::Turnout::Direction dir)
+        void turnoutSendState(const std::string turnoutTrackId, const winston::Turnout::Direction dir, const bool locked)
         {
-            turnoutSendState(turnoutTrackId, (int)dir);
+            turnoutSendState(turnoutTrackId, (int)dir, locked);
         }
 
         // send a double slip state via websocket
-        void doubleSlipSendState(const std::string turnoutTrackId, const winston::DoubleSlipTurnout::Direction dir)
+        void doubleSlipSendState(const std::string turnoutTrackId, const winston::DoubleSlipTurnout::Direction dir, const bool locked)
         {
-            turnoutSendState(turnoutTrackId, (int)dir);
+            turnoutSendState(turnoutTrackId, (int)dir, locked);
         }
 
         // send route state via websocket
@@ -288,12 +289,6 @@ namespace winston
                 const std::string id = data["id"];
                 this->turnoutToggle(id);
             }
-            else if (std::string("\"doRouteSet\"").compare(op) == 0)
-            {
-                const int id = data["id"];
-                const bool set = data["set"];
-                this->routeSet(id, set);
-            }
             else if (std::string("\"getTurnoutState\"").compare(op) == 0)
             {
                 const std::string id = data["id"];
@@ -301,12 +296,27 @@ namespace winston
                 if (track->type() == Track::Type::Turnout)
                 {
                     auto turnout = std::static_pointer_cast<winston::Turnout>(track);
-                    this->turnoutSendState(turnout->name(), turnout->direction());
+                    this->turnoutSendState(turnout->name(), turnout->direction(), turnout->locked());
                 }
                 else if(track->type() == Track::Type::DoubleSlipTurnout)
                 {
                     auto turnout = std::static_pointer_cast<winston::DoubleSlipTurnout>(track);
-                    this->doubleSlipSendState(turnout->name(), turnout->direction());
+                    this->doubleSlipSendState(turnout->name(), turnout->direction(), turnout->locked());
+                }
+            }
+            else if (std::string("\"doRouteSet\"").compare(op) == 0)
+            {
+                const int id = data["id"];
+                const bool set = data["set"];
+                this->routeSet(id, set);
+            }
+            else if (std::string("\"getRouteState\"").compare(op) == 0)
+            {
+                const int id = data["id"];
+                if (this->railway->supportsRoutes())
+                {
+                    auto route = this->railway->route(id);
+                    this->routeState(*route);
                 }
             }
             else if (std::string("\"getSignalState\"").compare(op) == 0)
@@ -435,7 +445,20 @@ namespace winston
                         auto r = routes.createNestedObject();
                         r["id"] = route->id;
                         r["name"] = route->name;
-                        r["start"] = Track::ConnectionToString(route->start());
+                        auto start = r.createNestedObject("start");
+                        {
+                            winston::Track::Shared track;
+                            auto connection = route->start(track);
+                            start["track"] = track->name();
+                            start["connection"] = Track::ConnectionToString(connection);
+                        }
+                        auto end = r.createNestedObject("end");
+                        {
+                            winston::Track::Shared track;
+                            auto connection = route->end(track);
+                            end["track"] = track->name();
+                            end["connection"] = Track::ConnectionToString(connection);
+                        }
                         auto routePath = r.createNestedArray("path");
                         for (auto& path : route->path)
                         {

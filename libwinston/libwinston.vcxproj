@@ -120,24 +120,25 @@
     <ClInclude Include="Callback.h" />
     <ClInclude Include="external\ArduinoJson-v6.19.0.hpp" />
     <ClInclude Include="external\better_enum.hpp" />
+    <ClInclude Include="external\optional.hpp" />
+    <ClInclude Include="external\span.hpp" />
     <ClInclude Include="HAL.h" />
     <ClInclude Include="Library.h" />
     <ClInclude Include="Locomotive.h" />
     <ClInclude Include="Log.h" />
     <ClInclude Include="ModelRailwaySystem.h" />
-    <ClInclude Include="optional.hpp" />
     <ClInclude Include="Position.h" />
     <ClInclude Include="Route.h" />
-    <ClInclude Include="span.hpp" />
     <ClInclude Include="Storyline.h" />
     <ClInclude Include="Track.h" />
     <ClInclude Include="Railway.h" />
     <ClInclude Include="Signal.h" />
-    <ClInclude Include="SignalBox.h" />
+    <ClInclude Include="SignalTower.h" />
     <ClInclude Include="Util.h" />
     <ClInclude Include="WebServer.h" />
     <ClInclude Include="Winston.h" />
     <ClInclude Include="WinstonConfig.h" />
+    <ClInclude Include="WinstonSharedTypes.h" />
     <ClInclude Include="WinstonTypes.h" />
   </ItemGroup>
   <ItemGroup>
@@ -155,12 +156,13 @@
     <ClCompile Include="Signal.cpp" />
     <ClCompile Include="Storyline.cpp" />
     <ClCompile Include="Track.cpp" />
-    <ClCompile Include="SignalBox.cpp" />
+    <ClCompile Include="SignalTower.cpp" />
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="Winston.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="design.md" />
+    <None Include="WinstonSharedTypes.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="NatvisFile.natvis">

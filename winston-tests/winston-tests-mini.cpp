@@ -23,11 +23,11 @@ namespace winstontests
             return callbacks;
         }
 
-        static winston::Railway::Callbacks railwayCallbacksWithSignals(winston::SignalBox::Shared signalBox)
+        static winston::Railway::Callbacks railwayCallbacksWithSignals(winston::SignalTower::Shared signalTower)
         {
             winston::Railway::Callbacks callbacks;
 
-            callbacks.turnoutUpdateCallback = signalBox->injectTurnoutSignalHandling([=](winston::Turnout::Shared turnout, const winston::Turnout::Direction direction) -> const winston::State
+            callbacks.turnoutUpdateCallback = signalTower->injectTurnoutSignalHandling([=](winston::Turnout::Shared turnout, const winston::Turnout::Direction direction) -> const winston::State
             {
                 return winston::State::Finished;
             });
@@ -71,7 +71,7 @@ namespace winstontests
             Assert::IsTrue(onto2.get() == c.get());
         }
 
-        TEST_METHOD(SignalBox_directForcedToggleTurnout)
+        TEST_METHOD(SignalTower_directForcedToggleTurnout)
         {
             testRailway = MiniRailway::make(railwayCallbacks());
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
@@ -81,7 +81,7 @@ namespace winstontests
             auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->track(MiniRailway::Tracks::Turnout1));
 
             winston::Track::Shared onto, onto2;
-            auto signalBox = winston::SignalBox::make();
+            auto signalTower = winston::SignalTower::make();
 
             auto direction = winston::Turnout::Direction::A_C;
             t1->finalizeChangeTo(direction);
@@ -91,7 +91,7 @@ namespace winstontests
             Assert::IsTrue(onto2.get() == c.get());
         }
 
-        TEST_METHOD(SignalBox_notifiedForcedToggleTurnout)
+        TEST_METHOD(SignalTower_notifiedForcedToggleTurnout)
         {
             testRailway = MiniRailway::make(railwayCallbacks());
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
@@ -101,21 +101,21 @@ namespace winstontests
             auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->track(MiniRailway::Tracks::Turnout1));
 
             winston::Track::Shared onto, onto2;
-            auto signalBox = winston::SignalBox::make();
+            auto signalTower = winston::SignalTower::make();
 
             auto direction = winston::Turnout::Direction::A_C;
             auto cb = std::make_shared<winston::Callback>([]() {});
-            signalBox->order(winston::Command::make([t1, direction](const winston::TimePoint &created) -> const winston::State { return t1->finalizeChangeTo(direction);  }));
+            signalTower->order(winston::Command::make([t1, direction](const winston::TimePoint &created) -> const winston::State { return t1->finalizeChangeTo(direction);  }));
             //EventTurnoutFinalizeToggle::make(cb, t1, direction));
             for (int i = 0; i < 10; ++i)
-                signalBox->work();
+                signalTower->work();
             Assert::IsTrue(t1->direction() == direction);
             Assert::IsTrue(a->traverse(winston::Track::Connection::DeadEnd, onto, false));
             Assert::IsTrue(onto->traverse(winston::Track::Connection::A, onto2, false));
             Assert::IsTrue(onto2.get() == c.get());
         }
 
-        TEST_METHOD(SignalBox_notifiedExternallyAcknowledgedToggleTurnout)
+        TEST_METHOD(SignalTower_notifiedExternallyAcknowledgedToggleTurnout)
         {
             testRailway = MiniRailway::make(railwayCallbacks());
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
@@ -125,14 +125,14 @@ namespace winstontests
             auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->track(MiniRailway::Tracks::Turnout1));
 
             winston::Track::Shared onto, onto2;
-            auto signalBox = winston::SignalBox::make();
+            auto signalTower = winston::SignalTower::make();
 
             auto direction = winston::Turnout::Direction::A_B;
             auto cb = std::make_shared<winston::Callback>([]() {});
-            signalBox->order(winston::Command::make([t1](const winston::TimePoint &created) -> const winston::State { return t1->startToggle(); }));
-            //signalBox->notify(winston::EventTurnoutStartToggle::make(cb, t1));
+            signalTower->order(winston::Command::make([t1](const winston::TimePoint &created) -> const winston::State { return t1->startToggle(); }));
+            //signalTower->notify(winston::EventTurnoutStartToggle::make(cb, t1));
             for (int i = 0; i < 10; ++i)
-                signalBox->work();
+                signalTower->work();
             Assert::IsTrue(t1->direction() == winston::Turnout::Direction::Changing);
 
             Assert::IsFalse(t1->traverse(winston::Track::Connection::A, onto, false));
@@ -140,10 +140,10 @@ namespace winstontests
             Assert::IsFalse(t1->traverse(winston::Track::Connection::C, onto, false));
 
             auto cb2 = std::make_shared<winston::Callback>([]() {});
-            signalBox->order(winston::Command::make([t1, direction](const winston::TimePoint &created) -> const winston::State { return t1->finalizeChangeTo(direction); }));
-            //signalBox->notify(winston::EventTurnoutFinalizeToggle::make(cb2, t1, direction));
+            signalTower->order(winston::Command::make([t1, direction](const winston::TimePoint &created) -> const winston::State { return t1->finalizeChangeTo(direction); }));
+            //signalTower->notify(winston::EventTurnoutFinalizeToggle::make(cb2, t1, direction));
             for (int i = 0; i < 10; ++i)
-                signalBox->work();
+                signalTower->work();
             Assert::IsTrue(t1->direction() == direction);
             
             Assert::IsTrue(a->traverse(winston::Track::Connection::DeadEnd, onto, false));
@@ -152,9 +152,9 @@ namespace winstontests
         }
 
         TEST_METHOD(Signals_forTurnouts) {
-            auto signalBox = winston::SignalBox::make();
+            auto signalTower = winston::SignalTower::make();
 
-            testRailway = MiniRailway::make(railwayCallbacksWithSignals(signalBox));
+            testRailway = MiniRailway::make(railwayCallbacksWithSignals(signalTower));
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
             auto a = testRailway->track(MiniRailway::Tracks::A);
             auto b = testRailway->track(MiniRailway::Tracks::B);
@@ -166,21 +166,21 @@ namespace winstontests
             Assert::IsTrue(sBA.operator bool() == true);
             Assert::IsTrue(sCA.operator bool() == true);
 
-            signalBox->setSignalsFor(t1);
+            signalTower->setSignalsFor(t1);
             for (int i = 0; i < 10; ++i)
-                signalBox->work();
+                signalTower->work();
             Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sCA->shows(winston::Signal::Aspect::Halt));
 
-            signalBox->order(winston::Command::make([t1](const winston::TimePoint &created) -> const winston::State { return t1->finalizeChangeTo(winston::Turnout::Direction::A_C); }));
+            signalTower->order(winston::Command::make([t1](const winston::TimePoint &created) -> const winston::State { return t1->finalizeChangeTo(winston::Turnout::Direction::A_C); }));
             for (int i = 0; i < 10; ++i)
-                signalBox->work();
+                signalTower->work();
             Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sCA->shows(winston::Signal::Aspect::Go));
             
-            signalBox->order(winston::Command::make([t1](const winston::TimePoint &created) -> const winston::State { return t1->finalizeChangeTo(winston::Turnout::Direction::A_B); }));
+            signalTower->order(winston::Command::make([t1](const winston::TimePoint &created) -> const winston::State { return t1->finalizeChangeTo(winston::Turnout::Direction::A_B); }));
             for (int i = 0; i < 10; ++i)
-                signalBox->work();
+                signalTower->work();
             Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sCA->shows(winston::Signal::Aspect::Halt));
         }

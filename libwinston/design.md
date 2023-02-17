@@ -13,7 +13,7 @@ Trigger a switch
 ### attachSignal(signal, exit)
 Attach a signal to guard exit
 
-## SignalBox
+## SignalTower
 
 ### order(command)
 Put command into work queue

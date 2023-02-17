@@ -20,11 +20,9 @@
 
 #include "external/central-z21/Z21.h"
 #include "TLC5947_SignalDevice.h"
-#include "PN532_DetectorDevice.h"
 
 constexpr auto FRAME_SLEEP = 50;
 
-constexpr auto WINSTON_RAILWAY_DEBUG_INJECTOR_DELAY = 1000;
 //#define RAILWAY_CLASS RailwayWithSiding
 //#define RAILWAY_CLASS TimeSaverRailway
 //#define RAILWAY_CLASS Y2020Railway
@@ -32,48 +30,25 @@ constexpr auto WINSTON_RAILWAY_DEBUG_INJECTOR_DELAY = 1000;
 #define RAILWAY_CLASS Y2021Railway
 
 
-class Kornweinheim : public winston::ModelRailwaySystem<RAILWAY_CLASS::Shared, RAILWAY_CLASS::AddressTranslator::Shared, Z21::Shared>
+class Kornweinheim : public winston::ModelRailwaySystem<RAILWAY_CLASS, RAILWAY_CLASS::AddressTranslator, Z21, WebServer>
 {
 private:
-
     void setupSignals();
     void setupDetectors();
 
     winston::DigitalCentralStation::Callbacks z21Callbacks();
     winston::Locomotive::Callbacks locoCallbacks();
     winston::Railway::Callbacks railwayCallbacks();
-
-#ifdef WINSTON_WITH_WEBSOCKET
-    winston::WebUI<WebServer, RAILWAY_CLASS, Storage> webUI;
     
-    /* websocket *
-    WebServer webServer;
-
-    // add a signal to the /signal output
-    void writeSignal(WebServer::HTTPConnection& connection, const winston::Track::Shared track, const winston::Track::Connection trackCon);
-    */
-    // Define a callback to handle incoming messages
-    winston::Result on_http(WebServer::HTTPConnection& connection, const winston::HTTPMethod method, const std::string& resource);
-    void writeSignalHTMLList(WebServer::HTTPConnection& connection, const winston::Track::Shared track, const winston::Track::Connection trackCon);
-
-    /*
-    void writeAttachedSignal(JsonArray& signals, winston::Track::Shared track, const winston::Track::Connection connection);
-
-    // Define a callback to handle incoming messages
-    void on_message(WebServer::Client &client, const std::string &message);*/
-#endif
+    const winston::Result on_http(WebServer::HTTPConnection& connection, const winston::HTTPMethod method, const std::string& resource);
+    
     // setup our model railway system
     void systemSetup();
 
-    const winston::Result orderRouteSet(winston::Route::Shared route, const bool set);
-    std::vector<winston::Route::Shared> routesInProgress;
-
-    void orderTurnoutToggle(winston::Turnout::Shared turnout, winston::Turnout::Direction direction);
-    void orderDoubleSlipTurnoutToggle(winston::DoubleSlipTurnout::Shared turnout, winston::DoubleSlipTurnout::Direction direction);
     void systemSetupComplete();
 
     // accept new requests and loop over what the signal box has to do
-    bool systemLoop();
+    void systemLoop();
 
     void populateLocomotiveShed();
 

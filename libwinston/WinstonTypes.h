@@ -6,11 +6,10 @@
 #pragma GCC push_options
 #pragma GCC optimize("Os")
 #endif
-#include "external/better_enum.hpp"
 #include <string>
 #include <array>
 #include <vector>
-#include "span.hpp"
+#include "external/span.hpp"
 #ifdef __GNUC__ 
 #pragma GCC pop_options
 #endif
@@ -19,9 +18,10 @@
 #include <chrono>
 using namespace std::chrono_literals;
 
+#include "WinstonSharedTypes.h"
+
 namespace winston
 {
-	using Address = uint16_t;
 	using Id = unsigned int;
 	using TrackIndex = size_t;
 
@@ -254,10 +254,10 @@ namespace winston
 
 	class Railway;
 
-	class SignalBox;
+	class SignalTower;
 
 	class DigitalCentralStation;
-	template<typename _Railway, class _AddressTranslator, class _DigitalCentralStation>
+	template<typename _Railway, class _AddressTranslator, class _DigitalCentralStation, class _WebServer>
 	class ModelRailwaySystem;
 
 	class Block;

@@ -92,7 +92,7 @@ namespace winston
 		OnMessage onMessage;
 	};
 
-	template<class _WebServer, class _Railway, class _Storage>
+	template<class _WebServer, class _Railway>
 	class WebUI
 	{
     public:
@@ -106,7 +106,7 @@ namespace winston
         typename _Railway::Shared railway;
         LocomotiveShed locomotiveShed;
         typename _Railway::AddressTranslator::Shared addressTranslator;
-        typename _Storage::Shared storageLayout;
+        winston::hal::StorageInterface::Shared storageLayout;
         DigitalCentralStation::Shared digitalCentralStation;
 	public:
 
@@ -120,7 +120,7 @@ namespace winston
             this->webServer.step();
         }
 
-		Result init(typename _Railway::Shared railway, LocomotiveShed locomotiveShed, typename _Storage::Shared storageLayout, typename _Railway::AddressTranslator::Shared addressTranslator, DigitalCentralStation::Shared digitalCentralStation, const unsigned int port, typename _WebServer::OnHTTP onHTTP, TurnoutToggleCallback turnoutToggle, RouteSetCallback routeSet)
+		Result init(typename _Railway::Shared railway, LocomotiveShed locomotiveShed, winston::hal::StorageInterface::Shared storageLayout, typename _Railway::AddressTranslator::Shared addressTranslator, DigitalCentralStation::Shared digitalCentralStation, const unsigned int port, typename _WebServer::OnHTTP onHTTP, TurnoutToggleCallback turnoutToggle, RouteSetCallback routeSet)
 		{
             this->railway = railway;
             this->locomotiveShed = locomotiveShed;
@@ -129,7 +129,6 @@ namespace winston
             this->storageLayout = storageLayout;
             this->addressTranslator = addressTranslator;
             this->digitalCentralStation = digitalCentralStation;
-            //this->locoControl = locoControl;
 
 			// webServer
 			this->webServer.init(
@@ -259,6 +258,7 @@ namespace winston
         Result on_http(typename _WebServer::HTTPConnection& connection, const winston::HTTPMethod method, const std::string& resource)
         {
             const std::string path_index("/");
+            const std::string path_log("/log");
 
             if (resource.compare(path_index) == 0)
             {
@@ -266,6 +266,22 @@ namespace winston
                 connection.header("content-type"_s, "text/html; charset=UTF-8"_s);
                 connection.header("Connection"_s, "close"_s);
                 connection.body("<html>winston</html>\r\n"_s);
+            }
+            else if (resource.compare(path_log) == 0)
+            {
+                connection.status(200);
+                connection.header("content-type"_s, "text/html; charset=UTF-8"_s);
+                connection.header("Connection"_s, "close"_s);
+                connection.body("<html><head>winston</head><body><table><tr><th>timestamp</th><th>level</th><th>log</th></tr>"_s);
+                for (const auto& entry : winston::logger.entries())
+                {
+                    connection.body("<tr><td>");
+                    connection.body(winston::build(entry.timestamp)); connection.body("</td><td>");
+                    connection.body(entry.levelName()); connection.body("</td><td>");
+                    connection.body(entry.text); connection.body("</td></tr>\r\n");
+                }
+
+                connection.body("</table></body></html>\r\n"_s);
             }
             else
                 return Result::NotFound;
@@ -609,10 +625,10 @@ namespace winston
                         unsigned char speed128 = (unsigned char)(speed & 0xFF);
                         if (loco->light() != light)
                         {
-                            signalBox->order(winston::Command::make([this, loco, light](const TimePoint &created) -> const winston::State
+                            signalTower->order(winston::Command::make([this, loco, light](const TimePoint &created) -> const winston::State
                                 {
         #ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
-                                    signalBox->order(winston::Command::make([this, loco, light](const TimePoint &created) -> const winston::State
+                                    signalTower->order(winston::Command::make([this, loco, light](const TimePoint &created) -> const winston::State
                                         {
                                             if (winston::hal::now() - created > WINSTON_RAILWAY_DEBUG_INJECTOR_DELAY)
                                             {
@@ -628,10 +644,10 @@ namespace winston
 
                         if (loco->forward() != forward || loco->speed() != speed128)
                         {
-                            signalBox->order(winston::Command::make([this, loco, speed128, forward](const TimePoint &created) -> const winston::State
+                            signalTower->order(winston::Command::make([this, loco, speed128, forward](const TimePoint &created) -> const winston::State
                                 {
         #ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
-                                    signalBox->order(winston::Command::make([this, loco, speed128, forward](const TimePoint &created) -> const winston::State
+                                    signalTower->order(winston::Command::make([this, loco, speed128, forward](const TimePoint &created) -> const winston::State
                                         {
                                             if (winston::hal::now() - created > WINSTON_RAILWAY_DEBUG_INJECTOR_DELAY)
                                             {

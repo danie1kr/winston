@@ -4,7 +4,7 @@
 #include "../libwinston/Signal.h"
 #include "../libwinston/HAL.h"
 
-#include "mio.hpp"
+#include "external/mio.hpp"
 
 #include "FT232_Device.h"
 

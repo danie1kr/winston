@@ -45,9 +45,6 @@
     <ClCompile Include="FT232_Device.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PN532_DetectorDevice.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\central-z21\Z21Const.h">
@@ -87,12 +84,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Kornweinheim.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PN532_DetectorDevice.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IC74HC695_SignalDevice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resources.h">

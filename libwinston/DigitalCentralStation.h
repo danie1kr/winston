@@ -1,11 +1,10 @@
 #pragma once
 
-#include "optional.hpp"
 #include "Util.h"
 #include "WinstonTypes.h"
 #include "Track.h"
 #include "Locomotive.h"
-#include "SignalBox.h"
+#include "SignalTower.h"
 
 namespace winston
 {
@@ -38,26 +37,42 @@ namespace winston
 				bool  forward,
 				unsigned char  speed,                                  // In 128 speed range
 				uint32_t functions)>;
-			LocomotiveUpdateCallback locomotiveUpdateCallback;
+			LocomotiveUpdateCallback locomotiveUpdateCallback = [](Locomotive::Shared loco,
+				bool  busy,
+				//	boolean  doubleTracktion,
+				//	boolean  transpond,
+				bool  forward,
+				unsigned char  speed,                                  // In 128 speed range
+				uint32_t functions) { return; };
 
 			using SystemInfoCallback = std::function<void(const size_t id, const std::string name, const std::string content)>;
-			SystemInfoCallback systemInfoCallback;
+			SystemInfoCallback systemInfoCallback = [=](const size_t id, const std::string name, const std::string content) {
+				winston::logger.log(winston::build("Z21: ", name, ": ", content));
+			};
 
 			using TrackPowerStatusCallback = std::function<void(const bool powerOn)>;
-			TrackPowerStatusCallback trackPowerStatusCallback;
+			TrackPowerStatusCallback trackPowerStatusCallback = [=](const bool powerOn) {
+				winston::logger.log(std::string("Z21: Power is ") + std::string(powerOn ? "on" : "off"));
+			};
 
 			using ProgrammingTrackStatusCallback = std::function<void(const bool programmingOn)>;
-			ProgrammingTrackStatusCallback programmingTrackStatusCallback;
+			ProgrammingTrackStatusCallback programmingTrackStatusCallback = [=](const bool programmingOn) {
+				winston::logger.log(std::string("Z21: Programming is ") + std::string(programmingOn ? "on" : "off"));
+			};
 
 			using ShortCircuitDetectedCallback = std::function<void()>;
-			ShortCircuitDetectedCallback shortCircuitDetectedCallback;
+			ShortCircuitDetectedCallback shortCircuitDetectedCallback = [=]() {
+				winston::logger.log("Z21: Short circuit detected!");
+			};
 
 			using ConnectedCallback = std::function<void()>;
-			ConnectedCallback connectedCallback;
+			ConnectedCallback connectedCallback = [](){
+				return;
+			};
 
 			// true: continue processing this address, false skip
-			using SpecialAccessoryProcessingCallback = std::function<const bool(const uint16_t address, const	uint8_t state)>;
-			SpecialAccessoryProcessingCallback specialAccessoryProcessingCallback;
+			using SpecialAccessoryProcessingCallback = std::function<const bool(const uint16_t address, const uint8_t state)>;
+			SpecialAccessoryProcessingCallback specialAccessoryProcessingCallback = [](const uint16_t address, const uint8_t state) -> const bool { return false; };
 		};
 
 		class DebugInjector : public Shared_Ptr<DebugInjector>
@@ -72,7 +87,7 @@ namespace winston
 			DigitalCentralStation::Shared station;
 		};
 
-		DigitalCentralStation(TurnoutAddressTranslator::Shared& addressTranslator, LocoAddressTranslator &locoAddressTranslator, SignalBox::Shared& signalBox, const Callbacks callbacks);
+		DigitalCentralStation(TurnoutAddressTranslator::Shared& addressTranslator, LocoAddressTranslator &locoAddressTranslator, SignalTower::Shared& signalTower, const Callbacks callbacks);
 		virtual ~DigitalCentralStation() = default;
 
 		virtual const winston::Result connect() = 0;
@@ -102,7 +117,7 @@ namespace winston
 
 		TurnoutAddressTranslator::Shared turnoutAddressTranslator;
 		LocoAddressTranslator& locoAddressTranslator;
-		SignalBox::Shared signalBox;
+		SignalTower::Shared signalTower;
 		const Callbacks callbacks;
 		bool emergencyStop;
 

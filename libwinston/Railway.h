@@ -30,35 +30,26 @@ namespace winston
 		struct Callbacks
 		{
 			using TurnoutUpdateCallback = std::function<const State(Turnout::Shared turnout, const Turnout::Direction direction)>;
-			TurnoutUpdateCallback turnoutUpdateCallback;
+			TurnoutUpdateCallback turnoutUpdateCallback = [=](winston::Turnout::Shared turnout, const winston::Turnout::Direction direction) -> const winston::State
+			{
+				turnout->finalizeChangeTo(direction);
+				return winston::State::Finished;
+			};
 			
 			using DoubleSlipUpdateCallback = std::function<const State(DoubleSlipTurnout::Shared turnout, const DoubleSlipTurnout::Direction direction)>;
-			DoubleSlipUpdateCallback doubleSlipUpdateCallback;
+			DoubleSlipUpdateCallback doubleSlipUpdateCallback = [=](winston::DoubleSlipTurnout::Shared turnout, const winston::DoubleSlipTurnout::Direction direction) -> const winston::State
+			{
+				turnout->finalizeChangeTo(direction);
+				return winston::State::Finished;
+			};
 
 			using SignalUpdateCallback = std::function<const State(Track::Shared track, Track::Connection connection, const Signal::Aspects aspect)>;
-			SignalUpdateCallback signalUpdateCallback;
 
 			DCCDetector::Callback dccDetectorCallback;
 		};
 
 		Railway(const Callbacks callbacks);
 		virtual ~Railway() = default;
-		/*
-		using SignalFactory = std::function < winston::Signal::Shared (winston::Track::Shared track, winston::Track::Connection connection)>;
-		template<class _Signal>
-		SignalFactory S(const Length distance, size_t& device, size_t& port)
-		{
-			Port devPort(device, port);
-			port += _Signal::lightsCount();
-			// TODO: ensure port does not overflow
-			return [distance, devPort, this](winston::Track::Shared track, winston::Track::Connection connection)->winston::Signal::Shared {
-				return _Signal::make([=](const winston::Signal::Aspects aspect)->const winston::State {
-					return this->callbacks.signalUpdateCallback(track, connection, aspect);
-					}, distance, devPort);
-			};
-		}
-		SignalFactory KS_dummy(const Length distance = 0, const Port port = Port());
-		SignalFactory H(const Length distance, size_t& device, size_t& port);*/
 
 		void block(const Address address, const Trackset trackset, const Block::Type type);
 		Block::Shared block(Address address) const;
@@ -335,17 +326,10 @@ namespace winston
 	private:
 		const std::string enumIntegralToString(const int i)
 		{
-			try
-			{
-				Routes r = Routes::_from_integral(i);
-				return r._to_string();
-			}
-			catch (std::exception &e)
-			{
-				(void)e;
-			}
+			if (Routes::_is_valid(i))
+				return "unknown";
 			
-			return "unknown";
+			return Routes::_from_integral_unchecked(i)._to_string();
 		}
 
 		Result validate()

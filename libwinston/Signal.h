@@ -6,7 +6,7 @@
 #include "WinstonTypes.h"
 #include "HAL.h"
 #include "Util.h"
-#include "span.hpp"
+#include "external/span.hpp"
 #include "Command.h"
 
 

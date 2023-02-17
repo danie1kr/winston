@@ -49,7 +49,7 @@ void winston_loop()
 
         winston::logger.info(kwh.statistics(5));
 #ifdef WINSTON_STATISTICS_DETAILLED
-        winston::logger.info(kwh.statisticsSignalBox(5));
+        winston::logger.info(kwh.statisticsSignalTower(5));
 #endif
         winston::logger.info(winston::build("LooPS: ", loopsPerSecond / secondsPerPrint));
         loopsPerSecond = 0;

@@ -3,11 +3,11 @@
 
 namespace winston {
 	Route::Track::Track(const winston::Track::Shared track)
-		: Shared_Ptr<Route::Track>(), _track{ track }, type { Type::Track }
+		: Shared_Ptr<Route::Track>(), type { Type::Track }, _track{ track }
 	{}
 
 	Route::Track::Track(const winston::Track::Shared track, const Type type)
-		: Shared_Ptr<Route::Track>(), _track{ track }, type{ type }
+		: Shared_Ptr<Route::Track>(), type{ type }, _track{ track }
 	{}
 
 	Track::Shared Route::Track::track() const

@@ -4,6 +4,7 @@
 #include "WinstonTypes.h"
 #include "Position.h"
 #include "Track.h"
+#include "Log.h"
 
 namespace winston
 {
@@ -61,10 +62,16 @@ namespace winston
 		struct Callbacks
 		{
 			using DriveCallback = std::function<void(const Address address, const unsigned char speed, const bool forward)>;
-			DriveCallback drive;
+			DriveCallback drive = [](const Address address, const unsigned char speed, const bool forward) {
+				logger.warn("Locomotive::DriveCallback used but not implemented");
+				return winston::State::Finished;
+			};
 
 			using FunctionsCallback = std::function<void(const Address address, const uint32_t functions)>;
-			FunctionsCallback functions;
+			FunctionsCallback functions = [](const Address address, const uint32_t functions) {
+				logger.warn("Locomotive::FunctionsCallback used but not implemented");
+				return winston::State::Finished;
+			};
 		};
 
 		enum class Type : unsigned char

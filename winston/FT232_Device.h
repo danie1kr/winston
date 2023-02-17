@@ -1,7 +1,6 @@
 #pragma once
 #include "../libwinston/Signal.h"
 #include "../libwinston/HAL.h"
-#include "../libwinston/span.hpp"
 
 #include<windows.h>
 #include "../external/ftdi-232/ftd2xx.h"

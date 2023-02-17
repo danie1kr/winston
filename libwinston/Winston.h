@@ -14,7 +14,7 @@
 #include "Railway.h"
 #include "Route.h"
 #include "Signal.h"
-#include "SignalBox.h"
+#include "SignalTower.h"
 #include "Storyline.h"
 #include "Track.h"
 #include "Util.h"

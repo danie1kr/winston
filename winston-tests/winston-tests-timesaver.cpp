@@ -30,7 +30,7 @@ namespace winstontests
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
         }
 
-        TEST_METHOD(SignalBox_directForcedToggleTurnout)
+        TEST_METHOD(SignalTower_directForcedToggleTurnout)
         {
             testRailway = std::make_shared<TimeSaverRailway>(railwayCallbacks());
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
@@ -39,7 +39,7 @@ namespace winstontests
             auto t2 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->track(TimeSaverRailway::Tracks::Turnout2));
 
             winston::Track::Shared onto, onto2;
-            auto signalBox = winston::SignalBox::make();
+            auto signalTower = winston::SignalTower::make();
 
             auto direction = winston::Turnout::Direction::A_C;
             t1->finalizeChangeTo(direction);
@@ -63,19 +63,19 @@ namespace winstontests
 
             winston::Track::Shared onto, onto2;
             auto tr = std::dynamic_pointer_cast<winston::Railway>(testRailway);
-            auto signalBox = winston::SignalBox::make(tr);
+            auto signalTower = winston::SignalTower::make(tr);
 
-            //signalBox->notify(winston::EventTurnoutStartToggle::make(cb, t1));
-            //signalBox->notify(winston::EventTurnoutStartToggle::make(cb, t2));
+            //signalTower->notify(winston::EventTurnoutStartToggle::make(cb, t1));
+            //signalTower->notify(winston::EventTurnoutStartToggle::make(cb, t2));
 
-            signalBox->order(winston::Command::make([t1](const TimePoint &created) -> const winston::State { return t1->startToggle(); }));
-            signalBox->order(winston::Command::make([t2](const TimePoint &created) -> const winston::State { return t2->startToggle(); }));
+            signalTower->order(winston::Command::make([t1](const TimePoint &created) -> const winston::State { return t1->startToggle(); }));
+            signalTower->order(winston::Command::make([t2](const TimePoint &created) -> const winston::State { return t2->startToggle(); }));
 
 
-            signalBox->work();
-            signalBox->work();
-            signalBox->work();
-            signalBox->work();
+            signalTower->work();
+            signalTower->work();
+            signalTower->work();
+            signalTower->work();
 
             Assert::IsTrue(count == 1);
         }*/

@@ -21,8 +21,8 @@
 
 #define NOT_IMPLEMENTED(func) winston::logger.warn(winston::build("Z21: ", func, " not implemented"));
 
-Z21::Z21(winston::hal::Socket::Shared& socket, winston::DigitalCentralStation::TurnoutAddressTranslator::Shared& addressTranslator, LocoAddressTranslator& locoAddressTranslator, winston::SignalBox::Shared& signalBox, winston::DigitalCentralStation::Callbacks callbacks)
-    : winston::DigitalCentralStation(addressTranslator, locoAddressTranslator, signalBox, callbacks), lastMsgSent{}, socket(socket)
+Z21::Z21(winston::hal::Socket::Shared& socket, winston::DigitalCentralStation::TurnoutAddressTranslator::Shared& addressTranslator, LocoAddressTranslator& locoAddressTranslator, winston::SignalTower::Shared& signalTower, winston::DigitalCentralStation::Callbacks callbacks)
+    : winston::DigitalCentralStation(addressTranslator, locoAddressTranslator, signalTower, callbacks), lastMsgSent{}, socket(socket)
 {
     this->onBroadcastFlags = [](uint32_t flags) { NOT_IMPLEMENTED("onBroadcastFlags"); };
 

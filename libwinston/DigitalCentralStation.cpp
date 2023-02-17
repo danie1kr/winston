@@ -2,8 +2,8 @@
 
 namespace winston
 {
-	DigitalCentralStation::DigitalCentralStation(TurnoutAddressTranslator::Shared& turnoutAddressTranslator, LocoAddressTranslator& locoAddressTranslator, SignalBox::Shared& signalBox, const Callbacks callbacks)
-		: Shared_Ptr<DigitalCentralStation>(), turnoutAddressTranslator(turnoutAddressTranslator), locoAddressTranslator(locoAddressTranslator), signalBox(signalBox), callbacks(callbacks), emergencyStop(false), connectedToDCS(false)
+	DigitalCentralStation::DigitalCentralStation(TurnoutAddressTranslator::Shared& turnoutAddressTranslator, LocoAddressTranslator& locoAddressTranslator, SignalTower::Shared& signalTower, const Callbacks callbacks)
+		: Shared_Ptr<DigitalCentralStation>(), turnoutAddressTranslator(turnoutAddressTranslator), locoAddressTranslator(locoAddressTranslator), signalTower(signalTower), callbacks(callbacks), emergencyStop(false), connectedToDCS(false)
 	{
 
 	}
@@ -41,7 +41,7 @@ namespace winston
 
 	void DigitalCentralStation::turnoutUpdate(Turnout::Shared turnout, const Turnout::Direction direction)
 	{
-		this->signalBox->order(Command::make([turnout, direction](const TimePoint& created) -> const State
+		this->signalTower->order(Command::make([turnout, direction](const TimePoint& created) -> const State
 			{
 				return turnout->finalizeChangeTo(direction);
 			}, __PRETTY_FUNCTION__));
@@ -49,7 +49,7 @@ namespace winston
 
 	void DigitalCentralStation::doubleSlipUpdate(DoubleSlipTurnout::Shared turnout, const DoubleSlipTurnout::Direction direction)
 	{
-		this->signalBox->order(Command::make([turnout, direction](const TimePoint& created) -> const State
+		this->signalTower->order(Command::make([turnout, direction](const TimePoint& created) -> const State
 			{
 				return turnout->finalizeChangeTo(direction);
 			}, __PRETTY_FUNCTION__));

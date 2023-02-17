@@ -23,11 +23,11 @@ namespace winstontests
             return callbacks;
         }
 
-        static winston::Railway::Callbacks railwayCallbacksWithSignals(winston::SignalBox::Shared signalBox)
+        static winston::Railway::Callbacks railwayCallbacksWithSignals(winston::SignalTower::Shared signalTower)
         {
             winston::Railway::Callbacks callbacks;
 
-            callbacks.turnoutUpdateCallback = signalBox->injectTurnoutSignalHandling([=](winston::Turnout::Shared turnout, const winston::Turnout::Direction direction) -> const winston::State
+            callbacks.turnoutUpdateCallback = signalTower->injectTurnoutSignalHandling([=](winston::Turnout::Shared turnout, const winston::Turnout::Direction direction) -> const winston::State
                 {
                     return winston::State::Finished;
                 });
@@ -36,9 +36,9 @@ namespace winstontests
         }
     public:
         TEST_METHOD(Signals_forTurnouts) {
-            auto signalBox = winston::SignalBox::make();
+            auto signalTower = winston::SignalTower::make();
 
-            testRailway = SignalTestRailway::make(railwayCallbacksWithSignals(signalBox));
+            testRailway = SignalTestRailway::make(railwayCallbacksWithSignals(signalTower));
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
             auto a = testRailway->track(SignalTestRailway::Tracks::A);
             auto b = testRailway->track(SignalTestRailway::Tracks::B);
@@ -50,29 +50,29 @@ namespace winstontests
             Assert::IsTrue(sBA.operator bool() == true);
             Assert::IsTrue(sCA.operator bool() == true);
 
-            signalBox->setSignalsFor(t1);
+            signalTower->setSignalsFor(t1);
             for (int i = 0; i < 10; ++i)
-                signalBox->work();
+                signalTower->work();
             Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sCA->shows(winston::Signal::Aspect::Halt));
 
-            signalBox->order(winston::Command::make([t1](const winston::TimePoint &created) -> const winston::State { return t1->finalizeChangeTo(winston::Turnout::Direction::A_C); }));
+            signalTower->order(winston::Command::make([t1](const winston::TimePoint &created) -> const winston::State { return t1->finalizeChangeTo(winston::Turnout::Direction::A_C); }));
             for (int i = 0; i < 10; ++i)
-                signalBox->work();
+                signalTower->work();
             Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sCA->shows(winston::Signal::Aspect::Go));
 
-            signalBox->order(winston::Command::make([t1](const winston::TimePoint &created) -> const winston::State { return t1->finalizeChangeTo(winston::Turnout::Direction::A_B); }));
+            signalTower->order(winston::Command::make([t1](const winston::TimePoint &created) -> const winston::State { return t1->finalizeChangeTo(winston::Turnout::Direction::A_B); }));
             for (int i = 0; i < 10; ++i)
-                signalBox->work();
+                signalTower->work();
             Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sCA->shows(winston::Signal::Aspect::Halt));
         }
 
         TEST_METHOD(Signals_longTrackInBetween) {
-            auto signalBox = winston::SignalBox::make();
+            auto signalTower = winston::SignalTower::make();
 
-            testRailway = SignalTestRailway::make(railwayCallbacksWithSignals(signalBox));
+            testRailway = SignalTestRailway::make(railwayCallbacksWithSignals(signalTower));
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
             auto l0 = testRailway->track(SignalTestRailway::Tracks::L0);
             auto l1 = testRailway->track(SignalTestRailway::Tracks::L1);
@@ -96,28 +96,28 @@ namespace winstontests
             sL8a->aspect(winston::Signal::Aspect::Halt);
             
             // |====L0====KL0a=KL1b====L1====L2====L3====L4=KL4a====L5====L6====L7====KL7a=KL8a====L8====|
-            signalBox->setSignalOn(l4, winston::Track::Connection::A, winston::Signal::Aspect::Go);
+            signalTower->setSignalOn(l4, winston::Track::Connection::A, winston::Signal::Aspect::Go);
             Assert::IsTrue(sL0a->shows(winston::Signal::Aspect::ExpectGo));
             Assert::IsTrue(sL1b->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sL4a->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sL7a->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sL8a->shows(winston::Signal::Aspect::Halt));
 
-            signalBox->setSignalOn(l1, winston::Track::Connection::B, winston::Signal::Aspect::Go);
+            signalTower->setSignalOn(l1, winston::Track::Connection::B, winston::Signal::Aspect::Go);
             Assert::IsTrue(sL0a->shows(winston::Signal::Aspect::ExpectGo));
             Assert::IsTrue(sL1b->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sL4a->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sL7a->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sL8a->shows(winston::Signal::Aspect::ExpectGo));
 
-            signalBox->setSignalOn(l1, winston::Track::Connection::B, winston::Signal::Aspect::Halt);
+            signalTower->setSignalOn(l1, winston::Track::Connection::B, winston::Signal::Aspect::Halt);
             Assert::IsTrue(sL0a->shows(winston::Signal::Aspect::ExpectGo));
             Assert::IsTrue(sL1b->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sL4a->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sL7a->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sL8a->shows(winston::Signal::Aspect::Halt));
 
-            signalBox->setSignalOn(l4, winston::Track::Connection::A, winston::Signal::Aspect::Halt);
+            signalTower->setSignalOn(l4, winston::Track::Connection::A, winston::Signal::Aspect::Halt);
             Assert::IsTrue(sL0a->shows(winston::Signal::Aspect::ExpectHalt));
             Assert::IsTrue(sL1b->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sL4a->shows(winston::Signal::Aspect::Halt));
@@ -126,9 +126,9 @@ namespace winstontests
         }
 
         TEST_METHOD(Signals_fullTurnoutsSignalization) {
-            auto signalBox = winston::SignalBox::make();
+            auto signalTower = winston::SignalTower::make();
 
-            testRailway = SignalTestRailway::make(railwayCallbacksWithSignals(signalBox));
+            testRailway = SignalTestRailway::make(railwayCallbacksWithSignals(signalTower));
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
             auto r = testRailway->track(SignalTestRailway::Tracks::R);
             auto s = testRailway->track(SignalTestRailway::Tracks::S);
@@ -168,36 +168,36 @@ namespace winstontests
             sWA->aspect(winston::Signal::Aspect::Halt);
 
             // S = T3 = T
-            signalBox->setSignalsFor(t3);
+            signalTower->setSignalsFor(t3);
             for (int i = 0; i < 10; ++i)
-                signalBox->work();
+                signalTower->work();
             Assert::IsTrue(sTB->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sUA->shows(winston::Signal::Aspect::ExpectGo));
             Assert::IsTrue(sUA->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sVB->shows(winston::Signal::Aspect::Halt));
 
-            signalBox->setSignalOn(t, winston::Track::Connection::A, winston::Signal::Aspect::Go);
+            signalTower->setSignalOn(t, winston::Track::Connection::A, winston::Signal::Aspect::Go);
             Assert::IsTrue(sTA->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sSA->shows(winston::Signal::Aspect::ExpectGo));
 
             /*
-            signalBox->order(winston::Command::make([t3](const TimePoint &created) -> const winston::State { return t3->finalizeChangeTo(winston::Turnout::Direction::A_C); }));
+            signalTower->order(winston::Command::make([t3](const TimePoint &created) -> const winston::State { return t3->finalizeChangeTo(winston::Turnout::Direction::A_C); }));
             for (int i = 0; i < 10; ++i)
-                signalBox->work();
+                signalTower->work();
             Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sCA->shows(winston::Signal::Aspect::Go));*
 
-            signalBox->order(winston::Command::make([t3](const TimePoint &created) -> const winston::State { return t3->finalizeChangeTo(winston::Turnout::Direction::A_B); }));
+            signalTower->order(winston::Command::make([t3](const TimePoint &created) -> const winston::State { return t3->finalizeChangeTo(winston::Turnout::Direction::A_B); }));
             for (int i = 0; i < 10; ++i)
-                signalBox->work();
+                signalTower->work();
             Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sCA->shows(winston::Signal::Aspect::Halt));*/
         }
         
         TEST_METHOD(Signals_PreSignal) {
-            auto signalBox = winston::SignalBox::make();
+            auto signalTower = winston::SignalTower::make();
 
-            testRailway = SignalTestRailway::make(railwayCallbacksWithSignals(signalBox));
+            testRailway = SignalTestRailway::make(railwayCallbacksWithSignals(signalTower));
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
             auto e = testRailway->track(SignalTestRailway::Tracks::E);
             auto f = testRailway->track(SignalTestRailway::Tracks::F);
@@ -208,23 +208,23 @@ namespace winstontests
             sVFa->aspect(winston::Signal::Aspect::Off);
             sHEa->aspect(winston::Signal::Aspect::Off);
 
-            signalBox->setSignalOn(e, winston::Track::Connection::A, winston::Signal::Aspect::Go);
+            signalTower->setSignalOn(e, winston::Track::Connection::A, winston::Signal::Aspect::Go);
             for (int i = 0; i < 10; ++i)
-                signalBox->work();
+                signalTower->work();
             Assert::IsTrue(sHEa->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sVFa->shows(winston::Signal::Aspect::ExpectGo));
 
-            signalBox->setSignalOn(e, winston::Track::Connection::A, winston::Signal::Aspect::Halt);
+            signalTower->setSignalOn(e, winston::Track::Connection::A, winston::Signal::Aspect::Halt);
             for (int i = 0; i < 10; ++i)
-                signalBox->work();
+                signalTower->work();
             Assert::IsTrue(sHEa->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sVFa->shows(winston::Signal::Aspect::ExpectHalt));
         }
 
         TEST_METHOD(Signals_ThreeTrackWithPreSignals) {
-            auto signalBox = winston::SignalBox::make();
+            auto signalTower = winston::SignalTower::make();
 
-            testRailway = SignalTestRailway::make(railwayCallbacksWithSignals(signalBox));
+            testRailway = SignalTestRailway::make(railwayCallbacksWithSignals(signalTower));
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
             auto h = testRailway->track(SignalTestRailway::Tracks::H);
             auto i = testRailway->track(SignalTestRailway::Tracks::I);
@@ -238,37 +238,37 @@ namespace winstontests
             sHVIa->aspect(winston::Signal::Aspect::Off);
             sVJa->aspect(winston::Signal::Aspect::Off);
 
-            signalBox->setSignalOn(h, winston::Track::Connection::A, winston::Signal::Aspect::Go);
+            signalTower->setSignalOn(h, winston::Track::Connection::A, winston::Signal::Aspect::Go);
             for (int i = 0; i < 10; ++i)
-                signalBox->work();
+                signalTower->work();
             Assert::IsTrue(sHVIa->shows(winston::Signal::Aspect::ExpectGo));
             Assert::IsTrue(sVJa->shows(winston::Signal::Aspect::Off));
-            signalBox->setSignalOn(h, winston::Track::Connection::A, winston::Signal::Aspect::Halt);
+            signalTower->setSignalOn(h, winston::Track::Connection::A, winston::Signal::Aspect::Halt);
             for (int i = 0; i < 10; ++i)
-                signalBox->work();
+                signalTower->work();
             Assert::IsTrue(sHVIa->shows(winston::Signal::Aspect::ExpectHalt));
             Assert::IsTrue(sVJa->shows(winston::Signal::Aspect::Off));
-            signalBox->setSignalOn(i, winston::Track::Connection::A, winston::Signal::Aspect::Halt);
+            signalTower->setSignalOn(i, winston::Track::Connection::A, winston::Signal::Aspect::Halt);
             for (int i = 0; i < 10; ++i)
-                signalBox->work();
+                signalTower->work();
             Assert::IsTrue(sHVIa->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sVJa->shows(winston::Signal::Aspect::ExpectHalt));
-            signalBox->setSignalOn(h, winston::Track::Connection::A, winston::Signal::Aspect::Go);
+            signalTower->setSignalOn(h, winston::Track::Connection::A, winston::Signal::Aspect::Go);
             for (int i = 0; i < 10; ++i)
-                signalBox->work();
+                signalTower->work();
             Assert::IsTrue(sHVIa->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sVJa->shows(winston::Signal::Aspect::ExpectHalt));
-            signalBox->setSignalOn(i, winston::Track::Connection::A, winston::Signal::Aspect::Go);
+            signalTower->setSignalOn(i, winston::Track::Connection::A, winston::Signal::Aspect::Go);
             for (int i = 0; i < 10; ++i)
-                signalBox->work();
+                signalTower->work();
             Assert::IsTrue(sHVIa->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sVJa->shows(winston::Signal::Aspect::ExpectGo));
         }
         
         TEST_METHOD(Signals_loopAbort) {
-            auto signalBox = winston::SignalBox::make();
+            auto signalTower = winston::SignalTower::make();
 
-            testRailway = SignalTestRailway::make(railwayCallbacksWithSignals(signalBox));
+            testRailway = SignalTestRailway::make(railwayCallbacksWithSignals(signalTower));
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
             auto o = testRailway->track(SignalTestRailway::Tracks::O);
             auto p = testRailway->track(SignalTestRailway::Tracks::P);
@@ -278,16 +278,16 @@ namespace winstontests
             t2->finalizeChangeTo(winston::Turnout::Direction::A_B);
             auto sHVQa = q->signalGuarding(winston::Track::Connection::A);
 
-            signalBox->setSignalOn(q, winston::Track::Connection::A, winston::Signal::Aspect::Go);
+            signalTower->setSignalOn(q, winston::Track::Connection::A, winston::Signal::Aspect::Go);
             for (int i = 0; i < 10; ++i)
-                signalBox->work();
+                signalTower->work();
             Assert::IsTrue(sHVQa->shows(winston::Signal::Aspect::Go));
             Assert::IsFalse(sHVQa->shows(winston::Signal::Aspect::ExpectGo));
             Assert::IsFalse(sHVQa->shows(winston::Signal::Aspect::ExpectHalt));
 
-            signalBox->setSignalOn(q, winston::Track::Connection::A, winston::Signal::Aspect::Halt);
+            signalTower->setSignalOn(q, winston::Track::Connection::A, winston::Signal::Aspect::Halt);
             for (int i = 0; i < 10; ++i)
-                signalBox->work();
+                signalTower->work();
             Assert::IsTrue(sHVQa->shows(winston::Signal::Aspect::Halt));
             Assert::IsFalse(sHVQa->shows(winston::Signal::Aspect::ExpectGo));
             Assert::IsFalse(sHVQa->shows(winston::Signal::Aspect::ExpectHalt));

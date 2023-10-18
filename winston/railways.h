@@ -254,25 +254,33 @@ BETTER_ENUM(Y2021RailwayTracks, unsigned int,
     Turnout9,
     Turnout10,
     Turnout11,
-    DoubleSlipTurnout12_13,
+    Turnout12,
+    Turnout13,
     Turnout14,
-    Turnout15,
-    Turnout16,
+    DoubleSlipTurnout15_16,
+    Turnout17,
+    Turnout18,
+    Turnout19,
+    Turnout20,
     PBF1,
     PBF1a,
     PBF2,
     PBF2a,
     PBF3,
     GBF1,
-    GBF2a, GBF2b,
+    GBF2,
     GBF3a, GBF3b,
+    GBF4a, GBF4b,
     N1,
     N2,
+    N3,
     B1, B2, B3, B4, B5, B6,
-    B_PBF2_PBF1, B_To_GBF
+    B_PBF2_PBF1, B_To_GBF,
+    PBF_To_N,
+    T7_To_T8
 );
 BETTER_ENUM(Y2021RailwayRoutes, unsigned int,
-    B3_PBF1, B3_PBF2, B3_PBF3, B3_N1,
+    B3_PBF1, B3_PBF2, B3_PBF3, B3_N,
     B6_PBF3, B6_N1
 );
 enum class Y2021RailwayDetectors : unsigned int
@@ -283,29 +291,33 @@ enum class Y2021RailwayDetectors : unsigned int
 class Y2021Railway : public winston::RailwayWithRails<Y2021RailwayTracks>, public winston::RailwayAddonRoutes<Y2021RailwayRoutes>, public winston::Shared_Ptr<Y2021Railway>
 {
     /*
-     //====Turnout11======================B2===============\\
-    //           \\                                         \\
-    ||  //====Turnout10======B5======Turnout9====Turnout8\\  \\
-    ||  ||                          //                \\  \\  \\
-    ||  ||                      DS_Turnout12====N2====|   \\ Turnout7
-    ||  ||                           //                 \\  ||
-    ||  || |====GBF1====Turnout14==DS_Turnout13            ||  ||
-    ||  ||                 //         //                ||  ||
-    B3  B6              GBF2b        GBF3b              ||  ||
-    ||  ||               ||           ||                ||  ||
-    ||  ||               Turnout15    ||                ||  ||
-    ||  ||               ||     \\    ||                B4  B1
-    ||  ||               ||       Turnout16             ||  ||
-    ||  ||               ||           ||                ||  ||
-    ||   \\             GBF2a        GBF3a              ||  ||
-    ||    \\             ||           ||               //   ||
-    ||     \\            --           --              //    ||
- Turnout1   \\         //====N1====|                 //    //
-    ||  \\   \\       //                            //    //
-    \\    Turnout2=Turnout3========PBF3============//    //
-     PBF2a====Turnout4========PBF2====================Turnout6
-                  \\                                    //
-    |====PBF1a====Turnout5========PBF1=================//
+        //====Turnout13==============================B2=======================\\
+       //           \\                                                         \\
+      // //====Turnout12==============B5==============Turnout11====Turnout10\\  \\
+     // ||                                               //              \\  \\  \\
+    ||  ||                                        DS_Turnout15====N3====| \\ Turnout9
+    ||  ||    |====GBF2====\\                          //                  \\     ||
+    ||  || |====GBF1====Turnout18====Turnout17====DS_Turnout16              \\    ||
+    ||  ||                 //         //                                     \\   ||
+    B3  B6              GBF3b        GBF4b                                    ||  ||
+    ||  ||               ||           ||                                      ||  ||
+    ||  ||               Turnout19    ||                                      ||  ||
+    ||  ||               ||     \\    ||                                      B4  B1
+    ||  ||               ||       Turnout20                                   ||  ||
+    ||  ||               ||           ||                                      ||  ||
+    ||  ||              GBF3a        GBF4a                                    ||  ||
+    ||  ||               ||           ||                                     //  //
+    ||  ||               --           --                                    //  //
+    ||   \\                                                                //  //
+    ||    \\                                                              //  //
+    ||     \\                          //====N2====|                     //  //
+ Turnout1   \\         PBF3_To_N====Turnout14====N1====|                 //  //
+    ||  \\   \\       //                                               //  //
+    \\    Turnout2=Turnout3====PBF3=================Turnout6============  //
+     \\                                                  \\              //
+     PBF2a====Turnout4========PBF2=====================Turnout7====Turnout8
+                  \\                                                 //
+    |====PBF1a====Turnout5===================PBF1===================//
     */
 
 public:

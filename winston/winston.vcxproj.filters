@@ -45,6 +45,9 @@
     <ClCompile Include="FT232_Device.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TimeSaver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\central-z21\Z21Const.h">
@@ -88,6 +91,12 @@
     </ClInclude>
     <ClInclude Include="resources.h">
       <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeSaver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeSaver.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

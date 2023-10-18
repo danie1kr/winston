@@ -11,13 +11,12 @@
 #include "../libwinston/Winston.h"
 
 #ifndef WINSTON_PLATFORM_TEENSY
-//enum class MiniRailwayTracks : unsigned int
-BETTER_ENUM(MiniRailwayTracks, unsigned int, //{
+BETTER_ENUM(MiniRailwayTracks, unsigned int,
     A,
     Turnout1,
     B,
     C
-);// };
+);
 
 class MiniRailway : public winston::RailwayWithRails<MiniRailwayTracks>, winston::Shared_Ptr<MiniRailway>
 {
@@ -46,8 +45,7 @@ private:
 #endif
 
 #ifndef WINSTON_PLATFORM_TEENSY
-//enum class SignalTestRailwayTracks : unsigned int
-BETTER_ENUM(SignalTestRailwayTracks, unsigned int, //{
+BETTER_ENUM(SignalTestRailwayTracks, unsigned int,
     A,
     Turnout1,
     B,
@@ -132,7 +130,7 @@ A-Turnout1-B-Turnout2-A
 
 */
 
-BETTER_ENUM(RailwayWithSidingsTracks, unsigned int, //{
+BETTER_ENUM(RailwayWithSidingsTracks, unsigned int,
     A,
     Turnout1,
     B,
@@ -169,55 +167,6 @@ public:
     private:
         winston::Shared_Ptr<RailwayWithSiding>::Shared railway;
     };
-};
-#endif
-
-#ifndef WINSTON_PLATFORM_TEENSY
-BETTER_ENUM(TimeSaverRailwayTracks, unsigned int, //{
-    A,
-    Turnout1,
-    B,
-    Turnout2,
-    Turnout3,
-    C,
-    Turnout4,
-    Turnout5,
-    D,
-    E
-);
-
-class TimeSaverRailway : public winston::RailwayWithRails<TimeSaverRailwayTracks>, winston::Shared_Ptr<TimeSaverRailway>
-{
-    /*
-|====A====Turnout1====B====|
-             /
-          Turnout2===============\
-            /                     \
-|====C====Turnout3 = Turnout4 = Turnout5====D====|
-                       /
-             |====E====
-
-    A-Turnout1-B
-          |
-          Turnout2-Turnout5-D
-          |           |
-        C-Turnout3-Turnout4
-                      |
-                      E
-    */
-
-public:
-    TimeSaverRailway(const Callbacks callbacks);
-    virtual ~TimeSaverRailway() = default;
-
-    static const std::string name();
-    const winston::Result init();
-
-    using winston::Shared_Ptr<TimeSaverRailway>::Shared;
-    using winston::Shared_Ptr<TimeSaverRailway>::make;
-private:
-    winston::Track::Shared define(const Tracks track);
-    void connect();
 };
 #endif
 

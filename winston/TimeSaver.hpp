@@ -1,9 +1,9 @@
-﻿#ifdef WINSTON_PLATFORM_TEENSY
+#ifdef WINSTON_PLATFORM_TEENSY
 #define Binary_h
 // keeps binary_h from beeing used which kills our 
 #endif
 
-#include "Kornweinheim.h"
+#include "TimeSaver.h"
 
 #ifdef WINSTON_PLATFORM_WIN_x64
 #define FLASHMEM
@@ -14,7 +14,7 @@
 #endif 
 
 /*
-    TODO: 
+    TODO:
         - retry commands if no answer came
         - show state via signals
         - initial connect, wait until first answer
@@ -42,7 +42,7 @@
 */
 
 #ifdef WINSTON_LOCO_TRACKING
-void Kornweinheim::webSocket_sendLocosPosition()
+void TimeSaver::webSocket_sendLocosPosition()
 {
 #ifdef WINSTON_WITH_WEBSOCKET
     auto now = winston::hal::now();
@@ -51,7 +51,7 @@ void Kornweinheim::webSocket_sendLocosPosition()
         DynamicJsonDocument obj(32 + this->locomotiveShed.size() * 256);
         obj["op"] = "locoPositions";
         auto data = obj.createNestedArray("data");
-        for (const auto &loco: this->locomotiveShed)
+        for (const auto& loco : this->locomotiveShed)
         {
             auto l = data.createNestedObject();
             l["address"] = loco.address();
@@ -70,7 +70,7 @@ void Kornweinheim::webSocket_sendLocosPosition()
 }
 #endif
 
-winston::DigitalCentralStation::Callbacks Kornweinheim::z21Callbacks()
+winston::DigitalCentralStation::Callbacks TimeSaver::z21Callbacks()
 {
     // default Callbacks already apply
     winston::DigitalCentralStation::Callbacks callbacks;
@@ -89,8 +89,8 @@ winston::DigitalCentralStation::Callbacks Kornweinheim::z21Callbacks()
     };
 
     callbacks.specialAccessoryProcessingCallback = [=](const uint16_t address, const uint8_t state) -> const bool {
-        
-        if(address == 500)
+
+        if (address == 500)
         {
             this->digitalCentralStationConnected();
         }
@@ -104,37 +104,37 @@ winston::DigitalCentralStation::Callbacks Kornweinheim::z21Callbacks()
         {
             return true;
         }
-        
+
         return false;
     };
 
     return callbacks;
 }
 
-winston::Locomotive::Callbacks Kornweinheim::locoCallbacks()
+winston::Locomotive::Callbacks TimeSaver::locoCallbacks()
 {
     winston::Locomotive::Callbacks callbacks;
 
     callbacks.drive = [=](const winston::Address address, const unsigned char speed, const bool forward) {
-        this->signalTower->order(winston::Command::make([this, address, speed, forward](const winston::TimePoint &created) -> const winston::State
+        this->signalTower->order(winston::Command::make([this, address, speed, forward](const winston::TimePoint& created) -> const winston::State
             {
                 this->digitalCentralStation->triggerLocoDrive(address, speed, forward);
-                return winston::State::Finished;
+        return winston::State::Finished;
             }, __PRETTY_FUNCTION__));
     };
 
     callbacks.functions = [=](const winston::Address address, const uint32_t functions) {
-        this->signalTower->order(winston::Command::make([this, address, functions](const winston::TimePoint &created) -> const winston::State
+        this->signalTower->order(winston::Command::make([this, address, functions](const winston::TimePoint& created) -> const winston::State
             {
                 this->digitalCentralStation->triggerLocoFunction(address, functions);
-                return winston::State::Finished;
+        return winston::State::Finished;
             }, __PRETTY_FUNCTION__));
     };
 
     return callbacks;
 }
 
-winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
+winston::Railway::Callbacks TimeSaver::railwayCallbacks()
 {
     winston::Railway::Callbacks callbacks;
 
@@ -147,7 +147,7 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
         // tell the ui what happens
         this->webUI.turnoutSendState(turnout->name(), direction, turnout->locked());
 #endif
-        for(auto route : this->routesInProgress)
+        for (auto route : this->routesInProgress)
         {
             auto state = route->reportTurnout(turnout, direction);
             if (state == winston::Route::State::Set)
@@ -200,7 +200,7 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
 }
 
 #ifdef WINSTON_WITH_WEBSOCKET
-    const winston::Result Kornweinheim::on_http(WebServer::HTTPConnection& connection, const winston::HTTPMethod method, const std::string& resource) {
+const winston::Result TimeSaver::on_http(WebServer::HTTPConnection& connection, const winston::HTTPMethod method, const std::string& resource) {
     const std::string path_confirmation_yes("/confirm_yes");
     const std::string path_confirmation_maybe("/confirm_maybe");
     const std::string path_confirmation_no("/confirm_no");
@@ -245,15 +245,15 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
 #endif
 
 // setup our model railway system
-void Kornweinheim::systemSetup() {
+void TimeSaver::systemSetup() {
     // the user defined railway and its address translator
-    this->railway = RAILWAY_CLASS::make(railwayCallbacks());
+    this->railway = TimeSaverRailway::make(railwayCallbacks());
     this->populateLocomotiveShed();
 
     // z21
     z21Socket = UDPSocket::make(z21IP, z21Port);
 
-    this->addressTranslator = RAILWAY_CLASS::AddressTranslator::make(railway);
+    this->addressTranslator = TimeSaverRailway::AddressTranslator::make(railway);
 
     // the internal signal box
     this->signalTower = winston::SignalTower::make();
@@ -285,7 +285,7 @@ void Kornweinheim::systemSetup() {
     // storage
     this->storageLayout = Storage::make(std::string(this->name()).append(".").append("winston.storage"), 128 * 1024);
     if (this->storageLayout->init() != winston::Result::OK)
-        winston::logger.err("Kornweinheim.init: Storage Layout Init failed");
+        winston::logger.err("TimeSaver.init: Storage Layout Init failed");
 
     // detectors
 #ifdef WINSTON_PLATFORM_TEENSY
@@ -301,10 +301,10 @@ void Kornweinheim::systemSetup() {
 
     winston::logger.setCallback([this](const winston::Logger::Entry& entry) {
         this->webUI.log(entry);
-    });
+        });
 };
 
-void Kornweinheim::setupSignals()
+void TimeSaver::setupSignals()
 {
     auto signalUpdateCallback = [=](winston::Track::Shared track, winston::Track::Connection connection, const winston::Signal::Aspects aspects) -> const winston::State
     {
@@ -325,6 +325,15 @@ void Kornweinheim::setupSignals()
         return winston::State::Finished;
     };
 
+    unsigned int dncPort = 999;
+    dncPort = 999; this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Tracks::A), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
+    dncPort = 999; this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Tracks::B), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
+    dncPort = 999; this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Tracks::C), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
+    dncPort = 999; this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Tracks::E), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
+    dncPort = 999; this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Tracks::F), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
+    dncPort = 999; this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Tracks::G), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
+
+    /*
     // H
     unsigned int port = 0;
     // PBF
@@ -356,11 +365,11 @@ void Kornweinheim::setupSignals()
     ++port; // to align with 24port device
     this->signals.push_back(this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B3), winston::Track::Connection::A, 5U, port, signalUpdateCallback));
     this->signals.push_back(this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B6), winston::Track::Connection::A, 5U, port, signalUpdateCallback));
-    
+
     // Abstellgleise
     this->signals.push_back(this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::N1), winston::Track::Connection::A, 5U, port, signalUpdateCallback));
     this->signals.push_back(this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::N2), winston::Track::Connection::A, 5U, port, signalUpdateCallback));
-    
+
     // GBF
     this->signals.push_back(this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::GBF1), winston::Track::Connection::A, 5U, port, signalUpdateCallback));
     this->signals.push_back(this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF3a), winston::Track::Connection::A, 5U, port, signalUpdateCallback));
@@ -379,9 +388,9 @@ void Kornweinheim::setupSignals()
     dncPort = 999; this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::GBF1), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
     dncPort = 999; this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::GBF2a), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
     dncPort = 999; this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::GBF3a), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
-}
+*/}
 
-void Kornweinheim::systemLoop()
+void TimeSaver::systemLoop()
 {
     {
 #ifdef WINSTON_WITH_WEBSOCKET
@@ -393,15 +402,15 @@ void Kornweinheim::systemLoop()
     }
 }
 
-winston::Result Kornweinheim::detectorUpdate(winston::Detector::Shared detector, winston::Locomotive& loco)
+winston::Result TimeSaver::detectorUpdate(winston::Detector::Shared detector, winston::Locomotive& loco)
 {
     // theoretical delays:
     /*
-    	speed					
-	km/h	    25	     60	     80	    120	    160
-	m/s	         6,94	 16,67	 22,22	 33,33	 44,44
-	m/s @ 1:87	 0,08	  0,19	  0,26	  0,38	  0,51
-	mm/s	    79,82	191,57	255,43	383,14	510,86
+        speed
+    km/h	    25	     60	     80	    120	    160
+    m/s	         6,94	 16,67	 22,22	 33,33	 44,44
+    m/s @ 1:87	 0,08	  0,19	  0,26	  0,38	  0,51
+    mm/s	    79,82	191,57	255,43	383,14	510,86
 d	1	         0,08	  0,19	  0,26	  0,38	  0,51
 e	2	         0,16	  0,38	  0,51	  0,77	  1,02
 l	4	         0,32	  0,77	  1,02	  1,53	  2,04
@@ -416,10 +425,10 @@ ms	32	         2,55	  6,13	  8,17	 12,26	 16,35
         {
             // loco is now at
             auto current = detector->position();
-           // auto deviation = loco.drive() - current;
+    // auto deviation = loco.drive() - current;
 
 
-            return winston::State::Finished;
+    return winston::State::Finished;
         }, __PRETTY_FUNCTION__));
     /*
         loco = fromNFCAddress(address)
@@ -458,11 +467,11 @@ ms	32	         2,55	  6,13	  8,17	 12,26	 16,35
     return winston::Result::OK;
 }
 
-void Kornweinheim::setupDetectors()
+void TimeSaver::setupDetectors()
 {
 }
 
-void Kornweinheim::systemSetupComplete()
+void TimeSaver::systemSetupComplete()
 {
 #ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
     this->stationDebugInjector->injectConnected();
@@ -472,22 +481,22 @@ void Kornweinheim::systemSetupComplete()
         });
     this->railway->doubleSlipTurnouts([=](const Tracks track, winston::DoubleSlipTurnout::Shared turnout) {
         auto v = std::rand() % 4;
-        auto dir = winston::DoubleSlipTurnout::Direction::A_B;
-        if (v == 1) dir = winston::DoubleSlipTurnout::Direction::A_C;
-        else if (v == 2) dir = winston::DoubleSlipTurnout::Direction::B_D;
-        else if (v == 3) dir = winston::DoubleSlipTurnout::Direction::C_D;
-        this->stationDebugInjector->injectDoubleSlipTurnoutUpdate(turnout, dir);
+    auto dir = winston::DoubleSlipTurnout::Direction::A_B;
+    if (v == 1) dir = winston::DoubleSlipTurnout::Direction::A_C;
+    else if (v == 2) dir = winston::DoubleSlipTurnout::Direction::B_D;
+    else if (v == 3) dir = winston::DoubleSlipTurnout::Direction::C_D;
+    this->stationDebugInjector->injectDoubleSlipTurnoutUpdate(turnout, dir);
         });
- #endif
+#endif
     this->signalInterfaceDevice->skipSend(false);
     this->signalDevice->flush();
     this->signalTower->order(this->signalDevice->flushCommand());
 }
 
-void Kornweinheim::populateLocomotiveShed()
+void TimeSaver::populateLocomotiveShed()
 {
     auto callbacks = locoCallbacks();
-    winston::Position pos(this->railway->track(Tracks::N1), winston::Track::Connection::A, 100);
+    winston::Position pos(this->railway->track(Tracks::A), winston::Track::Connection::A, 100);
 
     winston::Locomotive::Functions standardFunctions = { {0, "Light"} };
     winston::Locomotive::Functions functionsBR114 = { {1, "R&uuml;cklicht"}, {2, "Scheinwerfer"}, {3, "Rangiergang"} };
@@ -496,8 +505,8 @@ void Kornweinheim::populateLocomotiveShed()
     winston::Locomotive::Functions functionsGravita = {
         { 1, "Sound"},
         { 2, "Signalhorn lang"},
-        { 3, "Rotes Licht"}, 
-        { 4, "Kuppeln vorn"}, 
+        { 3, "Rotes Licht"},
+        { 4, "Kuppeln vorn"},
         { 5, "Kuppeln hinten"},
         { 6, "L&uuml;fter"},
         { 7, "F&uuml;hrerstandbeleuchtung"},
@@ -527,7 +536,7 @@ void Kornweinheim::populateLocomotiveShed()
     this->addLocomotive(callbacks, 7, functionsGravita, pos, winston::Locomotive::defaultThrottleSpeedMap, "Gravita", (unsigned char)winston::Locomotive::Type::Shunting | (unsigned char)winston::Locomotive::Type::Goods);
 }
 
-void Kornweinheim::inventStorylines()
+void TimeSaver::inventStorylines()
 {
 #ifdef WINSTON_STORYLINES
     this->userConfirmation = winston::ConfirmationProvider::make();
@@ -537,16 +546,16 @@ void Kornweinheim::inventStorylines()
     collectAndDrive->invent([&]() {
 
         auto loco = winston::TaskRandomLoco::make((unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods);
-        collectAndDrive->queue(std::static_pointer_cast<winston::Storyline::Task>(loco));
-        auto assembleTrack = winston::TaskRandomTrack::make(winston::Block::Type::Transit);
-        collectAndDrive->queue(std::static_pointer_cast<winston::Storyline::Task>(assembleTrack));
+    collectAndDrive->queue(std::static_pointer_cast<winston::Storyline::Task>(loco));
+    auto assembleTrack = winston::TaskRandomTrack::make(winston::Block::Type::Transit);
+    collectAndDrive->queue(std::static_pointer_cast<winston::Storyline::Task>(assembleTrack));
 
-        auto confirmLocoTrack = winston::TaskConfirm::make(userConfirmation, display, loco, "nach", assembleTrack, [collectAndDrive, loco, assembleTrack]() -> winston::State {
-            collectAndDrive->immediate(std::static_pointer_cast<winston::Storyline::Task>(loco));
-            collectAndDrive->immediate(std::static_pointer_cast<winston::Storyline::Task>(assembleTrack));
-            return winston::State::Running;
+    auto confirmLocoTrack = winston::TaskConfirm::make(userConfirmation, display, loco, "nach", assembleTrack, [collectAndDrive, loco, assembleTrack]() -> winston::State {
+        collectAndDrive->immediate(std::static_pointer_cast<winston::Storyline::Task>(loco));
+    collectAndDrive->immediate(std::static_pointer_cast<winston::Storyline::Task>(assembleTrack));
+    return winston::State::Running;
         });
-        collectAndDrive->queue(std::static_pointer_cast<winston::Storyline::Task>(confirmLocoTrack));
+    collectAndDrive->queue(std::static_pointer_cast<winston::Storyline::Task>(confirmLocoTrack));
 
         });
     this->storylines.push_back(collectAndDrive);

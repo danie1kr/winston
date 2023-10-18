@@ -1,9 +1,14 @@
 // winston-simulator.cpp : This file contains the 'main' function. Program execution begins and ends there.
 
-#include "Kornweinheim.hpp"
-#include "winston-main.h"
 
-Kornweinheim kwh;
+#include "winston-main.h"
+/*
+#include "Kornweinheim.hpp"
+Kornweinheim modelRailWayConfiguration;
+*/
+
+#include "TimeSaver.hpp"
+TimeSaver modelRailWayConfiguration;
 
 void winston_setup()
 {
@@ -26,8 +31,8 @@ void winston_setup()
     digitalWrite(led, LOW);
 #endif
 	// setup
-    kwh.setup();
-    winston::hal::text("KWH Setup complete!"_s);
+    modelRailWayConfiguration.setup();
+    winston::hal::text("Setup complete!"_s);
 #ifdef WINSTON_PLATFORM_TEENSY
     digitalWrite(led, HIGH);
 #endif
@@ -40,7 +45,7 @@ const size_t secondsPerPrint = WINSTON_STATISTICS_SECONDS_PER_PRINT;
 #endif
 void winston_loop()
 {
-    if (!kwh.loop())
+    if (!modelRailWayConfiguration.loop())
         winston::hal::delay(FRAME_SLEEP);
 #ifdef WINSTON_STATISTICS
     if (winston::hal::now().time_since_epoch() > nextSWJPrint)

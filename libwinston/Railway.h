@@ -51,10 +51,9 @@ namespace winston
 		Railway(const Callbacks callbacks);
 		virtual ~Railway() = default;
 
-		void block(const Address address, const Trackset trackset, const Block::Type type);
+		void block(const Address address, const Block::Type type, const Trackset trackset);
 		Block::Shared block(Address address) const;
 		const Blockmap blocks() const;
-		virtual void buildBlocks(const bool simple = true);
 
 		virtual const bool supportsBlocks() const;
 		virtual const bool supportsRoutes() const;

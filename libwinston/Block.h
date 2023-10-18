@@ -20,7 +20,7 @@ namespace winston {
 		};
 
 
-		Block(const Address address, const Trackset tracks, const Type type);
+		Block(const Address address, const Type type, const Trackset tracks);
 		//Block::Shared traverse(Track::Shared& entry, Track::Connection& connection);
 		//bool validate();
 
@@ -31,11 +31,12 @@ namespace winston {
 		const Type type;
 		const bool isType(const Type type) const;
 
+		const Address address;
+
 		using Shared_Ptr<Block>::Shared;
 		using Shared_Ptr<Block>::make;
 	private:
 		BlockEntrySet blockEntrySet;
-		const Address address;
 		const Trackset _tracks;
 	};
 

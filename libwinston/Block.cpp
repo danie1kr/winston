@@ -1,7 +1,7 @@
 #include "Block.h"
 
 namespace winston {
-	Block::Block(const Address address, const Trackset tracks, const Type type) : Shared_Ptr<Block>(), type(type), blockEntrySet(), address(address), _tracks(tracks)
+	Block::Block(const Address address, const Type type, const Trackset tracks) : Shared_Ptr<Block>(), type(type), blockEntrySet(), address(address), _tracks(tracks)
 	{
 	}
 

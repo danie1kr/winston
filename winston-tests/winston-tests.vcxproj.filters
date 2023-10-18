@@ -21,9 +21,6 @@
     <ClCompile Include="winston-tests-mini.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="winston-tests-timesaver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\winston\railways.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

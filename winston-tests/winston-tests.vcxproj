@@ -130,7 +130,6 @@
     <ClCompile Include="winston-tests-signal.cpp" />
     <ClCompile Include="winston-tests-signaldevice.cpp" />
     <ClCompile Include="winston-tests-spi-tlc5947-signal.cpp" />
-    <ClCompile Include="winston-tests-timesaver.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\libwinston\libwinston.vcxproj">

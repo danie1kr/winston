@@ -9,7 +9,7 @@ namespace winston
 
 	const bool Railway::supportsBlocks() const
 	{
-		return false;
+		return true;
 	}
 
 	const bool Railway::supportsRoutes() const
@@ -17,7 +17,7 @@ namespace winston
 		return false;
 	}
 
-	void Railway::block(const Address address, const Trackset trackset, const Block::Type type)
+	void Railway::block(const Address address, const Block::Type type, const Trackset trackset)
 	{
 		if (this->_blocks.find(address) != this->_blocks.end())
 			hal::fatal("block address exists already");
@@ -25,7 +25,7 @@ namespace winston
 		for (auto& track : trackset)
 			track->block(address);
 
-		this->_blocks.insert(std::make_pair(address, Block::make(address, trackset, type)));
+		this->_blocks.insert(std::make_pair(address, Block::make(address, type, trackset)));
 	}
 
 	Block::Shared Railway::block(Address address) const
@@ -40,6 +40,4 @@ namespace winston
 	{
 		return this->_blocks;
 	}
-
-	void Railway::buildBlocks(const bool simple) { }
 }

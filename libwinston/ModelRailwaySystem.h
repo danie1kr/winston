@@ -507,6 +507,7 @@ namespace winston
 			}
 		};
 		using Railway = _Railway;
+		using Tracks = Railway::Tracks;
 
 #ifdef WINSTON_STATISTICS
 		const std::string statistics(const size_t withTop = 0) const { return this->stopWatchJournal.toString(withTop); }

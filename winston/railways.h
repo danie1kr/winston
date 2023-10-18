@@ -267,6 +267,7 @@ BETTER_ENUM(Y2021RailwayTracks, unsigned int,
     PBF2,
     PBF2a,
     PBF3,
+    PBF3a,
     GBF1,
     GBF2,
     GBF3a, GBF3b,
@@ -280,7 +281,7 @@ BETTER_ENUM(Y2021RailwayTracks, unsigned int,
     T7_To_T8
 );
 BETTER_ENUM(Y2021RailwayRoutes, unsigned int,
-    B3_PBF1, B3_PBF2, B3_PBF3, B3_N,
+    B3_PBF1, B3_PBF2, B3_PBF3, B3_N1, B3_N2,
     B6_PBF3, B6_N1
 );
 enum class Y2021RailwayDetectors : unsigned int
@@ -298,20 +299,20 @@ class Y2021Railway : public winston::RailwayWithRails<Y2021RailwayTracks>, publi
     ||  ||                                        DS_Turnout15====N3====| \\ Turnout9
     ||  ||    |====GBF2====\\                          //                  \\     ||
     ||  || |====GBF1====Turnout18====Turnout17====DS_Turnout16              \\    ||
-    ||  ||                 //         //                                     \\   ||
-    B3  B6              GBF3b        GBF4b                                    ||  ||
-    ||  ||               ||           ||                                      ||  ||
-    ||  ||               Turnout19    ||                                      ||  ||
-    ||  ||               ||     \\    ||                                      B4  B1
-    ||  ||               ||       Turnout20                                   ||  ||
-    ||  ||               ||           ||                                      ||  ||
-    ||  ||              GBF3a        GBF4a                                    ||  ||
-    ||  ||               ||           ||                                     //  //
-    ||  ||               --           --                                    //  //
+    ||  ||                             //           //                       \\   ||
+    B3  B6                           GBF3b       GBF4b                        ||  ||
+    ||  ||                            ||           ||                         ||  ||
+    ||  ||                            Turnout19    ||                         ||  ||
+    ||  ||                            ||     \\    ||                         B4  B1
+    ||  ||                            ||       Turnout20                      ||  ||
+    ||  ||                            ||           ||                         ||  ||
+    ||  ||                           GBF3a        GBF4a                       ||  ||
+    ||  ||                            ||           ||                        //  //
+    ||  ||                            --           --                       //  //
     ||   \\                                                                //  //
     ||    \\                                                              //  //
     ||     \\                          //====N2====|                     //  //
- Turnout1   \\         PBF3_To_N====Turnout14====N1====|                 //  //
+ Turnout1   \\         PBF3_To_N====Turnout14====N1====|                //  //
     ||  \\   \\       //                                               //  //
     \\    Turnout2=Turnout3====PBF3=================Turnout6============  //
      \\                                                  \\              //

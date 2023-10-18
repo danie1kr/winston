@@ -329,8 +329,8 @@ void Kornweinheim::setupSignals()
     unsigned int port = 0;
     // PBF
     this->signals.push_back(this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF1), winston::Track::Connection::B, 5U, port, signalUpdateCallback));
-    this->signals.push_back(this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF2), winston::Track::Connection::B, 5U, port, signalUpdateCallback));
-    this->signals.push_back(this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF3), winston::Track::Connection::B, 5U, port, signalUpdateCallback));
+    this->signals.push_back(this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::T7_To_T8), winston::Track::Connection::B, 5U, port, signalUpdateCallback));
+    this->signals.push_back(this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF3a), winston::Track::Connection::B, 5U, port, signalUpdateCallback));
 
     // dummy
     this->signals.push_back(this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF1), winston::Track::Connection::A, 5U, port, signalUpdateCallback));
@@ -358,27 +358,32 @@ void Kornweinheim::setupSignals()
     this->signals.push_back(this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B6), winston::Track::Connection::A, 5U, port, signalUpdateCallback));
     
     // Abstellgleise
-    this->signals.push_back(this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::N1), winston::Track::Connection::A, 5U, port, signalUpdateCallback));
+    this->signals.push_back(this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF_To_N), winston::Track::Connection::A, 5U, port, signalUpdateCallback));
+    this->signals.push_back(this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::N1), winston::Track::Connection::A, 5U, port, signalUpdateCallback));
     this->signals.push_back(this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::N2), winston::Track::Connection::A, 5U, port, signalUpdateCallback));
-    
+    this->signals.push_back(this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::N3), winston::Track::Connection::A, 5U, port, signalUpdateCallback));
+
     // GBF
     this->signals.push_back(this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::GBF1), winston::Track::Connection::A, 5U, port, signalUpdateCallback));
+    this->signals.push_back(this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::GBF2), winston::Track::Connection::A, 5U, port, signalUpdateCallback));
+    this->signals.push_back(this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF4a), winston::Track::Connection::A, 5U, port, signalUpdateCallback));
+    this->signals.push_back(this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::GBF4b), winston::Track::Connection::A, 5U, port, signalUpdateCallback));
+    this->signals.push_back(this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF4b), winston::Track::Connection::B, 5U, port, signalUpdateCallback));
     this->signals.push_back(this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF3a), winston::Track::Connection::A, 5U, port, signalUpdateCallback));
+    ++port; // to align with 24port device
     this->signals.push_back(this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::GBF3b), winston::Track::Connection::A, 5U, port, signalUpdateCallback));
     this->signals.push_back(this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF3b), winston::Track::Connection::B, 5U, port, signalUpdateCallback));
-    this->signals.push_back(this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF2a), winston::Track::Connection::A, 5U, port, signalUpdateCallback));
-    ++port; // to align with 24port device
-    this->signals.push_back(this->signalFactory<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::GBF2b), winston::Track::Connection::A, 5U, port, signalUpdateCallback));
-    this->signals.push_back(this->signalFactory<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF2b), winston::Track::Connection::B, 5U, port, signalUpdateCallback));
 
     // don't care for ports here
     unsigned int dncPort = 999;
     dncPort = 999; this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::N1), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
     dncPort = 999; this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::N2), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
+    dncPort = 999; this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::N3), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
     dncPort = 999; this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::PBF1a), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
     dncPort = 999; this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::GBF1), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
-    dncPort = 999; this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::GBF2a), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
+    dncPort = 999; this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::GBF2), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
     dncPort = 999; this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::GBF3a), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
+    dncPort = 999; this->signalFactory<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::GBF4a), winston::Track::Connection::DeadEnd, 5U, dncPort, signalUpdateAlwaysHalt);
 }
 
 void Kornweinheim::systemLoop()

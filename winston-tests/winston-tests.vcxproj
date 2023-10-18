@@ -78,7 +78,7 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions);TCB_SPAN_NAMESPACE_NAME=std;WINSTON_PLATFORM_WIN_x64</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -94,7 +94,7 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions);TCB_SPAN_NAMESPACE_NAME=std;WINSTON_PLATFORM_WIN_x64</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -112,7 +112,7 @@
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions);TCB_SPAN_NAMESPACE_NAME=std;WINSTON_PLATFORM_WIN_x64</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

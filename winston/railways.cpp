@@ -686,11 +686,6 @@ winston::Route::Shared Y2021Railway::define(const Routes route)
     LOCAL_TURNOUT(Turnout19);
     LOCAL_TURNOUT(Turnout20);
 
-    const auto A = winston::Track::Connection::A;
-    const auto B = winston::Track::Connection::B;
-    const auto C = winston::Track::Connection::C;
-    const auto D = winston::Track::Connection::D;
-
 #define ROUTE(id, ...)  case Routes::id: { return winston::Route::make((int)Routes::id, __VA_ARGS__); }
 #define PATH(...)   winston::Route::Path{__VA_ARGS__}
 #define PROTECTIONS(...)   winston::Route::Protections{__VA_ARGS__}
@@ -763,7 +758,7 @@ winston::Route::Shared Y2021Railway::define(const Routes route)
             PATH_TURNOUT(Turnout2, A_B),
             PATH_TURNOUT(Turnout3, A_C),
             PATH_TRACK(PBF_To_N),
-            PATH_TURNOUT(Turnout14, A_B),
+            PATH_TURNOUT(Turnout14, A_C),
             PATH_TRACK(N2)
         ))
     ROUTE(B6_PBF3,
@@ -772,23 +767,40 @@ winston::Route::Shared Y2021Railway::define(const Routes route)
             PATH_TRACK(B6),
             PATH_TURNOUT(Turnout2, A_C),
             PATH_TURNOUT(Turnout3, A_B),
-            PATH_TRACK(PBF3)
+            PATH_TRACK(PBF3),
+            PATH_TURNOUT(Turnout6, A_B),
+            PATH_TRACK(PBF3a)
         ),
         PROTECTIONS(
             PATH_TURNOUT(Turnout1, A_B)
         ))
 
     ROUTE(B6_N1,
-        "B6 --> N",
+        "B6 --> N1",
         PATH(
             PATH_TRACK(B6),
             PATH_TURNOUT(Turnout2, A_C),
             PATH_TURNOUT(Turnout3, A_C),
-            PATH_TRACK(PBF_To_N)
+            PATH_TRACK(PBF_To_N),
+            PATH_TURNOUT(Turnout14, A_B),
+            PATH_TRACK(N1)
         ),
         PROTECTIONS(
             PATH_TURNOUT(Turnout1, A_B)
-            ))
+        ))
+    ROUTE(B6_N2,
+        "B6 --> N2",
+        PATH(
+            PATH_TRACK(B6),
+            PATH_TURNOUT(Turnout2, A_C),
+            PATH_TURNOUT(Turnout3, A_C),
+            PATH_TRACK(PBF_To_N), 
+            PATH_TURNOUT(Turnout14, A_C),
+            PATH_TRACK(N2)
+        ),
+        PROTECTIONS(
+            PATH_TURNOUT(Turnout1, A_B)
+        ))
     default:
         winston::logger.warn("unsupported route: ", route._to_string());
         break;

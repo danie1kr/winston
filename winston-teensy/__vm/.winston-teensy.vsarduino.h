@@ -13,15 +13,16 @@
 
 #ifndef _VSARDUINO_H_
 #define _VSARDUINO_H_
-#define __HARDWARE_imxrt1062__ 1
-#define __HARDWARE_IMXRT1062__ 1
+#define __TEENSY4_imxrt1062__ 1
+#define __TEENSY4_IMXRT1062__ 1
 #define _VMDEBUG 1
+#define TCB_SPAN_NO_CONTRACT_CHECKING 1
 #define TCB_SPAN_NAMESPACE_NAME std
 #define WINSTON_PLATFORM_TEENSY 1
 #define TL_NAMESPACE std
 #define __IMXRT1062__ 1
-#define TEENSYDUINO 156
-#define ARDUINO 108019
+#define TEENSYDUINO 158
+#define ARDUINO 108010
 #define ARDUINO_TEENSY41 1
 #define F_CPU 600000000
 #define USB_DUAL_SERIAL 1

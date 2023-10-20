@@ -7,8 +7,8 @@ class TLC5947 : public winston::SignalDevice<T>, public winston::Shared_Ptr<TLC5
 {
 	//static_assert(bits <= sizeof(T) * 8, "too many bits for T");
 public:
-	static const size_t bits = 12;
-	static const unsigned int SPI_Clock = 20000;
+	inline static const size_t bits = 12;
+	inline static const unsigned int SPI_Clock = 20000;
 	#pragma message("TLC5947 Chaining: For more than 3 devices, use a very low clock (<10khz) or spi buffer/repeaters like 74lvc245 or TXU0304")
 	// see https://forums.adafruit.com/viewtopic.php?t=58367&start=15
 

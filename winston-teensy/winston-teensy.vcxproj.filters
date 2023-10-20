@@ -81,9 +81,6 @@
     <ClInclude Include="..\libwinston\Signal.h">
       <Filter>libwinston-src</Filter>
     </ClInclude>
-    <ClInclude Include="..\libwinston\SignalBox.h">
-      <Filter>libwinston-src</Filter>
-    </ClInclude>
     <ClInclude Include="..\libwinston\Track.h">
       <Filter>libwinston-src</Filter>
     </ClInclude>
@@ -123,6 +120,9 @@
     <ClInclude Include="..\libwinston\Storyline.h">
       <Filter>libwinston-src</Filter>
     </ClInclude>
+    <ClInclude Include="..\libwinston\SignalTower.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\libwinston\Block.cpp">
@@ -153,9 +153,6 @@
       <Filter>libwinston-src</Filter>
     </ClCompile>
     <ClCompile Include="..\libwinston\Signal.cpp">
-      <Filter>libwinston-src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\libwinston\SignalBox.cpp">
       <Filter>libwinston-src</Filter>
     </ClCompile>
     <ClCompile Include="..\libwinston\Track.cpp">
@@ -199,6 +196,9 @@
     </ClCompile>
     <ClCompile Include="winston-teensy.ino" />
     <ClCompile Include="..\libwinston\Storyline.cpp">
+      <Filter>libwinston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libwinston\SignalTower.cpp">
       <Filter>libwinston-src</Filter>
     </ClCompile>
   </ItemGroup>

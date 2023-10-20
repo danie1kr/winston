@@ -347,7 +347,7 @@ namespace winston
             }
             else if (std::string("\"getRailway\"").compare(op) == 0)
             {
-                DynamicJsonDocument railwayContent(32 * 1024);
+                DynamicJsonDocument railwayContent(64 * 1024);
                 auto tracks = railwayContent.createNestedArray("tracks");
                 auto signals = railwayContent.createNestedArray("signals");
                 auto blocks = railwayContent.createNestedArray("blocks");

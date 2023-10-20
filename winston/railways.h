@@ -282,7 +282,7 @@ BETTER_ENUM(Y2021RailwayTracks, unsigned int,
 );
 BETTER_ENUM(Y2021RailwayRoutes, unsigned int,
     B3_PBF1, B3_PBF2, B3_PBF3, B3_N1, B3_N2,
-    B6_PBF3, B6_N1
+    B6_PBF3, B6_N1, B6_N2
 );
 enum class Y2021RailwayDetectors : unsigned int
 {

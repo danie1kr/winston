@@ -283,7 +283,7 @@ void TimeSaver::systemSetup() {
     this->signalDevice = TLC5947_SignalDevice::make(chainedTLC5947s * 24, this->signalInterfaceDevice, TLC5947Off);
 
     // storage
-    this->storageLayout = Storage::make(std::string(this->name()).append(".").append("winston.storage"), 128 * 1024);
+    this->storageLayout = Storage::make(std::string(this->name()).append(".").append("winston.storage"), 256 * 1024);
     if (this->storageLayout->init() != winston::Result::OK)
         winston::logger.err("TimeSaver.init: Storage Layout Init failed");
 

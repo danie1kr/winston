@@ -71,7 +71,6 @@ namespace winston {
 
 	const Result Route::validate()
 	{
-		const auto & current = this->start();
 		winston::Track::Connection connection = winston::Track::Connection::DeadEnd, 
 			nextConnection = winston::Track::Connection::DeadEnd;
 

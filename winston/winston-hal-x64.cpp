@@ -434,7 +434,8 @@ const winston::Result StorageWin::read(const size_t address, std::vector<unsigne
     if (!this->mmap.is_open())
         return winston::Result::NotInitialized;
     content.reserve(count);
-    for (size_t i = address; i < address + count; ++i)
+    const size_t maxI = min(address + count, this->mmap.size());
+    for (size_t i = address; i < maxI; ++i)
         content.push_back(this->mmap[i]);
 
     return winston::Result::OK;
@@ -446,7 +447,8 @@ const winston::Result StorageWin::read(const size_t address, std::string& conten
     if (!this->mmap.is_open())
         return winston::Result::NotInitialized;
     content.reserve(count);
-    for (size_t i = address; i < address + count; ++i)
+    const size_t maxI = min(address + count, this->mmap.size());
+    for (size_t i = address; i < maxI; ++i)
         content.push_back(this->mmap[i]);
 
     return winston::Result::OK;

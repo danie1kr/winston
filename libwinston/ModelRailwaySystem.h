@@ -507,7 +507,7 @@ namespace winston
 			}
 		};
 		using Railway = _Railway;
-		using Tracks = Railway::Tracks;
+		using Tracks = typename Railway::Tracks;
 
 #ifdef WINSTON_STATISTICS
 		const std::string statistics(const size_t withTop = 0) const { return this->stopWatchJournal.toString(withTop); }
@@ -561,8 +561,7 @@ namespace winston
 		virtual Result detectorUpdate(winston::Detector::Shared detector, Locomotive &loco) = 0;
 
 		// the railway
-		typename _Railway::Shared railway;
-		using Tracks = typename _Railway::Tracks;
+		typename Railway::Shared railway;
 
 		SignalTower::Shared signalTower;
 

@@ -5,6 +5,18 @@
 */
 #include "winston-main.h"
 
+/*
+teensy4.1 boards.txt:
+
+remove -fno-rtti:
+ old:
+  #teensy41.build.flags.cpp=-std=gnu++14 -fno-exceptions -fpermissive -fno-rtti -fno-threadsafe-statics -felide-constructors -Wno-error=narrowing
+ new:
+  teensy41.build.flags.cpp=-std=gnu++14 -fno-exceptions -fpermissive -fno-threadsafe-statics -felide-constructors -Wno-error=narrowing
+
+edit fnet_user_config.h and disable unneeded stuff
+*/
+
 // the setup function runs once when you press reset or power the board
 void setup() {
     winston_setup();

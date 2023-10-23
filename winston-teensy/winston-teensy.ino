@@ -15,6 +15,16 @@ remove -fno-rtti:
   teensy41.build.flags.cpp=-std=gnu++14 -fno-exceptions -fpermissive -fno-threadsafe-statics -felide-constructors -Wno-error=narrowing
 
 edit fnet_user_config.h and disable unneeded stuff
+
+use a board.txt with:
+    vm.build.sketch.cpp-use-build-cache=true
+    vm.preproc.lib-search.lib-in-lib=all
+    vm.preproc.lib-search.lib-in-sketch=all
+    vm.ctags.cache.gcc-e=true
+
+debugger: hardware
+default optimization
+menu -> teensy option 3 "optimize" -> debug
 */
 
 // the setup function runs once when you press reset or power the board

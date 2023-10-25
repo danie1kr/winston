@@ -65,10 +65,11 @@ private:
     const unsigned short z21Port = 21105;
 
     /* Signal Device */
+    winston::SignalController::Shared signalController;
     SignalInterfaceDevice::Shared signalInterfaceDevice;
-    TLC5947_SignalDevice::Shared signalDevice;
+    TLC5947::Shared signalDevice;
 
-    std::vector<winston::Signal::Shared> signals;
+    //std::vector<winston::Signal::Shared> signals;
 
     /*
     * cie1931 linear LED-PWM mapping

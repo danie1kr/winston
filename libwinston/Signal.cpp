@@ -20,8 +20,8 @@ namespace winston
 		return 0;
 	}
 
-	Signal::Signal(const Callback callback, const Length distance)
-		: callback(callback), _distance(distance), _aspect((unsigned int)Aspect::Go), _forced(0)
+	Signal::Signal(const Id device, Callback callback, const Length distance)
+		: device(device), callback(callback), _distance(distance), _aspect((unsigned int)Aspect::Go), _forced(0)
 	{
 
 	}
@@ -192,5 +192,43 @@ namespace winston
 	template<> void SignalAlwaysHalt::updateLights()
 	{
 		this->_lights[0].value = Light::maximum(Aspect::Halt);
+	}
+
+	SignalDevice::SignalDevice(const size_t ports)
+		: ports(ports)
+	{
+
+	}
+
+	SignalDevice::~SignalDevice()
+	{
+
+	}
+
+	const Result SignalDevice::update(winston::Signal::Shared signal)
+	{
+		this->lastUpdate = hal::now();
+		return this->updateInternal(signal);
+	}
+
+	const Result SignalDevice::flush()
+	{
+		this->lastFlush = hal::now();
+		return this->flushInternal();
+	}
+
+	Command::Shared SignalDevice::flushCommand(const Duration waitPeriod)
+	{
+		return Command::make([=](const TimePoint& created) -> const State
+			{
+				auto now = hal::now();
+				if ((now - lastFlush) > waitPeriod && lastUpdate > lastFlush)
+				{
+					this->flush();
+					return State::Running;
+				}
+				else
+					return State::Delay;
+			}, __PRETTY_FUNCTION__);
 	}
 }

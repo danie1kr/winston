@@ -65,12 +65,10 @@ namespace winston
 	{
 		return static_cast<bool>(static_cast<int>(a) & static_cast<int>(b));
 	}
-
-	/*
+/*
 	class Port
 	{
 	public:
-		Port();
 		Port(const size_t device, const size_t port);
 
 		const size_t device() const;
@@ -271,6 +269,8 @@ namespace winston
 	class Task;
 
 	class Signal;
+	class SignalDevice;
+	class SignalController;
 	
 	class Event;
 

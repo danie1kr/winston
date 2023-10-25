@@ -159,7 +159,7 @@ namespace winston
 
 		using Callback = std::function<const State(const Aspects aspect)>;
 		static Callback defaultCallback();
-		Signal(const Callback callback = defaultCallback(), const Length distance = 0);
+		Signal(const Id device = 0, const Callback callback = defaultCallback(), const Length distance = 0);
 
 		const State aspect(const Aspect aspect);
 		const Aspects aspect() const;
@@ -169,6 +169,8 @@ namespace winston
 		virtual const bool mainSignal() const = 0;
 
 		const Length distance() const;
+
+		const Id device;
 
 		void overwrite(const Aspects aspect);
 		
@@ -193,8 +195,8 @@ namespace winston
 	class SignalInstance : public Signal, public Shared_Ptr<SignalInstance<_Aspects>>
 	{
 	public:
-		SignalInstance(const Callback callback = Signal::defaultCallback(), const Length distance = 0, const Port port = 0)
-			: Signal(callback, distance)
+		SignalInstance(const Id device = 0, const Callback callback = Signal::defaultCallback(), const Length distance = 0, const Port port = 0)
+			: Signal(device, callback, distance)
 			, _lights(Sequence<BitCounter<_Aspects>::count() - 1>::generate(_Aspects, port)) {
 			this->init();
 		};
@@ -274,53 +276,27 @@ namespace winston
 	using SignalHV = SignalInstance<Signal::AspectsHV>;
 	using SignalAlwaysHalt = SignalInstance<Signal::AspectsAlwaysHalt>;
 
-	template<typename T>
-	class SignalDevice : public Shared_Ptr<SignalDevice<T>>
+	class SignalDevice : public Shared_Ptr<SignalDevice>
 	{
 		//static_assert(bits <= sizeof(T) * 8, "too many bits for T");
 	public:
-		SignalDevice(const size_t ports, typename SendDevice<T>::Shared device)
-			: device(device), ports(ports)
-		{
+		SignalDevice(const size_t ports);
+		virtual ~SignalDevice();
 
-		}
+		const Result update(winston::Signal::Shared signal);
+		const Result flush();
+		Command::Shared flushCommand(const Duration waitPeriod = toMilliseconds(40));
 
-		const Result update(winston::Signal::Shared signal)
-		{
-			this->lastUpdate = hal::now();
-			return this->updateInternal(signal);
-		}
-
-		const Result flush()
-		{
-			this->lastFlush = hal::now();
-			return this->flushInternal();
-		}
-
-		Command::Shared flushCommand(const Duration waitPeriod = toMilliseconds(40))
-		{
-			return Command::make([=](const TimePoint& created) -> const State
-			{
-				auto now = hal::now();
-				if ((now - lastFlush) > waitPeriod && lastUpdate > lastFlush)
-				{
-					this->flush();
-					return State::Running;
-				}
-				else
-					return State::Delay;
-			}, __PRETTY_FUNCTION__);
-		}
-
-		using Shared_Ptr<SignalDevice<T>>::Shared;
-		using Shared_Ptr<SignalDevice<T>>::make;
+		const size_t ports;
+		using Shared_Ptr<SignalDevice>::Shared;
+		using Shared_Ptr<SignalDevice>::make;
 	protected:
 		virtual const Result updateInternal(winston::Signal::Shared signal) = 0;
 		virtual const Result flushInternal() = 0;
-		typename SendDevice<T>::Shared device;
-		size_t ports;
 	private:
 		TimePoint lastFlush;
 		TimePoint lastUpdate;
+
+		friend class SignalController;
 	};
 }

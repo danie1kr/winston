@@ -125,7 +125,7 @@ private:
 
     /* Signal Device */
     SignalInterfaceDevice::Shared signalInterfaceDevice;
-    TLC5947_SignalDevice::Shared signalDevice;
+    TLC5947::Shared signalDevice;
 
     std::vector<winston::Signal::Shared> signals;
 

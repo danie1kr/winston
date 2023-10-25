@@ -99,6 +99,9 @@
     <ClInclude Include="external\span.hpp">
       <Filter>external</Filter>
     </ClInclude>
+    <ClInclude Include="SignalController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Signal.cpp">
@@ -150,6 +153,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Storyline.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SignalController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

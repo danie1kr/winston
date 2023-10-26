@@ -93,16 +93,16 @@ namespace winstontests
             Assert::IsTrue(railway->init() == winston::Result::OK);
 
             // start at 80mm before PBF3 B and drive for 100mm onto B4, 20mm behind A
-            auto PBF3 = railway->track(Y2021RailwayTracks::PBF3);
+            auto PBF3a = railway->track(Y2021RailwayTracks::PBF3a);
             auto B4 = railway->track(Y2021RailwayTracks::B4);
-            auto start_PBF3_B = winston::Position(PBF3, winston::Track::Connection::B, 80);
-            auto end = winston::Position(PBF3, winston::Track::Connection::B, 80);
+            auto start_PBF3a_B = winston::Position(PBF3a, winston::Track::Connection::B, 80);
+            auto end = winston::Position(PBF3a, winston::Track::Connection::B, 80);
             auto end_B4_A = winston::Position(B4, winston::Track::Connection::A, 20);
             const winston::Distance distance = 100;
             auto transit = end.drive(-distance);
             Assert::IsTrue(transit == winston::Position::Transit::CrossTrack);
-            Assert::AreEqual(end.trackName(), end_B4_A.trackName());
-            const auto travelled = start_PBF3_B.minus(end);
+            Assert::AreEqual(end_B4_A.trackName(), end.trackName());
+            const auto travelled = start_PBF3a_B.minus(end);
             Assert::IsTrue(travelled == distance);
         }
 
@@ -112,16 +112,16 @@ namespace winstontests
             Assert::IsTrue(railway->init() == winston::Result::OK);
 
             // start at 80mm before PBF3 B and drive for 100mm onto B4, 20mm behind A
-            auto PBF3 = railway->track(Y2021RailwayTracks::PBF3);
+            auto PBF3a = railway->track(Y2021RailwayTracks::PBF3a);
             auto B4 = railway->track(Y2021RailwayTracks::B4);
-            auto start_PBF3_B = winston::Position(PBF3, winston::Track::Connection::A, 80);
-            auto end = winston::Position(PBF3, winston::Track::Connection::A, 80);
+            auto start_PBF3a_B = winston::Position(PBF3a, winston::Track::Connection::A, 80);
+            auto end = winston::Position(PBF3a, winston::Track::Connection::A, 80);
             auto end_B4_A = winston::Position(B4, winston::Track::Connection::A, 20);
-            const winston::Distance distance = 100 + PBF3->length() - 80;
+            const winston::Distance distance = 100 + PBF3a->length() - 80;
             auto transit = end.drive(distance);
             Assert::IsTrue(transit == winston::Position::Transit::CrossTrack);
-            Assert::AreEqual(end.trackName(), end_B4_A.trackName());
-            const auto travelled = start_PBF3_B.minus(end);
+            Assert::AreEqual(end_B4_A.trackName(), end.trackName());
+            const auto travelled = start_PBF3a_B.minus(end);
             Assert::IsTrue(travelled == distance);
         }
 
@@ -132,18 +132,18 @@ namespace winstontests
 
             auto B6 = railway->track(Y2021RailwayTracks::B6);
             auto B5 = railway->track(Y2021RailwayTracks::B5);
-            auto Turnout10 = std::static_pointer_cast<winston::Turnout>(railway->track(Y2021RailwayTracks::Turnout10));
-            Turnout10->finalizeChangeTo(winston::Turnout::Direction::A_B);
+            auto Turnout12 = std::static_pointer_cast<winston::Turnout>(railway->track(Y2021RailwayTracks::Turnout12));
+            Turnout12->finalizeChangeTo(winston::Turnout::Direction::A_B);
 
             auto start = winston::Position(B6, winston::Track::Connection::A, 50);
             auto end = winston::Position(B6, winston::Track::Connection::A, 50);
             auto expect = winston::Position(B5, winston::Track::Connection::B, 80);
 
-            auto distance = (signed)(50 + Turnout10->length() + 80);
+            auto distance = (signed)(50 + Turnout12->length() + 80);
             auto transit = end.drive(-distance);
 
             Assert::IsTrue(transit == winston::Position::Transit::CrossTrack);
-            Assert::AreEqual(end.trackName(), expect.trackName());
+            Assert::AreEqual(expect.trackName(), end.trackName());
             Assert::IsTrue(end.connection() == expect.connection());
             Assert::IsTrue(end.distance() == expect.distance());
         }
@@ -155,14 +155,14 @@ namespace winstontests
 
             auto B6 = railway->track(Y2021RailwayTracks::B6);
             auto B5 = railway->track(Y2021RailwayTracks::B5);
-            auto Turnout10 = std::static_pointer_cast<winston::Turnout>(railway->track(Y2021RailwayTracks::Turnout10));
-            Turnout10->finalizeChangeTo(winston::Turnout::Direction::A_C);
+            auto Turnout12 = std::static_pointer_cast<winston::Turnout>(railway->track(Y2021RailwayTracks::Turnout12));
+            Turnout12->finalizeChangeTo(winston::Turnout::Direction::A_C);
 
             auto start = winston::Position(B6, winston::Track::Connection::A, 50);
             auto end = winston::Position(B6, winston::Track::Connection::A, 50);
             auto expect = winston::Position(B5, winston::Track::Connection::B, 80);
 
-            auto distance = (signed)(50 + Turnout10->length() + 80);
+            auto distance = (signed)(50 + Turnout12->length() + 80);
             auto transit = end.drive(-distance);
 
             Assert::IsTrue(transit == winston::Position::Transit::TraversalError);
@@ -174,28 +174,31 @@ namespace winstontests
             Assert::IsTrue(railway->init() == winston::Result::OK);
 
             auto PBF3 = railway->track(Y2021RailwayTracks::PBF3);
+            auto Turnout6 = std::static_pointer_cast<winston::Turnout>(railway->track(Y2021RailwayTracks::Turnout6));
+            auto PBF3a = railway->track(Y2021RailwayTracks::PBF3a);
             auto B4 = railway->track(Y2021RailwayTracks::B4);
-            auto Turnout8 = std::static_pointer_cast<winston::Turnout>(railway->track(Y2021RailwayTracks::Turnout8));
-            auto Turnout9 = std::static_pointer_cast<winston::Turnout>(railway->track(Y2021RailwayTracks::Turnout9));
-            auto B5 = railway->track(Y2021RailwayTracks::B5);
             auto Turnout10 = std::static_pointer_cast<winston::Turnout>(railway->track(Y2021RailwayTracks::Turnout10));
+            auto Turnout11 = std::static_pointer_cast<winston::Turnout>(railway->track(Y2021RailwayTracks::Turnout11));
+            auto B5 = railway->track(Y2021RailwayTracks::B5);
+            auto Turnout12 = std::static_pointer_cast<winston::Turnout>(railway->track(Y2021RailwayTracks::Turnout12));
             auto B6 = railway->track(Y2021RailwayTracks::B6);
             auto Turnout2 = std::static_pointer_cast<winston::Turnout>(railway->track(Y2021RailwayTracks::Turnout2));
             auto Turnout3 = std::static_pointer_cast<winston::Turnout>(railway->track(Y2021RailwayTracks::Turnout3));
 
-            Turnout8->finalizeChangeTo(winston::Turnout::Direction::A_C);
-            Turnout9->finalizeChangeTo(winston::Turnout::Direction::A_B);
-            Turnout10->finalizeChangeTo(winston::Turnout::Direction::A_B);
+            Turnout6->finalizeChangeTo(winston::Turnout::Direction::A_B);
+            Turnout10->finalizeChangeTo(winston::Turnout::Direction::A_C);
+            Turnout11->finalizeChangeTo(winston::Turnout::Direction::A_B);
+            Turnout12->finalizeChangeTo(winston::Turnout::Direction::A_B);
             Turnout2->finalizeChangeTo(winston::Turnout::Direction::A_C);
             Turnout3->finalizeChangeTo(winston::Turnout::Direction::A_B);
 
             auto pos = winston::Position(PBF3, winston::Track::Connection::A, 50);
-            auto distance = (signed)(PBF3->length() + B4->length() + Turnout8->length() + Turnout9->length() + B5->length() + Turnout10->length() + B6->length() + Turnout2->length() + Turnout3->length() + 10);
+            auto distance = (signed)(PBF3->length() + Turnout6->length() + PBF3a->length() + B4->length() + Turnout10->length() + Turnout11->length() + B5->length() + Turnout12->length() + B6->length() + Turnout2->length() + Turnout3->length() + 10);
             auto expect = winston::Position(PBF3, winston::Track::Connection::A, 60);
 
             auto transit = pos.drive(distance);
             Assert::IsTrue(transit == winston::Position::Transit::CrossTrack);
-            Assert::AreEqual(pos.trackName(), expect.trackName());
+            Assert::AreEqual(expect.trackName(), pos.trackName());
             Assert::IsTrue(pos.connection() == expect.connection());
             Assert::IsTrue(pos.distance() == expect.distance());
         }
@@ -257,9 +260,9 @@ namespace winstontests
         {
             railway = Y2021Railway::make(railwayCallbacks());
             Assert::IsTrue(railway->init() == winston::Result::OK);
-            auto PBF3 = railway->track(Y2021RailwayTracks::PBF3);
+            auto PBF3a = railway->track(Y2021RailwayTracks::PBF3a);
             auto B4 = railway->track(Y2021RailwayTracks::B4);
-            auto pos = winston::Position(PBF3, winston::Track::Connection::B, 50);
+            auto pos = winston::Position(PBF3a, winston::Track::Connection::B, 50);
             auto target = winston::Position(B4, winston::Track::Connection::A, 50);
 
             winston::Locomotive::ThrottleSpeedMap map{ {0, 0}, {100, 1000}, {255, 2550} };

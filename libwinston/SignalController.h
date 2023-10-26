@@ -34,6 +34,8 @@ namespace winston
 			, distance, currentPort);
 			track->attachSignal(s, connection);
 			currentPort += lightsCount;
+
+			return Result::OK;
 		}
 
 		using Shared_Ptr<SignalController>::Shared;

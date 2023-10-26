@@ -38,22 +38,9 @@ namespace winston
 			const Length Roco::R9 = curve(8264.0, 15.0);
 			const Length Roco::R10 = curve(8880.0, 15.0);
 			const Length Roco::R20 = curve(19620.0, 5.0);
-
-			const Length Roco::W15(const winston::Turnout::Direction direction)
-			{
-				switch (direction)
-				{
-				case Turnout::Direction::A_B:
-					return G1;
-				case Turnout::Direction::A_C:
-					return R10;
-				default:
-					return 0;
-				}
-
-				return 0;
-			}
-			const Length Roco::W10(const winston::Turnout::Direction direction)
+			/*
+			constexpr Length Roco::W15(const winston::Turnout::Direction direction)
+			constexpr Length Roco::W10(const winston::Turnout::Direction direction)
 			{
 				switch (direction)
 				{
@@ -67,7 +54,7 @@ namespace winston
 
 				return 0;
 			}
-			const Length Roco::BW23(const winston::Turnout::Direction direction)
+			constexpr Length Roco::BW23(const winston::Turnout::Direction direction)
 			{
 				switch (direction)
 				{
@@ -81,7 +68,7 @@ namespace winston
 
 				return 0;
 			}
-			const Length Roco::BW34(const winston::Turnout::Direction direction)
+			constexpr Length Roco::BW34(const winston::Turnout::Direction direction)
 			{
 				switch (direction)
 				{
@@ -95,7 +82,7 @@ namespace winston
 
 				return 0;
 			}
-			const Length Roco::DKW15(const winston::DoubleSlipTurnout::Direction direction)
+			constexpr Length Roco::DKW15(const winston::DoubleSlipTurnout::Direction direction)
 			{
 				switch (direction)
 				{
@@ -108,7 +95,7 @@ namespace winston
 				default: return 0;
 				}
 				return 0;
-			}
+			}*/
 		}
 	}
 

@@ -3,20 +3,19 @@
  Created:	12/9/2021 10:04:53 PM
  Author:	daniel
 */
+// don't include binary.h
+#define Binary_h
 #include "winston-main.h"
 
 /*
 teensy4.1 boards.txt:
-
-remove -fno-rtti:
- old:
-  #teensy41.build.flags.cpp=-std=gnu++14 -fno-exceptions -fpermissive -fno-rtti -fno-threadsafe-statics -felide-constructors -Wno-error=narrowing
- new:
-  teensy41.build.flags.cpp=-std=gnu++14 -fno-exceptions -fpermissive -fno-threadsafe-statics -felide-constructors -Wno-error=narrowing
-
 edit fnet_user_config.h and disable unneeded stuff
 
 use a board.txt with:
+    # remove -fno-rtti
+    teensy41.build.flags.cpp=-std=gnu++14 -fno-exceptions -fpermissive -fno-threadsafe-statics -felide-constructors -Wno-error=narrowing
+    recipe.hooks.deploy.postupload.1.pattern=cmd.exe /c ping localhost -n 10 
+
     vm.build.sketch.cpp-use-build-cache=true
     vm.preproc.lib-search.lib-in-lib=all
     vm.preproc.lib-search.lib-in-sketch=all

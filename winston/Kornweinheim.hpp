@@ -271,16 +271,26 @@ void Kornweinheim::systemSetup() {
 
     // signals
 #ifdef WINSTON_PLATFORM_TEENSY
-    this->signalInterfaceDevice = SignalInterfaceDevice::make(40, TLC5947_SignalDevice::SPI_Clock);
+    this->signalInterfaceDevices.push_back(SignalInterfaceDevice::make(40, TLC5947::SPI_Clock));
+    this->signalInterfaceDevices.push_back(SignalInterfaceDevice::make(39, TLC5947::SPI_Clock));
     auto TLC5947Off = Arduino_GPIOOutputPin::make(41, Arduino_GPIOOutputPin::State::High);
 #else
-    this->signalInterfaceDevice = SignalInterfaceDevice::make(3, TLC5947::SPI_Clock);
-    auto TLC5947Off = this->signalInterfaceDevice->getOutputPinDevice(4);
+#pragma message("using one SignalInterfaceDevice for two devices")
+    this->signalInterfaceDevices.push_back(SignalInterfaceDevice::make(3, TLC5947::SPI_Clock));
+    this->signalInterfaceDevices.push_back(this->signalInterfaceDevices[0]);
+    auto TLC5947Off = this->signalInterfaceDevices[0]->getOutputPinDevice(4);
 #endif
-    this->signalInterfaceDevice->init();
-    this->signalInterfaceDevice->skipSend(true);
-    const unsigned int chainedTLC5947s = 4;
-    this->signalDevice = TLC5947::make(chainedTLC5947s * 24, this->signalInterfaceDevice, TLC5947Off);
+
+    // two chains, each having two TLC5947 devies
+    const unsigned int chainedTLC5947s = 2;
+    for (const auto& device : this->signalInterfaceDevices)
+    {
+        device->init();
+        device->skipSend(true);
+        this->signalDevices.push_back(TLC5947::make(chainedTLC5947s * 24, device, TLC5947Off));
+    }
+
+    this->signalController = winston::SignalController::make(this->signalDevices);
 
     // storage
     this->storageLayout = Storage::make(std::string(this->name()).append(".").append("winston.storage"), 256 * 1024);
@@ -314,8 +324,8 @@ void Kornweinheim::setupSignals()
 #endif
 
         // update physical light
-        this->signalDevice->update(track->signalGuarding(connection));
-        winston::logger.info("Signal at ", track->name(), "|", winston::Track::ConnectionToString(connection), " set to ", aspects);
+        this->signalController->update(*track->signalGuarding(connection));
+        winston::logger.info("Signal at ", track->name(), "|", winston::Track::ConnectionToString(connection), " set to ", winston::Signal::buildAspects(aspects));
 
         return winston::State::Finished;
     };
@@ -480,9 +490,10 @@ void Kornweinheim::systemSetupComplete()
         this->stationDebugInjector->injectDoubleSlipTurnoutUpdate(turnout, dir);
         });
  #endif
-    this->signalInterfaceDevice->skipSend(false);
-    this->signalDevice->flush();
-    this->signalTower->order(this->signalDevice->flushCommand());
+    for (const auto& device : this->signalInterfaceDevices)
+        device->skipSend(false);
+    this->signalController->flush();
+    this->signalTower->order(this->signalController->flushCommand());
 }
 
 void Kornweinheim::populateLocomotiveShed()

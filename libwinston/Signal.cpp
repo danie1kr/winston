@@ -20,8 +20,19 @@ namespace winston
 		return 0;
 	}
 
-	Signal::Signal(const Id device, Callback callback, const Length distance)
-		: device(device), callback(callback), _distance(distance), _aspect((unsigned int)Aspect::Go), _forced(0)
+	const std::string Signal::buildAspects(const Aspects first)
+	{
+		std::string s;
+		if (first & (unsigned int)Signal::Aspect::Off) s += "Off, ";
+		if (first & (unsigned int)Signal::Aspect::Go) s += "Go, ";
+		if (first & (unsigned int)Signal::Aspect::Halt) s += "Halt, ";
+		if (first & (unsigned int)Signal::Aspect::ExpectHalt) s += "ExpectHalt, ";
+		if (first & (unsigned int)Signal::Aspect::ExpectGo) s += "ExpectGo";
+		return s;
+	}
+
+	Signal::Signal(Callback callback, const Length distance)
+		: callback(callback), _distance(distance), _aspect((unsigned int)Aspect::Go), _forced(0)
 	{
 
 	}
@@ -205,7 +216,7 @@ namespace winston
 
 	}
 
-	const Result SignalDevice::update(winston::Signal::Shared signal)
+	const Result SignalDevice::update(const winston::Signal &signal)
 	{
 		this->lastUpdate = hal::now();
 		return this->updateInternal(signal);

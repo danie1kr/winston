@@ -46,6 +46,7 @@ namespace winston
 		NotInitialized,
 		NotFound,
 		OutOfBounds,
+		InvalidParameter
 	};
 
 	enum class Features : unsigned int

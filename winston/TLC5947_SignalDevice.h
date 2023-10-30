@@ -7,6 +7,9 @@ class TLC5947 : public winston::SignalDevice, public winston::Shared_Ptr<TLC5947
 	//static_assert(bits <= sizeof(T) * 8, "too many bits for T");
 public:
 	static const size_t bits = 12;
+#ifdef __GNUC__ 
+	inline 
+#endif
 	static const unsigned int SPI_Clock = 20000;
 	#pragma message("TLC5947 Chaining: For more than 3 devices, use a very low clock (<10khz) or spi buffer/repeaters like 74lvc245 or TXU0304")
 	// see https://forums.adafruit.com/viewtopic.php?t=58367&start=15
@@ -18,7 +21,7 @@ public:
 	using winston::Shared_Ptr<TLC5947>::make;
 private:
 
-	const winston::Result updateInternal(winston::Signal::Shared signal);
+	const winston::Result updateInternal(const winston::Signal& signal);
 	virtual const winston::Result flushInternal();
 	void setPort(const size_t port, unsigned int value);
 

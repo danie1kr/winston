@@ -369,7 +369,7 @@ void Y2020Railway::connect()
     t9->connect(winston::Track::Connection::C, f, winston::Track::Connection::A);
     /*
 #define attachSignalY2020(track, SignalClass, guardedConnection) \
-    track->attachSignal(SignalClass::make([=](const winston::Signal::Aspects aspect)->const winston::State { return this->callbacks.signalUpdateCallback(track, guardedConnection, aspect); }), guardedConnection);
+    track->attachSignal(SignalClass::make([=](const winston::Aspects aspect)->const winston::State { return this->callbacks.signalUpdateCallback(track, guardedConnection, aspect); }), guardedConnection);
 
     attachSignalY2020(g1, winston::SignalKS, winston::Track::Connection::A);
     attachSignalY2020(g1, winston::SignalKS, winston::Track::Connection::B);
@@ -622,8 +622,8 @@ void Y2021Railway::connect()
     // nebengleise
     Turnout3->connect(C, PBF_To_N, A)
         ->connect(B, Turnout14, A)
-        ->connect(B, N1, A);
-    Turnout14->connect(C, N2, A);
+        ->connect(B, N2, A);
+    Turnout14->connect(C, N1, A);
     DoubleSlipTurnout15_16->connect(D, N3, A);
 
     // GBF
@@ -747,7 +747,7 @@ winston::Route::Shared Y2021Railway::define(const Routes route)
             PATH_TURNOUT(Turnout2, A_B),
             PATH_TURNOUT(Turnout3, A_C),
             PATH_TRACK(PBF_To_N),
-            PATH_TURNOUT(Turnout14, A_B),
+            PATH_TURNOUT(Turnout14, A_C),
             PATH_TRACK(N1)
         ))
     ROUTE(B3_N2,
@@ -758,7 +758,7 @@ winston::Route::Shared Y2021Railway::define(const Routes route)
             PATH_TURNOUT(Turnout2, A_B),
             PATH_TURNOUT(Turnout3, A_C),
             PATH_TRACK(PBF_To_N),
-            PATH_TURNOUT(Turnout14, A_C),
+            PATH_TURNOUT(Turnout14, A_B),
             PATH_TRACK(N2)
         ))
     ROUTE(B6_PBF3,
@@ -782,7 +782,7 @@ winston::Route::Shared Y2021Railway::define(const Routes route)
             PATH_TURNOUT(Turnout2, A_C),
             PATH_TURNOUT(Turnout3, A_C),
             PATH_TRACK(PBF_To_N),
-            PATH_TURNOUT(Turnout14, A_B),
+            PATH_TURNOUT(Turnout14, A_C),
             PATH_TRACK(N1)
         ),
         PROTECTIONS(
@@ -795,7 +795,7 @@ winston::Route::Shared Y2021Railway::define(const Routes route)
             PATH_TURNOUT(Turnout2, A_C),
             PATH_TURNOUT(Turnout3, A_C),
             PATH_TRACK(PBF_To_N), 
-            PATH_TURNOUT(Turnout14, A_C),
+            PATH_TURNOUT(Turnout14, A_B),
             PATH_TRACK(N2)
         ),
         PROTECTIONS(

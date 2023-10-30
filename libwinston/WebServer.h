@@ -16,7 +16,7 @@
 #define ARDUINOJSON_ENABLE_ARDUINO_STRING 0
 #define ARDUINOJSON_ENABLE_ARDUINO_STREAM 0
 #define ARDUINOJSON_ENABLE_ARDUINO_PRINT 0
-#include "external/ArduinoJson-v6.19.0.hpp"
+#include "external/ArduinoJson-v6.21.3.h"
 #ifdef __GNUC__ 
 #pragma GCC pop_options
 #endif

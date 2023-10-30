@@ -55,23 +55,23 @@ namespace winston
 	template<typename T> struct is_shared_ptr : std::false_type {};
 	template<typename T> struct is_shared_ptr<std::shared_ptr<T>> : std::true_type {};
 
-	std::string hex(unsigned int n);
+	const std::string hex(unsigned int n);
 	
-	std::string build();
-	std::string build(const std::string first);
-	std::string build(const int first);
-	std::string build(const unsigned int first);
-	std::string build(const long first);
-	std::string build(const unsigned long first);
-	std::string build(const long long first);
-	std::string build(const unsigned long long first);
-	std::string build(const short first);
-	std::string build(const unsigned short first);
-	std::string build(const unsigned char first);
-	std::string build(const char* first);
-	std::string build(const Result first);
+	const std::string build();
+	const std::string build(const std::string first);
+	const std::string build(const int first);
+	const std::string build(const unsigned int first);
+	const std::string build(const long first);
+	const std::string build(const unsigned long first);
+	const std::string build(const long long first);
+	const std::string build(const unsigned long long first);
+	const std::string build(const short first);
+	const std::string build(const unsigned short first);
+	const std::string build(const unsigned char first);
+	const std::string build(const char* first);
+	const std::string build(const Result first);
 #ifdef WINSTON_HAS_CHRONO
-	std::string build(const TimePoint first);
+	const std::string build(const TimePoint first);
 #endif
 	template <typename _First, typename... _Args>
 		std::string build(const _First first, _Args&&... args)

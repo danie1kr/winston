@@ -224,11 +224,7 @@ void WebServerTeensy::init(OnHTTP onHTTP, OnMessage onMessage, unsigned int port
     this->onMessage = onMessage;
     this->it = this->connections.begin();
     this->server.listen(port + 1);
-#ifdef WINSTON_WITH_QNETHERNET
-    this->httpServer.begin(port, false);
-#else
-     this->httpServer.begin(port);
-#endif
+    this->httpServer.begin(port);
 }
 
 void WebServerTeensy::send(Client& connection, const std::string& data)
@@ -330,6 +326,15 @@ void WebServerTeensy::step()
                         //this->disconnect(this->getClient(id));
                     }
                 });
+            /*
+            * from https://github.com/ssilverman/QNEthernet/blob/master/examples/LengthWidthServer/LengthWidthServer.ino :
+              EthernetClient client = server.accept();
+  if (client) {
+    IPAddress ip = client.remoteIP();
+    printf("Client connected: %u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
+    clients.emplace_back(std::move(client));
+    printf("Client count: %zu\r\n", clients.size());
+  }*/
             this->newConnection(connection);
         }
 

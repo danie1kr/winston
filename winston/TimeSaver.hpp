@@ -320,7 +320,7 @@ void TimeSaver::setupSignals()
         return winston::State::Finished;
     };
 
-    auto signalUpdateAlwaysHalt = [=](winston::Track::Shared track, winston::Track::Connection connection, const winston::Signal::Aspects aspects) -> const winston::State
+    auto signalUpdateAlwaysHalt = [=](winston::Track::Shared track, winston::Track::Connection connection, const winston::Signal::Aspects) -> const winston::State
     {
         return winston::State::Finished;
     };

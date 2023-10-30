@@ -12,9 +12,9 @@ TLC5947::~TLC5947()
 {
 }
 
-const winston::Result TLC5947::updateInternal(winston::Signal::Shared signal)
+const winston::Result TLC5947::updateInternal(const winston::Signal& signal)
 {
-	for (auto& light : signal->lights())
+	for (auto& light : signal.lights())
 		setPort(light.port, light.value);
 	return this->flush();
 }

@@ -118,7 +118,7 @@
     <ClInclude Include="Detector.h" />
     <ClInclude Include="DigitalCentralStation.h" />
     <ClInclude Include="Callback.h" />
-    <ClInclude Include="external\ArduinoJson-v6.19.0.hpp" />
+    <ClInclude Include="external\ArduinoJson-v6.21.3.h" />
     <ClInclude Include="external\better_enum.hpp" />
     <ClInclude Include="external\optional.hpp" />
     <ClInclude Include="external\span.hpp" />

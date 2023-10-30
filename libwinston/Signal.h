@@ -159,7 +159,7 @@ namespace winston
 
 		using Callback = std::function<const State(const Aspects aspect)>;
 		static Callback defaultCallback();
-		Signal(const Id device = 0, const Callback callback = defaultCallback(), const Length distance = 0);
+		Signal(const Callback callback = defaultCallback(), const Length distance = 0);
 
 		const State aspect(const Aspect aspect);
 		const Aspects aspect() const;
@@ -170,11 +170,10 @@ namespace winston
 
 		const Length distance() const;
 
-		const Id device;
-
 		void overwrite(const Aspects aspect);
 		
 		virtual const std::span<const Light> lights() const = 0;
+		static const std::string buildAspects(const Aspects first);
 	protected:
 
 		virtual void init() = 0;
@@ -195,8 +194,8 @@ namespace winston
 	class SignalInstance : public Signal, public Shared_Ptr<SignalInstance<_Aspects>>
 	{
 	public:
-		SignalInstance(const Id device = 0, const Callback callback = Signal::defaultCallback(), const Length distance = 0, const Port port = 0)
-			: Signal(device, callback, distance)
+		SignalInstance(const Callback callback = Signal::defaultCallback(), const Length distance = 0, const Port port = 0)
+			: Signal(callback, distance)
 			, _lights(Sequence<BitCounter<_Aspects>::count() - 1>::generate(_Aspects, port)) {
 			this->init();
 		};
@@ -283,7 +282,7 @@ namespace winston
 		SignalDevice(const size_t ports);
 		virtual ~SignalDevice();
 
-		const Result update(winston::Signal::Shared signal);
+		const Result update(const winston::Signal &signal);
 		const Result flush();
 		Command::Shared flushCommand(const Duration waitPeriod = toMilliseconds(40));
 
@@ -291,7 +290,7 @@ namespace winston
 		using Shared_Ptr<SignalDevice>::Shared;
 		using Shared_Ptr<SignalDevice>::make;
 	protected:
-		virtual const Result updateInternal(winston::Signal::Shared signal) = 0;
+		virtual const Result updateInternal(const winston::Signal& signal) = 0;
 		virtual const Result flushInternal() = 0;
 	private:
 		TimePoint lastFlush;

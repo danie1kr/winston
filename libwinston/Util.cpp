@@ -4,6 +4,7 @@
 
 #include "Util.h"
 #include "HAL.h"
+#include "Signal.h"
 
 #ifdef WINSTON_PLATFORM_TEENSY
 namespace std
@@ -40,7 +41,7 @@ namespace winston
 
 	Callback::Shared nop = Callback::make([]() {});
 
-	std::string hex(unsigned int n)
+	const std::string hex(unsigned int n)
 	{
 		// see https://www.geeksforgeeks.org/program-decimal-hexadecimal-conversion/
 		std::string ret = n == 0 ? "0" : "";
@@ -62,73 +63,73 @@ namespace winston
 		return std::string("0x") + ret;
 	}
 
-	std::string build()
+	const std::string build()
 	{
 		return std::string("");
 	}
 
-	std::string build(const std::string first)
+	const std::string build(const std::string first)
 	{
 		return first;
 	}
-	std::string build(const int first)
+	const std::string build(const int first)
 	{
 		return std::to_string(first);
 	}
 
-	std::string build(const unsigned int first)
+	const std::string build(const unsigned int first)
 	{
 		return std::to_string(first);
 	}
 
-	std::string build(const short first)
+	const std::string build(const short first)
 	{
 		return std::to_string(first);
 	}
 
-	std::string build(const unsigned short first)
+	const std::string build(const unsigned short first)
 	{
 		return std::to_string(first);
 	}
 
-	std::string build(const long first)
+	const std::string build(const long first)
 	{
 		return std::to_string(first);
 	}
 
-	std::string build(const unsigned long first)
+	const std::string build(const unsigned long first)
 	{
 		return std::to_string(first);
 	}
 
-	std::string build(const long long first)
+	const std::string build(const long long first)
 	{
 		return std::to_string(first);
 	}
 
-	std::string build(const unsigned long long first)
+	const std::string build(const unsigned long long first)
 	{
 		return std::to_string(first);
 	}
 
-	std::string build(const unsigned char first)
+	const std::string build(const unsigned char first)
 	{
 		return std::to_string(first);
 	}
 
-	std::string build(const char* first)
+	const std::string build(const char* first)
 	{
 		return std::string(first);
 	}
 
 #ifdef WINSTON_HAS_CHRONO
-	std::string build(const winston::TimePoint first)
+	const std::string build(const winston::TimePoint first)
 	{
 		return build(inMilliseconds(first.time_since_epoch()));
 	}
 #endif
 
-	std::string build(const winston::Result first)
+	const std::string build(const winston::Result first)
 	{
 		switch (first)
 		{

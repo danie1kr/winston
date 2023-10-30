@@ -47,10 +47,10 @@ namespace winstontests
 			TLC5947::Shared signalDevice = TLC5947::make(24, sendDevice, sendDevice);
 
 			winston::Port port{ 0 };
-			winston::Signal::Shared signal = winston::SignalKS::make(0, [](const winston::Signal::Aspects aspect) -> const winston::State { return winston::State::Finished; }, 0, port);
+			winston::Signal::Shared signal = winston::SignalKS::make( [](const winston::Signal::Aspects aspect) -> const winston::State { return winston::State::Finished; }, 0, port);
 			{
 				signal->aspect(winston::Signal::Aspect::Halt);
-				signalDevice->update(signal);
+				signalDevice->update(*signal);
 				const std::vector<unsigned int> expect_Halt = { winston::Signal::Light::maximum(winston::Signal::Aspect::Halt) >> 4, (winston::Signal::Light::maximum(winston::Signal::Aspect::Halt) & 0xF) << 4, 0x00 };
 			
 				auto data = sendDevice->data();
@@ -59,7 +59,7 @@ namespace winstontests
 			}
 			{
 				signal->aspect(winston::Signal::Aspect::Go);
-				signalDevice->update(signal);
+				signalDevice->update(*signal);
 				const std::vector<unsigned int> expect_Go = { 0x00, winston::Signal::Light::maximum(winston::Signal::Aspect::Go) >> 8, winston::Signal::Light::maximum(winston::Signal::Aspect::Halt) & 0xFF };
 				auto data = sendDevice->data();
 				std::vector<unsigned int> data34To36(data.end() - 3, data.end());

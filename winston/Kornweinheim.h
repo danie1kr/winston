@@ -66,8 +66,8 @@ private:
 
     /* Signal Device */
     winston::SignalController::Shared signalController;
-    SignalInterfaceDevice::Shared signalInterfaceDevice;
-    TLC5947::Shared signalDevice;
+    std::vector<SignalInterfaceDevice::Shared> signalInterfaceDevices;
+    std::vector<winston::SignalDevice::Shared> signalDevices;
 
     //std::vector<winston::Signal::Shared> signals;
 

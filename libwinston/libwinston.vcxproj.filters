@@ -84,9 +84,6 @@
     <ClInclude Include="Storyline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="external\ArduinoJson-v6.19.0.hpp">
-      <Filter>external</Filter>
-    </ClInclude>
     <ClInclude Include="external\better_enum.hpp">
       <Filter>external</Filter>
     </ClInclude>
@@ -101,6 +98,9 @@
     </ClInclude>
     <ClInclude Include="SignalController.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="external\ArduinoJson-v6.21.3.h">
+      <Filter>external</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

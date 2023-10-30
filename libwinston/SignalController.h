@@ -6,8 +6,30 @@
 
 namespace winston
 {
-	class SignalController : public Shared_Ptr<SignalController>
+	class SignalController : public SignalDevice, Shared_Ptr<SignalController>
 	{
+	private:
+		class SignalOfDevice : public Shared_Ptr<SignalOfDevice>
+		{
+		public:
+			SignalOfDevice(SignalDevice::Shared device);
+			virtual ~SignalOfDevice();
+			SignalDevice::Shared device;
+		};
+
+		template<typename _Signal>
+		class Signal : public _Signal, public SignalOfDevice, public Shared_Ptr<Signal<_Signal>>
+		{
+		public:
+			Signal(SignalDevice::Shared device, const winston::Signal::Callback callback = winston::Signal::defaultCallback(), const Length distance = 0, const Port port = 0) :
+				_Signal(callback, distance, port), SignalOfDevice(device) {
+
+			}
+
+			using Shared_Ptr<Signal<_Signal>>::Shared;
+			using Shared_Ptr<Signal<_Signal>>::make;
+		};
+
 	public:
 		SignalController(const std::vector<typename SignalDevice::Shared> devices);
 		virtual ~SignalController();
@@ -27,7 +49,7 @@ namespace winston
 				winston::logger.err("Not enough devices for all signals");
 				return Result::OutOfBounds;
 			}
-			auto s = _Signal::make(currentDev,
+			auto s = Signal<_Signal>::make(devices[currentDev],
 				[track, connection, signalUpdateCallback](const winston::Signal::Aspects aspect)->const winston::State {
 					return signalUpdateCallback(track, connection, aspect);
 				}
@@ -41,8 +63,10 @@ namespace winston
 		using Shared_Ptr<SignalController>::Shared;
 		using Shared_Ptr<SignalController>::make;
 	private:
-		virtual const Result updateInternal(winston::Signal::Shared signal);
+		virtual const Result updateInternal(const winston::Signal &signal);
 		virtual const Result flushInternal();
+
+		const size_t countPorts(const std::vector<typename SignalDevice::Shared> devices) const;
 
 		const std::vector<typename SignalDevice::Shared> devices;
 		Id currentDev;

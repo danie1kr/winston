@@ -562,16 +562,17 @@ namespace winston
     namespace hal {
         void init()
         {
+#ifdef WINSTON_WITH_TEENSYDEBUG
+            //SerialUSB1.begin(115200);
+            while (!SerialUSB1) {}    // Wait for Debugger connect
+            debug.begin(SerialUSB1);
+#endif
+
             Serial.begin(115200);/*
             while (!Serial) { //}&& millis() < 2000) {
                 // Wait for Serial to initialize
             }*/
             text("Winston Teensy Init Hello");
-
-#ifdef WINSTON_WITH_TEENSYDEBUG
-            SerialUSB1.begin(115200);
-            debug.begin(SerialUSB1);
-#endif
 
 #ifdef WINSTON_WITH_SDFAT
             if (!SD.begin(BUILTIN_SDCARD)) {

@@ -24,7 +24,7 @@ namespace winston {
 		//Block::Shared traverse(Track::Shared& entry, Track::Connection& connection);
 		//bool validate();
 
-		const bool contains(Track::Shared track) const;
+		const bool contains(Track &track) const;
 		const BlockEntrySet entries() const;
 		const Trackset tracks() const;
 

@@ -2,6 +2,7 @@
 
 namespace winston
 {
+	/*
 	Callback::Callback(Function function)
 		: Shared_Ptr<Callback>(), function(function), count(0)
 	{
@@ -19,4 +20,5 @@ namespace winston
 		++count;
 		return this->shared_from_this();
 	}
+	*/
 }

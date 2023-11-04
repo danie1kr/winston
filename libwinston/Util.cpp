@@ -39,8 +39,6 @@ namespace winston
 		hal::text(error);
 	}
 
-	Callback::Shared nop = Callback::make([]() {});
-
 	const std::string hex(unsigned int n)
 	{
 		// see https://www.geeksforgeeks.org/program-decimal-hexadecimal-conversion/

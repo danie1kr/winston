@@ -6,6 +6,7 @@
 
 namespace winston
 {
+	/*
 	class Callback : public Shared_Ptr<Callback>, public std::enable_shared_from_this<Callback>
 	{
 	public:
@@ -21,6 +22,6 @@ namespace winston
 		int count;
 
 		friend class Event;
-	};
+	};*/
 }
 

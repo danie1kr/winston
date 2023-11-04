@@ -272,7 +272,7 @@ void Kornweinheim::systemSetup() {
     // signals
 #ifdef WINSTON_PLATFORM_TEENSY
     this->signalInterfaceDevices.push_back(SignalInterfaceDevice::make(40, TLC5947::SPI_Clock));
-    this->signalInterfaceDevices.push_back(SignalInterfaceDevice::make(39, TLC5947::SPI_Clock));
+    this->signalInterfaceDevices.push_back(SignalInterfaceDevice::make(28, TLC5947::SPI_Clock));
     auto TLC5947Off = Arduino_GPIOOutputPin::make(41, Arduino_GPIOOutputPin::State::High);
 #else
 #pragma message("using one SignalInterfaceDevice for two devices")

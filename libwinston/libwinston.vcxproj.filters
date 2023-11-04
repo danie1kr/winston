@@ -45,9 +45,6 @@
     <ClInclude Include="DigitalCentralStation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Callback.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ModelRailwaySystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -120,9 +117,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DigitalCentralStation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Callback.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Railway.cpp">

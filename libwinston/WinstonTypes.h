@@ -87,7 +87,7 @@ namespace winston
 		using Shared = std::shared_ptr<_T>;
 
 		template<typename... Args>
-		static Shared make(Args&&... args) {
+		[[nodiscard]] static Shared make(Args&&... args) {
 			return std::make_shared<_T>(std::forward<Args>(args)...);
 		}
 	};
@@ -274,8 +274,6 @@ namespace winston
 	class SignalController;
 	
 	class Event;
-
-	class Callback;
 
 	class UDPSocket;
 

@@ -5,10 +5,11 @@
 #include <string>
 #include <deque>
 #include <memory>
+#include <functional>
 #include <algorithm>
 
+#include "WinstonTypes.h"
 #include "WinstonConfig.h"
-#include "Callback.h"
 
 namespace winston
 {
@@ -103,7 +104,7 @@ namespace winston
 
 	unsigned char reverse(unsigned char b);
 
-	extern Callback::Shared nop;
+	//extern Callback::Shared nop;
 
 #define WINSTON_JOURNAL_SIZE	32
 	class StopwatchJournal

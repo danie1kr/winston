@@ -3,7 +3,6 @@
 #include "WinstonConfig.h"
 #include "WinstonTypes.h"
 #include "Block.h"
-#include "Callback.h"
 #include "Command.h"
 #include "Detector.h"
 #include "DigitalCentralStation.h"

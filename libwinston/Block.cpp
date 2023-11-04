@@ -5,9 +5,9 @@ namespace winston {
 	{
 	}
 
-	const bool Block::contains(Track::Shared track) const
+	const bool Block::contains(Track &track) const
 	{
-		return this->_tracks.find(track) != this->_tracks.end();
+		return std::find_if(this->_tracks.begin(), this->_tracks.end(), [&track](const Track::Shared& t) { return &track == t.get(); }) != this->_tracks.end();
 	}
 
 	const BlockEntrySet Block::entries() const

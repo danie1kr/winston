@@ -117,7 +117,6 @@
     <ClInclude Include="Command.h" />
     <ClInclude Include="Detector.h" />
     <ClInclude Include="DigitalCentralStation.h" />
-    <ClInclude Include="Callback.h" />
     <ClInclude Include="external\ArduinoJson-v6.21.3.h" />
     <ClInclude Include="external\better_enum.hpp" />
     <ClInclude Include="external\optional.hpp" />
@@ -147,7 +146,6 @@
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="Detector.cpp" />
     <ClCompile Include="DigitalCentralStation.cpp" />
-    <ClCompile Include="Callback.cpp" />
     <ClCompile Include="HAL.cpp" />
     <ClCompile Include="Library.cpp" />
     <ClCompile Include="Locomotive.cpp" />

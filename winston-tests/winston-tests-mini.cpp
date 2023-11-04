@@ -104,9 +104,7 @@ namespace winstontests
             auto signalTower = winston::SignalTower::make();
 
             auto direction = winston::Turnout::Direction::A_C;
-            auto cb = std::make_shared<winston::Callback>([]() {});
             signalTower->order(winston::Command::make([t1, direction](const winston::TimePoint &created) -> const winston::State { return t1->finalizeChangeTo(direction);  }));
-            //EventTurnoutFinalizeToggle::make(cb, t1, direction));
             for (int i = 0; i < 10; ++i)
                 signalTower->work();
             Assert::IsTrue(t1->direction() == direction);
@@ -128,9 +126,7 @@ namespace winstontests
             auto signalTower = winston::SignalTower::make();
 
             auto direction = winston::Turnout::Direction::A_B;
-            auto cb = std::make_shared<winston::Callback>([]() {});
             signalTower->order(winston::Command::make([t1](const winston::TimePoint &created) -> const winston::State { return t1->startToggle(); }));
-            //signalTower->notify(winston::EventTurnoutStartToggle::make(cb, t1));
             for (int i = 0; i < 10; ++i)
                 signalTower->work();
             Assert::IsTrue(t1->direction() == winston::Turnout::Direction::Changing);
@@ -139,9 +135,7 @@ namespace winstontests
             Assert::IsFalse(t1->traverse(winston::Track::Connection::B, onto, false));
             Assert::IsFalse(t1->traverse(winston::Track::Connection::C, onto, false));
 
-            auto cb2 = std::make_shared<winston::Callback>([]() {});
             signalTower->order(winston::Command::make([t1, direction](const winston::TimePoint &created) -> const winston::State { return t1->finalizeChangeTo(direction); }));
-            //signalTower->notify(winston::EventTurnoutFinalizeToggle::make(cb2, t1, direction));
             for (int i = 0; i < 10; ++i)
                 signalTower->work();
             Assert::IsTrue(t1->direction() == direction);

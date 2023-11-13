@@ -517,37 +517,37 @@ void Z21::processPacket(uint8_t* data) {
     }
 }
 
-void Z21::requestTurnoutInfo(winston::Turnout::Shared turnout)
+void Z21::requestTurnoutInfo(winston::Turnout& turnout)
 {
     const unsigned int address = this->turnoutAddressTranslator->address(turnout);
     this->getAccessoryInfo((const unsigned short)address);
 }
 
-void Z21::requestDoubleSlipTurnoutInfo(winston::DoubleSlipTurnout::Shared turnout)
+void Z21::requestDoubleSlipTurnoutInfo(winston::DoubleSlipTurnout& turnout)
 {
     const unsigned int address = this->turnoutAddressTranslator->address(turnout);
     this->getAccessoryInfo((const unsigned short)address);
     this->getAccessoryInfo((const unsigned short)(address+1));
 }
 
-void Z21::requestLocoInfo(const winston::Locomotive::Shared loco)
+void Z21::requestLocoInfo(const winston::Locomotive& loco)
 {
     const unsigned int address = this->locoAddressTranslator.addressOfLoco(loco);
     this->getLocoInfo(address);
 }
 
-void Z21::triggerTurnoutChangeTo(winston::Turnout::Shared turnout, winston::Turnout::Direction direction)
+void Z21::triggerTurnoutChangeTo(winston::Turnout& turnout, winston::Turnout::Direction direction)
 {
     const unsigned int address = this->turnoutAddressTranslator->address(turnout);
     this->setAccessory((const unsigned short)address, (direction == winston::Turnout::Direction::A_C ? Z21_Accessory_Pos::P0 : Z21_Accessory_Pos::P1), true, true);
 }
 
-void Z21::triggerDoubleSlipTurnoutChangeTo(winston::DoubleSlipTurnout::Shared turnout, winston::DoubleSlipTurnout::Direction direction)
+void Z21::triggerDoubleSlipTurnoutChangeTo(winston::DoubleSlipTurnout& turnout, winston::DoubleSlipTurnout::Direction direction)
 {
     const unsigned int addressA = this->turnoutAddressTranslator->address(turnout);
     const unsigned int addressB = addressA + 1;
     unsigned char a, b;
-    turnout->toAccessoryStates(a, b, direction);
+    turnout.toAccessoryStates(a, b, direction);
     this->setAccessory((const unsigned short)addressA, (a ? Z21_Accessory_Pos::P0 : Z21_Accessory_Pos::P1), true, true);
     this->setAccessory((const unsigned short)addressB, (b ? Z21_Accessory_Pos::P0 : Z21_Accessory_Pos::P1), true, true);
 }
@@ -583,7 +583,7 @@ void Z21::processXPacket(uint8_t* data) {
                         if (accessoryState == Z21_Accessory_State::P0 || accessoryState == Z21_Accessory_State::P1)
                         {
                             auto direction = accessoryState == Z21_Accessory_State::P1 ? winston::Turnout::Direction::A_B : winston::Turnout::Direction::A_C;
-                            this->turnoutUpdate(turnout, direction);
+                            this->turnoutUpdate(*turnout, direction);
                             winston::logger.log(winston::build("Z21: Turnout ", address, " in state ", winston::Turnout::DirectionToString(direction)));
                         }
                         else
@@ -595,7 +595,7 @@ void Z21::processXPacket(uint8_t* data) {
                     {
                         auto turnout = std::static_pointer_cast<winston::DoubleSlipTurnout>(track);
                         // returns first address
-                        bool firstAddress = this->turnoutAddressTranslator->address(turnout) == address;
+                        bool firstAddress = this->turnoutAddressTranslator->address(*turnout) == address;
                         if (accessoryState == Z21_Accessory_State::P0 || accessoryState == Z21_Accessory_State::P1)
                         {
                             unsigned char state = accessoryState == Z21_Accessory_State::P0 ? 1 : 0;
@@ -604,7 +604,7 @@ void Z21::processXPacket(uint8_t* data) {
                                 // we do this twice potentially...
                                 turnout->setAccessoryState(state, firstAddress, false, false);
                                 auto direction = turnout->fromAccessoryState();
-                                this->doubleSlipUpdate(turnout, direction);
+                                this->doubleSlipUpdate(*turnout, direction);
                                 winston::logger.log(winston::build("Z21: Turnout ", address, " in state ", winston::DoubleSlipTurnout::DirectionToString(direction)));
                             }
                             else
@@ -683,7 +683,7 @@ void Z21::processLocoInfo(uint8_t* data) {
 
     //onLocoInfo(addr, busy, consist, transpond, forward, speed, functions);
     if (auto loco = this->locoAddressTranslator.locoFromAddress(addr))
-        this->callbacks.locomotiveUpdateCallback(loco, busy, forward, speed, functions);
+        this->callbacks.locomotiveUpdateCallback(*loco, busy, forward, speed, functions);
 }
 
 void Z21::processBCPacket(uint8_t* data) {

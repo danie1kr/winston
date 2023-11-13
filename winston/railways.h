@@ -342,7 +342,7 @@ public:
     public:
         AddressTranslator(winston::Shared_Ptr<Y2021Railway>::Shared railway);
         virtual winston::Track::Shared turnout(const winston::Address address) const;
-        virtual const winston::Address address(winston::Track::Shared track) const;
+        virtual const winston::Address address(winston::Track& track) const;
 
         virtual winston::Route::Shared route(const winston::Address address) const;
         virtual const winston::Address address(winston::Route::Shared track) const;

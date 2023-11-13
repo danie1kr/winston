@@ -10,7 +10,7 @@
 
 namespace winston
 {
-	class SignalTower : public Shared_Ptr<SignalTower>, public std::enable_shared_from_this<SignalTower>
+	class SignalTower : public Shared_Ptr<SignalTower>
 	{
 	public:
 
@@ -25,10 +25,10 @@ namespace winston
 		Railway::Callbacks::TurnoutUpdateCallback injectTurnoutSignalHandling(Railway::Callbacks::TurnoutUpdateCallback callback);
 
 		void initSignalsForTurnouts(std::set<Turnout::Shared> turnouts, std::set<DoubleSlipTurnout::Shared> doubleSlipTurnouts);
-		void setSignalsFor(Track::Shared turnout, const Track::Connection connectionStartFrom);
-		void setSignalsFor(Track::Shared turnout);
+		void setSignalsFor(Track& turnout, const Track::Connection connectionStartFrom);
+		void setSignalsFor(Track& turnout);
 
-		static void setSignalOn(Track::Shared track, const Track::Connection signalGuardedConnection, const Signal::Aspect aspect, const Signal::Aspect preAspect = Signal::Aspect::Off);
+		static void setSignalOn(Track& track, const Track::Connection signalGuardedConnection, const Signal::Aspect aspect, const Signal::Aspect preAspect = Signal::Aspect::Off);
 		
 		void order(Command::Shared command);
 		bool work();

@@ -6,7 +6,7 @@
 
 namespace winston
 {
-	Track::Track(const std::string name, Length trackLength) : Shared_Ptr<Track>(), _name(name), _block(0), trackLength(trackLength)
+	Track::Track(const std::string name, Length trackLength) : Shared_Ptr<Track>()/*, std::enable_shared_from_this<Track>()*/, _name(name), _block(0), trackLength(trackLength)
 	{
 	}
 
@@ -94,7 +94,7 @@ namespace winston
 	}
 
 	Bumper::Bumper(const std::string name, Length tracklength)
-		: Track(name, tracklength), Shared_Ptr<Bumper>(), a()
+		: Track(name, tracklength), Shared_Ptr<Bumper>()/*, std::enable_shared_from_this<Bumper>()*/, a()
 	{
 	}
 
@@ -149,8 +149,8 @@ namespace winston
 
 	void Bumper::eachConnection(ConnectionCallback callback)
 	{
-		callback(this->shared_from_this(), Connection::A);
-		callback(this->shared_from_this(), Connection::DeadEnd);
+		callback(*this, Connection::A);
+		callback(*this, Connection::DeadEnd);
 	}
 
 	Track::Shared Bumper::connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa)
@@ -214,7 +214,7 @@ namespace winston
 	}
 
 	Rail::Rail(const std::string name, Length tracklength)
-		: Track(name, tracklength), Shared_Ptr<Rail>(), a(), b()
+		: Track(name, tracklength), Shared_Ptr<Rail>()/*, std::enable_shared_from_this<Rail>()*/, a(), b()
 	{
 
 	}
@@ -274,8 +274,8 @@ namespace winston
 	}
 	void Rail::eachConnection(ConnectionCallback callback)
 	{
-		callback(this->shared_from_this(), Connection::A);
-		callback(this->shared_from_this(), Connection::B);
+		callback(*this, Connection::A);
+		callback(*this, Connection::B);
 	}
 
 	Track::Shared Rail::connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa)
@@ -357,13 +357,13 @@ namespace winston
 	}
 
 	Turnout::Turnout(const std::string name, const Callback callback, const bool leftTurnout)
-		: Track(name, 0), Shared_Ptr<Turnout>(), callback(callback), trackLengthCalculator(nullptr), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c(), lockingRoutes()
+		: Track(name, 0), Shared_Ptr<Turnout>()/*, std::enable_shared_from_this<Turnout>()*/, callback(callback), trackLengthCalculator(nullptr), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c(), lockingRoutes()
 	{
 
 	}
 
 	Turnout::Turnout(const std::string name, const Callback callback, const TrackLengthCalculator trackLengthCalculator, const bool leftTurnout)
-		: Track(name, 0), Shared_Ptr<Turnout>(), callback(callback), trackLengthCalculator(trackLengthCalculator), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c(), lockingRoutes()
+		: Track(name, 0), Shared_Ptr<Turnout>()/*, std::enable_shared_from_this<Turnout>()*/, callback(callback), trackLengthCalculator(trackLengthCalculator), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c(), lockingRoutes()
 	{
 
 	}
@@ -469,9 +469,9 @@ namespace winston
 
 	void Turnout::eachConnection(ConnectionCallback callback)
 	{
-		callback(this->shared_from_this(), Connection::A);
-		callback(this->shared_from_this(), Connection::B);
-		callback(this->shared_from_this(), Connection::C);
+		callback(*this, Connection::A);
+		callback(*this, Connection::B);
+		callback(*this, Connection::C);
 	}
 
 	Track::Shared Turnout::connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa)
@@ -532,7 +532,7 @@ namespace winston
 			return State::Finished;
 
 		this->dir = Direction::Changing;
-		return this->callback(this->shared_from_this(), this->dir);
+		return this->callback(*this, this->dir);
 	}
 
 	const State Turnout::startToggle()
@@ -545,7 +545,7 @@ namespace winston
 		if (this->dir == direction)
 			return State::Finished;
 
-		State state = this->callback(this->shared_from_this(), direction);
+		State state = this->callback(*this, direction);
 		this->dir = direction;
 
 		return state;
@@ -554,14 +554,14 @@ namespace winston
 	void Turnout::lock(const int route)
 	{
 		this->lockingRoutes.insert(route);
-		this->callback(this->shared_from_this(), this->dir);
+		this->callback(*this, this->dir);
 	}
 
 	void Turnout::unlock(const int route)
 	{
 		this->lockingRoutes.erase(route);
 		if (!this->locked())
-			this->callback(this->shared_from_this(), this->dir);
+			this->callback(*this, this->dir);
 	}
 
 	bool Turnout::locked() const
@@ -611,13 +611,13 @@ namespace winston
 	}
 
 	DoubleSlipTurnout::DoubleSlipTurnout(const std::string name, const Callback callback)
-		: Track(name, 0), Shared_Ptr<DoubleSlipTurnout>(), callback(callback), trackLengthCalculator(nullptr), dir(Direction::A_B), accessoryStates{0xF0, 0x0D}, a(), b(), c(), d(), lockingRoutes()
+		: Track(name, 0), Shared_Ptr<DoubleSlipTurnout>()/*, std::enable_shared_from_this<DoubleSlipTurnout>()*/, callback(callback), trackLengthCalculator(nullptr), dir(Direction::A_B), accessoryStates{0xF0, 0x0D}, a(), b(), c(), d(), lockingRoutes()
 	{
 
 	}
 
 	DoubleSlipTurnout::DoubleSlipTurnout(const std::string name, const Callback callback, const TrackLengthCalculator trackLengthCalculator)
-		: Track(name, 0), Shared_Ptr<DoubleSlipTurnout>(), callback(callback), trackLengthCalculator(trackLengthCalculator), dir(Direction::A_B), accessoryStates{ 0xF0, 0x0D }, a(), b(), c(), d(), lockingRoutes()
+		: Track(name, 0), Shared_Ptr<DoubleSlipTurnout>()/*, std::enable_shared_from_this<DoubleSlipTurnout>()*/, callback(callback), trackLengthCalculator(trackLengthCalculator), dir(Direction::A_B), accessoryStates{0xF0, 0x0D}, a(), b(), c(), d(), lockingRoutes()
 	{
 
 	}
@@ -765,10 +765,10 @@ namespace winston
 
 	void DoubleSlipTurnout::eachConnection(ConnectionCallback callback)
 	{
-		callback(this->shared_from_this(), Connection::A);
-		callback(this->shared_from_this(), Connection::B);
-		callback(this->shared_from_this(), Connection::C);
-		callback(this->shared_from_this(), Connection::D);
+		callback(*this, Connection::A);
+		callback(*this, Connection::B);
+		callback(*this, Connection::C);
+		callback(*this, Connection::D);
 	}
 
 	Track::Shared DoubleSlipTurnout::connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa)
@@ -839,7 +839,7 @@ namespace winston
 			return State::Finished;
 
 		this->dir = Direction::Changing;
-		return this->callback(this->shared_from_this(), this->dir);
+		return this->callback(*this, this->dir);
 	}
 
 	const State DoubleSlipTurnout::startToggle()
@@ -852,7 +852,7 @@ namespace winston
 		if (this->dir == direction)
 			return State::Finished;
 
-		State state = this->callback(this->shared_from_this(), direction);
+		State state = this->callback(*this, direction);
 		this->dir = direction;
 
 		return state;
@@ -861,14 +861,14 @@ namespace winston
 	void DoubleSlipTurnout::lock(const int route)
 	{
 		this->lockingRoutes.insert(route);
-		this->callback(this->shared_from_this(), this->dir);
+		this->callback(*this, this->dir);
 	}
 
 	void DoubleSlipTurnout::unlock(const int route)
 	{
 		this->lockingRoutes.erase(route);
 		if(!this->locked())
-			this->callback(this->shared_from_this(), this->dir);
+			this->callback(*this, this->dir);
 	}
 
 	bool DoubleSlipTurnout::locked() const
@@ -884,7 +884,7 @@ namespace winston
 		{
 			this->dir = this->fromAccessoryState();
 			if (doCallback)
-				this->callback(this->shared_from_this(), this->dir);
+				this->callback(*this, this->dir);
 		}
 	}
 

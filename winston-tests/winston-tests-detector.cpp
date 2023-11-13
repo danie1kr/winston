@@ -15,7 +15,7 @@ namespace winstontests
         {
             winston::Railway::Callbacks callbacks;
 
-            callbacks.turnoutUpdateCallback = [=](winston::Turnout::Shared turnout, const winston::Turnout::Direction direction) -> const winston::State
+            callbacks.turnoutUpdateCallback = [=](winston::Turnout& turnout, const winston::Turnout::Direction direction) -> const winston::State
             {
                 return winston::State::Finished;
             };
@@ -27,7 +27,7 @@ namespace winstontests
         {
             winston::Railway::Callbacks callbacks;
 
-            callbacks.turnoutUpdateCallback = signalTower->injectTurnoutSignalHandling([=](winston::Turnout::Shared turnout, const winston::Turnout::Direction direction) -> const winston::State
+            callbacks.turnoutUpdateCallback = signalTower->injectTurnoutSignalHandling([=](winston::Turnout& turnout, const winston::Turnout::Direction direction) -> const winston::State
                 {
                     return winston::State::Finished;
                 });

@@ -200,18 +200,18 @@ namespace winston
 			this->webServer.broadcast(json);
 		}
 
-		void locoSend(winston::Locomotive::Shared loco)
+		void locoSend(winston::Locomotive& loco)
 		{
-			DynamicJsonDocument obj(1024+256*loco->functions().size());
+			DynamicJsonDocument obj(1024+256*loco.functions().size());
 			obj["op"] = "loco";
 			auto data = obj.createNestedObject("data");
-			data["address"] = loco->address();
-			data["name"] = loco->name();
-			data["light"] = loco->light();
-			data["forward"] = loco->forward();
-			data["speed"] = loco->speed();
+			data["address"] = loco.address();
+			data["name"] = loco.name();
+			data["light"] = loco.light();
+			data["forward"] = loco.forward();
+			data["speed"] = loco.speed();
             auto functions = data.createNestedArray("functions");
-            for (auto const & function : loco->functions())
+            for (auto const & function : loco.functions())
             {
                 auto func = functions.createNestedObject();
                 func["id"] = function.id;
@@ -398,7 +398,7 @@ namespace winston
                         winston::Track::Shared a, b, c;
                         turnout->connections(a, b, c);
 
-                        auto address = this->addressTranslator->address(turnout)+1;
+                        auto address = this->addressTranslator->address(*turnout)+1;
 
                         auto track = tracks.createNestedObject();
                         track["a"] = a->name();
@@ -420,7 +420,7 @@ namespace winston
                         winston::DoubleSlipTurnout::Shared turnout = std::static_pointer_cast<winston::DoubleSlipTurnout>(track);
                         winston::Track::Shared a, b, c, d;
                         turnout->connections(a, b, c, d);
-                        auto address = this->addressTranslator->address(turnout)+1;
+                        auto address = this->addressTranslator->address(*turnout)+1;
 
                         auto track = tracks.createNestedObject();
                         track["a"] = a->name();
@@ -595,7 +595,7 @@ namespace winston
             else if (std::string("\"getLocoShed\"").compare(op) == 0)
             {
                 for (auto& loco : this->locomotiveShed)
-                    this->locoSend(loco);
+                    this->locoSend(*loco);
             }
             else if (std::string("\"doControlLoco\"").compare(op) == 0)
             {

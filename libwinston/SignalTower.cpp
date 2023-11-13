@@ -17,7 +17,7 @@ namespace winston
 
 	Railway::Callbacks::TurnoutUpdateCallback SignalTower::injectTurnoutSignalHandling(Railway::Callbacks::TurnoutUpdateCallback callback)
 	{
-		return [this, callback](Turnout::Shared turnout, Turnout::Direction direction) -> State {
+		return [this, callback](Turnout& turnout, Turnout::Direction direction) -> State {
 			State state = callback(turnout, direction);
 			if (state == State::Finished)
 				this->setSignalsFor(turnout);
@@ -28,21 +28,21 @@ namespace winston
 	void SignalTower::initSignalsForTurnouts(std::set<Turnout::Shared> turnouts, std::set<DoubleSlipTurnout::Shared> doubleSlipTurnouts)
 	{
 		for (auto& turnout : turnouts)
-			this->setSignalsFor(turnout);
+			this->setSignalsFor(*turnout);
 		for (auto& doubleSlipTurnout : doubleSlipTurnouts)
 		{
-			this->setSignalsFor(doubleSlipTurnout);
+			this->setSignalsFor(*doubleSlipTurnout);
 		}
 	}
 
-	void SignalTower::setSignalOn(Track::Shared track, const Track::Connection signalGuardedConnection, const Signal::Aspect aspect, const Signal::Aspect preAspect)
+	void SignalTower::setSignalOn(Track& track, const Track::Connection signalGuardedConnection, const Signal::Aspect aspect, const Signal::Aspect preAspect)
 	{
 		const auto preSignalAspect = aspect & Signal::Aspect::Go ? Signal::Aspect::ExpectGo : Signal::Aspect::ExpectHalt;
 
-		auto current = track;
+		auto current = track.shared_from_this();
 		auto connection = signalGuardedConnection;
 		// current and from are now the position of mainSignal
-		if (Signal::Shared mainSignal = track->signalGuarding(connection))
+		if (Signal::Shared mainSignal = track.signalGuarding(connection))
 		{
 			if (preAspect == Signal::Aspect::Off)
 				mainSignal->aspect(preAspect);
@@ -57,9 +57,9 @@ namespace winston
 		}
 	}
 
-	void SignalTower::setSignalsFor(Track::Shared turnout, const Track::Connection connectionStartFrom)
+	void SignalTower::setSignalsFor(Track& turnout, const Track::Connection connectionStartFrom)
 	{
-		Track::Shared signalCurrent = turnout;
+		Track::Shared signalCurrent = turnout.shared_from_this();
 		auto signalConnection = connectionStartFrom;
 		auto signalToSet = this->nextSignal(signalCurrent, true, signalConnection, true, true);
 
@@ -84,13 +84,13 @@ namespace winston
 		default:
 		case Track::TraversalResult::OpenTurnout: aspect = Signal::Aspect::Halt; break;
 		}
-		this->setSignalOn(signalCurrent, signalConnection, aspect, preAspect);
+		this->setSignalOn(*signalCurrent, signalConnection, aspect, preAspect);
 	}
 
-	void SignalTower::setSignalsFor(Track::Shared track)
+	void SignalTower::setSignalsFor(Track& track)
 	{
-		track->eachConnection([this](Track::Shared track, const Track::Connection connection) {
-			this->order(Command::make([this, track, connection](const TimePoint& created) -> const winston::State {
+		track.eachConnection([this](Track& track, const Track::Connection connection) {
+			this->order(Command::make([this, &track, connection](const TimePoint& created) -> const winston::State {
 				this->setSignalsFor(track, connection);
 		return State::Finished;
 				}, __PRETTY_FUNCTION__));

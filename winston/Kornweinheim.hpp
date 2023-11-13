@@ -75,9 +75,9 @@ winston::DigitalCentralStation::Callbacks Kornweinheim::z21Callbacks()
     // default Callbacks already apply
     winston::DigitalCentralStation::Callbacks callbacks;
 
-    callbacks.locomotiveUpdateCallback = [=](winston::Locomotive::Shared loco, bool busy, bool  forward, unsigned char  speed, uint32_t functions)
+    callbacks.locomotiveUpdateCallback = [=](winston::Locomotive& loco, bool busy, bool  forward, unsigned char  speed, uint32_t functions)
     {
-        loco->update(busy, forward, speed, functions);
+        loco.update(busy, forward, speed, functions);
 
 #ifdef WINSTON_WITH_WEBSOCKET
         this->webUI.locoSend(loco);
@@ -138,14 +138,14 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
 {
     winston::Railway::Callbacks callbacks;
 
-    callbacks.turnoutUpdateCallback = [=](winston::Turnout::Shared turnout, const winston::Turnout::Direction direction) -> const winston::State
+    callbacks.turnoutUpdateCallback = [=](winston::Turnout&  turnout, const winston::Turnout::Direction direction) -> const winston::State
     {
         // tell the signal box to update the signals
         this->signalTower->setSignalsFor(turnout);
 
 #ifdef WINSTON_WITH_WEBSOCKET
         // tell the ui what happens
-        this->webUI.turnoutSendState(turnout->name(), direction, turnout->locked());
+        this->webUI.turnoutSendState(turnout.name(), direction, turnout.locked());
 #endif
         for(auto route : this->routesInProgress)
         {
@@ -159,19 +159,19 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
             }
         }
 
-        winston::logger.info("Turnout ", turnout->name(), " set to direction ", winston::Turnout::DirectionToString(direction));
+        winston::logger.info("Turnout ", turnout.name(), " set to direction ", winston::Turnout::DirectionToString(direction));
 
         return winston::State::Finished;
     };
 
-    callbacks.doubleSlipUpdateCallback = [=](winston::DoubleSlipTurnout::Shared turnout, const winston::DoubleSlipTurnout::Direction direction) -> const winston::State
+    callbacks.doubleSlipUpdateCallback = [=](winston::DoubleSlipTurnout&  turnout, const winston::DoubleSlipTurnout::Direction direction) -> const winston::State
     {
         // tell the signal box to update the signals
         this->signalTower->setSignalsFor(turnout);
 
 #ifdef WINSTON_WITH_WEBSOCKET
         // tell the ui what happens
-        this->webUI.doubleSlipSendState(turnout->name(), direction, turnout->locked());
+        this->webUI.doubleSlipSendState(turnout.name(), direction, turnout.locked());
 #endif
         for (auto route : this->routesInProgress)
         {
@@ -185,7 +185,7 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
             }
         }
 
-        winston::logger.info("Turnout ", turnout->name(), " set to direction ", winston::DoubleSlipTurnout::DirectionToString(direction));
+        winston::logger.info("Turnout ", turnout.name(), " set to direction ", winston::DoubleSlipTurnout::DirectionToString(direction));
 
         return winston::State::Finished;
     };
@@ -316,21 +316,21 @@ void Kornweinheim::systemSetup() {
 
 void Kornweinheim::setupSignals()
 {
-    auto signalUpdateCallback = [=](winston::Track::Shared track, winston::Track::Connection connection, const winston::Signal::Aspects aspects) -> const winston::State
+    auto signalUpdateCallback = [=](winston::Track& track, winston::Track::Connection connection, const winston::Signal::Aspects aspects) -> const winston::State
     {
 #ifdef WINSTON_WITH_WEBSOCKET
         // send to web socket server
-        this->webUI.signalSendState(track->name(), connection, aspects);
+        this->webUI.signalSendState(track.name(), connection, aspects);
 #endif
 
         // update physical light
-        this->signalController->update(*track->signalGuarding(connection));
-        winston::logger.info("Signal at ", track->name(), "|", winston::Track::ConnectionToString(connection), " set to ", winston::Signal::buildAspects(aspects));
+        this->signalController->update(*track.signalGuarding(connection));
+        winston::logger.info("Signal at ", track.name(), "|", winston::Track::ConnectionToString(connection), " set to ", winston::Signal::buildAspects(aspects));
 
         return winston::State::Finished;
     };
 
-    auto signalUpdateAlwaysHalt = [=](winston::Track::Shared track, winston::Track::Connection connection, const winston::Signal::Aspects aspects) -> const winston::State
+    auto signalUpdateAlwaysHalt = [=](winston::Track& track, winston::Track::Connection connection, const winston::Signal::Aspects aspects) -> const winston::State
     {
         return winston::State::Finished;
     };
@@ -478,10 +478,10 @@ void Kornweinheim::systemSetupComplete()
 #ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
     this->stationDebugInjector->injectConnected();
 
-    this->railway->turnouts([=](const Tracks track, winston::Turnout::Shared turnout) {
+    this->railway->turnouts([=](const Tracks track, winston::Turnout& turnout) {
         this->stationDebugInjector->injectTurnoutUpdate(turnout, std::rand() % 2 ? winston::Turnout::Direction::A_B : winston::Turnout::Direction::A_C);
         });
-    this->railway->doubleSlipTurnouts([=](const Tracks track, winston::DoubleSlipTurnout::Shared turnout) {
+    this->railway->doubleSlipTurnouts([=](const Tracks track, winston::DoubleSlipTurnout& turnout) {
         auto v = std::rand() % 4;
         auto dir = winston::DoubleSlipTurnout::Direction::A_B;
         if (v == 1) dir = winston::DoubleSlipTurnout::Direction::A_C;
@@ -537,6 +537,7 @@ void Kornweinheim::populateLocomotiveShed()
     this->addLocomotive(callbacks, 6, standardFunctions, pos, winston::Locomotive::defaultThrottleSpeedMap, "E 11", (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods);
     this->addLocomotive(callbacks, 8, standardFunctions, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 218", (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods);
     this->addLocomotive(callbacks, 7, functionsGravita, pos, winston::Locomotive::defaultThrottleSpeedMap, "Gravita", (unsigned char)winston::Locomotive::Type::Shunting | (unsigned char)winston::Locomotive::Type::Goods);
+    this->addLocomotive(callbacks, 9, functionsGravita, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 335", (unsigned char)winston::Locomotive::Type::Shunting | (unsigned char)winston::Locomotive::Type::Goods);
 }
 
 void Kornweinheim::inventStorylines()

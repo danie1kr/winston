@@ -60,15 +60,13 @@ const winston::Address TimeSaverRailway::AddressTranslator::address(winston::Rou
 winston::Track::Shared TimeSaverRailway::define(const Tracks track)
 {
     using namespace winston::library::track;
-    auto turnoutCallback = [this, track](winston::Track::Shared turnout, const winston::Turnout::Direction direction) -> winston::State
+    auto turnoutCallback = [this, track](winston::Track& turnout, const winston::Turnout::Direction direction) -> winston::State
     {
-        winston::Turnout::Shared s = std::static_pointer_cast<winston::Turnout, winston::Track>(turnout);
-        return this->callbacks.turnoutUpdateCallback(s, direction);
+        return this->callbacks.turnoutUpdateCallback(static_cast<winston::Turnout&>(turnout), direction);
     };
-    auto doubleSlipTurnoutCallback = [this, track](winston::Track::Shared turnout, const winston::DoubleSlipTurnout::Direction direction) -> winston::State
+    auto doubleSlipTurnoutCallback = [this, track](winston::Track& turnout, const winston::DoubleSlipTurnout::Direction direction) -> winston::State
     {
-        winston::DoubleSlipTurnout::Shared s = std::static_pointer_cast<winston::DoubleSlipTurnout, winston::Track>(turnout);
-        return this->callbacks.doubleSlipUpdateCallback(s, direction);
+        return this->callbacks.doubleSlipUpdateCallback(static_cast<winston::DoubleSlipTurnout&>(turnout), direction);
     };
     switch (track)
     {

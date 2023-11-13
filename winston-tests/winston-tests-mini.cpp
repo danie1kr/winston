@@ -15,7 +15,7 @@ namespace winstontests
         {
             winston::Railway::Callbacks callbacks;
 
-            callbacks.turnoutUpdateCallback = [=](winston::Turnout::Shared turnout, const winston::Turnout::Direction direction) -> const winston::State
+            callbacks.turnoutUpdateCallback = [=](winston::Turnout& turnout, const winston::Turnout::Direction direction) -> const winston::State
             {
                 return winston::State::Finished;
             };
@@ -27,7 +27,7 @@ namespace winstontests
         {
             winston::Railway::Callbacks callbacks;
 
-            callbacks.turnoutUpdateCallback = signalTower->injectTurnoutSignalHandling([=](winston::Turnout::Shared turnout, const winston::Turnout::Direction direction) -> const winston::State
+            callbacks.turnoutUpdateCallback = signalTower->injectTurnoutSignalHandling([=](winston::Turnout& turnout, const winston::Turnout::Direction direction) -> const winston::State
             {
                 return winston::State::Finished;
             });
@@ -160,7 +160,7 @@ namespace winstontests
             Assert::IsTrue(sBA.operator bool() == true);
             Assert::IsTrue(sCA.operator bool() == true);
 
-            signalTower->setSignalsFor(t1);
+            signalTower->setSignalsFor(*t1);
             for (int i = 0; i < 10; ++i)
                 signalTower->work();
             Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Go));

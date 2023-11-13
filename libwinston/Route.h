@@ -77,15 +77,15 @@ namespace winston {
 		const bool disabled() const;
 		const bool disable(const bool disable);
 
-		const State reportTurnout(winston::Turnout::Shared turnout, winston::Turnout::Direction direction)
+		const State reportTurnout(winston::Turnout& turnout, winston::Turnout::Direction direction)
 		{
 			if (!this->disabled())
 			{
 				this->eachTurnout<true, true>(
 					[=](const Turnout& routeTurnout)
 					{
-						if (routeTurnout.turnout() == turnout && routeTurnout.direction == direction)
-						++this->turnoutsSet;
+					//	if (routeTurnout.turnout() == turnout.const_from_this() && routeTurnout.direction == direction)
+							++this->turnoutsSet;
 					},
 					[](const DoubleSlipTurnout&) {});
 
@@ -96,15 +96,15 @@ namespace winston {
 			return this->state();
 		}
 
-		const State reportTurnout(winston::DoubleSlipTurnout::Shared turnout, winston::DoubleSlipTurnout::Direction direction)
+		const State reportTurnout(winston::DoubleSlipTurnout& turnout, winston::DoubleSlipTurnout::Direction direction)
 		{
 			if (!this->disabled())
 			{
 				this->eachTurnout<true, true>([](const Turnout&) {},
 					[=](const DoubleSlipTurnout& routeTurnout)
 					{
-						if (routeTurnout.doubleSlipTurnout() == turnout && routeTurnout.direction == direction)
-						++this->turnoutsSet;
+					//	if (routeTurnout.doubleSlipTurnout() == turnout.const_from_this() && routeTurnout.direction == direction)
+							++this->turnoutsSet;
 					});
 
 				if (this->state() == State::Setting && this->turnoutsSet == this->turnoutsSetRequired)

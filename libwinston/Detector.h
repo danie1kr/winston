@@ -16,13 +16,13 @@ namespace winston
 	};
 
 	template<typename T>
-	class DetectorAddressable : public Detector, public Shared_Ptr<DetectorAddressable<T>>, public std::enable_shared_from_this<DetectorAddressable<T>>
+	class DetectorAddressable : public Detector, public Shared_Ptr<DetectorAddressable<T>>
 	{
 	public:
 		using Callback = std::function<Result(Detector::Shared detector, const T address)>;
 
 		DetectorAddressable(Callback callback, Track::Shared track, const Track::Connection connection, const Distance distance)
-			: Detector(track, connection, distance), std::enable_shared_from_this<DetectorAddressable>(), callback(callback)
+			: Detector(track, connection, distance), callback(callback)
 		{
 
 		}

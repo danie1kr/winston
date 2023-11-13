@@ -51,7 +51,7 @@ namespace winston
 			}
 			auto s = Signal<_Signal>::make(devices[currentDev],
 				[track, connection, signalUpdateCallback](const winston::Signal::Aspects aspect)->const winston::State {
-					return signalUpdateCallback(track, connection, aspect);
+					return signalUpdateCallback(*track, connection, aspect);
 				}
 			, distance, currentPort);
 			track->attachSignal(s, connection);

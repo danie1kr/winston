@@ -29,21 +29,21 @@ namespace winston
 	public:
 		struct Callbacks
 		{
-			using TurnoutUpdateCallback = std::function<const State(Turnout::Shared turnout, const Turnout::Direction direction)>;
-			TurnoutUpdateCallback turnoutUpdateCallback = [=](winston::Turnout::Shared turnout, const winston::Turnout::Direction direction) -> const winston::State
+			using TurnoutUpdateCallback = std::function<const State(Turnout&  turnout, const Turnout::Direction direction)>;
+			TurnoutUpdateCallback turnoutUpdateCallback = [=](winston::Turnout&  turnout, const winston::Turnout::Direction direction) -> const winston::State
 			{
-				turnout->finalizeChangeTo(direction);
+				turnout.finalizeChangeTo(direction);
 				return winston::State::Finished;
 			};
 			
-			using DoubleSlipUpdateCallback = std::function<const State(DoubleSlipTurnout::Shared turnout, const DoubleSlipTurnout::Direction direction)>;
-			DoubleSlipUpdateCallback doubleSlipUpdateCallback = [=](winston::DoubleSlipTurnout::Shared turnout, const winston::DoubleSlipTurnout::Direction direction) -> const winston::State
+			using DoubleSlipUpdateCallback = std::function<const State(DoubleSlipTurnout&  turnout, const DoubleSlipTurnout::Direction direction)>;
+			DoubleSlipUpdateCallback doubleSlipUpdateCallback = [=](winston::DoubleSlipTurnout&  turnout, const winston::DoubleSlipTurnout::Direction direction) -> const winston::State
 			{
-				turnout->finalizeChangeTo(direction);
+				turnout.finalizeChangeTo(direction);
 				return winston::State::Finished;
 			};
 
-			using SignalUpdateCallback = std::function<const State(Track::Shared track, Track::Connection connection, const Signal::Aspects aspect)>;
+			using SignalUpdateCallback = std::function<const State(Track&  track, Track::Connection connection, const Signal::Aspects aspect)>;
 
 			DCCDetector::Callback dccDetectorCallback;
 		};
@@ -136,18 +136,18 @@ namespace winston
 			return map;
 		}
 
-		void turnouts(std::function<void(const Tracks track, Turnout::Shared turnout)> callback)
+		void turnouts(std::function<void(const Tracks track, Turnout& turnout)> callback)
 		{
 			for (size_t i = 0; i < tracksCount(); ++i)
 				if (this->tracks[i]->type() == Track::Type::Turnout)
-					callback(this->trackEnum(i), std::static_pointer_cast<Turnout>(this->tracks[i]));
+					callback(this->trackEnum(i), *(std::static_pointer_cast<Turnout>(this->tracks[i])));
 		}
 
-		void doubleSlipTurnouts(std::function<void(const Tracks track, DoubleSlipTurnout::Shared turnout)> callback)
+		void doubleSlipTurnouts(std::function<void(const Tracks track, DoubleSlipTurnout& turnout)> callback)
 		{
 			for (size_t i = 0; i < tracksCount(); ++i)
 				if (this->tracks[i]->type() == Track::Type::DoubleSlipTurnout)
-					callback(this->trackEnum(i), std::static_pointer_cast<DoubleSlipTurnout>(this->tracks[i]));
+					callback(this->trackEnum(i), *(std::static_pointer_cast<DoubleSlipTurnout>(this->tracks[i])));
 		}
 
 		inline constexpr Tracks trackEnum(size_t index) const

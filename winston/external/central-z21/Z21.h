@@ -30,11 +30,11 @@ public:
     const winston::Result connect();
     const winston::Result tick();
 
-    void requestTurnoutInfo(winston::Turnout::Shared turnout);
-    void requestDoubleSlipTurnoutInfo(winston::DoubleSlipTurnout::Shared turnout);
-    void requestLocoInfo(const winston::Locomotive::Shared loco);
-    void triggerTurnoutChangeTo(winston::Turnout::Shared turnout, winston::Turnout::Direction direction);
-    void triggerDoubleSlipTurnoutChangeTo(winston::DoubleSlipTurnout::Shared turnout, winston::DoubleSlipTurnout::Direction direction);
+    void requestTurnoutInfo(winston::Turnout& turnout);
+    void requestDoubleSlipTurnoutInfo(winston::DoubleSlipTurnout& turnout);
+    void requestLocoInfo(const winston::Locomotive& loco);
+    void triggerTurnoutChangeTo(winston::Turnout& turnout, winston::Turnout::Direction direction);
+    void triggerDoubleSlipTurnoutChangeTo(winston::DoubleSlipTurnout& turnout, winston::DoubleSlipTurnout::Direction direction);
     void triggerLocoDrive(const winston::Address address, const unsigned char speed, const bool forward);
     void triggerLocoFunction(const winston::Address address, const uint32_t functions);
 

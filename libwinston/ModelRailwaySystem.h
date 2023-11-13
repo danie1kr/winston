@@ -105,13 +105,13 @@ namespace winston
 				{
 					auto turnout = std::static_pointer_cast<winston::Turnout>(track);
 					auto requestDir = winston::Turnout::otherDirection(turnout->direction());
-					this->orderTurnoutToggle(turnout, requestDir);
+					this->orderTurnoutToggle(*turnout, requestDir);
 				}
 				else if (track->type() == winston::Track::Type::DoubleSlipTurnout)
 				{
 					auto turnout = std::static_pointer_cast<winston::DoubleSlipTurnout>(track);
 					auto requestDir = winston::DoubleSlipTurnout::nextDirection(turnout->direction());
-					this->orderDoubleSlipTurnoutToggle(turnout, requestDir);
+					this->orderDoubleSlipTurnoutToggle(*turnout, requestDir);
 				}
 				return winston::Result::OK;
 				},
@@ -139,21 +139,21 @@ namespace winston
 				return *it;
 		}
 
-		const Address addressOfLoco(const Locomotive::Shared loco) const
+		const Address addressOfLoco(const Locomotive& loco) const
 		{
-			return loco->address();
+			return loco.address();
 		}
 
-		inline const State turnoutChangeTo(winston::Turnout::Shared turnout, winston::Turnout::Direction direction)
+		inline const State turnoutChangeTo(winston::Turnout& turnout, winston::Turnout::Direction direction)
 		{
 			this->digitalCentralStation->triggerTurnoutChangeTo(turnout, direction);
-			return turnout->startToggle();
+			return turnout.startToggle();
 		}
 
-		inline const State doubleSlipChangeTo(winston::DoubleSlipTurnout::Shared turnout, winston::DoubleSlipTurnout::Direction direction)
+		inline const State doubleSlipChangeTo(winston::DoubleSlipTurnout& turnout, winston::DoubleSlipTurnout::Direction direction)
 		{
 			this->digitalCentralStation->triggerDoubleSlipTurnoutChangeTo(turnout, direction);
-			return turnout->startToggle();
+			return turnout.startToggle();
 		}
 
 		inline const State locoFunction(const winston::Address address, const uint32_t functions)
@@ -170,37 +170,37 @@ namespace winston
 
 		void digitalCentralStationConnected()
 		{
-			this->railway->turnouts([=](const Tracks track, winston::Turnout::Shared turnout) {
+			this->railway->turnouts([=](const Tracks track, winston::Turnout& turnout) {
 
-				this->signalTower->order(winston::Command::make([this, turnout](const TimePoint& created) -> const winston::State
+				this->signalTower->order(winston::Command::make([this, &turnout](const TimePoint& created) -> const winston::State
 					{
 						this->digitalCentralStation->requestTurnoutInfo(turnout);
-			winston::hal::delay(50);
-			this->signalTower->setSignalsFor(turnout);
-			winston::hal::delay(100);
-			return winston::State::Finished;
+						winston::hal::delay(50);
+						this->signalTower->setSignalsFor(turnout);
+						winston::hal::delay(100);
+						return winston::State::Finished;
 					}, __PRETTY_FUNCTION__));
 				});
 
-			this->railway->doubleSlipTurnouts([=](const Tracks track, winston::DoubleSlipTurnout::Shared turnout) {
+			this->railway->doubleSlipTurnouts([=](const Tracks track, winston::DoubleSlipTurnout& turnout) {
 
-				this->signalTower->order(winston::Command::make([this, turnout](const TimePoint& created) -> const winston::State
+				this->signalTower->order(winston::Command::make([this, &turnout](const TimePoint& created) -> const winston::State
 					{
 						this->digitalCentralStation->requestDoubleSlipTurnoutInfo(turnout);
-			winston::hal::delay(50);
-			this->signalTower->setSignalsFor(turnout);
-			winston::hal::delay(100);
-			return winston::State::Finished;
+						winston::hal::delay(50);
+						this->signalTower->setSignalsFor(turnout);
+						winston::hal::delay(100);
+						return winston::State::Finished;
 					}, __PRETTY_FUNCTION__));
 				});
 
 			for (const auto& loco : this->locomotiveShed) {
 
-				this->signalTower->order(winston::Command::make([this, loco](const TimePoint& created) -> const winston::State
+				this->signalTower->order(winston::Command::make([this, &loco](const TimePoint& created) -> const winston::State
 					{
-						this->digitalCentralStation->requestLocoInfo(loco);
-				winston::hal::delay(150);
-				return winston::State::Finished;
+						this->digitalCentralStation->requestLocoInfo(*loco);
+						winston::hal::delay(150);
+						return winston::State::Finished;
 					}, __PRETTY_FUNCTION__));
 			}
 		}
@@ -223,13 +223,13 @@ namespace winston
 
 				route->eachTurnout<true, true>([this, id = route->id](const winston::Route::Turnout& turnout)
 					{
-						this->orderTurnoutToggle(turnout.turnout(), turnout.direction);
-				turnout.turnout()->lock(id);
+						this->orderTurnoutToggle(*turnout.turnout(), turnout.direction);
+						turnout.turnout()->lock(id);
 					},
 					[this, id = route->id](const winston::Route::DoubleSlipTurnout& turnout)
 					{
-						this->orderDoubleSlipTurnoutToggle(turnout.doubleSlipTurnout(), turnout.direction);
-					turnout.doubleSlipTurnout()->lock(id);
+						this->orderDoubleSlipTurnoutToggle(*turnout.doubleSlipTurnout(), turnout.direction);
+						turnout.doubleSlipTurnout()->lock(id);
 					}
 					);
 			}
@@ -253,14 +253,14 @@ namespace winston
 			return winston::Result::OK;
 		}
 		
-		void orderTurnoutToggle(winston::Turnout::Shared turnout, winston::Turnout::Direction direction)
+		void orderTurnoutToggle(winston::Turnout& turnout, winston::Turnout::Direction direction)
 		{
-			this->signalTower->order(winston::Command::make([this, turnout, direction](const winston::TimePoint& created) -> const winston::State
+			this->signalTower->order(winston::Command::make([this, &turnout, direction](const winston::TimePoint& created) -> const winston::State
 				{
 					WINSTON_TURNOUT_TOGGLE_GUARD;
 
 #ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
-			this->signalTower->order(winston::Command::make([this, turnout, direction](const winston::TimePoint& created) -> const winston::State
+			this->signalTower->order(winston::Command::make([this, &turnout, direction](const winston::TimePoint& created) -> const winston::State
 				{
 					if (winston::hal::now() - created > WINSTON_RAILWAY_DEBUG_INJECTOR_DELAY)
 					{
@@ -276,14 +276,14 @@ namespace winston
 				}, __PRETTY_FUNCTION__));
 		};
 
-		void orderDoubleSlipTurnoutToggle(winston::DoubleSlipTurnout::Shared turnout, winston::DoubleSlipTurnout::Direction direction)
+		void orderDoubleSlipTurnoutToggle(winston::DoubleSlipTurnout& turnout, winston::DoubleSlipTurnout::Direction direction)
 		{
-			this->signalTower->order(winston::Command::make([this, turnout, direction](const winston::TimePoint& created) -> const winston::State
+			this->signalTower->order(winston::Command::make([this, &turnout, direction](const winston::TimePoint& created) -> const winston::State
 				{
 					WINSTON_TURNOUT_TOGGLE_GUARD;
 
 #ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
-			this->signalTower->order(winston::Command::make([this, turnout, direction](const winston::TimePoint& created) -> const winston::State
+			this->signalTower->order(winston::Command::make([this, &turnout, direction](const winston::TimePoint& created) -> const winston::State
 				{
 					if (winston::hal::now() - created > WINSTON_RAILWAY_DEBUG_INJECTOR_DELAY)
 					{
@@ -540,7 +540,7 @@ namespace winston
 			return winston::Result::OK;
 		}
 
-		//using SignalFactory = std::function < winston::Signal::Shared(winston::Track::Shared track, winston::Track::Connection connection)>;
+		/*using SignalFactory = std::function < winston::Signal::Shared(winston::Track::Shared track, winston::Track::Connection connection)>;
 		template<class _Signal>
 		Signal::Shared signalFactory(winston::Track::Shared track, const winston::Track::Connection connection, winston::Distance distance, unsigned int& port, const winston::Railway::Callbacks::SignalUpdateCallback& signalUpdateCallback)
 		{
@@ -555,8 +555,8 @@ namespace winston
 			return [distance, devPort, this](winston::Track::Shared track, winston::Track::Connection connection)->winston::Signal::Shared {
 				return _Signal::make([=](const winston::Signal::Aspects aspect)->const winston::State {
 					return this->callbacks.signalUpdateCallback(track, connection, aspect);
-					}, distance, devPort);9*/
-		}
+					}, distance, devPort);9
+		}*/
 
 		virtual Result detectorUpdate(winston::Detector::Shared detector, Locomotive &loco) = 0;
 

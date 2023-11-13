@@ -15,7 +15,7 @@ namespace winston
 		{
 		public:
 			virtual Track::Shared turnout(const Address address) const = 0;
-			virtual const Address address(winston::Track::Shared track) const = 0;
+			virtual const Address address(winston::Track& track) const = 0;
 
 			virtual Route::Shared route(const Address address) const = 0;
 			virtual const Address address(winston::Route::Shared track) const = 0;
@@ -25,19 +25,19 @@ namespace winston
 		{
 		public:
 			virtual Locomotive::Shared locoFromAddress(const Address address) = 0;
-			virtual const Address addressOfLoco(const Locomotive::Shared loco) const = 0;
+			virtual const Address addressOfLoco(const Locomotive& loco) const = 0;
 		};
 
 		struct Callbacks : public Railway::Callbacks
 		{
-			using LocomotiveUpdateCallback = std::function<void(Locomotive::Shared loco,
+			using LocomotiveUpdateCallback = std::function<void(Locomotive& loco,
 				bool  busy,
 			//	boolean  doubleTracktion,
 			//	boolean  transpond,
 				bool  forward,
 				unsigned char  speed,                                  // In 128 speed range
 				uint32_t functions)>;
-			LocomotiveUpdateCallback locomotiveUpdateCallback = [](Locomotive::Shared loco,
+			LocomotiveUpdateCallback locomotiveUpdateCallback = [](Locomotive& loco,
 				bool  busy,
 				//	boolean  doubleTracktion,
 				//	boolean  transpond,
@@ -79,9 +79,9 @@ namespace winston
 		{
 		public:
 			DebugInjector(DigitalCentralStation::Shared& station);
-			void injectTurnoutUpdate(Turnout::Shared turnout, const Turnout::Direction direction);
-			void injectDoubleSlipTurnoutUpdate(DoubleSlipTurnout::Shared turnout, const DoubleSlipTurnout::Direction direction);
-			void injectLocoUpdate(Locomotive::Shared loco, bool busy, bool forward, unsigned char speed, uint32_t functions);
+			void injectTurnoutUpdate(Turnout& turnout, const Turnout::Direction direction);
+			void injectDoubleSlipTurnoutUpdate(DoubleSlipTurnout& turnout, const DoubleSlipTurnout::Direction direction);
+			void injectLocoUpdate(Locomotive& loco, bool busy, bool forward, unsigned char speed, uint32_t functions);
 			void injectConnected();
 		private:
 			DigitalCentralStation::Shared station;
@@ -93,11 +93,11 @@ namespace winston
 		virtual const winston::Result connect() = 0;
 		virtual const winston::Result tick() = 0;
 
-		virtual void requestTurnoutInfo(Turnout::Shared turnout) = 0;
-		virtual void requestDoubleSlipTurnoutInfo(DoubleSlipTurnout::Shared turnout) = 0;
-		virtual void requestLocoInfo(const Locomotive::Shared loco) = 0;
-		virtual void triggerTurnoutChangeTo(winston::Turnout::Shared turnout, winston::Turnout::Direction direction) = 0;
-		virtual void triggerDoubleSlipTurnoutChangeTo(winston::DoubleSlipTurnout::Shared turnout, winston::DoubleSlipTurnout::Direction direction) = 0;
+		virtual void requestTurnoutInfo(Turnout& turnout) = 0;
+		virtual void requestDoubleSlipTurnoutInfo(DoubleSlipTurnout& turnout) = 0;
+		virtual void requestLocoInfo(const Locomotive& loco) = 0;
+		virtual void triggerTurnoutChangeTo(winston::Turnout& turnout, winston::Turnout::Direction direction) = 0;
+		virtual void triggerDoubleSlipTurnoutChangeTo(winston::DoubleSlipTurnout& turnout, winston::DoubleSlipTurnout::Direction direction) = 0;
 		virtual void triggerLocoDrive(const Address address, const unsigned char speed, const bool forward) = 0;
 		virtual void triggerLocoFunction(const Address address, const uint32_t functions) = 0;
 		virtual void keepAlive();
@@ -105,8 +105,8 @@ namespace winston
 		virtual bool isEmergencyStop() const = 0;
 		virtual const winston::Result requestEmergencyStop(const bool emergencyStop) = 0;
 
-		void turnoutUpdate(Turnout::Shared turnout, const Turnout::Direction direction);
-		void doubleSlipUpdate(DoubleSlipTurnout::Shared turnout, const DoubleSlipTurnout::Direction direction);
+		void turnoutUpdate(Turnout&, const Turnout::Direction direction);
+		void doubleSlipUpdate(DoubleSlipTurnout& turnout, const DoubleSlipTurnout::Direction direction);
 
 		const bool connected() const;
 

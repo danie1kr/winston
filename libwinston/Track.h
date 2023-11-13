@@ -143,7 +143,7 @@ namespace winston
 		virtual void collectAllConnections(std::set<Track::Shared>& tracks) const = 0;
 		virtual const Connection whereConnects(const Track::Shared& other) const = 0;
 		virtual const Connection otherConnection(const Connection connection) const = 0;
-		using ConnectionCallback = std::function<void(Track::Shared track, const Connection connection)>;
+		using ConnectionCallback = std::function<void(Track& track, const Connection connection)>;
 		virtual void eachConnection(ConnectionCallback callback) = 0;
 
 		virtual const Result validate() = 0;
@@ -173,7 +173,7 @@ namespace winston
 	using Trackset = std::set<Track::Shared>;
 	
 	// a====|
-	class Bumper : public Track, public Shared_Ptr<Bumper>, public std::enable_shared_from_this<Bumper>
+	class Bumper : public Track, public Shared_Ptr<Bumper>
 	{
 	public:
 		Bumper(const std::string name = "", Length tracklength = 0);
@@ -199,7 +199,7 @@ namespace winston
 
 		using Shared_Ptr<Bumper>::Shared;
 		using Shared_Ptr<Bumper>::make;
-
+		using Shared_Ptr<Bumper>::enable_shared_from_this_virtual::shared_from_this;
 	private:
 		Track::Shared connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa = true);
 		
@@ -208,7 +208,7 @@ namespace winston
 	};
 
 	// a====b
-	class Rail : public Track, public Shared_Ptr<Rail>, public std::enable_shared_from_this<Rail>
+	class Rail : public Track, public Shared_Ptr<Rail>
 	{
 	public:
 		Rail(const std::string name = "", Length tracklength = 0);
@@ -234,6 +234,7 @@ namespace winston
 
 		using Shared_Ptr<Rail>::Shared;
 		using Shared_Ptr<Rail>::make;
+		using Shared_Ptr<Rail>::enable_shared_from_this_virtual::shared_from_this;
 	private:
 		Track::Shared connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa = true);
 		
@@ -243,7 +244,7 @@ namespace winston
 
 	// a====b
 	//   \==c
-	class Turnout : public Track, public Shared_Ptr<Turnout>, public std::enable_shared_from_this<Turnout>
+	class Turnout : public Track, public Shared_Ptr<Turnout>
 	{
 	public:
 		enum class Direction : unsigned int
@@ -254,7 +255,7 @@ namespace winston
 		};
 		static const std::string DirectionToString(const Direction direction);
 
-		using Callback = const std::function<State(Track::Shared turnout, Direction direction)>;
+		using Callback = const std::function<State(Track& turnout, Direction direction)>;
 
 		using TrackLengthCalculator = const std::function<const Length(const Direction)>;
 
@@ -289,11 +290,12 @@ namespace winston
 		static const Direction otherDirection(const Direction current);
 		const Connection fromDirection() const;
 
-		using Shared_Ptr<Turnout>::Shared;
-		using Shared_Ptr<Turnout>::make;
 		virtual const Length length() const;
 		const Length lengthOnDirection(const Direction dir) const;
 
+		using Shared_Ptr<Turnout>::Shared;
+		using Shared_Ptr<Turnout>::make;
+		using Shared_Ptr<Turnout>::enable_shared_from_this_virtual::shared_from_this;
 	private:
 		Track::Shared connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa = true);
 		
@@ -313,7 +315,7 @@ namespace winston
 	     X
 	    / \
 	   C   B */
-	class DoubleSlipTurnout : public Track, public Shared_Ptr<DoubleSlipTurnout>, public std::enable_shared_from_this<DoubleSlipTurnout>
+	class DoubleSlipTurnout : public Track, public Shared_Ptr<DoubleSlipTurnout>
 	{
 	public:
 		enum class Direction : unsigned int
@@ -327,7 +329,7 @@ namespace winston
 
 		static const std::string DirectionToString(const Direction direction);
 
-		using Callback = const std::function<State(Track::Shared turnout, Direction direction)>;
+		using Callback = const std::function<State(Track& turnout, Direction direction)>;
 
 		using TrackLengthCalculator = const std::function<const Length(const Direction)>;
 
@@ -361,18 +363,18 @@ namespace winston
 		void setAccessoryState(const unsigned char state, const bool first, const bool applyToInternalDirection, const bool doCallback);
 		const bool isKnownAccessoryState() const;
 		const Direction fromAccessoryState() const;
-		/*const Direction fromAccessoryState(const unsigned char state, const bool first);
-		const void toAccessoryStates(unsigned char& a, unsigned char& b) const;*/
+
 		const void toAccessoryStates(unsigned char& a, unsigned char& b, const Direction direction) const;
 		const Direction direction() const;
 		static const Direction nextDirection(const Direction current);
 		const Connection fromDirection() const;
 
-		using Shared_Ptr<DoubleSlipTurnout>::Shared;
-		using Shared_Ptr<DoubleSlipTurnout>::make;
 		virtual const Length length() const;
 		const Length lengthOnDirection(const Direction dir) const;
 
+		using Shared_Ptr<DoubleSlipTurnout>::Shared;
+		using Shared_Ptr<DoubleSlipTurnout>::make;
+		using Shared_Ptr<DoubleSlipTurnout>::enable_shared_from_this_virtual::shared_from_this;
 	private:
 		Track::Shared connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa = true);
 

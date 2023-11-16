@@ -41,7 +41,7 @@ enum class TimeSaverRailwayDetectors : unsigned int
     A, T1_T2, B, C_T3, T4_D, T5_E, F, T6_G
 };
 
-class TimeSaverRailway : public winston::RailwayWithRails<TimeSaverRailwayTracks>, public winston::RailwayAddonRoutes<TimeSaverRailwayRoutes>, public winston::Shared_Ptr<TimeSaverRailway>
+class TimeSaverRailway : public winston::RailwayWithRails<TimeSaverRailwayTracks,TimeSaverRailwayRoutes>, public winston::Shared_Ptr<TimeSaverRailway>
 {
     /*
       ====A====T1===========T2====B====

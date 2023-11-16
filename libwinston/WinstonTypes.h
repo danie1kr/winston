@@ -10,6 +10,7 @@
 #include <array>
 #include <vector>
 #include "external/span.hpp"
+#include "external/better_enum.hpp"
 #ifdef __GNUC__ 
 #pragma GCC pop_options
 #endif
@@ -290,6 +291,8 @@ namespace winston
 	class Log;
 
 	class Railway;
+	BETTER_ENUM(RoutesNone, unsigned int, None);
+	BETTER_ENUM(BlocksSingle, unsigned int, Single);
 
 	class SignalTower;
 

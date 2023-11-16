@@ -137,7 +137,11 @@
     <ClCompile Include="FT232_Device.cpp" />
     <ClInclude Include="Kornweinheim.hpp" />
     <ClCompile Include="railways.cpp" />
-    <ClCompile Include="TimeSaver.cpp" />
+    <ClCompile Include="TimeSaver.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Realworld|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="TLC5947_SignalDevice.cpp" />
     <ClCompile Include="winston-hal-x64.cpp" />
     <ClCompile Include="winston-main.cpp" />

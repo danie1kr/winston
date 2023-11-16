@@ -50,37 +50,14 @@ namespace winston
 
 		Railway(const Callbacks callbacks);
 		virtual ~Railway() = default;
-		/*
-		void block(const Address address, const Block::Type type, const Trackset trackset);
-		Block::Shared block(Address address) const;
-		const Blockmap blocks() const;
-		
-		virtual const bool supportsBlocks() const;
-		virtual const bool supportsRoutes() const;
-*/
+
 		virtual const Result init() = 0;
 
 	protected:
 		const Callbacks callbacks;
-		//Blockmap _blocks;
 	};
-	/*
-	template<typename _DetectorClass>
-	class RailwayWithDetector
-	{
-	public:
-		using Detectors = _DetectorClass;
-		virtual void attachDetectors() { };
-		using DetectorMap = std::map<typename _DetectorClass, Detector::Shared>;
-		const DetectorMap& occupancyDetectors()
-		{
-			return this->detectors;
-		}
 
-		DetectorMap detectors;
-	};*/
-
-	template<typename _TracksClass>
+	template<typename _TracksClass, typename _RoutesEnum = RoutesNone, typename _BlocksEnum = BlocksSingle>
 	class RailwayWithRails : public Railway
 	{
 	public:
@@ -89,13 +66,37 @@ namespace winston
 
 		using Tracks = _TracksClass;
 
-		const Result initRails()
+		const Result init()
+		{
+			auto result = this->initTracks();
+			if (result != winston::Result::OK)
+			{
+				winston::logger.err("Railway::initTracks failed with ", result);
+				return result;
+			}
+			result = this->initRoutes();
+			if (result != winston::Result::OK)
+			{
+				winston::logger.err("Railway::initRoutes failed with ", result);
+				return result;
+			}
+			result = this->initBlocks();
+			if (result != winston::Result::OK)
+			{
+				winston::logger.err("Railway::initBlocks failed with ", result);
+				return result;
+			}
+
+			return winston::Result::OK;
+		}
+
+		const Result initTracks()
 		{
 			for (Tracks track : Tracks::_values())
 				this->tracks[track] = this->define(track);
 			this->connect();
 
-			return this->validate();
+			return this->validateTracks();
 		}
 
 		static constexpr size_t tracksCount() noexcept {
@@ -211,7 +212,7 @@ namespace winston
 			return this->track(s);
 		}
 	private:
-		const Result validate() const
+		const Result validateTracks() const
 		{
 			bool passed = true;
 
@@ -229,15 +230,11 @@ namespace winston
 	protected:
 		std::array<Track::Shared, tracksCount()> tracks;
 
-		virtual const Result validateFinal()
+		virtual const Result validateFinalTracks()
 		{
 			return Result::OK;
 		};
-	};
 
-	template<typename _RoutesEnum>
-	class RailwayAddonRoutes
-	{
 	public:
 		using Routes = _RoutesEnum;
 		static constexpr size_t routesCount() noexcept {
@@ -245,7 +242,10 @@ namespace winston
 		}
 		using RouteArray = std::array<Route::Shared, routesCount()>;
 
-		virtual Route::Shared define(const Routes route) = 0;
+		virtual Route::Shared define(const Routes route)
+		{
+			return nullptr;
+		}
 
 		Route::Shared route(const int i) const
 		{
@@ -260,18 +260,23 @@ namespace winston
 			return this->routes[id];
 		}
 
-		const Result initRoutes()
+		virtual const bool supportRoutes() const
 		{
-			for (Routes route: Routes::_values())
-				this->routes[route] = this->define(route);
-			// TODO: simulate signals
-
-			return this->validate();
+			return false;
 		}
 
-		const bool supportsRoutes() const
+		const Result initRoutes()
 		{
-			return true;
+			if (this->supportRoutes())
+			{
+				for (Routes route : Routes::_values())
+					this->routes[route] = this->define(route);
+				// TODO: simulate signals
+
+				return this->validateRoutes();
+			}
+			else
+				return Result::OK;
 		}
 
 		using EachRouteCallback = std::function<void(Route::Shared&)>;
@@ -316,7 +321,7 @@ namespace winston
 		}
 
 	protected:
-		const Result validateFinal()
+		const Result validateFinalRoutes()
 		{
 			for (auto route : this->routes)
 			{
@@ -337,7 +342,7 @@ namespace winston
 			return Routes::_from_integral_unchecked(i)._to_string();
 		}
 
-		Result validate()
+		Result validateRoutes()
 		{
 			bool passed = true;
 
@@ -488,11 +493,7 @@ namespace winston
 		}
 
 		RouteArray routes;
-	};
 
-	template<typename _BlocksEnum, typename _TracksClass>
-	class RailwayAddonBlocks
-	{
 	public:
 		using Blocks = _BlocksEnum;
 
@@ -523,26 +524,31 @@ namespace winston
 			return this->_blocks;
 		}
 		
-		virtual const bool supportsBlocks() const
+		virtual const bool supportBlocks() const
 		{
-			return true;
+			return false;
 		}
 
-		const Result initBlocks(RailwayWithRails<_TracksClass>& railway)
+		const Result initBlocks()
 		{
-			for (Blocks block : Blocks::_values())
-				this->_blocks[block] = this->define(block);
+			if (this->supportBlocks())
+			{
+				for (Blocks block : Blocks::_values())
+					this->_blocks[block] = this->define(block);
 
-			return this->validateBlocks(railway);
+				return this->validateBlocks();
+			}
+			else
+				return Result::OK;
 		}
 
-		const Result validateBlocks(RailwayWithRails<_TracksClass> &railway)
+		const Result validateBlocks()
 		{
 			std::set<_TracksClass> marked;
 			for (const auto& block : this->_blocks)
 			{
-				if(!block.second->validate([&marked, &railway](const Track& track) -> const bool {
-					_TracksClass trackEnum = railway.trackEnum(track);
+				if(!block.second->validate([&marked, this](const Track& track) -> const bool {
+					_TracksClass trackEnum = this->trackEnum(track);
 					if (marked.find(trackEnum) != marked.end())
 						return false;
 					else
@@ -555,8 +561,11 @@ namespace winston
 			return marked.size() == _TracksClass::_size() ? Result::OK : Result::ValidationFailed;
 		}
 
-		virtual typename Block::Shared define(const Blocks block) = 0;
-
+		virtual typename Block::Shared define(const Blocks block)
+		{
+			return nullptr;
+		}
+		
 	protected:
 		BlockMap _blocks;
 	};

@@ -329,7 +329,7 @@ namespace winston
             else if (std::string("\"getRouteState\"").compare(op) == 0)
             {
                 const int id = data["id"];
-                if (this->railway->supportsRoutes())
+                if (this->railway->supportRoutes())
                 {
                     auto route = this->railway->route(id);
                     this->routeState(*route);
@@ -444,9 +444,9 @@ namespace winston
                     }
                 }
 
-             /*   if (this->railway->supportsBlocks())
+                if (this->railway->supportBlocks())
                 {
-                    for (auto& block : this->railway->blocks())
+                /*    for (auto& block : this->railway->blocks())
                     {
                         auto b = blocks.createNestedObject();
                         b["address"] = block.first;
@@ -455,10 +455,10 @@ namespace winston
                         auto blockTracks = b.createNestedArray("tracks");
                         for (auto& track : bl->tracks())
                             blockTracks.add(track->name());
-                    }
-                }*/
+                    }*/
+                }
 
-                if (this->railway->supportsRoutes())
+                if (this->railway->supportRoutes())
                 {
                     this->railway->eachRoute([=](const Route::Shared& route) {
                         auto r = routes.createNestedObject();

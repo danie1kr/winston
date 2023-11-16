@@ -44,10 +44,6 @@ const std::string MiniRailway::name()
 {
     return std::string("MiniRailway");
 }
-const winston::Result MiniRailway::init()
-{
-    return this->initRails();
-}
 
 SignalTestRailway::SignalTestRailway(const Callbacks callbacks) : winston::RailwayWithRails<SignalTestRailwayTracks>(callbacks) {};
 
@@ -164,11 +160,6 @@ const std::string SignalTestRailway::name()
     return std::string("SignalTestRailway");
 }
 
-const winston::Result SignalTestRailway::init()
-{
-    return this->initRails();
-}
-
 RailwayWithSiding::RailwayWithSiding(const Callbacks callbacks) : winston::RailwayWithRails<RailwayWithSidingsTracks>(callbacks) {};
 RailwayWithSiding::AddressTranslator::AddressTranslator(RailwayWithSiding::Shared railway) : winston::DigitalCentralStation::TurnoutAddressTranslator(), Shared_Ptr<AddressTranslator>(), railway(railway) { };
 
@@ -231,20 +222,10 @@ const std::string RailwayWithSiding::name()
     return std::string("RailwayWithSiding");
 }
 
-const winston::Result RailwayWithSiding::init()
-{
-    return this->initRails();
-}
-
 Y2020Railway::Y2020Railway(const Callbacks callbacks) : winston::RailwayWithRails<Y2020RailwayTracks>(callbacks) {};
 const std::string Y2020Railway::name()
 {
     return std::string("Y2020Railway");
-}
-
-const winston::Result Y2020Railway::init()
-{
-    return this->initRails();
 }
 
 Y2020Railway::AddressTranslator::AddressTranslator(Y2020Railway::Shared railway) : winston::DigitalCentralStation::TurnoutAddressTranslator(), Shared_Ptr<AddressTranslator>(), railway(railway) { };
@@ -380,7 +361,7 @@ void Y2020Railway::connect()
 }
 #endif
 
-Y2021Railway::Y2021Railway(const Callbacks callbacks) : winston::RailwayWithRails<Y2021RailwayTracks>(callbacks){};
+Y2021Railway::Y2021Railway(const Callbacks callbacks) : winston::RailwayWithRails<Y2021RailwayTracks, Y2021RailwayRoutes, Y2021RailwayBlocks>(callbacks){};
 const std::string Y2021Railway::name()
 {
     return std::string("Y2021Railway");
@@ -891,35 +872,21 @@ void Y2021Railway::attachDetectors()
 {
 }
 
-const winston::Result Y2021Railway::init()
+const bool Y2021Railway::supportBlocks() const
 {
-    auto result = this->initRails();
-    if (result != winston::Result::OK)
-    {
-        winston::logger.err("Y2021Railway initRails failed with ", result);
-        return result;
-    }
-    result = this->initRoutes();
-    if (result != winston::Result::OK)
-    {
-        winston::logger.err("Y2021Railway initRoutes failed with ", result);
-        return result;
-    }
-    result = this->initBlocks(*this);
-    if (result != winston::Result::OK)
-    {
-        winston::logger.err("Y2021Railway initBlocks failed with ", result);
-        return result;
-    }
+    return true;
+}
 
-    return winston::Result::OK;
+const bool Y2021Railway::supportRoutes() const
+{
+    return true;
 }
 
 const winston::Result Y2021Railway::validateFinal()
 {
-    auto result = winston::RailwayWithRails<Y2021RailwayTracks>::validateFinal();
+    auto result = this->validateFinalTracks();
     if (result != winston::Result::OK)
         return result;
 
-    return winston::RailwayAddonRoutes<Routes>::validateFinal();
+    return this->validateFinalRoutes();
 }

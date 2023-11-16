@@ -33,7 +33,6 @@ public:
     virtual ~MiniRailway() = default;
 
     static const std::string name();
-    const winston::Result init();
 
     using winston::Shared_Ptr<MiniRailway>::Shared;
     using winston::Shared_Ptr<MiniRailway>::make;
@@ -107,7 +106,6 @@ public:
     virtual ~SignalTestRailway() = default;
 
     static const std::string name();
-    const winston::Result init();
 
     using winston::Shared_Ptr<SignalTestRailway>::Shared;
     using winston::Shared_Ptr<SignalTestRailway>::make;
@@ -145,7 +143,6 @@ public:
     virtual ~RailwayWithSiding() = default;
 
     static const std::string name();
-    const winston::Result init();
 
     using winston::Shared_Ptr<RailwayWithSiding>::Shared;
     using winston::Shared_Ptr<RailwayWithSiding>::make;
@@ -217,7 +214,6 @@ public:
     virtual ~Y2020Railway() = default;
 
     static const std::string name();
-    const winston::Result init();
 
     using winston::Shared_Ptr<Y2020Railway>::Shared;
     using winston::Shared_Ptr<Y2020Railway>::make;
@@ -298,9 +294,7 @@ enum class Y2021RailwayDetectors : unsigned int
 };
 
 class Y2021Railway : 
-    public winston::RailwayWithRails<Y2021RailwayTracks>,
-    public winston::RailwayAddonRoutes<Y2021RailwayRoutes>,
-    public winston::RailwayAddonBlocks<Y2021RailwayBlocks, Y2021RailwayTracks>,
+    public winston::RailwayWithRails<Y2021RailwayTracks, Y2021RailwayRoutes, Y2021RailwayBlocks>,
     public winston::Shared_Ptr<Y2021Railway>
 {
     /*
@@ -338,12 +332,12 @@ public:
     virtual ~Y2021Railway() = default;
 
     static const std::string name();
-    const winston::Result init();
     void attachDetectors();
 
-    //using winston::RailwayAddonRoutes<Y2021RailwayRoutes>::supportsRoutes;
-
     const winston::Result validateFinal();
+
+    const bool supportRoutes() const;
+    const bool supportBlocks() const;
 
     using winston::Shared_Ptr<Y2021Railway>::Shared;
     using winston::Shared_Ptr<Y2021Railway>::make;

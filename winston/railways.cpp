@@ -841,7 +841,7 @@ Y2021Railway::Block::Shared Y2021Railway::define(const Y2021Railway::Blocks bloc
 #define FREE        winston::Block::Type::Free
 #define TRANSIT     winston::Block::Type::Transit
 #define SIDING      winston::Block::Type::Siding
-#define PLATFORM    winston::Block::Type::Plattform
+#define PLATFORM    winston::Block::Type::Platform
 
     switch(block)
     {
@@ -857,10 +857,17 @@ Y2021Railway::Block::Shared Y2021Railway::define(const Y2021Railway::Blocks bloc
         BLOCK(N, TRANSIT, { PBF_To_N, Turnout14 });
         BLOCK(PBF12, TRANSIT, { Turnout1, PBF2a, Turnout4, B_PBF2_PBF1 });
         BLOCK(GBF, TRANSIT, { B_To_GBF, DoubleSlipTurnout15_16, Turnout17, Turnout18 });
-        /*, PBF1a, PBF1, PBF2, PBF3,
-            N, N1, N2, N3,
-            B1, B2, B3, B4, B5, B6,
-            GBF, GBF1, GBF2, GBF3, GBF4)*/
+
+        BLOCK(B1, FREE, { Turnout8, B1 });
+        BLOCK(B2, FREE, { Turnout9, B2, Turnout13});
+        BLOCK(B3, FREE, { B3 });
+        BLOCK(B4, FREE, { B4 });
+        BLOCK(B5, FREE, { Turnout10, Turnout11, B5, Turnout12 });
+        BLOCK(B6, FREE, { B6 });
+
+        BLOCK(PBF1, PLATFORM, { Turnout5, PBF1 });
+        BLOCK(PBF2, PLATFORM, { PBF2, Turnout7, T7_To_T8 });
+        BLOCK(PBF3, PLATFORM, { Turnout2, Turnout3, PBF3, Turnout6, PBF3a });
     default:
         winston::logger.warn("undefined block: ", block._to_string());
         break;

@@ -35,19 +35,11 @@ namespace winston {
 		}
 
 		// size must match
-		bool result = this->_tracks.size() == tracks.size();
-		if (!result)
+		if (this->_tracks.size() != tracks.size())
 			return false;
 
 		// content of tracks must be in _tracks
-		for (auto it = tracks.begin(); it != tracks.end(); ++it)
-		{
-			if (this->_tracks.find(*it) == this->_tracks.end())
-				return false;
-		}
-
-		// which means they are equal
-		return true;
+		return std::is_permutation(tracks.begin(), tracks.end(), this->_tracks.begin());
 	}
 
 	const bool Block::contains(Track &track) const

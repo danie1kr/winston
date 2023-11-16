@@ -284,12 +284,24 @@ BETTER_ENUM(Y2021RailwayRoutes, unsigned int,
     B3_PBF1, B3_PBF2, B3_PBF3, B3_N1, B3_N2,
     B6_PBF3, B6_N1, B6_N2
 );
+BETTER_ENUM(Y2021RailwayBlocks, unsigned int,
+    PBF12, PBF1a, PBF1, PBF2, PBF3,
+    N, N1, N2, N3,
+    B1, B2, B3, B4, B5, B6,
+    GBF, GBF1, GBF2, GBF3, GBF4
+);
+BETTER_ENUM(RoutesEmpty, unsigned int, None);
+
 enum class Y2021RailwayDetectors : unsigned int
 {
     B1, B4, B3, B6, B2_Speedtrap_A, B2_Speedtrap_B, PBF1
 };
 
-class Y2021Railway : public winston::RailwayWithRails<Y2021RailwayTracks>, public winston::RailwayAddonRoutes<Y2021RailwayRoutes>, public winston::Shared_Ptr<Y2021Railway>
+class Y2021Railway : 
+    public winston::RailwayWithRails<Y2021RailwayTracks>,
+    public winston::RailwayAddonRoutes<Y2021RailwayRoutes>,
+    public winston::RailwayAddonBlocks<Y2021RailwayBlocks, Y2021RailwayTracks>,
+    public winston::Shared_Ptr<Y2021Railway>
 {
     /*
         //====Turnout13==============================B2=======================\\
@@ -329,7 +341,7 @@ public:
     const winston::Result init();
     void attachDetectors();
 
-    using winston::RailwayAddonRoutes<Y2021RailwayRoutes>::supportsRoutes;
+    //using winston::RailwayAddonRoutes<Y2021RailwayRoutes>::supportsRoutes;
 
     const winston::Result validateFinal();
 
@@ -357,5 +369,6 @@ public:
 private:
     winston::Track::Shared define(const Tracks track);
     winston::Route::Shared define(const Routes route);
+    Block::Shared define(const Blocks block);
     void connect();
 };

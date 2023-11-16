@@ -1,8 +1,8 @@
 #pragma once
 
-#include <unordered_map>
-#include "WinstonTypes.h"
 #include "Track.h"
+#include "WinstonTypes.h"
+#include <unordered_map>
 
 namespace winston {
 
@@ -14,24 +14,23 @@ namespace winston {
 	public:
 		enum class Type : unsigned char
 		{
-			Free,
-			Transit,
-			Siding
+			Free,      // free trak
+			Transit,   // transit track
+			Siding,    // park
+			Platform,  // in a station
 		};
 
-
-		Block(const Address address, const Type type, const Trackset tracks);
+		Block(const Type type, const Trackset tracks);
 		//Block::Shared traverse(Track::Shared& entry, Track::Connection& connection);
-		//bool validate();
+
+		using MarkCallback = std::function<const bool(const Track&)>;
+		const bool validate(MarkCallback mark) const;
 
 		const bool contains(Track &track) const;
 		const BlockEntrySet entries() const;
 		const Trackset tracks() const;
 
 		const Type type;
-		const bool isType(const Type type) const;
-
-		const Address address;
 
 		using Shared_Ptr<Block>::Shared;
 		using Shared_Ptr<Block>::make;
@@ -39,8 +38,6 @@ namespace winston {
 		BlockEntrySet blockEntrySet;
 		const Trackset _tracks;
 	};
-
 	using Blockset = std::set<Block::Shared>;
-	using Blockmap = std::unordered_map<Address, Block::Shared>;
 }
 

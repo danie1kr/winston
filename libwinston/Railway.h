@@ -50,19 +50,19 @@ namespace winston
 
 		Railway(const Callbacks callbacks);
 		virtual ~Railway() = default;
-
+		/*
 		void block(const Address address, const Block::Type type, const Trackset trackset);
 		Block::Shared block(Address address) const;
 		const Blockmap blocks() const;
-
+		
 		virtual const bool supportsBlocks() const;
 		virtual const bool supportsRoutes() const;
-
+*/
 		virtual const Result init() = 0;
 
 	protected:
 		const Callbacks callbacks;
-		Blockmap _blocks;
+		//Blockmap _blocks;
 	};
 	/*
 	template<typename _DetectorClass>
@@ -184,7 +184,13 @@ namespace winston
 		const Tracks trackEnum(Track::Shared& track) const
 		{
 			auto it = std::find(this->tracks.begin(), this->tracks.end(), track);
-			return Tracks::_from_integral_unchecked((unsigned int)std::distance(this->tracks.begin(), it)); //this->trackEnum(std::distance(this->tracks.begin(), it));
+			return Tracks::_from_integral_unchecked((unsigned int)std::distance(this->tracks.begin(), it));
+		}
+
+		const Tracks trackEnum(const Track& track) const
+		{
+			auto it = std::find(this->tracks.begin(), this->tracks.end(), track.shared_from_this());
+			return Tracks::_from_integral_unchecked((unsigned int)std::distance(this->tracks.begin(), it));
 		}
 
 		inline Tracks track(Bumper::Shared& track)
@@ -482,5 +488,76 @@ namespace winston
 		}
 
 		RouteArray routes;
+	};
+
+	template<typename _BlocksEnum, typename _TracksClass>
+	class RailwayAddonBlocks
+	{
+	public:
+		using Blocks = _BlocksEnum;
+
+		class Block : public Shared_Ptr<Block>, public winston::Block
+		{
+		public:
+			Block(const Blocks id, const Type type, const Trackset trackset) : winston::Block(type, trackset), id{ id }
+			{
+
+			};
+
+			const Blocks id;
+			using Shared_Ptr<Block>::Shared;
+			using Shared_Ptr<Block>::make;
+		};
+		using BlockMap = std::unordered_map<Address, typename Block::Shared>;
+
+		typename Block::Shared block(const Blocks block) const
+		{
+			auto it = this->_blocks.find(block);
+			if (it != this->_blocks.end())
+				return it->second;
+			return nullptr;
+		}
+
+		const BlockMap blocks() const
+		{
+			return this->_blocks;
+		}
+		
+		virtual const bool supportsBlocks() const
+		{
+			return true;
+		}
+
+		const Result initBlocks(RailwayWithRails<_TracksClass>& railway)
+		{
+			for (Blocks block : Blocks::_values())
+				this->_blocks[block] = this->define(block);
+
+			return this->validateBlocks(railway);
+		}
+
+		const Result validateBlocks(RailwayWithRails<_TracksClass> &railway)
+		{
+			std::set<_TracksClass> marked;
+			for (const auto& block : this->_blocks)
+			{
+				if(!block.second->validate([&marked, &railway](const Track& track) -> const bool {
+					_TracksClass trackEnum = railway.trackEnum(track);
+					if (marked.find(trackEnum) != marked.end())
+						return false;
+					else
+						marked.insert(trackEnum);
+					return true;
+					}))
+					return Result::ValidationFailed;
+			}
+
+			return marked.size() == _TracksClass::_size() ? Result::OK : Result::ValidationFailed;
+		}
+
+		virtual typename Block::Shared define(const Blocks block) = 0;
+
+	protected:
+		BlockMap _blocks;
 	};
 }

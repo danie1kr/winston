@@ -1,8 +1,14 @@
 #include "Block.h"
 
 namespace winston {
-	Block::Block(const Address address, const Type type, const Trackset tracks) : Shared_Ptr<Block>(), type(type), address(address), blockEntrySet(), _tracks(tracks)
+	Block::Block(const Type type, const Trackset tracks) : Shared_Ptr<Block>(), type(type), blockEntrySet(), _tracks(tracks)
 	{
+	}
+
+	const bool Block::validate(MarkCallback mark) const
+	{
+		// check that all elements of the track set are reached
+		return false;
 	}
 
 	const bool Block::contains(Track &track) const
@@ -45,10 +51,5 @@ namespace winston {
 	const Trackset Block::tracks() const
 	{
 		return this->_tracks;
-	}
-
-	const bool Block::isType(const Type type) const
-	{
-		return this->type == type;
 	}
 }

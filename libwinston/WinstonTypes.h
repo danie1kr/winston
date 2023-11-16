@@ -4,7 +4,7 @@
 
 #ifdef __GNUC__ 
 #pragma GCC push_options
-#pragma GCC optimize("Os")
+//#pragma GCC optimize("Os")
 #endif
 #include <string>
 #include <array>

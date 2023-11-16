@@ -9,7 +9,7 @@
 
 #ifdef __GNUC__ 
 #pragma GCC push_options
-#pragma GCC optimize("Os")
+//#pragma GCC optimize("Os")
 #endif
 #define ARDUINOJSON_ENABLE_STD_STRING 1
 #define ARDUINOJSON_ENABLE_STD_STREAM 0
@@ -444,16 +444,19 @@ namespace winston
                     }
                 }
 
-                for (auto& block : this->railway->blocks())
+             /*   if (this->railway->supportsBlocks())
                 {
-                    auto b = blocks.createNestedObject();
-                    b["address"] = block.first;
-                    auto bl = block.second;
+                    for (auto& block : this->railway->blocks())
+                    {
+                        auto b = blocks.createNestedObject();
+                        b["address"] = block.first;
+                        auto bl = block.second;
 
-                    auto blockTracks = b.createNestedArray("tracks");
-                    for (auto& track : bl->tracks())
-                        blockTracks.add(track->name());
-                }
+                        auto blockTracks = b.createNestedArray("tracks");
+                        for (auto& track : bl->tracks())
+                            blockTracks.add(track->name());
+                    }
+                }*/
 
                 if (this->railway->supportsRoutes())
                 {

@@ -96,8 +96,7 @@ winston::DigitalCentralStation::Callbacks Kornweinheim::z21Callbacks()
         }
         else if (address >= 400 && address < 400 + this->railway->routesCount())
         {
-            auto route = this->railway->route(address - 400);
-            if (route)
+            if (auto route = this->railway->route(address - 400))
                 this->orderRouteSet(route, true);
         }
         else

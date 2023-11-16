@@ -640,6 +640,7 @@ void Y2021Railway::connect()
 
 winston::Route::Shared Y2021Railway::define(const Routes route)
 {
+    
     LOCAL_TRACK(PBF1a);
     LOCAL_TRACK(PBF1);
     LOCAL_TRACK(PBF2a);
@@ -801,24 +802,94 @@ winston::Route::Shared Y2021Railway::define(const Routes route)
             PATH_TURNOUT(Turnout1, A_B)
         ))
     default:
-        winston::logger.warn("unsupported route: ", route._to_string());
+        winston::logger.warn("undefined route: ", route._to_string());
         break;
     }
+    
+    return nullptr;
+}
 
+Y2021Railway::Block::Shared Y2021Railway::define(const Y2021Railway::Blocks block)
+{
+    LOCAL_TRACK(PBF1a);
+    LOCAL_TRACK(PBF1);
+    LOCAL_TRACK(PBF2a);
+    LOCAL_TRACK(PBF2);
+    LOCAL_TRACK(PBF3);
+    LOCAL_TRACK(PBF3a);
+    LOCAL_TRACK(GBF1);
+    LOCAL_TRACK(GBF2);
+    LOCAL_TRACK(GBF3a);
+    LOCAL_TRACK(GBF3b);
+    LOCAL_TRACK(GBF4a);
+    LOCAL_TRACK(GBF4b);
+    LOCAL_TRACK(B1);
+    LOCAL_TRACK(B2);
+    LOCAL_TRACK(B3);
+    LOCAL_TRACK(B4);
+    LOCAL_TRACK(B5);
+    LOCAL_TRACK(B6);
+    LOCAL_TRACK(B_PBF2_PBF1);
+    LOCAL_TRACK(B_To_GBF);
+    LOCAL_TRACK(N1);
+    LOCAL_TRACK(N2);
+    LOCAL_TRACK(N3);
+    LOCAL_TRACK(PBF_To_N);
+    LOCAL_TRACK(T7_To_T8);
+    LOCAL_TRACK(Turnout1);
+    LOCAL_TRACK(Turnout2);
+    LOCAL_TRACK(Turnout3);
+    LOCAL_TRACK(Turnout4);
+    LOCAL_TRACK(Turnout5);
+    LOCAL_TRACK(Turnout6);
+    LOCAL_TRACK(Turnout7);
+    LOCAL_TRACK(Turnout8);
+    LOCAL_TRACK(Turnout9);
+    LOCAL_TRACK(Turnout10);
+    LOCAL_TRACK(Turnout11);
+    LOCAL_TRACK(Turnout12);
+    LOCAL_TRACK(Turnout13);
+    LOCAL_TRACK(Turnout14);
+    LOCAL_TRACK(DoubleSlipTurnout15_16);
+    LOCAL_TRACK(Turnout17);
+    LOCAL_TRACK(Turnout18);
+    LOCAL_TRACK(Turnout19);
+    LOCAL_TRACK(Turnout20);
+
+#define BLOCK(id, type, ...)  case Y2021Railway::Blocks::id: { return Y2021Railway::Block::make(Y2021Railway::Blocks::id, type, winston::Trackset(__VA_ARGS__)); }
+#define FREE        winston::Block::Type::Free
+#define TRANSIT     winston::Block::Type::Transit
+#define SIDING      winston::Block::Type::Siding
+#define PLATFORM    winston::Block::Type::Plattform
+
+    switch(block)
+    {
+        BLOCK(PBF1a, SIDING, { PBF1a });
+        BLOCK(N1, SIDING, { N1 });
+        BLOCK(N2, SIDING, { N2 });
+        BLOCK(N3, SIDING, { N3 });
+        BLOCK(GBF1, SIDING, { GBF1 });
+        BLOCK(GBF2, SIDING, { GBF2 });
+        BLOCK(GBF3, SIDING, { GBF3a, Turnout19, GBF3b });
+        BLOCK(GBF4, SIDING, { GBF4a, Turnout20, GBF4b });
+
+        BLOCK(N, TRANSIT, { PBF_To_N, Turnout14 });
+        BLOCK(PBF12, TRANSIT, { Turnout1, PBF2a, Turnout4, B_PBF2_PBF1 });
+        BLOCK(GBF, TRANSIT, { B_To_GBF, DoubleSlipTurnout15_16, Turnout17, Turnout18 });
+        /*, PBF1a, PBF1, PBF2, PBF3,
+            N, N1, N2, N3,
+            B1, B2, B3, B4, B5, B6,
+            GBF, GBF1, GBF2, GBF3, GBF4)*/
+    default:
+        winston::logger.warn("undefined block: ", block._to_string());
+        break;
+}
     return nullptr;
 }
 
 void Y2021Railway::attachDetectors()
 {
 }
-/*
-void Y2021Railway::buildBlocks() 
-{
-    winston::Trackset set;
-    for (Tracks track : Tracks::_values())
-        set.insert(this->track(track));
-    this->block(1, set, winston::Block::Type::Free);
-}*/
 
 const winston::Result Y2021Railway::init()
 {
@@ -834,6 +905,12 @@ const winston::Result Y2021Railway::init()
         winston::logger.err("Y2021Railway initRoutes failed with ", result);
         return result;
     }
+    result = this->initBlocks(*this);
+    if (result != winston::Result::OK)
+    {
+        winston::logger.err("Y2021Railway initBlocks failed with ", result);
+        return result;
+    }
 
     return winston::Result::OK;
 }
@@ -844,5 +921,5 @@ const winston::Result Y2021Railway::validateFinal()
     if (result != winston::Result::OK)
         return result;
 
-    return winston::RailwayAddonRoutes<Y2021RailwayRoutes>::validateFinal();
+    return winston::RailwayAddonRoutes<Routes>::validateFinal();
 }

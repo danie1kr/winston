@@ -7,8 +7,47 @@ namespace winston {
 
 	const bool Block::validate(MarkCallback mark) const
 	{
+		if (this->_tracks.size() == 0)
+			return true;
+
 		// check that all elements of the track set are reached
-		return false;
+		auto current = *this->_tracks.begin();
+		std::list<Track::Shared> tracks;
+		tracks.push_back(current);
+
+		for (auto it = tracks.begin(); it != tracks.end(); ++it)
+		{
+			current = *it;
+			if (mark(*current))
+			{
+				Trackset others;
+				current->collectAllConnections(others);
+
+				for (auto other : others)
+				{
+					if (this->_tracks.find(other) != this->_tracks.end() && 
+						std::find(tracks.begin(), tracks.end(), other) == tracks.end())
+					{
+						tracks.push_back(other);
+					}
+				}
+			}
+		}
+
+		// size must match
+		bool result = this->_tracks.size() == tracks.size();
+		if (!result)
+			return false;
+
+		// content of tracks must be in _tracks
+		for (auto it = tracks.begin(); it != tracks.end(); ++it)
+		{
+			if (this->_tracks.find(*it) == this->_tracks.end())
+				return false;
+		}
+
+		// which means they are equal
+		return true;
 	}
 
 	const bool Block::contains(Track &track) const

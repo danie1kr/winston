@@ -547,7 +547,7 @@ namespace winston
 			std::set<_TracksClass> marked;
 			for (const auto& block : this->_blocks)
 			{
-				if(!block.second->validate([&marked, this](const Track& track) -> const bool {
+				if(block.second && !block.second->validate([&marked, this](const Track& track) -> const bool {
 					_TracksClass trackEnum = this->trackEnum(track);
 					if (marked.find(trackEnum) != marked.end())
 						return false;

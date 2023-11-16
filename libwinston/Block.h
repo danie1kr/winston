@@ -21,7 +21,6 @@ namespace winston {
 		};
 
 		Block(const Type type, const Trackset tracks);
-		//Block::Shared traverse(Track::Shared& entry, Track::Connection& connection);
 
 		using MarkCallback = std::function<const bool(const Track&)>;
 		const bool validate(MarkCallback mark) const;

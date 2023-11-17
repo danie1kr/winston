@@ -1,7 +1,7 @@
 #include "Block.h"
 
 namespace winston {
-	Block::Block(const Type type, const Trackset tracks) : Shared_Ptr<Block>(), type(type), blockEntrySet(), _tracks(tracks)
+	Block::Block(const Type type, const Trackset tracks) : Shared_Ptr<Block>(), type(type), _tracks(tracks), entriesSet(this->buildEntriesSet())
 	{
 	}
 
@@ -47,7 +47,7 @@ namespace winston {
 		return std::find_if(this->_tracks.begin(), this->_tracks.end(), [&track](const Track::Shared& t) { return &track == t.get(); }) != this->_tracks.end();
 	}
 
-	const BlockEntrySet Block::entries() const
+	const BlockEntrySet Block::buildEntriesSet() const
 	{
 		BlockEntrySet set;
 		for (auto& track : this->_tracks)
@@ -57,7 +57,7 @@ namespace winston {
 			{
 				// a bumper is always an entry
 			case Track::Type::Bumper: 
-				set.insert(std::make_pair(track, Track::Connection::A)); 
+				set.insert(std::make_pair(track, Track::Connection::A));
 				break;
 			case Track::Type::Rail:
 				CHECK_ENTRY_AND_ADD(Track::Connection::A);

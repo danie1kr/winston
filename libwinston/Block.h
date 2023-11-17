@@ -26,7 +26,6 @@ namespace winston {
 		const bool validate(MarkCallback mark) const;
 
 		const bool contains(Track &track) const;
-		const BlockEntrySet entries() const;
 		const Trackset tracks() const;
 
 		const Type type;
@@ -34,8 +33,11 @@ namespace winston {
 		using Shared_Ptr<Block>::Shared;
 		using Shared_Ptr<Block>::make;
 	private:
-		BlockEntrySet blockEntrySet;
 		const Trackset _tracks;
+		const BlockEntrySet buildEntriesSet() const;
+
+	public:
+		const BlockEntrySet entriesSet;
 	};
 	using Blockset = std::set<Block::Shared>;
 }

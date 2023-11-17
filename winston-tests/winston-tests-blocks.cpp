@@ -9,7 +9,7 @@ namespace winstontests
 {
     TEST_CLASS(BlocksTest)
     {
-        std::shared_ptr<Y2021Railway> testRailway;
+        std::shared_ptr<RailwayWithSiding> testRailway;
 
         static winston::Railway::Callbacks railwayCallbacks()
         {
@@ -36,14 +36,20 @@ namespace winstontests
         }
     public:
 
+        TEST_METHOD(RailInit)
+        {
+            testRailway = RailwayWithSiding::make(railwayCallbacks());
+            Assert::IsTrue(testRailway->init() == winston::Result::OK);
+        }
+
         TEST_METHOD(BlockValidate)
         {
-            testRailway = Y2021Railway::make(railwayCallbacks());
+            testRailway = RailwayWithSiding::make(railwayCallbacks());
             testRailway->init();
 
-            std::set<Y2021Railway::Tracks> marked;
+            std::set<RailwayWithSiding::Tracks> marked;
             auto marker = [&marked, this](const winston::Track& track) -> const bool {
-                Y2021Railway::Tracks trackEnum = testRailway->trackEnum(track);
+                RailwayWithSiding::Tracks trackEnum = testRailway->trackEnum(track);
                 if (marked.find(trackEnum) != marked.end())
                     return false;
                 else
@@ -52,42 +58,42 @@ namespace winstontests
                 };
 
             {
-                // Turnout5 ==== PBF1
-                auto T5 = testRailway->track(Y2021Railway::Tracks::Turnout5);
-                auto PBF1 = testRailway->track(Y2021Railway::Tracks::PBF1);
-                auto block = Y2021Railway::Block::make(Y2021RailwayBlocks::PBF1, winston::Block::Type::Platform, winston::Trackset({ T5, PBF1  }));
+                // A ==== T1
+                auto A = testRailway->track(RailwayWithSiding::Tracks::A);
+                auto T1 = testRailway->track(RailwayWithSiding::Tracks::Turnout1);
+                auto block = RailwayWithSiding::Block::make(RailwayWithSidingsBlocks::A, winston::Block::Type::Platform, winston::Trackset({ A, T1  }));
 
                 marked.clear();
                 auto result = block->validate(marker);
                 Assert::IsTrue(result);
             }
             {
-                // Turnout5 and PBF3 are not connected
-                auto T5 = testRailway->track(Y2021Railway::Tracks::Turnout5);
-                auto PBF3 = testRailway->track(Y2021Railway::Tracks::PBF3);
-                auto block = Y2021Railway::Block::make(Y2021RailwayBlocks::PBF1, winston::Block::Type::Platform, winston::Trackset({ T5, PBF3 }));
+                // A and B are not connected
+                auto A = testRailway->track(RailwayWithSiding::Tracks::A);
+                auto B = testRailway->track(RailwayWithSiding::Tracks::B);
+                auto block = RailwayWithSiding::Block::make(RailwayWithSidingsBlocks::A, winston::Block::Type::Platform, winston::Trackset({ A, B }));
 
                 marked.clear();
                 auto result = block->validate(marker);
                 Assert::IsFalse(result);
             }
             {
-                // PBF1 ==== Turnout8 ==== B1
-                auto PBF1 = testRailway->track(Y2021Railway::Tracks::PBF1);
-                auto Turnout8 = testRailway->track(Y2021Railway::Tracks::Turnout8);
-                auto B1 = testRailway->track(Y2021Railway::Tracks::B1);
-                auto block = Y2021Railway::Block::make(Y2021RailwayBlocks::PBF1, winston::Block::Type::Platform, winston::Trackset({ PBF1, Turnout8, B1 }));
+                // C ==== Turnout1 ==== A
+                auto C = testRailway->track(RailwayWithSiding::Tracks::C);
+                auto Turnout1 = testRailway->track(RailwayWithSiding::Tracks::Turnout1);
+                auto A = testRailway->track(RailwayWithSiding::Tracks::A);
+                auto block = RailwayWithSiding::Block::make(RailwayWithSidingsBlocks::A, winston::Block::Type::Platform, winston::Trackset({ C, Turnout1, A }));
 
                 marked.clear();
                 auto result = block->validate(marker);
                 Assert::IsTrue(result);
             }
             {
-                // PBF1 ==== [Turnout8/forgotten] ==== B1
-                auto PBF1 = testRailway->track(Y2021Railway::Tracks::PBF1);
-                auto Turnout8 = testRailway->track(Y2021Railway::Tracks::Turnout8);
-                auto B1 = testRailway->track(Y2021Railway::Tracks::B1);
-                auto block = Y2021Railway::Block::make(Y2021RailwayBlocks::PBF1, winston::Block::Type::Platform, winston::Trackset({ PBF1, B1 }));
+                // C ==== [Turnout1/forgotten] ==== A
+                auto C = testRailway->track(RailwayWithSiding::Tracks::C);
+                auto Turnout1 = testRailway->track(RailwayWithSiding::Tracks::Turnout1);
+                auto A = testRailway->track(RailwayWithSiding::Tracks::A);
+                auto block = RailwayWithSiding::Block::make(RailwayWithSidingsBlocks::A, winston::Block::Type::Platform, winston::Trackset({ C, A }));
 
                 marked.clear();
                 auto result = block->validate(marker);
@@ -95,10 +101,27 @@ namespace winstontests
             }
         }
 
-        TEST_METHOD(RailInit)
+        TEST_METHOD(EntrySetGeneration)
         {
-            testRailway = Y2021Railway::make(railwayCallbacks());
+            testRailway = RailwayWithSiding::make(railwayCallbacks());
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
+
+            // C ==== Turnout1 ==== A
+            auto C = testRailway->track(RailwayWithSiding::Tracks::C);
+            auto Turnout1 = testRailway->track(RailwayWithSiding::Tracks::Turnout1);
+            auto A = testRailway->track(RailwayWithSiding::Tracks::A);
+            auto block = RailwayWithSiding::Block::make(RailwayWithSidingsBlocks::A, winston::Block::Type::Platform, winston::Trackset({ C, Turnout1, A }));
+
+            {
+                winston::BlockEntry entry{ C, winston::Track::Connection::B };
+                auto result = block->entriesSet.find(entry) == block->entriesSet.end();
+                Assert::IsFalse(result);
+            }
+            {
+                winston::BlockEntry entry{ C, winston::Track::Connection::A };
+                auto result = block->entriesSet.find(entry) == block->entriesSet.end();
+                Assert::IsTrue(result);
+            }
         }
     };
 }

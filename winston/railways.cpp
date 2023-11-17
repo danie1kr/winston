@@ -160,7 +160,7 @@ const std::string SignalTestRailway::name()
     return std::string("SignalTestRailway");
 }
 
-RailwayWithSiding::RailwayWithSiding(const Callbacks callbacks) : winston::RailwayWithRails<RailwayWithSidingsTracks>(callbacks) {};
+RailwayWithSiding::RailwayWithSiding(const Callbacks callbacks) : winston::RailwayWithRails<RailwayWithSidingsTracks, winston::RoutesNone, RailwayWithSidingsBlocks>(callbacks) {};
 RailwayWithSiding::AddressTranslator::AddressTranslator(RailwayWithSiding::Shared railway) : winston::DigitalCentralStation::TurnoutAddressTranslator(), Shared_Ptr<AddressTranslator>(), railway(railway) { };
 
 winston::Track::Shared RailwayWithSiding::AddressTranslator::turnout(const winston::Address address) const
@@ -201,6 +201,28 @@ winston::Track::Shared RailwayWithSiding::define(const Tracks track)
     }
 }
 
+RailwayWithSiding::Block::Shared RailwayWithSiding::define(const RailwayWithSiding::Blocks block)
+{
+    auto a = this->track(Tracks::A);
+    auto b = this->track(Tracks::B);
+    auto c = this->track(Tracks::C);
+    auto t1 = this->track(Tracks::Turnout1);
+    auto t2 = this->track(Tracks::Turnout2);
+
+    switch (block)
+    {
+    case RailwayWithSiding::Blocks::A:
+        return RailwayWithSiding::Block::make(RailwayWithSiding::Blocks::A, winston::Block::Type::Free, winston::Trackset({ a, t1 }));
+    case RailwayWithSiding::Blocks::B:
+        return RailwayWithSiding::Block::make(RailwayWithSiding::Blocks::B, winston::Block::Type::Free, winston::Trackset({ b }));
+    case RailwayWithSiding::Blocks::C:
+        return RailwayWithSiding::Block::make(RailwayWithSiding::Blocks::C, winston::Block::Type::Free, winston::Trackset({ c, t2 }));
+    default:
+        winston::hal::fatal(std::string("block ") + std::string(block._to_string()) + std::string("not in switch"));
+        return nullptr;
+    }
+}
+
 void RailwayWithSiding::connect()
 {
     auto a = this->track(Tracks::A);
@@ -220,6 +242,11 @@ void RailwayWithSiding::connect()
 const std::string RailwayWithSiding::name()
 {
     return std::string("RailwayWithSiding");
+}
+
+const bool RailwayWithSiding::supportBlocks() const
+{
+    return true;
 }
 
 Y2020Railway::Y2020Railway(const Callbacks callbacks) : winston::RailwayWithRails<Y2020RailwayTracks>(callbacks) {};

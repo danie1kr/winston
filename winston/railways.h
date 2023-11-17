@@ -135,19 +135,24 @@ BETTER_ENUM(RailwayWithSidingsTracks, unsigned int,
     C,
     Turnout2
 );
+BETTER_ENUM(RailwayWithSidingsBlocks, unsigned int,
+    A, B, C
+);
 
-class RailwayWithSiding : public winston::RailwayWithRails<RailwayWithSidingsTracks>, winston::Shared_Ptr<RailwayWithSiding>
+class RailwayWithSiding : public winston::RailwayWithRails<RailwayWithSidingsTracks, winston::RoutesNone, RailwayWithSidingsBlocks>, winston::Shared_Ptr<RailwayWithSiding>
 {
 public:
     RailwayWithSiding(const Callbacks callbacks);
     virtual ~RailwayWithSiding() = default;
 
     static const std::string name();
+    const bool supportBlocks() const;
 
     using winston::Shared_Ptr<RailwayWithSiding>::Shared;
     using winston::Shared_Ptr<RailwayWithSiding>::make;
 private:
     winston::Track::Shared define(const Tracks track);
+    Block::Shared define(const Blocks block);
     void connect();
 
 public:

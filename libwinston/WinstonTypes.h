@@ -53,7 +53,7 @@ namespace winston
 	enum class Features : unsigned int
 	{
 		None =		0b000,
-		Blocks =	0b001,
+		Sections =	0b001,
 		Detectors = 0b010,
 		Routes	  = 0b100
 	};
@@ -95,7 +95,7 @@ namespace winston
 		{
 			return base_type::shared_from_this();
 		}
-		std::shared_ptr<enable_shared_from_this_virtual_base const> shared_from_this() const
+		std::shared_ptr<enable_shared_from_this_virtual_base const> const_from_this() const
 		{
 			return base_type::shared_from_this();
 		}
@@ -113,9 +113,9 @@ namespace winston
 			return result;
 		}
 
-		std::shared_ptr<T const> shared_from_this() const
+		std::shared_ptr<T const> const_from_this() const
 		{
-			std::shared_ptr<T const> result(base_type::shared_from_this(), static_cast<T const*>(this));
+			std::shared_ptr<T const> result(base_type::const_from_this(), static_cast<T const*>(this));
 			return result;
 		}
 	};
@@ -125,6 +125,7 @@ namespace winston
 	{
 	public:
 		using Shared = std::shared_ptr<_T>;
+		using Const = std::shared_ptr<_T const>;
 		template<typename... Args>
 		[[nodiscard]] static Shared make(Args&&... args) {
 			return std::make_shared<_T>(std::forward<Args>(args)...);
@@ -292,7 +293,7 @@ namespace winston
 
 	class Railway;
 	BETTER_ENUM(RoutesNone, unsigned int, None);
-	BETTER_ENUM(BlocksSingle, unsigned int, Single);
+	BETTER_ENUM(SectionsSingle, unsigned int, Single);
 
 	class SignalTower;
 
@@ -300,7 +301,7 @@ namespace winston
 	template<typename _Railway, class _AddressTranslator, class _DigitalCentralStation, class _WebServer>
 	class ModelRailwaySystem;
 
-	class Block;
+	class Section;
 	class Detector;
 	template<typename T> class DetectorAddressable;
 	using DCCDetector = DetectorAddressable<Address>;

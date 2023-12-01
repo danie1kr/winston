@@ -4,7 +4,7 @@
 #include "WinstonTypes.h"
 #include "Command.h"
 #include "Locomotive.h"
-#include "Block.h"
+#include "Section.h"
 namespace winston {
 	class Storyline : public BasicCommand, public Shared_Ptr<Storyline>
 	{
@@ -57,7 +57,7 @@ namespace winston {
 	class TaskRandomTrack : public Storyline::Task, public Shared_Ptr<TaskRandomTrack>
 	{
 	public:
-		TaskRandomTrack(const Block::Type type);
+		TaskRandomTrack(const Section::Type type);
 		virtual ~TaskRandomTrack() = default;
 		const State execute();
 		const std::string text() const;
@@ -65,7 +65,7 @@ namespace winston {
 		using Shared_Ptr<TaskRandomTrack>::Shared;
 		using Shared_Ptr<TaskRandomTrack>::make;
 	private:
-		const Block::Type type;
+		const Section::Type type;
 	};
 
 	class ConfirmationProvider : public Shared_Ptr<ConfirmationProvider>

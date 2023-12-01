@@ -48,7 +48,7 @@ namespace winston
 	Position::Transit Position::drive(const Distance distance)
 	{
 		this->dist += distance;
-		auto block = this->track->block();
+		auto section = this->track->section();
 		if (this->dist >= 0 && this->dist <= (int)this->track->length())
 			return Transit::Stay;
 		else
@@ -88,7 +88,7 @@ namespace winston
 			}
 			this->track = current;
 			this->reference = connection;
-			return this->track->block() == block ? Transit::CrossTrack : Transit::CrossBlock;
+			return this->track->section() == section ? Transit::CrossTrack : Transit::CrossSection;
 		}
 	}
 }

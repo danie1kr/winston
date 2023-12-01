@@ -6,10 +6,10 @@
 
 namespace winston {
 
-	using BlockEntry = std::pair<Track::Shared, Track::Connection>;
-	using BlockEntrySet = std::set<BlockEntry>;
+	using SectionEntry = std::pair<Track::Shared, Track::Connection>;
+	using SectionEntrySet = std::set<SectionEntry>;
 
-	class Block : public Shared_Ptr<Block>
+	class Section : public Shared_Ptr<Section>
 	{
 	public:
 		enum class Type : unsigned char
@@ -20,7 +20,7 @@ namespace winston {
 			Platform,  // in a station
 		};
 
-		Block(const Type type, const Trackset tracks);
+		Section(const Type type, const Trackset tracks);
 
 		using MarkCallback = std::function<const bool(const Track&)>;
 		const bool validate(MarkCallback mark) const;
@@ -30,15 +30,15 @@ namespace winston {
 
 		const Type type;
 
-		using Shared_Ptr<Block>::Shared;
-		using Shared_Ptr<Block>::make;
+		using Shared_Ptr<Section>::Shared;
+		using Shared_Ptr<Section>::make;
 	private:
 		const Trackset _tracks;
-		const BlockEntrySet buildEntriesSet() const;
+		const SectionEntrySet buildEntriesSet() const;
 
 	public:
-		const BlockEntrySet entriesSet;
+		const SectionEntrySet entriesSet;
 	};
-	using Blockset = std::set<Block::Shared>;
+	using Sectionset = std::set<Section::Shared>;
 }
 

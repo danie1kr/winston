@@ -1,8 +1,6 @@
 #pragma once
-
 #include "WinstonConfig.h"
-#include "WinstonTypes.h"
-#include "Block.h"
+
 #include "Command.h"
 #include "Detector.h"
 #include "DigitalCentralStation.h"
@@ -10,13 +8,15 @@
 #include "Library.h"
 #include "Locomotive.h"
 #include "ModelRailwaySystem.h"
+#include "Position.h"
 #include "Railway.h"
 #include "Route.h"
+#include "Section.h"
 #include "Signal.h"
 #include "SignalController.h"
 #include "SignalTower.h"
 #include "Storyline.h"
 #include "Track.h"
 #include "Util.h"
-#include "Position.h"
 #include "WebServer.h"
+#include "WinstonTypes.h"

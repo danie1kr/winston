@@ -24,8 +24,8 @@
         - DCC-Detector
             - send loco position to frontend
         - frontend
-            - place loco on track, have it simulate detectors when entering/leaving blocks
-            - block signals
+            - place loco on track, have it simulate detectors when entering/leaving sections
+            - section signals
 
     PCB v2:
         - new tiny signals
@@ -421,7 +421,7 @@ ms	32	         2,55	  6,13	  8,17	 12,26	 16,35
     speed in mm/s * delay in ms / 1000 = overshoot
     */
     auto now = winston::hal::now(); // - offset (=2 ms Card->IC, +1ms IC->Teensy, +5ms Teensy->Teensy == 8ms <=> 2.04mm @ scaled 0.255 m/s @ 22.2m/s = 80 km/h
-    // actual work as we do not want to block the receiver
+    // actual work as we do not want to section the receiver
     this->signalTower->order(winston::Command::make([detector, loco, now](const winston::TimePoint& created) -> const winston::State
         {
             // loco is now at
@@ -447,13 +447,13 @@ ms	32	         2,55	  6,13	  8,17	 12,26	 16,35
 
             this->signalTower->order(winston::Command::make([=](const winston::TimePoint &created) -> const winston::State
             {
-                railway -> updateBlockOccupancy(previous, pos, timeOnTour, loco.trainLength() = 100);
+                railway -> updateSectionOccupancy(previous, pos, timeOnTour, loco.trainLength() = 100);
                 return winston::State::Finished;
             }, __PRETTY_FUNCTION__));
 
             this->signalTower->order(winston::Command::make([signalTower](const winston::TimePoint &created) -> const winston::State
             {
-                signalbox -> updateSignalsAccordingToBlocks();
+                signalbox -> updateSignalsAccordingToSections();
                 return winston::State::Finished;
             }, __PRETTY_FUNCTION__));
         }
@@ -550,7 +550,7 @@ void Kornweinheim::inventStorylines()
 
         auto loco = winston::TaskRandomLoco::make((unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods);
         collectAndDrive->queue(std::static_pointer_cast<winston::Storyline::Task>(loco));
-        auto assembleTrack = winston::TaskRandomTrack::make(winston::Block::Type::Transit);
+        auto assembleTrack = winston::TaskRandomTrack::make(winston::Section::Type::Transit);
         collectAndDrive->queue(std::static_pointer_cast<winston::Storyline::Task>(assembleTrack));
 
         auto confirmLocoTrack = winston::TaskConfirm::make(userConfirmation, display, loco, "nach", assembleTrack, [collectAndDrive, loco, assembleTrack]() -> winston::State {

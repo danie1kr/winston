@@ -47,8 +47,8 @@ namespace winston
 		virtual bool has(const Connection connection) const = 0;
 		virtual Track::Shared on(const Connection connection) const = 0;
 		
-		void block(const Address address);
-		const Address block() const;
+		void section(const Address address);
+		const Address section() const;
 
 		virtual const bool traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const = 0;
 		virtual const bool canTraverse(const Connection entering) const = 0;
@@ -166,7 +166,7 @@ namespace winston
 
 	private:
 		const std::string _name;
-		Address _block;
+		Address _section;
 		const Length trackLength;
 	};
 

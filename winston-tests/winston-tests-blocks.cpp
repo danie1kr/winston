@@ -7,7 +7,7 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace winstontests
 {
-    TEST_CLASS(BlocksTest)
+    TEST_CLASS(SectionsTest)
     {
         std::shared_ptr<RailwayWithSiding> testRailway;
 
@@ -42,7 +42,7 @@ namespace winstontests
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
         }
 
-        TEST_METHOD(BlockValidate)
+        TEST_METHOD(SectionValidate)
         {
             testRailway = RailwayWithSiding::make(railwayCallbacks());
             testRailway->init();
@@ -61,20 +61,20 @@ namespace winstontests
                 // A ==== T1
                 auto A = testRailway->track(RailwayWithSiding::Tracks::A);
                 auto T1 = testRailway->track(RailwayWithSiding::Tracks::Turnout1);
-                auto block = RailwayWithSiding::Block::make(RailwayWithSidingsBlocks::A, winston::Block::Type::Platform, winston::Trackset({ A, T1  }));
+                auto section = RailwayWithSiding::Section::make(RailwayWithSidingsSections::A, winston::Section::Type::Platform, winston::Trackset({ A, T1  }));
 
                 marked.clear();
-                auto result = block->validate(marker);
+                auto result = section->validate(marker);
                 Assert::IsTrue(result);
             }
             {
                 // A and B are not connected
                 auto A = testRailway->track(RailwayWithSiding::Tracks::A);
                 auto B = testRailway->track(RailwayWithSiding::Tracks::B);
-                auto block = RailwayWithSiding::Block::make(RailwayWithSidingsBlocks::A, winston::Block::Type::Platform, winston::Trackset({ A, B }));
+                auto section = RailwayWithSiding::Section::make(RailwayWithSidingsSections::A, winston::Section::Type::Platform, winston::Trackset({ A, B }));
 
                 marked.clear();
-                auto result = block->validate(marker);
+                auto result = section->validate(marker);
                 Assert::IsFalse(result);
             }
             {
@@ -82,10 +82,10 @@ namespace winstontests
                 auto C = testRailway->track(RailwayWithSiding::Tracks::C);
                 auto Turnout1 = testRailway->track(RailwayWithSiding::Tracks::Turnout1);
                 auto A = testRailway->track(RailwayWithSiding::Tracks::A);
-                auto block = RailwayWithSiding::Block::make(RailwayWithSidingsBlocks::A, winston::Block::Type::Platform, winston::Trackset({ C, Turnout1, A }));
+                auto section = RailwayWithSiding::Section::make(RailwayWithSidingsSections::A, winston::Section::Type::Platform, winston::Trackset({ C, Turnout1, A }));
 
                 marked.clear();
-                auto result = block->validate(marker);
+                auto result = section->validate(marker);
                 Assert::IsTrue(result);
             }
             {
@@ -93,10 +93,10 @@ namespace winstontests
                 auto C = testRailway->track(RailwayWithSiding::Tracks::C);
                 auto Turnout1 = testRailway->track(RailwayWithSiding::Tracks::Turnout1);
                 auto A = testRailway->track(RailwayWithSiding::Tracks::A);
-                auto block = RailwayWithSiding::Block::make(RailwayWithSidingsBlocks::A, winston::Block::Type::Platform, winston::Trackset({ C, A }));
+                auto section = RailwayWithSiding::Section::make(RailwayWithSidingsSections::A, winston::Section::Type::Platform, winston::Trackset({ C, A }));
 
                 marked.clear();
-                auto result = block->validate(marker);
+                auto result = section->validate(marker);
                 Assert::IsFalse(result);
             }
         }
@@ -110,16 +110,16 @@ namespace winstontests
             auto C = testRailway->track(RailwayWithSiding::Tracks::C);
             auto Turnout1 = testRailway->track(RailwayWithSiding::Tracks::Turnout1);
             auto A = testRailway->track(RailwayWithSiding::Tracks::A);
-            auto block = RailwayWithSiding::Block::make(RailwayWithSidingsBlocks::A, winston::Block::Type::Platform, winston::Trackset({ C, Turnout1, A }));
+            auto section = RailwayWithSiding::Section::make(RailwayWithSidingsSections::A, winston::Section::Type::Platform, winston::Trackset({ C, Turnout1, A }));
 
             {
-                winston::BlockEntry entry{ C, winston::Track::Connection::B };
-                auto result = block->entriesSet.find(entry) == block->entriesSet.end();
+                winston::SectionEntry entry{ C, winston::Track::Connection::B };
+                auto result = section->entriesSet.find(entry) == section->entriesSet.end();
                 Assert::IsFalse(result);
             }
             {
-                winston::BlockEntry entry{ C, winston::Track::Connection::A };
-                auto result = block->entriesSet.find(entry) == block->entriesSet.end();
+                winston::SectionEntry entry{ C, winston::Track::Connection::A };
+                auto result = section->entriesSet.find(entry) == section->entriesSet.end();
                 Assert::IsTrue(result);
             }
         }

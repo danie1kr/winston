@@ -11,7 +11,7 @@ namespace winston
 		{
 			Stay = 0,
 			CrossTrack = 1,
-			CrossBlock = 2,
+			CrossSection = 2,
 			TraversalError = 3
 		};
 

@@ -17,7 +17,7 @@
 #include "Detector.h"
 #include "Util.h"
 #include "Track.h"
-#include "Block.h"
+#include "Section.h"
 #include "Route.h"
 #include "HAL.h"
 #include "Log.h"
@@ -57,7 +57,7 @@ namespace winston
 		const Callbacks callbacks;
 	};
 
-	template<typename _TracksClass, typename _RoutesEnum = RoutesNone, typename _BlocksEnum = BlocksSingle>
+	template<typename _TracksClass, typename _RoutesEnum = RoutesNone, typename _SectionsEnum = SectionsSingle>
 	class RailwayWithRails : public Railway
 	{
 	public:
@@ -80,10 +80,10 @@ namespace winston
 				winston::logger.err("Railway::initRoutes failed with ", result);
 				return result;
 			}
-			result = this->initBlocks();
+			result = this->initSections();
 			if (result != winston::Result::OK)
 			{
-				winston::logger.err("Railway::initBlocks failed with ", result);
+				winston::logger.err("Railway::initSections failed with ", result);
 				return result;
 			}
 
@@ -109,14 +109,6 @@ namespace winston
 		template<typename _Track, typename ..._args>
 		Track::Shared& add(Tracks track, _args && ...args) {
 			return this->tracks[static_cast<size_t>(track)] = std::make_shared<_Track>(std::forward<_args>(args)...);
-		}
-
-		const Trackset trackset(std::initializer_list<Tracks> tracks)
-		{
-			Trackset set;
-			for (auto track: tracks)
-				set.insert(this->track(track));
-			return set;
 		}
 
 		const std::unordered_map<Tracks, Bumper::Shared> bumper() const
@@ -151,18 +143,12 @@ namespace winston
 					callback(this->trackEnum(i), *(std::static_pointer_cast<DoubleSlipTurnout>(this->tracks[i])));
 		}
 
-		inline constexpr Tracks trackEnum(size_t index) const
+		inline constexpr Tracks trackEnum(const size_t index) const
 		{
 			return Tracks::_from_integral_unchecked((unsigned int)index);
 		}
 
-		inline constexpr unsigned int trackIndex(Track::Shared track) const
-		{
-			auto it = std::find(this->tracks.begin(), this->tracks.end(), track);
-			return (unsigned int)std::distance(this->tracks.begin(), it);
-		}
-
-		inline Track::Shared track(std::string name)
+		inline Track::Shared track(const std::string name) const
 		{
 			auto it = std::find_if(this->tracks.begin(), this->tracks.end(),
 				[name](const auto& track) {return name.compare(track->name()) == 0; });
@@ -182,7 +168,7 @@ namespace winston
 			return this->tracks[index];
 		}
 
-		const Tracks trackEnum(Track::Shared& track) const
+		const Tracks trackEnum(const Track::Const& track) const
 		{
 			auto it = std::find(this->tracks.begin(), this->tracks.end(), track);
 			return Tracks::_from_integral_unchecked((unsigned int)std::distance(this->tracks.begin(), it));
@@ -190,10 +176,10 @@ namespace winston
 
 		const Tracks trackEnum(const Track& track) const
 		{
-			auto it = std::find(this->tracks.begin(), this->tracks.end(), track.shared_from_this());
-			return Tracks::_from_integral_unchecked((unsigned int)std::distance(this->tracks.begin(), it));
+			auto ptr = track.const_from_this();
+			return trackEnum(ptr);
 		}
-
+		/*
 		inline Tracks track(Bumper::Shared& track)
 		{
 			auto s = std::static_pointer_cast<Track>(track);
@@ -210,7 +196,7 @@ namespace winston
 		{
 			auto s = std::static_pointer_cast<Track>(track);
 			return this->track(s);
-		}
+		}*/
 	private:
 		const Result validateTracks() const
 		{
@@ -495,59 +481,59 @@ namespace winston
 		RouteArray routes;
 
 	public:
-		using Blocks = _BlocksEnum;
+		using Sections = _SectionsEnum;
 
-		class Block : public Shared_Ptr<Block>, public winston::Block
+		class Section : public Shared_Ptr<Section>, public winston::Section
 		{
 		public:
-			Block(const Blocks id, const Type type, const Trackset trackset) : winston::Block(type, trackset), id{ id }
+			Section(const Sections id, const Type type, const Trackset trackset) : winston::Section(type, trackset), id{ id }
 			{
 
 			};
 
-			const Blocks id;
-			using Shared_Ptr<Block>::Shared;
-			using Shared_Ptr<Block>::make;
+			const Sections id;
+			using Shared_Ptr<Section>::Shared;
+			using Shared_Ptr<Section>::make;
 		};
-		using BlockMap = std::unordered_map<Address, typename Block::Shared>;
+		using SectionMap = std::unordered_map<Address, typename Section::Shared>;
 
-		typename Block::Shared block(const Blocks block) const
+		typename Section::Shared section(const Sections section) const
 		{
-			auto it = this->_blocks.find(block);
-			if (it != this->_blocks.end())
+			auto it = this->_sections.find(section);
+			if (it != this->_sections.end())
 				return it->second;
 			return nullptr;
 		}
 
-		const BlockMap blocks() const
+		const SectionMap sections() const
 		{
-			return this->_blocks;
+			return this->_sections;
 		}
 		
-		virtual const bool supportBlocks() const
+		virtual const bool supportSections() const
 		{
 			return false;
 		}
 
-		const Result initBlocks()
+		const Result initSections()
 		{
-			if (this->supportBlocks())
+			if (this->supportSections())
 			{
-				for (Blocks block : Blocks::_values())
-					this->_blocks[block] = this->define(block);
+				for (Sections section : Sections::_values())
+					this->_sections[section] = this->define(section);
 
-				return this->validateBlocks();
+				return this->validateSections();
 			}
 			else
 				return Result::OK;
 		}
 
-		const Result validateBlocks()
+		const Result validateSections()
 		{
 			std::set<_TracksClass> marked;
-			for (const auto& block : this->_blocks)
+			for (const auto& section : this->_sections)
 			{
-				if(block.second && !block.second->validate([&marked, this](const Track& track) -> const bool {
+				if(section.second && !section.second->validate([&marked, this](const Track& track) -> const bool {
 					_TracksClass trackEnum = this->trackEnum(track);
 					if (marked.find(trackEnum) != marked.end())
 						return false;
@@ -561,12 +547,12 @@ namespace winston
 			return marked.size() == _TracksClass::_size() ? Result::OK : Result::ValidationFailed;
 		}
 
-		virtual typename Block::Shared define(const Blocks block)
+		virtual typename Section::Shared define(const Sections section)
 		{
 			return nullptr;
 		}
 		
 	protected:
-		BlockMap _blocks;
+		SectionMap _sections;
 	};
 }

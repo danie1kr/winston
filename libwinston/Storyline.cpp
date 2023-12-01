@@ -81,7 +81,7 @@ namespace winston
 		return "Random Locomotive";
 	}
 
-	TaskRandomTrack::TaskRandomTrack(const Block::Type type)
+	TaskRandomTrack::TaskRandomTrack(const Section::Type type)
 		: Storyline::Task(), type(type)
 	{
 		

@@ -355,7 +355,7 @@
             <div class="switch col s6">
                 <div>Grid <label>hide <input id="gridView" type="checkbox"><span class="lever"></span>show</label></div>
                 <div>Layout <label>fixed <input id="layoutEdit" type="checkbox"><span class="lever"></span>edit</label></div>
-                <div>Blocks <label>view <input id="blockView" type="checkbox"><span class="lever"></span>off</label></div>
+                <div>Sections <label>view <input id="sectionView" type="checkbox"><span class="lever"></span>off</label></div>
                 <div>
                     Detector Debug <label>on <input id="detectorDebug" type="checkbox"><span class="lever"></span>off</label>
                     <div class="input-field col s12">
@@ -465,7 +465,7 @@
         }
 
         /* variables and constants */
-        let railway, signals, blocks, detectors, routes, layout, $railway, $saveLayout, $resetLayout, cy, uiEditLayout = false, allowLayoutStorage = true, allowLayoutLoading = true;
+        let railway, signals, sections, detectors, routes, layout, $railway, $saveLayout, $resetLayout, cy, uiEditLayout = false, allowLayoutStorage = true, allowLayoutLoading = true;
 
         const WinstonTypeTurnout = "turnout";
         const WinstonTypeLocomotive = "locomotive";
@@ -1147,15 +1147,15 @@
                         }
                     },
                     {
-                        selector: "node.blockColoring",
+                        selector: "node.sectionColoring",
                         style: {
-                            "background-color": "data(blockColor)"
+                            "background-color": "data(sectionColor)"
                         }
                     },
                     {
-                        selector: "edge.blockColoring",
+                        selector: "edge.sectionColoring",
                         style: {
-                            "line-color": "data(blockColor)"
+                            "line-color": "data(sectionColor)"
                         }
                     }
                 ]
@@ -1310,7 +1310,7 @@
             let URLsp = new URLSearchParams(window.location.search);
             $("#layoutEdit").prop("checked", URLsp.has("layoutEdit") ? "checked" : null)
                 .trigger("change");
-            $("#blockView").prop("checked", URLsp.has("blockView") ? "checked" : null)
+            $("#sectionView").prop("checked", URLsp.has("sectionView") ? "checked" : null)
                 .trigger("change");
             $("#detectorDebug").prop("checked", URLsp.has("detectorDebug") ? "checked" : null)
                 .trigger("change");
@@ -1340,7 +1340,7 @@
                     cy.add(layout.cy);
                     cy = cytoscapeUpdateData(cy, railway);
                     cy = cytoscapeUpdateSignals(cy, signals);
-                    cy = cytoscapeUpdateBlocks(cy, blocks);
+                    cy = cytoscapeUpdateSections(cy, sections);
                     cy = cytoscapeUpdateDetectors(cy, detectors);
                     cy = cytoscapePostAdd(cy);
 
@@ -1356,7 +1356,7 @@
                         cy.add(layout.cy);
                         cy = cytoscapeUpdateRailway(cy, data.tracks);
                         cy = cytoscapeUpdateSignals(cy, signals);
-                        cy = cytoscapeUpdateBlocks(cy, blocks);
+                        cy = cytoscapeUpdateSections(cy, sections);
                         cy = cytoscapePostAdd(cy);*/
 
                     cy.viewport({ zoom: layout.viewport.zoom, pan: layout.viewport.pan });
@@ -1513,12 +1513,12 @@
             return cy;
         }
 
-        function cytoscapeUpdateBlocks(cy, blocks) {
-            _.each(blocks, function (block, i) {
-                _.each(block.tracks, function (track, j) {
+        function cytoscapeUpdateSections(cy, sections) {
+            _.each(sections, function (section, i) {
+                _.each(section.tracks, function (track, j) {
                     cy.$("[track=\"" + track + "\"]").forEach(function (ele, i, eles) {
-                        ele.data("block", block.address);
-                        ele.data("blockColor", "#red");
+                        ele.data("section", section.address);
+                        ele.data("sectionColor", "#red");
                     });
                 });
             });
@@ -1666,7 +1666,7 @@
                 let edges = [];
                 railway = data.tracks;
                 signals = data.signals;
-                blocks = data.blocks;
+                sections = data.sections;
                 detectors = data.detectors;
                 routes = data.routes;
 
@@ -1678,7 +1678,7 @@
                 cy.add(nodes);
                 cy.add(edges);
                 cy = cytoscapeUpdateSignals(cy, data.signals);
-                cy = cytoscapeUpdateBlocks(cy, data.blocks);
+                cy = cytoscapeUpdateSections(cy, data.sections);
                 cy = cytoscapeUpdateDetectors(cy, data.detectors);
                 cy = cytoscapePostAdd(cy);
 
@@ -1833,11 +1833,11 @@
                 }
                 putStateIntoURL();
             });
-            $("#blockView").on('change', function (event) {
+            $("#sectionView").on('change', function (event) {
                 if ($(event.target).prop("checked"))
-                    cy.$("[blockColor]").addClass("blockColoring");
+                    cy.$("[sectionColor]").addClass("sectionColoring");
                 else
-                    cy.$().removeClass("blockColoring");
+                    cy.$().removeClass("sectionColoring");
                 putStateIntoURL();
             });
             $("#detectorDebug").on('change', (event) => {
@@ -1873,8 +1873,8 @@
                 url += "&gridView";
             if ($("#layoutEdit").prop("checked"))
                 url += "&layoutEdit";
-            if ($("#blockView").prop("checked"))
-                url += "&blockView";
+            if ($("#sectionView").prop("checked"))
+                url += "&sectionView";
             if ($("#detectorDebug").prop("checked"))
                 url += "&detectorDebug";
             window.history.pushState({ path: url }, '', url);

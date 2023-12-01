@@ -350,7 +350,7 @@ namespace winston
                 DynamicJsonDocument railwayContent(64 * 1024);
                 auto tracks = railwayContent.createNestedArray("tracks");
                 auto signals = railwayContent.createNestedArray("signals");
-                auto blocks = railwayContent.createNestedArray("blocks");
+                auto sections = railwayContent.createNestedArray("sections");
                 auto routes = railwayContent.createNestedArray("routes");
                 auto detectors = railwayContent.createNestedArray("detectors");
 
@@ -444,17 +444,17 @@ namespace winston
                     }
                 }
 
-                if (this->railway->supportBlocks())
+                if (this->railway->supportSections())
                 {
-                /*    for (auto& block : this->railway->blocks())
+                /*    for (auto& section : this->railway->sections())
                     {
-                        auto b = blocks.createNestedObject();
-                        b["address"] = block.first;
-                        auto bl = block.second;
+                        auto b = sections.createNestedObject();
+                        b["address"] = section.first;
+                        auto bl = section.second;
 
-                        auto blockTracks = b.createNestedArray("tracks");
+                        auto sectionTracks = b.createNestedArray("tracks");
                         for (auto& track : bl->tracks())
-                            blockTracks.add(track->name());
+                            sectionTracks.add(track->name());
                     }*/
                 }
 
@@ -679,9 +679,9 @@ namespace winston
                 //else
                 //    winston::logger.err(winston::build("error: locomotive ", address, " not in shed"));
                 
-                unsigned int block = (unsigned int)data["block"].toInt();
+                unsigned int section = (unsigned int)data["section"].toInt();
                 unsigned int loco = (unsigned int)data["loco"].toInt();
-                // this->stationDebugInjector->injectBlockUpdate(block, loco);
+                // this->stationDebugInjector->injectSectionUpdate(section, loco);
                 */
             }
 #endif

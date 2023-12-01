@@ -113,7 +113,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Block.h" />
+    <ClInclude Include="Section.h" />
     <ClInclude Include="Command.h" />
     <ClInclude Include="Detector.h" />
     <ClInclude Include="DigitalCentralStation.h" />
@@ -142,7 +142,7 @@
     <ClInclude Include="WinstonTypes.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Block.cpp" />
+    <ClCompile Include="Section.cpp" />
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="Detector.cpp" />
     <ClCompile Include="DigitalCentralStation.cpp" />

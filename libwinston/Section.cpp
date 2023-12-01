@@ -1,11 +1,11 @@
-#include "Block.h"
+#include "Section.h"
 
 namespace winston {
-	Block::Block(const Type type, const Trackset tracks) : Shared_Ptr<Block>(), type(type), _tracks(tracks), entriesSet(this->buildEntriesSet())
+	Section::Section(const Type type, const Trackset tracks) : Shared_Ptr<Section>(), type(type), _tracks(tracks), entriesSet(this->buildEntriesSet())
 	{
 	}
 
-	const bool Block::validate(MarkCallback mark) const
+	const bool Section::validate(MarkCallback mark) const
 	{
 		if (this->_tracks.size() == 0)
 			return true;
@@ -42,14 +42,14 @@ namespace winston {
 		return std::is_permutation(tracks.begin(), tracks.end(), this->_tracks.begin());
 	}
 
-	const bool Block::contains(Track &track) const
+	const bool Section::contains(Track &track) const
 	{
 		return std::find_if(this->_tracks.begin(), this->_tracks.end(), [&track](const Track::Shared& t) { return &track == t.get(); }) != this->_tracks.end();
 	}
 
-	const BlockEntrySet Block::buildEntriesSet() const
+	const SectionEntrySet Section::buildEntriesSet() const
 	{
-		BlockEntrySet set;
+		SectionEntrySet set;
 		for (auto& track : this->_tracks)
 		{
 #define CHECK_ENTRY_AND_ADD(connection) { Track::Shared t = track->on(connection); if (this->_tracks.find(t) == this->_tracks.end()) set.insert(std::make_pair(track, connection));}
@@ -79,7 +79,7 @@ namespace winston {
 		return set;
 	}
 
-	const Trackset Block::tracks() const
+	const Trackset Section::tracks() const
 	{
 		return this->_tracks;
 	}

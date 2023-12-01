@@ -135,24 +135,24 @@ BETTER_ENUM(RailwayWithSidingsTracks, unsigned int,
     C,
     Turnout2
 );
-BETTER_ENUM(RailwayWithSidingsBlocks, unsigned int,
+BETTER_ENUM(RailwayWithSidingsSections, unsigned int,
     A, B, C
 );
 
-class RailwayWithSiding : public winston::RailwayWithRails<RailwayWithSidingsTracks, winston::RoutesNone, RailwayWithSidingsBlocks>, winston::Shared_Ptr<RailwayWithSiding>
+class RailwayWithSiding : public winston::RailwayWithRails<RailwayWithSidingsTracks, winston::RoutesNone, RailwayWithSidingsSections>, winston::Shared_Ptr<RailwayWithSiding>
 {
 public:
     RailwayWithSiding(const Callbacks callbacks);
     virtual ~RailwayWithSiding() = default;
 
     static const std::string name();
-    const bool supportBlocks() const;
+    const bool supportSections() const;
 
     using winston::Shared_Ptr<RailwayWithSiding>::Shared;
     using winston::Shared_Ptr<RailwayWithSiding>::make;
 private:
     winston::Track::Shared define(const Tracks track);
-    Block::Shared define(const Blocks block);
+    Section::Shared define(const Sections section);
     void connect();
 
 public:
@@ -285,7 +285,7 @@ BETTER_ENUM(Y2021RailwayRoutes, unsigned int,
     B3_PBF1, B3_PBF2, B3_PBF3, B3_N1, B3_N2,
     B6_PBF3, B6_N1, B6_N2
 );
-BETTER_ENUM(Y2021RailwayBlocks, unsigned int,
+BETTER_ENUM(Y2021RailwaySections, unsigned int,
     PBF12, PBF1a, PBF1, PBF2, PBF3,
     N, N1, N2, N3,
     B1, B2, B3, B4, B5, B6,
@@ -299,7 +299,7 @@ enum class Y2021RailwayDetectors : unsigned int
 };
 
 class Y2021Railway : 
-    public winston::RailwayWithRails<Y2021RailwayTracks, Y2021RailwayRoutes, Y2021RailwayBlocks>,
+    public winston::RailwayWithRails<Y2021RailwayTracks, Y2021RailwayRoutes, Y2021RailwaySections>,
     public winston::Shared_Ptr<Y2021Railway>
 {
     /*
@@ -342,7 +342,7 @@ public:
     const winston::Result validateFinal();
 
     const bool supportRoutes() const;
-    const bool supportBlocks() const;
+    const bool supportSections() const;
 
     using winston::Shared_Ptr<Y2021Railway>::Shared;
     using winston::Shared_Ptr<Y2021Railway>::make;
@@ -368,6 +368,6 @@ public:
 private:
     winston::Track::Shared define(const Tracks track);
     winston::Route::Shared define(const Routes route);
-    Block::Shared define(const Blocks block);
+    Section::Shared define(const Sections section);
     void connect();
 };

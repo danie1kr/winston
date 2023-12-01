@@ -160,7 +160,7 @@ const std::string SignalTestRailway::name()
     return std::string("SignalTestRailway");
 }
 
-RailwayWithSiding::RailwayWithSiding(const Callbacks callbacks) : winston::RailwayWithRails<RailwayWithSidingsTracks, winston::RoutesNone, RailwayWithSidingsBlocks>(callbacks) {};
+RailwayWithSiding::RailwayWithSiding(const Callbacks callbacks) : winston::RailwayWithRails<RailwayWithSidingsTracks, winston::RoutesNone, RailwayWithSidingsSections>(callbacks) {};
 RailwayWithSiding::AddressTranslator::AddressTranslator(RailwayWithSiding::Shared railway) : winston::DigitalCentralStation::TurnoutAddressTranslator(), Shared_Ptr<AddressTranslator>(), railway(railway) { };
 
 winston::Track::Shared RailwayWithSiding::AddressTranslator::turnout(const winston::Address address) const
@@ -201,7 +201,7 @@ winston::Track::Shared RailwayWithSiding::define(const Tracks track)
     }
 }
 
-RailwayWithSiding::Block::Shared RailwayWithSiding::define(const RailwayWithSiding::Blocks block)
+RailwayWithSiding::Section::Shared RailwayWithSiding::define(const RailwayWithSiding::Sections section)
 {
     auto a = this->track(Tracks::A);
     auto b = this->track(Tracks::B);
@@ -209,16 +209,16 @@ RailwayWithSiding::Block::Shared RailwayWithSiding::define(const RailwayWithSidi
     auto t1 = this->track(Tracks::Turnout1);
     auto t2 = this->track(Tracks::Turnout2);
 
-    switch (block)
+    switch (section)
     {
-    case RailwayWithSiding::Blocks::A:
-        return RailwayWithSiding::Block::make(RailwayWithSiding::Blocks::A, winston::Block::Type::Free, winston::Trackset({ a, t1 }));
-    case RailwayWithSiding::Blocks::B:
-        return RailwayWithSiding::Block::make(RailwayWithSiding::Blocks::B, winston::Block::Type::Free, winston::Trackset({ b }));
-    case RailwayWithSiding::Blocks::C:
-        return RailwayWithSiding::Block::make(RailwayWithSiding::Blocks::C, winston::Block::Type::Free, winston::Trackset({ c, t2 }));
+    case RailwayWithSiding::Sections::A:
+        return RailwayWithSiding::Section::make(RailwayWithSiding::Sections::A, winston::Section::Type::Free, winston::Trackset({ a, t1 }));
+    case RailwayWithSiding::Sections::B:
+        return RailwayWithSiding::Section::make(RailwayWithSiding::Sections::B, winston::Section::Type::Free, winston::Trackset({ b }));
+    case RailwayWithSiding::Sections::C:
+        return RailwayWithSiding::Section::make(RailwayWithSiding::Sections::C, winston::Section::Type::Free, winston::Trackset({ c, t2 }));
     default:
-        winston::hal::fatal(std::string("block ") + std::string(block._to_string()) + std::string("not in switch"));
+        winston::hal::fatal(std::string("section ") + std::string(section._to_string()) + std::string("not in switch"));
         return nullptr;
     }
 }
@@ -244,7 +244,7 @@ const std::string RailwayWithSiding::name()
     return std::string("RailwayWithSiding");
 }
 
-const bool RailwayWithSiding::supportBlocks() const
+const bool RailwayWithSiding::supportSections() const
 {
     return true;
 }
@@ -388,7 +388,7 @@ void Y2020Railway::connect()
 }
 #endif
 
-Y2021Railway::Y2021Railway(const Callbacks callbacks) : winston::RailwayWithRails<Y2021RailwayTracks, Y2021RailwayRoutes, Y2021RailwayBlocks>(callbacks){};
+Y2021Railway::Y2021Railway(const Callbacks callbacks) : winston::RailwayWithRails<Y2021RailwayTracks, Y2021RailwayRoutes, Y2021RailwaySections>(callbacks){};
 const std::string Y2021Railway::name()
 {
     return std::string("Y2021Railway");
@@ -817,7 +817,7 @@ winston::Route::Shared Y2021Railway::define(const Routes route)
     return nullptr;
 }
 
-Y2021Railway::Block::Shared Y2021Railway::define(const Y2021Railway::Blocks block)
+Y2021Railway::Section::Shared Y2021Railway::define(const Y2021Railway::Sections section)
 {
     LOCAL_TRACK(PBF1a);
     LOCAL_TRACK(PBF1);
@@ -864,39 +864,39 @@ Y2021Railway::Block::Shared Y2021Railway::define(const Y2021Railway::Blocks bloc
     LOCAL_TRACK(Turnout19);
     LOCAL_TRACK(Turnout20);
 
-#define BLOCK(id, type, ...)  case Y2021Railway::Blocks::id: { return Y2021Railway::Block::make(Y2021Railway::Blocks::id, type, winston::Trackset(__VA_ARGS__)); }
-#define FREE        winston::Block::Type::Free
-#define TRANSIT     winston::Block::Type::Transit
-#define SIDING      winston::Block::Type::Siding
-#define PLATFORM    winston::Block::Type::Platform
+#define SECTION(id, type, ...)  case Y2021Railway::Sections::id: { return Y2021Railway::Section::make(Y2021Railway::Sections::id, type, winston::Trackset(__VA_ARGS__)); }
+#define FREE        winston::Section::Type::Free
+#define TRANSIT     winston::Section::Type::Transit
+#define SIDING      winston::Section::Type::Siding
+#define PLATFORM    winston::Section::Type::Platform
 
-    switch(block)
+    switch(section)
     {
-        BLOCK(PBF1a, SIDING, { PBF1a });
-        BLOCK(N1, SIDING, { N1 });
-        BLOCK(N2, SIDING, { N2 });
-        BLOCK(N3, SIDING, { N3 });
-        BLOCK(GBF1, SIDING, { GBF1 });
-        BLOCK(GBF2, SIDING, { GBF2 });
-        BLOCK(GBF3, SIDING, { GBF3a, Turnout19, GBF3b });
-        BLOCK(GBF4, SIDING, { GBF4a, Turnout20, GBF4b });
+        SECTION(PBF1a, SIDING, { PBF1a });
+        SECTION(N1, SIDING, { N1 });
+        SECTION(N2, SIDING, { N2 });
+        SECTION(N3, SIDING, { N3 });
+        SECTION(GBF1, SIDING, { GBF1 });
+        SECTION(GBF2, SIDING, { GBF2 });
+        SECTION(GBF3, SIDING, { GBF3a, Turnout19, GBF3b });
+        SECTION(GBF4, SIDING, { GBF4a, Turnout20, GBF4b });
 
-        BLOCK(N, TRANSIT, { PBF_To_N, Turnout14 });
-        BLOCK(PBF12, TRANSIT, { Turnout1, PBF2a, Turnout4, B_PBF2_PBF1 });
-        BLOCK(GBF, TRANSIT, { B_To_GBF, DoubleSlipTurnout15_16, Turnout17, Turnout18 });
+        SECTION(N, TRANSIT, { PBF_To_N, Turnout14 });
+        SECTION(PBF12, TRANSIT, { Turnout1, PBF2a, Turnout4, B_PBF2_PBF1 });
+        SECTION(GBF, TRANSIT, { B_To_GBF, DoubleSlipTurnout15_16, Turnout17, Turnout18 });
 
-        BLOCK(B1, FREE, { Turnout8, B1 });
-        BLOCK(B2, FREE, { Turnout9, B2, Turnout13});
-        BLOCK(B3, FREE, { B3 });
-        BLOCK(B4, FREE, { B4 });
-        BLOCK(B5, FREE, { Turnout10, Turnout11, B5, Turnout12 });
-        BLOCK(B6, FREE, { B6 });
+        SECTION(B1, FREE, { Turnout8, B1 });
+        SECTION(B2, FREE, { Turnout9, B2, Turnout13});
+        SECTION(B3, FREE, { B3 });
+        SECTION(B4, FREE, { B4 });
+        SECTION(B5, FREE, { Turnout10, Turnout11, B5, Turnout12 });
+        SECTION(B6, FREE, { B6 });
 
-        BLOCK(PBF1, PLATFORM, { Turnout5, PBF1 });
-        BLOCK(PBF2, PLATFORM, { PBF2, Turnout7, T7_To_T8 });
-        BLOCK(PBF3, PLATFORM, { Turnout2, Turnout3, PBF3, Turnout6, PBF3a });
+        SECTION(PBF1, PLATFORM, { Turnout5, PBF1 });
+        SECTION(PBF2, PLATFORM, { PBF2, Turnout7, T7_To_T8 });
+        SECTION(PBF3, PLATFORM, { Turnout2, Turnout3, PBF3, Turnout6, PBF3a });
     default:
-        winston::logger.warn("undefined block: ", block._to_string());
+        winston::logger.warn("undefined section: ", section._to_string());
         break;
 }
     return nullptr;
@@ -906,7 +906,7 @@ void Y2021Railway::attachDetectors()
 {
 }
 
-const bool Y2021Railway::supportBlocks() const
+const bool Y2021Railway::supportSections() const
 {
     return true;
 }

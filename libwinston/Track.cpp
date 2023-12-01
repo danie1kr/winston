@@ -6,7 +6,7 @@
 
 namespace winston
 {
-	Track::Track(const std::string name, Length trackLength) : Shared_Ptr<Track>()/*, std::enable_shared_from_this<Track>()*/, _name(name), _block(0), trackLength(trackLength)
+	Track::Track(const std::string name, Length trackLength) : Shared_Ptr<Track>()/*, std::enable_shared_from_this<Track>()*/, _name(name), _section(0), trackLength(trackLength)
 	{
 	}
 
@@ -42,14 +42,14 @@ namespace winston
 		return this->connectTo(local, nullptr, to, remote, nullptr);
 	}
 
-	void Track::block(const Address address)
+	void Track::section(const Address address)
 	{
-		this->_block = address;
+		this->_section = address;
 	}
 
-	const Address Track::block() const
+	const Address Track::section() const
 	{
-		return this->_block;
+		return this->_section;
 	}
 
 	void Track::attachSignal(Signal::Shared signal, const Connection guarding)

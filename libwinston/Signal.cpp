@@ -31,8 +31,8 @@ namespace winston
 		return s;
 	}
 
-	Signal::Signal(Callback callback, const Length distance)
-		: callback(callback), _distance(distance), _aspect((unsigned int)Aspect::Go), _forced(0)
+	Signal::Signal(const Id deviceId, Callback callback, const Length distance)
+		: deviceId(deviceId), callback(callback), _distance(distance), _aspect((unsigned int)Aspect::Go), _forced(0)
 	{
 
 	}
@@ -205,8 +205,8 @@ namespace winston
 		this->_lights[0].value = Light::maximum(Aspect::Halt);
 	}
 
-	SignalDevice::SignalDevice(const size_t ports)
-		: ports(ports)
+	SignalDevice::SignalDevice(const Id id, const size_t ports)
+		: id(id), ports(ports)
 	{
 
 	}

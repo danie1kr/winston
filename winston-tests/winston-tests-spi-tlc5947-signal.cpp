@@ -22,7 +22,7 @@ namespace winstontests
 			this->signalInterfaceDevice = SignalInterfaceDevice::make(3, 5000000);
 			auto TLC5947Off = this->signalInterfaceDevice->getOutputPinDevice(4);
 			this->signalInterfaceDevice->init();
-			this->signalDevice = TLC5947::make(24, this->signalInterfaceDevice, TLC5947Off);
+			this->signalDevice = TLC5947::make(0, 24, this->signalInterfaceDevice, TLC5947Off);
 		}
 
 		TEST_METHOD_CLEANUP(cleanup)
@@ -113,7 +113,7 @@ namespace winstontests
 			}
 
 			auto port1{ 0 };
-			auto signal1 = winston::SignalKS::make(winston::Signal::defaultCallback(), 0, port1);
+			auto signal1 = winston::SignalKS::make(0, winston::Signal::defaultCallback(), 0, port1);
 
 			signal1->aspect(winston::Signal::Aspect::Halt);
 			this->signalDevice->update(*signal1);

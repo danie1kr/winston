@@ -983,7 +983,7 @@
             $info.find("#infoSignalConnection").text(node.data("guarding"));
             let lights = _.map(node.data("lights"), l => " Port: " + l.port)
             let lightsText = lights.join("<br>");
-            $info.find("#infoSignalLights").html(lightsText);
+            $info.find("#infoSignalLights").html("Device: " + node.data("device") + "<br>" + lightsText);
             $info.css("top", event.originalEvent.clientY + 'px')
                 .css("left", (event.originalEvent.clientX + 20) + 'px')
                 .show();
@@ -1478,10 +1478,11 @@
                 if (existing.length > 0) {
                     existing.removeClass("unverified");
                     existing.data("lights", signal.lights);
+                    existing.data("device", signal.device);
                 }
                 else {
                     let lights = signal.lights;
-                    nodes.push({ group: 'nodes', data: { id: track + "_signal_" + guarding, guarding: guarding, parentTrack: track, lights: lights, relativePosition: { x: 0, y: 20 } }, position: { x: parentPosition.x, y: parentPosition.y + 20 }, classes: "signal" });
+                    nodes.push({ group: 'nodes', data: { id: track + "_signal_" + guarding, guarding: guarding, parentTrack: track, lights: signal.lights, device: signal.device, relativePosition: { x: 0, y: 20 } }, position: { x: parentPosition.x, y: parentPosition.y + 20 }, classes: "signal" });
                     edges.push({ group: 'edges', data: { source: track + "_signal_" + guarding, target: edgeTarget }, classes: "signalConnector" });
                 }
             });

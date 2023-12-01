@@ -22,7 +22,7 @@ namespace winston
 		{
 		public:
 			Signal(SignalDevice::Shared device, const winston::Signal::Callback callback = winston::Signal::defaultCallback(), const Length distance = 0, const Port port = 0) :
-				_Signal(callback, distance, port), SignalOfDevice(device) {
+				_Signal(device->id, callback, distance, port), SignalOfDevice(device) {
 
 			}
 
@@ -31,7 +31,7 @@ namespace winston
 		};
 
 	public:
-		SignalController(const std::vector<typename SignalDevice::Shared> devices);
+		SignalController(const Id id, const std::vector<typename SignalDevice::Shared> devices);
 		virtual ~SignalController();
 
 		template<class _Signal>

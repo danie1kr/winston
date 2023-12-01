@@ -282,14 +282,15 @@ void Kornweinheim::systemSetup() {
 
     // two chains, each having two TLC5947 devies
     const unsigned int chainedTLC5947s = 2;
+    unsigned int signalDeviceId = 0;
     for (const auto& device : this->signalInterfaceDevices)
     {
         device->init();
         device->skipSend(true);
-        this->signalDevices.push_back(TLC5947::make(chainedTLC5947s * 24, device, TLC5947Off));
+        this->signalDevices.push_back(TLC5947::make(signalDeviceId++, chainedTLC5947s * 24, device, TLC5947Off));
     }
 
-    this->signalController = winston::SignalController::make(this->signalDevices);
+    this->signalController = winston::SignalController::make(0, this->signalDevices);
 
     // storage
     this->storageLayout = Storage::make(std::string(this->name()).append(".").append("winston.storage"), 256 * 1024);
@@ -338,8 +339,6 @@ void Kornweinheim::setupSignals()
     this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF1), winston::Track::Connection::B, 5U, signalUpdateCallback);
     this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::T7_To_T8), winston::Track::Connection::B, 5U, signalUpdateCallback);
     this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF3a), winston::Track::Connection::B, 5U, signalUpdateCallback);
-
-    // dummy
     this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF1), winston::Track::Connection::A, 5U, signalUpdateCallback);
     this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF2), winston::Track::Connection::A, 5U, signalUpdateCallback);
     this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF3), winston::Track::Connection::A, 5U, signalUpdateCallback);

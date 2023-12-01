@@ -715,6 +715,7 @@ namespace winston
 				data["guarding"] = winston::Track::ConnectionToString(connection);
 				data["pre"] = signal->preSignal();
 				data["main"] = signal->mainSignal();
+                data["device"] = signal->deviceId;
 				auto lights = data.createNestedArray("lights");
 				for (const auto& signalLight : signal->lights())
 				{

@@ -2,8 +2,8 @@
 
 #include "TLC5947_SignalDevice.h"
 
-TLC5947::TLC5947(const size_t ports, typename winston::SendDevice<unsigned char>::Shared device, typename winston::GPIODigitalPinOutputDevice::Shared pinOff)
-	: winston::SignalDevice(ports), device(device), data((ports * bits / 8) / sizeof(unsigned char), 0), pinOff(pinOff)
+TLC5947::TLC5947(const winston::Id id, const size_t ports, typename winston::SendDevice<unsigned char>::Shared device, typename winston::GPIODigitalPinOutputDevice::Shared pinOff)
+	: winston::SignalDevice(id, ports), device(device), data((ports * bits / 8) / sizeof(unsigned char), 0), pinOff(pinOff)
 {
 	pinOff->set(winston::GPIOPinDevice::State::High);
 }

@@ -159,7 +159,7 @@ namespace winston
 
 		using Callback = std::function<const State(const Aspects aspect)>;
 		static Callback defaultCallback();
-		Signal(const Callback callback = defaultCallback(), const Length distance = 0);
+		Signal(const Id deviceId, const Callback callback = defaultCallback(), const Length distance = 0);
 
 		const State aspect(const Aspect aspect);
 		const Aspects aspect() const;
@@ -174,6 +174,8 @@ namespace winston
 		
 		virtual const std::span<const Light> lights() const = 0;
 		static const std::string buildAspects(const Aspects first);
+
+		const Id deviceId;
 	protected:
 
 		virtual void init() = 0;
@@ -194,8 +196,8 @@ namespace winston
 	class SignalInstance : public Signal, public Shared_Ptr<SignalInstance<_Aspects>>
 	{
 	public:
-		SignalInstance(const Callback callback = Signal::defaultCallback(), const Length distance = 0, const Port port = 0)
-			: Signal(callback, distance)
+		SignalInstance(const Id deviceId = 0, const Callback callback = Signal::defaultCallback(), const Length distance = 0, const Port port = 0)
+			: Signal(deviceId, callback, distance)
 			, _lights(Sequence<BitCounter<_Aspects>::count() - 1>::generate(_Aspects, port)) {
 			this->init();
 		};
@@ -279,13 +281,14 @@ namespace winston
 	{
 		//static_assert(bits <= sizeof(T) * 8, "too many bits for T");
 	public:
-		SignalDevice(const size_t ports);
+		SignalDevice(const Id id, const size_t ports);
 		virtual ~SignalDevice();
 
 		const Result update(const winston::Signal &signal);
 		const Result flush();
 		Command::Shared flushCommand(const Duration waitPeriod = toMilliseconds(40));
 
+		const Id id;
 		const size_t ports;
 		using Shared_Ptr<SignalDevice>::Shared;
 		using Shared_Ptr<SignalDevice>::make;

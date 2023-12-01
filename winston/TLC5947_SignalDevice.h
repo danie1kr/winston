@@ -14,7 +14,7 @@ public:
 	#pragma message("TLC5947 Chaining: For more than 3 devices, use a very low clock (<10khz) or spi buffer/repeaters like 74lvc245 or TXU0304")
 	// see https://forums.adafruit.com/viewtopic.php?t=58367&start=15
 
-	TLC5947(const size_t ports, typename winston::SendDevice<unsigned char>::Shared device, typename winston::GPIODigitalPinOutputDevice::Shared pinOff);
+	TLC5947(const winston::Id id, const size_t ports, typename winston::SendDevice<unsigned char>::Shared device, typename winston::GPIODigitalPinOutputDevice::Shared pinOff);
 	virtual ~TLC5947();
 
 	using winston::Shared_Ptr<TLC5947>::Shared;

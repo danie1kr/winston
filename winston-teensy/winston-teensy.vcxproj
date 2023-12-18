@@ -156,6 +156,7 @@
     <DebuggerFlavor>VisualMicroDebugger</DebuggerFlavor>
   </PropertyGroup>
   <ItemGroup>
+    <ClCompile Include="..\libwinston\Section.cpp" />
     <ClCompile Include="..\libwinston\SignalController.cpp" />
     <ClCompile Include="..\libwinston\SignalTower.cpp" />
     <ClCompile Include="..\libwinston\Storyline.cpp" />
@@ -166,7 +167,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\libwinston\Block.h" />
     <ClInclude Include="..\libwinston\Callback.h" />
     <ClInclude Include="..\libwinston\Command.h" />
     <ClInclude Include="..\libwinston\Detector.h" />
@@ -179,6 +179,7 @@
     <ClInclude Include="..\libwinston\Position.h" />
     <ClInclude Include="..\libwinston\Railway.h" />
     <ClInclude Include="..\libwinston\Route.h" />
+    <ClInclude Include="..\libwinston\Section.h" />
     <ClInclude Include="..\libwinston\Signal.h" />
     <ClInclude Include="..\libwinston\SignalController.h" />
     <ClInclude Include="..\libwinston\SignalTower.h" />
@@ -202,7 +203,6 @@
     <ClInclude Include="__vm\.winston-teensy.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\libwinston\Block.cpp" />
     <ClCompile Include="..\libwinston\Callback.cpp" />
     <ClCompile Include="..\libwinston\Command.cpp" />
     <ClCompile Include="..\libwinston\Detector.cpp" />

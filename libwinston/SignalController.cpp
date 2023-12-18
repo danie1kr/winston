@@ -57,4 +57,17 @@ namespace winston
 		return Result::OK;
 	}
 
+	template<>
+	const Result SignalController::attach<winston::SignalAlwaysHalt>(winston::Track::Shared track, const winston::Track::Connection connection, winston::Distance distance, const winston::Railway::Callbacks::SignalUpdateCallback& signalUpdateCallback)
+	{
+		auto s = Signal<SignalAlwaysHalt>::make(devices[1],
+			[track, connection, signalUpdateCallback](const winston::Signal::Aspects aspect)->const winston::State {
+				return signalUpdateCallback(*track, connection, aspect);
+			}
+		, distance, 47);
+		track->attachSignal(s, connection);
+
+		return Result::OK;
+	}
+
 }

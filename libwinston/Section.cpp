@@ -1,4 +1,5 @@
 #include "Section.h"
+#include <list>
 
 namespace winston {
 	Section::Section(const Type type, const Trackset tracks) : Shared_Ptr<Section>(), type(type), _tracks(tracks), entriesSet(this->buildEntriesSet())

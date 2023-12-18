@@ -306,37 +306,39 @@ namespace winston
 
 		virtual const Result on_http(typename _WebServer::HTTPConnection& connection, const HTTPMethod method, const std::string& resource) = 0;
 		const Result on_http_internal(typename _WebServer::HTTPConnection& connection, const HTTPMethod method, const std::string& resource) {
-			/*const std::string path_signals("/signals");
+			const std::string path_signals("/signals");
 			const std::string path_signalstest("/signals-test");
 			const std::string path_confirmation_yes("/confirm_yes");
 			const std::string path_confirmation_maybe("/confirm_maybe");
-			const std::string path_confirmation_no("/confirm_no");*/
-			/*
+			const std::string path_confirmation_no("/confirm_no");
+
 			if (resource.compare(path_signals) == 0)
 			{
 				connection.status(200);
 				connection.header("content-type"_s, "text/html; charset=UTF-8"_s);
 				connection.header("Connection"_s, "close"_s);
-				connection.body("<html><head>winston signal list</head><body><table border=1><tr><th>track</th><th>connection</th><th>light</th><th>port</th><th>device @ port</th></tr>"_s);
+				std::string body = "<html><head>winston signal list</head><body><table border=1><tr><th>track</th><th>connection</th><th>light</th><th>port</th><th>device @ port</th></tr>";
 				for (unsigned int i = 0; i < railway->tracksCount(); ++i)
 				{
 					auto track = railway->track(i);
 					switch (track->type())
 					{
 					case winston::Track::Type::Bumper:
-						this->writeSignalHTMLList(connection, track, winston::Track::Connection::DeadEnd);
-						this->writeSignalHTMLList(connection, track, winston::Track::Connection::A);
+						this->writeSignalHTMLList(body, track, winston::Track::Connection::DeadEnd);
+						this->writeSignalHTMLList(body, track, winston::Track::Connection::A);
 						break;
 					case winston::Track::Type::Rail:
-						this->writeSignalHTMLList(connection, track, winston::Track::Connection::A);
-						this->writeSignalHTMLList(connection, track, winston::Track::Connection::B);
+						this->writeSignalHTMLList(body, track, winston::Track::Connection::A);
+						this->writeSignalHTMLList(body, track, winston::Track::Connection::B);
 						break;
 					default:
 						break;
 					}
 				}
-				connection.body("</table></body></html>\r\n"_s);
+				body += "</table></body></html>\r\n";
+				connection.body(body);
 			}
+			/*
 			else if (resource.compare(path_signalstest) == 0)
 			{
 				const unsigned int interval = 5;
@@ -407,12 +409,14 @@ namespace winston
 				connection.header("content-type"_s, "text/html; charset=UTF-8"_s);
 				connection.header("Connection"_s, "close"_s);
 				connection.body(winston::build("<html><head>winston signal test</head><body>signal test for 5x ", interval, "s </body></html>"_s));
-			}
+			}*/
 			else
 				return Result::NotFound;
+			return Result::OK;
+		}
 
 		// add a signal to the /signal output
-		void writeSignalHTMLList(typename _WebServer::HTTPConnection& connection, const Track::Shared track, const Track::Connection trackCon)
+		void writeSignalHTMLList(std::string &body, const Track::Shared track, const Track::Connection trackCon)
 		{
 			if (auto signal = track->signalGuarding(trackCon))
 			{
@@ -452,19 +456,16 @@ namespace winston
 						}; break;
 					}
 
-					std::string signal = "<span style=\"color:" + color + ";\">" + icon + "</span>";
+					//std::string signal = "<span style=\"color:" + color + ";\">" + icon + "</span>";
 
 					if (l == 0)
-						connection.body(winston::build("<tr><td rowspan=", cnt, ">", track->name(), "</td><td rowspan=", cnt, ">", winston::Track::ConnectionToString(trackCon), "</td><td>"));
+						body += winston::build("<tr><td rowspan=", cnt, ">", track->name(), "</td><td rowspan=", cnt, ">", winston::Track::ConnectionToString(trackCon), "</td><td>");
 					else
-						connection.body(winston::build("<tr><td>"));
+						body += winston::build("<tr><td>");
 					++l;
-					connection.body(winston::build(l, signal, "</td><td>", light.port, "</td><td>", light.port == 999 ? "n/a" : winston::build(light.port / 24, " @ ", light.port % 24), "</td></tr>"));
+					body += winston::build(l, "<span style=\"color:" + color + ";\">" + icon + "</span>", "</td><td>", light.port, "</td><td>", signal->deviceId, " @ ", light.port < 10 ? "0" : "", light.port, "</td></tr>");
 				}
 			}
-		}
-			return Result::OK;*/
-			return Result::NotFound;
 		}
 #endif
 

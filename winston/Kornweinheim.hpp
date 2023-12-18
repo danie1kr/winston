@@ -337,7 +337,7 @@ void Kornweinheim::setupSignals()
 
     // PBF
     this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF1), winston::Track::Connection::B, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::T7_To_T8), winston::Track::Connection::B, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF2), winston::Track::Connection::B, 5U, signalUpdateCallback);
     this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF3a), winston::Track::Connection::B, 5U, signalUpdateCallback);
     this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF1), winston::Track::Connection::A, 5U, signalUpdateCallback);
     this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF2), winston::Track::Connection::A, 5U, signalUpdateCallback);

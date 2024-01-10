@@ -8,7 +8,6 @@
 
 #include "FT232_Device.h"
 
-#include <WinSock2.h>
 #include <WS2tcpip.h>
 template<winston::hal::Socket::Type SocketType>
 class SocketWinSock : public winston::hal::Socket, winston::Shared_Ptr<SocketWinSock<SocketType>>
@@ -193,6 +192,7 @@ private:
 	websocketpp::server<websocketpp::config::asio> server;
 };
 using WebServer = WebServerWSPP;
+
 
 class DisplayWin : public winston::TaskConfirm::Display, public winston::Shared_Ptr<DisplayWin>
 {

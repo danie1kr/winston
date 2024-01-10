@@ -64,7 +64,7 @@
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LinkIncremental>false</LinkIncremental>
+    <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -135,6 +135,7 @@
     <ClCompile Include="external\central-z21\Z21.cpp" />
     <ClCompile Include="external\central-z21\Z21Packet.cpp" />
     <ClCompile Include="FT232_Device.cpp" />
+    <ClCompile Include="winston-shared-hal-x64.cpp" />
     <ClInclude Include="Kornweinheim.hpp" />
     <ClCompile Include="railways.cpp" />
     <ClCompile Include="TimeSaver.cpp">
@@ -170,7 +171,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="external\central-z21\readme.md" />
-    <None Include="resources\package.json" />
     <None Include="resources\winston.html" />
   </ItemGroup>
   <ItemGroup>

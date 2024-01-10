@@ -80,4 +80,8 @@ namespace winston
 		Id currentDev;
 		Port currentPort;
 	};
+
+	template<>
+	const Result SignalController::attach<winston::SignalAlwaysHalt>(winston::Track::Shared track, const winston::Track::Connection connection, winston::Distance distance, const winston::Railway::Callbacks::SignalUpdateCallback& signalUpdateCallback);
+
 }

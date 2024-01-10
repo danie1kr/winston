@@ -555,4 +555,73 @@ namespace winston
 	protected:
 		SectionMap _sections;
 	};
+
+	/*
+		tracks: [[[x,y],[x,y]], [[x,y], [x,y]] ,
+		turnouts : [
+			id: edge.data("track"),
+            connection: edge.data("connection"),
+            line: [[from.x, from.y], [to.x, to.y]]] ,
+		bounds : {
+		min: {
+			x: 999999,
+			y : 999999
+		},
+		max : {
+			x: -999999,
+			y : -999999
+		}
+		}
+		*/
+	struct RailwayMicroLayout
+	{
+		struct Point
+		{
+			int32_t x;
+			int32_t y;
+		};
+		using Track = std::vector<Point>;
+		using Tracks = std::vector<Track>;
+
+		struct Turnout
+		{
+			std::string id;
+			std::string connection;
+			std::array<Point,2> p;
+		};
+		using Turnouts = std::vector<Turnout>;
+
+		struct Bounds
+		{
+			Point min, max;
+		};
+
+		Tracks tracks;
+		Turnouts turnouts;
+
+		Bounds bounds;
+
+		Result scale(unsigned int width, unsigned int height)
+		{
+			if (bounds.max.x - bounds.min.x == 0 || bounds.max.y - bounds.min.y == 0)
+				return Result::InvalidParameter;
+
+			for(auto &track : this->tracks)
+				for (auto& p : track)
+				{
+					p.x = ((p.x - bounds.min.x) * width) / (bounds.max.x - bounds.min.x);
+					p.y = ((p.y - bounds.min.y) * height) / (bounds.max.y - bounds.min.y);
+				}
+
+			for (auto& turnout : this->turnouts)
+				for (auto& p : turnout.p)
+				{
+					p.x = ((p.x - bounds.min.x) * width) / (bounds.max.x - bounds.min.x);
+					p.y = ((p.y - bounds.min.y) * height) / (bounds.max.y - bounds.min.y);
+				}
+
+			this->bounds.min = { 0, 0};
+			this->bounds.max = { (int32_t)width, (int32_t)height };
+		}
+	};
 }

@@ -69,5 +69,4 @@ namespace winston
 
 		return Result::OK;
 	}
-
 }

@@ -366,7 +366,6 @@ constexpr uint8_t Arduino_SPIDevice::DataMode(const SPIMode mode)
 
 const winston::Result Arduino_SPIDevice::init()
 {
-    SPI.begin();
     pinMode(this->chipSelect, OUTPUT);
     digitalWrite(this->chipSelect, HIGH);
     return winston::Result::OK;
@@ -574,6 +573,8 @@ namespace winston
             }*/
             text("Winston Teensy Init Hello");
 
+            SPI.begin();
+
 #ifdef WINSTON_WITH_SDFAT
             if (!SD.begin(BUILTIN_SDCARD)) {
                 SD.sdfs.printSdError(&Serial);
@@ -596,8 +597,13 @@ namespace winston
             uint8_t mac[6];
             teensyMAC(mac);
 #if defined(WINSTON_ETHERNET_IP) && defined(WINSTON_ETHERNET_DNS) && defined(WINSTON_ETHERNET_GATEWAY) && defined(WINSTON_ETHERNET_SUBNET)
-            Ethernet.begin(mac, WINSTON_ETHERNET_IP, WINSTON_ETHERNET_DNS, WINSTON_ETHERNET_GATEWAY, WINSTON_ETHERNET_SUBNET);
+            #ifdef WINSTON_WITH_QNETHERNET
+            Ethernet.begin(WINSTON_ETHERNET_IP, WINSTON_ETHERNET_SUBNET, WINSTON_ETHERNET_GATEWAY);
 #else
+            Ethernet.begin(mac, WINSTON_ETHERNET_IP, WINSTON_ETHERNET_DNS, WINSTON_ETHERNET_GATEWAY, WINSTON_ETHERNET_SUBNET);
+#endif
+#else
+
             if (!Ethernet.begin(mac))
                 error("Failed to start Ethernet\n"_s);
             else

@@ -45,6 +45,9 @@ const size_t secondsPerPrint = WINSTON_STATISTICS_SECONDS_PER_PRINT;
 #endif
 void winston_loop()
 {
+#ifdef WINSTON_WITH_QNETHERNET
+    Ethernet.loop();
+#endif
     if (!modelRailWayConfiguration.loop())
         winston::hal::delay(FRAME_SLEEP);
 #ifdef WINSTON_STATISTICS

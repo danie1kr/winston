@@ -530,7 +530,8 @@
                 case "loco": { loco(data); break; }
                 case "log": { log(data); break; }
                 case "status": { status(data); break; }
-                case "storeRailwayLayoutSuccessful": {
+                case "storeRailwayLayoutSuccessful":
+                case "storeRailwayMicroLayoutSuccessful": {
                     allowLayoutStorage = data;
                     if (allowLayoutStorage)
                         $saveLayout.removeClass("disabled");
@@ -851,6 +852,153 @@
             });
         }
 
+        function storeMicroLayout() {
+
+            let layout = {
+                tracks: [],
+                turnouts: [],
+                bounds: {
+                    min: {
+                        x: 999999,
+                        y: 999999
+                    },
+                    max: {
+                        x: -999999,
+                        y: -999999
+                    }
+                }
+            };
+
+            function updateBounds(pos) {
+                if (layout.bounds.min.x > pos.x) layout.bounds.min.x = pos.x;
+                if (layout.bounds.min.y > pos.y) layout.bounds.min.y = pos.y;
+                if (layout.bounds.max.x < pos.x) layout.bounds.max.x = pos.x;
+                if (layout.bounds.max.y < pos.y) layout.bounds.max.y = pos.y;
+            }
+
+            let tracks = [];
+            cy.edges(".track, .internal ").each(edge => {
+
+                let nodes = edge.connectedNodes(".trackNode, .connection, .connector");
+
+                if (nodes.length !== 2) {
+                    console.log("more than two nodes!");
+                }
+                else {
+                    let from = nodes[0].position();
+                    let to = nodes[1].position();
+
+                    if (from.x === to.x && from.y === to.y)
+                        return;
+
+                    updateBounds(from);
+                    updateBounds(to);
+
+                    if (edge.hasClass("internal")) {
+                        layout.turnouts.push({
+                            id: edge.data("track"),
+                            connection: edge.data("connection"),
+                            line: [[from.x, from.y], [to.x, to.y]]
+                        });
+                    }
+                    else
+                        tracks.push({ from: from, to: to });
+                }
+            });
+
+
+            function compactTracks(tracks) {
+
+                function merge(strips) {
+                    let result = [];
+                    _.each(strips, (strip, i) => {
+                        _.each(strips, (strip2, j) => {
+                            if (i >= j)
+                                return;
+                            // strip starts where strip2 ends, append strip to strip2
+                            if (strip[0][0] === strip2[strip2.length - 1][0] && strip[0][1] === strip2[strip2.length - 1][1]) {
+                                _.each(strip, (s, k) => {
+                                    if (k !== 0)
+                                        strip2.push(s);
+                                });
+                                strips[i] = [];
+                            }
+                            // strip starts where strip2 starts, prepend strip to strip2 in reverse
+                            else if (strip[0][0] === strip2[0][0] && strip[0][1] === strip2[0][1]) {
+                                _.each(strip, (s, k) => {
+                                    if (k !== 0)
+                                        strip2.unshift(s);
+                                });
+                                strips[i] = [];
+                            }
+                            // strip ends where strip2 starts, prepend strip to strip2 
+                            else if (strip[strip.length - 1][0] === strip2[0][0] && strip[strip.length - 1][1] === strip2[0][1]) {
+                                _.eachRight(strip, (s, k) => {
+                                    if (k !== 0)
+                                        strip2.unshift(s);
+                                });
+                                strips[i] = [];
+                            }
+                            // strip ends where strip2 ends, append strip to strip2 in reverse
+                            else if (strip[strip.length - 1][0] === strip2[0][0] && strip[strip.length - 1][1] === strip2[0][1]) {
+                                _.eachRight(strip, (s, k) => {
+                                    if (k !== 0)
+                                        strip2.append(s);
+                                });
+                                strips[i] = [];
+                            }
+                        });
+                    });
+
+                    return _.filter(strips, s => s.length > 0);
+                }
+
+                _.each(tracks, track => {
+
+                    if (track.found === true)
+                        return true;
+                    let found = false;
+                    let current = [[track.from.x, track.from.y], [track.to.x, track.to.y]];
+                    _.each(layout.tracks, ltrack => {
+                        // existing line strip starts with current segment end, prepend it
+                        if (ltrack[0][0] === current[1][0] && ltrack[0][1] === current[1][1]) {
+                            ltrack.unshift(current[0]);
+                            found = true;
+                        }
+                        // existing line strip ends with current segment start, append it
+                        else if (ltrack[ltrack.length - 1][0] === current[0][0] && ltrack[ltrack.length - 1][1] === current[0][1]) {
+                            ltrack.push(current[1]);
+                            found = true;
+                        }
+
+                        if (found)
+                            return false;
+                    });
+
+                    // new strip
+                    if (!found)
+                        layout.tracks.push(current);
+
+                    layout.tracks = merge(layout.tracks);
+                });
+
+                layout.tracks = _.map(layout.tracks, track => _.flatten(track));
+            }
+
+            /*tracks = [
+                { from: { x: 0, y: 0 }, to: { x: 1, y: 0 } }, { from: { x: 1, y: 0 }, to: { x: 2, y: 1 } },
+                { from: { x: 3, y: 0 }, to: { x: 0, y: 0 } },
+                { from: { x: 5, y: 5 }, to: { x: 6, y: 6 } },
+                { from: { x: 2, y: 1, }, to: {x: 5, y: 5 }}];*/
+            compactTracks(tracks);
+
+            let payload = JSON.stringify(layout);
+            let chunkSize = 32000;
+            for (let i = 0; i < payload.length; i += chunkSize)
+                send("storeRailwayMicroLayout", { layout: payload.substring(i, Math.min(i + chunkSize, payload.length)), offset: i, fullSize: payload.length });
+
+        }
+
         function storeRailwayLayout() {
             let layout =
             {
@@ -859,12 +1007,11 @@
             }
 
             let payload = JSON.stringify(layout);
-            let offset = 0;
-            let size = 0;
             let chunkSize = 32000;
             for (let i = 0; i < payload.length; i += chunkSize)
                 send("storeRailwayLayout", { layout: payload.substring(i, Math.min(i + chunkSize, payload.length)), offset: i, fullSize: payload.length });
 
+            storeMicroLayout();
         }
 
         /* context menus */

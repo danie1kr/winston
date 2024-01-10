@@ -128,7 +128,7 @@ namespace winston
 		{
 		protected:
 			StorageInterface(const size_t maxSize = 0);
-			size_t maxSize;
+			const size_t maxSize;
 		public:
 			using Shared_Ptr<StorageInterface>::Shared;
 			using Shared_Ptr<StorageInterface>::make;
@@ -139,6 +139,25 @@ namespace winston
 			virtual const Result write(const size_t address, unsigned char content) = 0;
 			virtual const Result write(const size_t address, std::string& content, const size_t length = 0) = 0;
 			virtual const Result sync() = 0;
+		};
+
+		class DisplayUX : public Shared_Ptr<DisplayUX>
+		{
+		protected:
+			DisplayUX(const unsigned int width, const unsigned int height);
+		public:
+			using Shared_Ptr<DisplayUX>::Shared;
+			using Shared_Ptr<DisplayUX>::make;
+			virtual const Result init() = 0;
+			virtual const Result brightness(unsigned char value) = 0;
+			virtual const Result setCursor(unsigned int x, unsigned int y) = 0;
+			virtual const bool getTouch(unsigned int &x, unsigned int &y) = 0;
+			virtual const Result draw(unsigned int x, unsigned int y, unsigned int w, unsigned int h, void* data) = 0;
+			virtual const unsigned char brightness() = 0;
+			virtual const unsigned int tick() = 0;
+
+			const unsigned int width;
+			const unsigned int height;
 		};
 	}
 }

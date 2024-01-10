@@ -8,15 +8,9 @@
 
 #include "winston-hal-x64.h"
 
-#pragma comment(lib, "ws2_32.lib")
-
 using websocketpp::lib::placeholders::_1;
 using websocketpp::lib::placeholders::_2;
 
-const char* operator "" _s(const char* in, size_t len)
-{
-    return in;
-}
 
 WebServerWSPP::HTTPConnectionWSPP::HTTPConnectionWSPP(HTTPClient& connection) 
     : HTTPConnection(), connection(connection) 
@@ -531,45 +525,4 @@ const winston::Result DisplayWin::send(const std::vector<DataType> data)
     for (auto& line : data)
         winston::hal::text(winston::build(line, "\n"));
     return winston::Result::OK;
-}
-
-namespace winston
-{
-    namespace hal {
-        void init()
-        {
-            {
-                WSADATA wsaData;
-                if (!WSAStartup(MAKEWORD(1, 1), &wsaData))
-                    runtimeEnableNetwork();
-            }
-        }
-
-        void text(const std::string& text)
-        {
-            std::cout << text << std::endl;
-        }
-
-        void error(const std::string& error)
-        {
-            logger.err(error);
-        }
-
-        void fatal(const std::string reason)
-        {
-            logger.log(reason, Logger::Entry::Level::Fatal);
-            throw std::exception(reason.c_str());
-            exit(-1);
-        }
-
-        void delay(const unsigned int ms)
-        {
-            Sleep(ms);
-        }
-
-        TimePoint now()
-        {
-            return std::chrono::system_clock::now();
-        }
-    }
 }

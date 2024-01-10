@@ -107,6 +107,7 @@ namespace winston
         LocomotiveShed locomotiveShed;
         typename _Railway::AddressTranslator::Shared addressTranslator;
         winston::hal::StorageInterface::Shared storageLayout;
+        winston::hal::StorageInterface::Shared storageMicroLayout;
         DigitalCentralStation::Shared digitalCentralStation;
 	public:
 
@@ -120,13 +121,14 @@ namespace winston
             this->webServer.step();
         }
 
-		Result init(typename _Railway::Shared railway, LocomotiveShed locomotiveShed, winston::hal::StorageInterface::Shared storageLayout, typename _Railway::AddressTranslator::Shared addressTranslator, DigitalCentralStation::Shared digitalCentralStation, const unsigned int port, typename _WebServer::OnHTTP onHTTP, TurnoutToggleCallback turnoutToggle, RouteSetCallback routeSet)
+		Result init(typename _Railway::Shared railway, LocomotiveShed locomotiveShed, winston::hal::StorageInterface::Shared storageLayout, winston::hal::StorageInterface::Shared storageMicroLayout, typename _Railway::AddressTranslator::Shared addressTranslator, DigitalCentralStation::Shared digitalCentralStation, const unsigned int port, typename _WebServer::OnHTTP onHTTP, TurnoutToggleCallback turnoutToggle, RouteSetCallback routeSet)
 		{
             this->railway = railway;
             this->locomotiveShed = locomotiveShed;
             this->turnoutToggle = turnoutToggle;
             this->routeSet = routeSet;
             this->storageLayout = storageLayout;
+            this->storageMicroLayout = storageMicroLayout;
             this->addressTranslator = addressTranslator;
             this->digitalCentralStation = digitalCentralStation;
 
@@ -557,6 +559,39 @@ namespace winston
                     this->webServer.send(client, json);
                 }
             }
+            else if (std::string("\"storeRailwayMicroLayout\"").compare(op) == 0)
+            {
+                std::string layout = data["layout"];
+                size_t offset = (size_t)((unsigned int)data["offset"]);
+                size_t fullSize = (size_t)((unsigned int)data["fullSize"]);
+                size_t address = 0;
+                auto length = layout.size();
+                if (offset == 0)
+                {
+                    this->storageMicroLayout->write(address + 0, (fullSize >> 0) & 0xFF);
+                    this->storageMicroLayout->write(address + 1, (fullSize >> 8) & 0xFF);
+                    this->storageMicroLayout->write(address + 2, (fullSize >> 16) & 0xFF);
+                    this->storageMicroLayout->write(address + 3, (fullSize >> 24) & 0xFF);
+                    address = 4;
+                }
+                else
+                {
+                    address = 4 + offset;
+                }
+                this->storageMicroLayout->write(address, layout);
+
+                this->storageMicroLayout->sync();
+
+                if (offset == fullSize - length)
+                {
+                    DynamicJsonDocument obj(200);
+                    obj["op"] = "storeRailwayMicroLayoutSuccessful";
+                    obj["data"] = true;
+                    std::string json("");
+                    serializeJson(obj, json);
+                    this->webServer.send(client, json);
+                }
+            }
             else if (std::string("\"getRailwayLayout\"").compare(op) == 0)
             {
                 size_t address = 0;
@@ -582,6 +617,44 @@ namespace winston
 
                     DynamicJsonDocument obj(sizePerMessage + 1024);
                     obj["op"] = "layout";
+                    auto data = obj.createNestedObject("data");
+                    data["offset"] = (int)offset;
+                    data["fullSize"] = (int)length;
+                    data["layout"] = layout;
+                    std::string json("");
+                    serializeJson(obj, json);
+                    this->webServer.send(client, json);
+
+                    offset += sent;
+                    remaining -= sent;
+                }
+
+            }
+            else if (std::string("\"getRailwayMicroLayout\"").compare(op) == 0)
+            {
+                size_t address = 0;
+                std::vector<unsigned char> data;
+                auto result = this->storageMicroLayout->read(address, data, 4);
+                if (result != winston::Result::OK)
+                {
+                    winston::logger.err(winston::build("getRailwayMicroLayout could not read layout file."));
+                    return;
+                }
+                size_t length = (data[0] << 0) | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
+                address = 4;
+
+                const size_t sizePerMessage = size_t(0.7f * webServer.maxMessageSize());
+                size_t remaining = length;
+                size_t offset = 0;
+
+                while (remaining > 0)
+                {
+                    size_t sent = remaining > sizePerMessage ? sizePerMessage : remaining;
+                    std::string layout;
+                    this->storageMicroLayout->read(address + offset, layout, sent);
+
+                    DynamicJsonDocument obj(sizePerMessage + 1024);
+                    obj["op"] = "microLayout";
                     auto data = obj.createNestedObject("data");
                     data["offset"] = (int)offset;
                     data["fullSize"] = (int)length;

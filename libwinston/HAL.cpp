@@ -18,5 +18,11 @@ namespace winston
 		{
 
 		}
+
+		DisplayUX::DisplayUX(const unsigned int width, const unsigned int height)
+			: Shared_Ptr<DisplayUX>(), width(width), height(height)
+		{
+
+		}
 	}
 }

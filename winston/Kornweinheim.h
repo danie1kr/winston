@@ -21,7 +21,7 @@
 #include "external/central-z21/Z21.h"
 #include "TLC5947_SignalDevice.h"
 
-constexpr auto FRAME_SLEEP = 50;
+constexpr auto FRAME_SLEEP = 5;
 
 //#define RAILWAY_CLASS RailwayWithSiding
 //#define RAILWAY_CLASS TimeSaverRailway
@@ -107,6 +107,7 @@ private:
     */
     /* Storage */
     Storage::Shared storageLayout;
+    Storage::Shared storageMicroLayout;
 
     /* Occupancy Detector */
     winston::Result detectorUpdate(winston::Detector::Shared detector, winston::Locomotive &loco);

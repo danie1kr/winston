@@ -4,7 +4,7 @@
 
 #include "Util.h"
 #include "HAL.h"
-#include "Signal.h"
+//#include "Signal.h"
 
 #ifdef WINSTON_PLATFORM_TEENSY
 namespace std
@@ -120,11 +120,13 @@ namespace winston
 		return std::string(first);
 	}
 
+#ifndef WINSTON_PLATFORM_ESP32
 #ifdef WINSTON_HAS_CHRONO
 	const std::string build(const winston::TimePoint first)
 	{
 		return build(inMilliseconds(first.time_since_epoch()));
 	}
+#endif
 #endif
 
 	const std::string build(const winston::Result first)

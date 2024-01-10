@@ -1,0 +1,18 @@
+# winston-teensy build property overrides
+#
+
+# Alter or remove Optimization for Hardware Debugging
+# Can be used in Conjunction with Project Properties > Configuration Defines
+
+# Default is -Og
+# ide.compiler_flags_debug=-Og
+
+# Remove added flags by setting to blank:
+ide.compiler_flags_debug=
+
+recipe.hooks.deploy.postupload.1.pattern=cmd.exe /c ping localhost -n 2
+
+vm.build.sketch.cpp-use-build-cache=true
+vm.preproc.lib-search.lib-in-lib=all
+vm.preproc.lib-search.lib-in-sketch=all
+vm.ctags.cache.gcc-e=true

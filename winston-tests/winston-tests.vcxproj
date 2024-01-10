@@ -126,6 +126,7 @@
     <ClCompile Include="..\winston\railways.cpp" />
     <ClCompile Include="..\winston\TLC5947_SignalDevice.cpp" />
     <ClCompile Include="..\winston\winston-hal-x64.cpp" />
+    <ClCompile Include="..\winston\winston-shared-hal-x64.cpp" />
     <ClCompile Include="winston-tests-blocks.cpp" />
     <ClCompile Include="winston-tests-detector.cpp" />
     <ClCompile Include="winston-tests-mini.cpp" />

@@ -90,9 +90,9 @@ namespace winston
 			this->systemSetupComplete();
 		};
 
-		void setupWebServer(winston::hal::StorageInterface::Shared storageLayout, typename _Railway::AddressTranslator::Shared addressTranslator, const unsigned int port)
+		void setupWebServer(winston::hal::StorageInterface::Shared storageLayout, winston::hal::StorageInterface::Shared storageMicroLayout, typename _Railway::AddressTranslator::Shared addressTranslator, const unsigned int port)
 		{
-			this->webUI.init(this->railway, this->locomotiveShed, storageLayout, addressTranslator, this->digitalCentralStation, port,
+			this->webUI.init(this->railway, this->locomotiveShed, storageLayout, storageMicroLayout, addressTranslator, this->digitalCentralStation, port,
 				[=](typename _WebServer::HTTPConnection& client, const winston::HTTPMethod method, const std::string& resource) -> winston::Result {
 					auto result = this->on_http_internal(client, method, resource);
 			if (result == Result::NotFound)

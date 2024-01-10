@@ -16,8 +16,10 @@
 #endif
 #include <memory>
 
+#ifndef WINSTON_PLATFORM_ESP32
 #include <chrono>
 using namespace std::chrono_literals;
+#endif
 
 #include "WinstonSharedTypes.h"
 
@@ -47,7 +49,9 @@ namespace winston
 		NotInitialized,
 		NotFound,
 		OutOfBounds,
-		InvalidParameter
+		InvalidParameter,
+		OutOfMemory,
+		NotImplemented
 	};
 
 	enum class Features : unsigned int
@@ -132,6 +136,7 @@ namespace winston
 		}
 	};
 
+#ifndef WINSTON_PLATFORM_ESP32
 	template<class _T>
 	class Uniqe_Ptr
 	{
@@ -143,6 +148,7 @@ namespace winston
 			return std::make_unique<_T>(std::forward<Args>(args)...);
 		}
 	};
+#endif
 
 	class Device : public Shared_Ptr<Device>
 	{
@@ -328,6 +334,7 @@ namespace winston
 	using Length = unsigned int;
 	using Distance = int;
 
+#ifndef WINSTON_PLATFORM_ESP32
 	using TimePoint = std::chrono::system_clock::time_point;
 	using Duration = TimePoint::duration;
 #define toSeconds(x) (std::chrono::seconds(x))
@@ -336,5 +343,15 @@ namespace winston
 #define inSeconds(x) ((x) / toSeconds(1))
 #define inMilliseconds(x) ((x) / toMilliseconds(1))
 #define inMicroseconds(x) ((x) / toMicroseconds(1))
+#else
+	using TimePoint = uint32_t;
+	using Duration = uint32_t;
+#define toSeconds(x) (x / 1000)
+#define toMilliseconds(x) (x)
+#define toMicroseconds(x) (x * 1000)
+#define inSeconds(x) ((x) / toSeconds(1))
+#define inMilliseconds(x) ((x) / toMilliseconds(1))
+#define inMicroseconds(x) ((x) / toMicroseconds(1))
+#endif
 }
 #endif

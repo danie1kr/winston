@@ -10,13 +10,14 @@
 #define WINSTON_WITH_HTTP
 #define WINSTON_WITH_SDFAT
 
-#define WINSTON_WITH_QNETHERNET
+//#define WINSTON_WITH_QNETHERNET
 
 #ifdef WINSTON_WITH_QNETHERNET
 #define USE_NATIVE_ETHERNET         false
 #define USE_QN_ETHERNET             true
 #include <QNEthernet.h>
 using namespace qindesign::network;
+#warning untested
 #else
 #define USE_NATIVE_ETHERNET         true
 #define USE_QN_ETHERNET             false

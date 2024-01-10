@@ -99,6 +99,9 @@
     <ClInclude Include="external\ArduinoJson-v6.21.3.h">
       <Filter>external</Filter>
     </ClInclude>
+    <ClInclude Include="WebClient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Signal.cpp">

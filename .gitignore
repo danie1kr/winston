@@ -24,3 +24,8 @@
 /winston-esp-signal/winston-esp-signal.vcxproj.user
 /winston-loconet-bridge/.vs/winston-loconet-bridge
 /winston-teensy/obj/ARM/Debug
+/winston-display/external/lvgl
+/winston-display/x64/Debug
+/winston-display-esp/.vs/winston-display-esp
+/winston-display-esp/obj/x64/Debug
+/winston-display-esp/__vm

@@ -296,6 +296,9 @@ void Kornweinheim::systemSetup() {
     this->storageLayout = Storage::make(std::string(this->name()).append(".").append("winston.storage"), 256 * 1024);
     if (this->storageLayout->init() != winston::Result::OK)
         winston::logger.err("Kornweinheim.init: Storage Layout Init failed");
+    this->storageMicroLayout = Storage::make(std::string(this->name()).append(".").append("winston.micro.storage"), 256 * 1024);
+    if (this->storageMicroLayout->init() != winston::Result::OK)
+        winston::logger.err("Kornweinheim.init: Storage Layout Init failed");
 
     // detectors
 #ifdef WINSTON_PLATFORM_TEENSY
@@ -307,7 +310,7 @@ void Kornweinheim::systemSetup() {
     this->routesInProgress.clear();
     this->inventStorylines();
 
-    this->setupWebServer(this->storageLayout, this->addressTranslator, 8080);
+    this->setupWebServer(this->storageLayout, this->storageMicroLayout, this->addressTranslator, 8080);
 
     winston::logger.setCallback([this](const winston::Logger::Entry& entry) {
         this->webUI.log(entry);

@@ -11,7 +11,7 @@
 #include "winston-display-hal-esp32.h"
 #endif
 
-#include "../libwinston/external/ArduinoJson-v6.21.3.h"
+#include "../libwinston/external/ArduinoJson-v7.0.1.h"
 
 Screen currentScreen = Screen::Cinema;
 DisplayUX::Shared display = DisplayUX::make(480, 320);
@@ -49,7 +49,7 @@ void winston_setup()
         [](WinstonTarget target) -> winston::Result
         {
             webSocketClient.init([](ConnectionWSPP& client, const std::string message) {
-                DynamicJsonDocument msg(32 * 1024);
+                JsonDocument msg;
                 deserializeJson(msg, message);
                 JsonObject obj = msg.as<JsonObject>();
                 std::string op("\"");
@@ -59,7 +59,7 @@ void winston_setup()
 
                 if (std::string("\"microLayout\"").compare(op) == 0)
                 {
-                    DynamicJsonDocument layoutDoc(64*1024);
+                    JsonDocument layoutDoc;
                     std::string layoutJSON = data["layout"].as<std::string>();
                     deserializeJson(layoutDoc, layoutJSON);
                     JsonArray tracks = layoutDoc["tracks"].as<JsonArray>();
@@ -81,13 +81,30 @@ void winston_setup()
                         }
                         rml.tracks.push_back(t);
                     }
-                    rml.scale(480, 320);
+
+                    for (JsonVariant turnout: turnouts)
+                    {
+                        winston::RailwayMicroLayout::Turnout t;
+                        auto id = turnout["id"].as<std::string>();
+                        auto connection = turnout["connection"].as<std::string>();
+                        auto points = turnout["p"].as<JsonArray>();
+
+                        t.id = turnout["id"].as<std::string>();
+                        t.connection = turnout["connection"].as<std::string>();
+                        t.p[0].x = points[0].as<int32_t>();
+                        t.p[0].y = points[1].as<int32_t>();
+                        t.p[1].x = points[2].as<int32_t>();
+                        t.p[1].y = points[3].as<int32_t>();
+                        rml.turnouts.push_back(t);
+                    }
+                    int offset = 8;
+                    rml.scale({ offset, offset, 480 - 4 * offset, 320 - 2 * offset });
                     uxUpdateRailwayLayout(rml);
                 }
                 
                 }, target == WinstonTarget::BlackCanary ? "ws://192.168.188.57:8080" : "ws://192.168.188.133:8080");
 
-            DynamicJsonDocument msg(256);
+            JsonDocument msg;
             msg["op"] = "getRailwayMicroLayout";
             std::string json("");
             serializeJson(msg, json);

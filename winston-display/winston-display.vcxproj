@@ -442,6 +442,9 @@
     <ClCompile Include="external\lvgl\src\widgets\textarea\lv_textarea.c" />
     <ClCompile Include="external\lvgl\src\widgets\tileview\lv_tileview.c" />
     <ClCompile Include="external\lvgl\src\widgets\win\lv_win.c" />
+    <ClCompile Include="res\movie_png.c" />
+    <ClCompile Include="res\settings_png.c" />
+    <ClCompile Include="res\train_png.c" />
     <ClCompile Include="UX.cpp" />
     <ClCompile Include="winston-display-hal-x64.cpp" />
     <ClCompile Include="winston-display.cpp" />

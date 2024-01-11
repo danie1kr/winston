@@ -6,6 +6,15 @@
 #else
 #include <lvgl.h>
 #endif
+#ifdef __cplusplus
+extern "C" {
+#endif
+LV_IMG_DECLARE(movie_FILL0_wght400_GRAD0_opsz24);
+LV_IMG_DECLARE(settings_FILL0_wght400_GRAD0_opsz24);
+LV_IMG_DECLARE(train_FILL0_wght400_GRAD0_opsz24);
+#ifdef __cplusplus
+}
+#endif
 
 lv_obj_t* lvglScreenSettings;
 lv_obj_t* lvglScreenRailway;
@@ -14,6 +23,12 @@ lv_obj_t* labelWifiIP;
 lv_obj_t* ledWifi;
 
 std::vector<lv_obj_t*> tracks;
+std::map<const winston::RailwayMicroLayout::Turnout*, lv_obj_t*> turnouts;
+
+lv_style_t lvglStyleTrack, lvglStyleTurnout;
+
+constexpr int uiButtonPadding = 8;
+constexpr int uiButtonSize = 32;
 
 void uxUpdateRailwayLayout(winston::RailwayMicroLayout& rml)
 {
@@ -25,7 +40,20 @@ void uxUpdateRailwayLayout(winston::RailwayMicroLayout& rml)
     {
         auto line = lv_line_create(lvglScreenRailway);
         lv_line_set_points(line, (lv_point_precise_t*) &track.front(), track.size());
+        lv_obj_add_style(line, &lvglStyleTrack, 0);
         tracks.push_back(line);
+    }
+
+    for (auto& turnout : turnouts)
+        lv_obj_delete(turnout.second);
+
+    turnouts.clear();
+    for (const auto& turnout : rml.turnouts)
+    {
+        auto line = lv_line_create(lvglScreenRailway);
+        lv_line_set_points(line, (lv_point_precise_t*)&turnout.p.front(), turnout.p.size());
+        lv_obj_add_style(line, &lvglStyleTurnout, 0);
+        turnouts.insert(std::make_pair(&turnout, line));
     }
 }
 
@@ -84,7 +112,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
     brightnessData->callback = brightnessCallback;
 
     lv_obj_t* sliderBacklight = lv_slider_create(lvglScreenSettings);
-    lv_obj_set_size(sliderBacklight, display->width - 80 - 24, ySize);
+    lv_obj_set_size(sliderBacklight, display->width - 92 - 24, ySize);
     lv_obj_set_pos(sliderBacklight, 24, y);
     lv_obj_add_event_cb(sliderBacklight,
         [](lv_event_t* e) {
@@ -104,7 +132,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
     // wifi on/off + ip
     lv_obj_t* labelWifi = lv_label_create(lvglScreenSettings);
     lv_label_set_text(labelWifi, "WiFi");
-    lv_obj_set_size(labelWifi, display->width - 80, ySize);
+    lv_obj_set_size(labelWifi, display->width - 92, ySize);
     lv_obj_set_pos(labelWifi, 0, y);
     lv_obj_add_style(labelWifi, &styleLabel, 0);
     y += yInc;
@@ -121,7 +149,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
     // websocket connect
     lv_obj_t* labelDropdownWinstonTarget = lv_label_create(lvglScreenSettings);
     lv_label_set_text(labelDropdownWinstonTarget, "Winston");
-    lv_obj_set_size(labelDropdownWinstonTarget, display->width - 80, ySize);
+    lv_obj_set_size(labelDropdownWinstonTarget, display->width - 92, ySize);
     lv_obj_set_pos(labelDropdownWinstonTarget, 0, y);
     lv_obj_add_style(labelDropdownWinstonTarget, &styleLabel, 0);
     y += yInc;
@@ -134,7 +162,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
     winstonTargetData->callback = winstonTarget;
     lv_obj_t* dropdownWinstonTarget = lv_dropdown_create(lvglScreenSettings);
     lv_dropdown_set_options(dropdownWinstonTarget, "Black Canary\nTeensy\n");
-    lv_obj_set_size(dropdownWinstonTarget, display->width - 80, ySize);
+    lv_obj_set_size(dropdownWinstonTarget, display->width - 92, ySize);
     lv_obj_set_pos(dropdownWinstonTarget, 0, y);
     lv_obj_add_event_cb(dropdownWinstonTarget,
         [](lv_event_t* e) {
@@ -155,24 +183,34 @@ void setupUX(winston::hal::DisplayUX::Shared display,
         buttonData->screen = Screen::Cinema;
         buttonData->callback = gotoScreen;
         lv_obj_t* btnCinema = lv_button_create(lvglScreenSettings);
-        lv_obj_set_size(btnCinema, 64, 140);
-        lv_obj_set_pos(btnCinema, display->width - 80, 10);
+        lv_obj_set_content_width(btnCinema, uiButtonSize);
+        lv_obj_set_content_height(btnCinema, uiButtonSize);
+        lv_obj_align(btnCinema, LV_ALIGN_BOTTOM_RIGHT, -uiButtonPadding, -uiButtonPadding);
+        //lv_obj_padd
         lv_obj_add_event_cb(btnCinema, [](lv_event_t* e) {
             ButtonData* userData = (ButtonData*)lv_event_get_user_data(e);
             userData->callback(userData->screen);
             }, LV_EVENT_CLICKED, buttonData);
+
+        lv_obj_t *btnCinemaIcon = lv_image_create(btnCinema);
+        lv_image_set_src(btnCinemaIcon, &movie_FILL0_wght400_GRAD0_opsz24);
+        lv_obj_align(btnCinemaIcon, LV_ALIGN_CENTER, 0, 0);
     } 
     {
         ButtonData* buttonData = new ButtonData();
         buttonData->screen = Screen::Railway;
         buttonData->callback = gotoScreen;
         lv_obj_t* btnRailway = lv_button_create(lvglScreenSettings);
-        lv_obj_set_size(btnRailway, 64, 140);
-        lv_obj_set_pos(btnRailway, display->width - 80, 170);
+        lv_obj_set_content_width(btnRailway, uiButtonSize);
+        lv_obj_set_content_height(btnRailway, uiButtonSize);
+        lv_obj_align(btnRailway, LV_ALIGN_BOTTOM_RIGHT, -uiButtonPadding, -(4* uiButtonPadding + uiButtonSize));
         lv_obj_add_event_cb(btnRailway, [](lv_event_t* e) {
             ButtonData* userData = (ButtonData*)lv_event_get_user_data(e);
             userData->callback(userData->screen);
             }, LV_EVENT_CLICKED, buttonData);
+        lv_obj_t* btnRailwayIcon = lv_image_create(btnRailway);
+        lv_image_set_src(btnRailwayIcon, &train_FILL0_wght400_GRAD0_opsz24);
+        lv_obj_align(btnRailwayIcon, LV_ALIGN_CENTER, 0, 0);
     }
     // slider backlight
     // label: ip
@@ -191,25 +229,42 @@ void setupUX(winston::hal::DisplayUX::Shared display,
         buttonData->screen = Screen::Settings;
         buttonData->callback = gotoScreen;
         lv_obj_t* btnSettings = lv_button_create(lvglScreenRailway);
-        lv_obj_set_size(btnSettings, 64, 140);
-        lv_obj_set_pos(btnSettings, display->width - 80, 10);
+        lv_obj_set_content_width(btnSettings, uiButtonSize);
+        lv_obj_set_content_height(btnSettings, uiButtonSize);
+        lv_obj_align(btnSettings, LV_ALIGN_BOTTOM_RIGHT, -uiButtonPadding, -uiButtonPadding);
         lv_obj_add_event_cb(btnSettings, [](lv_event_t* e) {
             ButtonData* userData = (ButtonData*)lv_event_get_user_data(e);
             userData->callback(userData->screen);
             }, LV_EVENT_CLICKED, buttonData);
+        lv_obj_t* btnSettingsIcon = lv_image_create(btnSettings);
+        lv_image_set_src(btnSettingsIcon, &settings_FILL0_wght400_GRAD0_opsz24);
+        lv_obj_align(btnSettingsIcon, LV_ALIGN_CENTER, 0, 0);
     }
     {
         ButtonData* buttonData = new ButtonData();
         buttonData->screen = Screen::Railway;
         buttonData->callback = gotoScreen;
         lv_obj_t* btnRailway = lv_button_create(lvglScreenRailway);
-        lv_obj_set_size(btnRailway, 64, 140);
-        lv_obj_set_pos(btnRailway, display->width - 80, 170);
+        lv_obj_set_content_width(btnRailway, uiButtonSize);
+        lv_obj_set_content_height(btnRailway, uiButtonSize);
+        lv_obj_align(btnRailway, LV_ALIGN_BOTTOM_RIGHT, -uiButtonPadding, -(4 * uiButtonPadding + uiButtonSize));
         lv_obj_add_event_cb(btnRailway, [](lv_event_t* e) {
             ButtonData* userData = (ButtonData*)lv_event_get_user_data(e);
             userData->callback(userData->screen);
             }, LV_EVENT_CLICKED, buttonData);
+        lv_obj_t* btnRailwayIcon = lv_image_create(btnRailway);
+        lv_image_set_src(btnRailwayIcon, &train_FILL0_wght400_GRAD0_opsz24);
+        lv_obj_align(btnRailwayIcon, LV_ALIGN_CENTER, 0, 0);
     }
+
+    lv_style_init(&lvglStyleTrack);
+    lv_style_set_line_width(&lvglStyleTrack, 6);
+    lv_style_set_line_color(&lvglStyleTrack, lv_palette_main(LV_PALETTE_TEAL));
+    lv_style_set_line_rounded(&lvglStyleTrack, true);
+    lv_style_init(&lvglStyleTurnout);
+    lv_style_set_line_width(&lvglStyleTurnout, 8);
+    lv_style_set_line_color(&lvglStyleTurnout, lv_palette_main(LV_PALETTE_ORANGE));
+    lv_style_set_line_rounded(&lvglStyleTurnout, true);
 
     lv_screen_load(lvglScreenSettings);
 }

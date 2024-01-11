@@ -22,6 +22,9 @@
     <Filter Include="external\lvgl\src">
       <UniqueIdentifier>{11ccd616-9abf-45b8-b688-65a320f79184}</UniqueIdentifier>
     </Filter>
+    <Filter Include="res">
+      <UniqueIdentifier>{225281e8-5683-4f9d-a7af-91866920ecc0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="winston-display.cpp">
@@ -950,6 +953,15 @@
     </ClCompile>
     <ClCompile Include="UX.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="res\settings_png.c">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="res\movie_png.c">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="res\train_png.c">
+      <Filter>res</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

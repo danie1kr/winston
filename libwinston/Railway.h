@@ -601,27 +601,32 @@ namespace winston
 
 		Bounds bounds;
 
-		Result scale(unsigned int width, unsigned int height)
+		Result scale(const Bounds &screen)
 		{
-			if (bounds.max.x - bounds.min.x == 0 || bounds.max.y - bounds.min.y == 0)
+			int boundsWidth = this->bounds.max.x - this->bounds.min.x;
+			int boundsHeight = this->bounds.max.y - this->bounds.min.y;
+
+			if (boundsWidth == 0 || boundsHeight == 0)
 				return Result::InvalidParameter;
+
+			int screenWidth = screen.max.x - screen.min.x;
+			int screenHeight = screen.max.y - screen.min.y;
 
 			for(auto &track : this->tracks)
 				for (auto& p : track)
 				{
-					p.x = ((p.x - bounds.min.x) * width) / (bounds.max.x - bounds.min.x);
-					p.y = ((p.y - bounds.min.y) * height) / (bounds.max.y - bounds.min.y);
+					p.x = screen.min.x + ((p.x - bounds.min.x) * screenWidth) / boundsWidth;
+					p.y = screen.min.y + ((p.y - bounds.min.y) * screenHeight) / boundsHeight;
 				}
 
 			for (auto& turnout : this->turnouts)
 				for (auto& p : turnout.p)
 				{
-					p.x = ((p.x - bounds.min.x) * width) / (bounds.max.x - bounds.min.x);
-					p.y = ((p.y - bounds.min.y) * height) / (bounds.max.y - bounds.min.y);
+					p.x = screen.min.x + ((p.x - bounds.min.x) * screenWidth) / boundsWidth;
+					p.y = screen.min.y + ((p.y - bounds.min.y) * screenHeight) / boundsHeight;
 				}
 
-			this->bounds.min = { 0, 0};
-			this->bounds.max = { (int32_t)width, (int32_t)height };
+			this->bounds = screen;
 		}
 	};
 }

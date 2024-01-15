@@ -1,14 +1,13 @@
 #pragma once
+#define _WINSOCKAPI_ 
+#define WIN32_LEAN_AND_MEAN
 
-#include <WinSock2.h>
-#include "../libwinston/Signal.h"
 #include "../libwinston/HAL.h"
 
-#include "external/mio.hpp"
-
-#include "FT232_Device.h"
-
+#ifdef WINSTON_HAL_USE_SOCKETS
+#include <WinSock2.h>
 #include <WS2tcpip.h>
+
 template<winston::hal::Socket::Type SocketType>
 class SocketWinSock : public winston::hal::Socket, winston::Shared_Ptr<SocketWinSock<SocketType>>
 {
@@ -97,7 +96,10 @@ private:
 };
 using UDPSocket = SocketWinSock<winston::hal::Socket::Type::UDP>;
 using TCPSocket = SocketWinSock<winston::hal::Socket::Type::TCP>;
+#endif
 
+#ifdef WINSTON_HAL_USE_SERIAL
+#include "FT232_Device.h"
 class SerialDeviceWin : public winston::hal::SerialDevice, winston::Shared_Ptr<SerialDeviceWin>
 {
 public:
@@ -118,7 +120,10 @@ private:
 	HANDLE serialHandle;
 	COMMTIMEOUTS    timeouts;
 };
+#endif
 
+#ifdef WINSTON_HAL_USE_STORAGE
+#include "external/mio.hpp"
 class StorageWin : public winston::hal::StorageInterface, winston::Shared_Ptr<StorageWin>
 {
 public:
@@ -127,6 +132,7 @@ public:
 	const winston::Result init();
 	const winston::Result read(const size_t address, std::vector<unsigned char>& content, const size_t length = 1);
 	const winston::Result read(const size_t address, std::string& content, const size_t length = 1);
+	const winston::Result read(const size_t address, unsigned char &content);
 	const winston::Result write(const size_t address, unsigned char content);
 	const winston::Result write(const size_t address, std::vector<unsigned char>& content, const size_t length = 0);
 	const winston::Result write(const size_t address, std::string& content, const size_t length = 0);
@@ -142,7 +148,9 @@ private:
 	mio::mmap_sink mmap;
 };
 using Storage = StorageWin;
+#endif
 
+#ifdef WINSTON_HAL_USE_WEBSERVER
 #include "../libwinston/WebServer.h"
 
 #define _WEBSOCKETPP_CPP11_TYPE_TRAITS_
@@ -192,8 +200,59 @@ private:
 	websocketpp::server<websocketpp::config::asio> server;
 };
 using WebServer = WebServerWSPP;
+#endif
 
+#ifdef WINSTON_HAL_USE_DISPLAYUX
+class DisplayUXWin : public winston::hal::DisplayUX, public winston::Shared_Ptr<DisplayUXWin>
+{
+public:
+	DisplayUXWin(const unsigned int width, const unsigned int height);
+	virtual ~DisplayUXWin() = default;
+	virtual const winston::Result init();
+	virtual const winston::Result setCursor(unsigned int x, unsigned int y);
+	virtual const bool getTouch(unsigned int& x, unsigned int& y);
+	virtual const winston::Result draw(unsigned int x, unsigned int y, unsigned int w, unsigned int h, void* data);
+	virtual const winston::Result brightness(unsigned char value);
+	virtual const unsigned char brightness();
+	virtual const unsigned int tick();
+	using winston::Shared_Ptr<DisplayUXWin>::Shared;
+	using winston::Shared_Ptr<DisplayUXWin>::make;
+};
+using DisplayUX = DisplayUXWin;
+#endif
 
+#ifdef WINSTON_HAL_USE_WEBSOCKETCLIENT
+#include "../libwinston/WebClient.h"
+#define _WEBSOCKETPP_CPP11_TYPE_TRAITS_
+#define _WEBSOCKETPP_CPP11_STL_
+#define ASIO_STANDALONE
+#include "../winston/external/websocketpp/config/asio_no_tls_client.hpp"
+#include "../winston/external/websocketpp/client.hpp"
+
+using ConnectionWSPP = websocketpp::connection_hdl;
+class WebSocketClientWin : public winston::WebSocketClient<ConnectionWSPP>
+{
+public:
+	using Client = ConnectionWSPP;
+	WebSocketClientWin();
+	~WebSocketClientWin() = default;
+
+	void init(OnMessage onMessage, std::string uri);
+	void send(const std::string message);
+	void step();
+	void shutdown();
+	const bool connected();
+	const size_t maxMessageSize();
+private:
+	void on_msg(Client hdl, websocketpp::config::asio_client::message_type::ptr msg);
+	void on_fail(websocketpp::connection_hdl hdl);
+	websocketpp::client<websocketpp::config::asio_client> client;
+	websocketpp::client<websocketpp::config::asio_client>::connection_ptr connection;
+};
+using WebSocketClient = WebSocketClientWin;
+#endif
+
+#include "../libwinston/Storyline.h"
 class DisplayWin : public winston::TaskConfirm::Display, public winston::Shared_Ptr<DisplayWin>
 {
 public:

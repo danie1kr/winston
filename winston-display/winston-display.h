@@ -1,6 +1,20 @@
 #pragma once
 #include <functional>
+
+#ifndef WINSTON_HAL_USE_STORAGE
+#define WINSTON_HAL_USE_STORAGE
+#endif
+
+#ifndef WINSTON_HAL_USE_DISPLAYUX
+#define WINSTON_HAL_USE_DISPLAYUX
+#endif
+
+#ifndef WINSTON_HAL_USE_WEBSOCKETCLIENT
+#define WINSTON_HAL_USE_WEBSOCKETCLIENT
+#endif
+
 #include "../libwinston/HAL.h"
+#include "../libwinston/EventLooper.h"
 #include "../libwinston/Railway.h"
 #ifdef __cplusplus
 extern "C" {
@@ -14,8 +28,10 @@ extern "C" {
 
 enum class WinstonTarget
 {
-	BlackCanary,
-	Teensy
+	BlackCanaryLAN = 0,
+	BlackCanaryWifi = 1,
+	Localhost = 2,
+	Teensy = 3
 };
 
 enum class Screen
@@ -23,6 +39,13 @@ enum class Screen
 	Cinema = 0,
 	Settings = 1,
 	Railway = 2,
+};
+
+struct Settings
+{
+	unsigned char brightness;
+	WinstonTarget target;
+	Screen screen;
 };
 
 template<typename T>
@@ -39,7 +62,8 @@ void setupUX(winston::hal::DisplayUX::Shared display,
 	ValueCallbackUX<WinstonTarget> winstonTarget,
 	ValueGetterUX<std::string> wifiIP);
 
-void uxUpdateRailwayLayout(winston::RailwayMicroLayout &rml);
+void uxUpdateRailwayLayout(winston::RailwayMicroLayout& rml, ValueCallbackUX<std::string> turnoutToggle);
+void uxUpdateTurnout(const std::string& id, const int& state, const bool& locked);
 void uxUpdateWifiIP(const std::string ip);
 void uxUpdateWifiLED(const bool on);
 

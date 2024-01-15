@@ -23,15 +23,22 @@ lv_obj_t* labelWifiIP;
 lv_obj_t* ledWifi;
 
 std::vector<lv_obj_t*> tracks;
-std::map<const winston::RailwayMicroLayout::Turnout*, lv_obj_t*> turnouts;
+std::map<lv_obj_t*, const winston::RailwayMicroLayout::TurnoutConnection> turnouts;
+std::map<lv_obj_t*, const std::string> turnoutTogglers;
 
-lv_style_t lvglStyleTrack, lvglStyleTurnout;
+lv_style_t lvglStyleTrack, lvglStyleTurnout, lvglStyleCenteredText;
 
 constexpr int uiButtonPadding = 8;
 constexpr int uiButtonSize = 32;
 
-void uxUpdateRailwayLayout(winston::RailwayMicroLayout& rml)
+void uxUpdateRailwayLayout(winston::RailwayMicroLayout& rml, ValueCallbackUX<std::string> turnoutToggle)
 {
+    struct TurnoutToggleData
+    {
+        ValueCallbackUX<std::string> callback;
+        std::string turnoutId;
+    };
+
     for (auto& track : tracks)
         lv_obj_delete(track);
 
@@ -39,21 +46,108 @@ void uxUpdateRailwayLayout(winston::RailwayMicroLayout& rml)
     for (const auto& track : rml.tracks)
     {
         auto line = lv_line_create(lvglScreenRailway);
-        lv_line_set_points(line, (lv_point_precise_t*) &track.front(), track.size());
+        lv_line_set_points(line, (lv_point_precise_t*) &track.front(), (unsigned int)track.size());
         lv_obj_add_style(line, &lvglStyleTrack, 0);
         tracks.push_back(line);
     }
 
     for (auto& turnout : turnouts)
-        lv_obj_delete(turnout.second);
-
+    {
+        lv_obj_delete(turnout.first);
+    }
     turnouts.clear();
+
+    for (auto& turnoutToggler : turnoutTogglers)
+    {
+        auto data = lv_obj_get_user_data(turnoutToggler.first);
+        if (data)
+            delete data;
+        lv_obj_delete(turnoutToggler.first);
+    }
+    turnoutTogglers.clear();
+
     for (const auto& turnout : rml.turnouts)
     {
-        auto line = lv_line_create(lvglScreenRailway);
-        lv_line_set_points(line, (lv_point_precise_t*)&turnout.p.front(), turnout.p.size());
-        lv_obj_add_style(line, &lvglStyleTurnout, 0);
-        turnouts.insert(std::make_pair(&turnout, line));
+        winston::RailwayMicroLayout::Bounds bounds;
+
+        for (const auto& connection : turnout.connections)
+        {
+            auto line = lv_line_create(lvglScreenRailway);
+            lv_line_set_points(line, (lv_point_precise_t*)&connection.p.front(), connection.p.size());
+            lv_obj_add_style(line, &lvglStyleTurnout, 0);
+            lv_obj_add_flag(line, LV_OBJ_FLAG_HIDDEN);
+
+            const winston::RailwayMicroLayout::TurnoutConnection turnoutConnection = { turnout.id, connection.connection };
+            turnouts.insert(std::make_pair(line, turnoutConnection));
+
+            bounds.update(connection.p[0]);
+            bounds.update(connection.p[1]);
+        }
+        
+        TurnoutToggleData* turnoutToggleData = new TurnoutToggleData();
+        turnoutToggleData->callback = turnoutToggle;
+        turnoutToggleData->turnoutId = turnout.id;
+
+        std::string labelText = turnout.id;
+        auto posDST = labelText.find("DoubleSlipTurnout");
+        auto posT = labelText.find("Turnout");
+
+        if (posDST != std::string::npos)
+            labelText.erase(posDST, strlen("DoubleSlipTurnout"));
+        else if (posT != std::string::npos)
+            labelText.erase(posT, strlen("Turnout"));
+
+        auto button = lv_label_create(lvglScreenRailway);
+        lv_obj_set_pos(button, bounds.min.x + (bounds.max.x - bounds.min.x)/2 - 16, bounds.min.y + (bounds.max.y - bounds.min.y) / 2 - 16);
+        lv_obj_set_size(button, 32, 32);
+        lv_obj_set_user_data(button, turnoutToggleData);
+        lv_obj_add_flag(button, LV_OBJ_FLAG_CLICKABLE);
+        lv_label_set_text(button, labelText.c_str());
+        lv_obj_add_event_cb(button,
+            [](lv_event_t* e) {
+                TurnoutToggleData* userData = (TurnoutToggleData*)lv_event_get_user_data(e);
+                userData->callback(userData->turnoutId);
+            },
+            LV_EVENT_CLICKED, turnoutToggleData);
+        lv_obj_add_style(button, &lvglStyleCenteredText, 0);
+        turnoutTogglers.insert(std::make_pair(button, turnout.id));
+    }
+}
+
+void uxUpdateTurnout(const std::string &id, const int &state, const bool &locked)
+{
+    for (const auto& turnout : turnouts)
+    {
+        auto &tc = turnout.second;
+        auto line = turnout.first;
+        if (tc.turnout.compare(id) == 0)
+        {
+            /*
+            two way:
+            A_B = 0, 
+            A_C = 1,
+            four way:
+            A_B = 2,
+			A_C = 3,
+			C_D = 4,
+			B_D = 5,
+            changing = 8
+            */
+            if(state == 0 && tc.connection.compare("b"))
+                lv_obj_clear_flag(line, LV_OBJ_FLAG_HIDDEN);
+            else if (state == 1 && tc.connection.compare("c"))
+                lv_obj_clear_flag(line, LV_OBJ_FLAG_HIDDEN);
+            else if (state == 2 && (tc.connection.compare("a") || tc.connection.compare("b")))
+                lv_obj_clear_flag(line, LV_OBJ_FLAG_HIDDEN);
+            else if (state == 3 && (tc.connection.compare("a") || tc.connection.compare("c")))
+                lv_obj_clear_flag(line, LV_OBJ_FLAG_HIDDEN);
+            else if (state == 4 && (tc.connection.compare("c") || tc.connection.compare("d")))
+                lv_obj_clear_flag(line, LV_OBJ_FLAG_HIDDEN);
+            else if (state == 5 && (tc.connection.compare("b") || tc.connection.compare("d")))
+                lv_obj_clear_flag(line, LV_OBJ_FLAG_HIDDEN);
+            else
+                lv_obj_add_flag(line, LV_OBJ_FLAG_HIDDEN);
+        }
     }
 }
 
@@ -82,9 +176,13 @@ void setupUX(winston::hal::DisplayUX::Shared display,
     const unsigned int ySize = 24;
     const unsigned int yInc = ySize + 8;
 
-    static lv_style_t styleLabel;
-    lv_style_init(&styleLabel);
-    lv_style_set_text_align(&styleLabel, LV_TEXT_ALIGN_CENTER);
+    lv_style_init(&lvglStyleCenteredText);
+    lv_style_set_text_align(&lvglStyleCenteredText, LV_TEXT_ALIGN_CENTER);
+
+    static lv_style_t styleIconRecolor;
+    lv_style_init(&styleIconRecolor);
+    lv_style_set_image_recolor(&styleIconRecolor, lv_color_white());
+    lv_style_set_img_recolor_opa(&styleIconRecolor, LV_OPA_COVER);
 
     // settings
     lvglScreenSettings = lv_obj_create(NULL);
@@ -92,14 +190,14 @@ void setupUX(winston::hal::DisplayUX::Shared display,
     lv_label_set_text(labelTitle, "Settings");
     lv_obj_set_size(labelTitle, display->width - 80, ySize);
     lv_obj_set_pos(labelTitle, 0, y);
-    lv_obj_add_style(labelTitle, &styleLabel, 0);
+    lv_obj_add_style(labelTitle, &lvglStyleCenteredText, 0);
     y += yInc;
 
     lv_obj_t* labelSliderBacklight = lv_label_create(lvglScreenSettings);
     lv_label_set_text(labelSliderBacklight, "Backlight");
     lv_obj_set_size(labelSliderBacklight, display->width - 80, ySize);
     lv_obj_set_pos(labelSliderBacklight, 0, y);
-    lv_obj_add_style(labelSliderBacklight, &styleLabel, 0);
+    lv_obj_add_style(labelSliderBacklight, &lvglStyleCenteredText, 0);
     y += yInc;
 
     struct BrightnessData
@@ -113,7 +211,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
 
     lv_obj_t* sliderBacklight = lv_slider_create(lvglScreenSettings);
     lv_obj_set_size(sliderBacklight, display->width - 92 - 24, ySize);
-    lv_obj_set_pos(sliderBacklight, 24, y);
+    lv_obj_set_pos(sliderBacklight, x, y);
     lv_obj_add_event_cb(sliderBacklight,
         [](lv_event_t* e) {
             lv_obj_t* slider = (lv_obj_t*)lv_event_get_target(e);
@@ -134,13 +232,13 @@ void setupUX(winston::hal::DisplayUX::Shared display,
     lv_label_set_text(labelWifi, "WiFi");
     lv_obj_set_size(labelWifi, display->width - 92, ySize);
     lv_obj_set_pos(labelWifi, 0, y);
-    lv_obj_add_style(labelWifi, &styleLabel, 0);
+    lv_obj_add_style(labelWifi, &lvglStyleCenteredText, 0);
     y += yInc;
     labelWifiIP = lv_label_create(lvglScreenSettings);
     lv_label_set_text(labelWifiIP, wifiIP().c_str());
     lv_obj_set_size(labelWifiIP, display->width - 120, ySize);
     lv_obj_set_pos(labelWifiIP, 40, y);
-    lv_obj_add_style(labelWifiIP, &styleLabel, 0);
+    lv_obj_add_style(labelWifiIP, &lvglStyleCenteredText, 0);
     ledWifi = lv_led_create(lvglScreenSettings);
     lv_obj_set_pos(ledWifi, 20, y);
     lv_led_on(ledWifi);
@@ -151,7 +249,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
     lv_label_set_text(labelDropdownWinstonTarget, "Winston");
     lv_obj_set_size(labelDropdownWinstonTarget, display->width - 92, ySize);
     lv_obj_set_pos(labelDropdownWinstonTarget, 0, y);
-    lv_obj_add_style(labelDropdownWinstonTarget, &styleLabel, 0);
+    lv_obj_add_style(labelDropdownWinstonTarget, &lvglStyleCenteredText, 0);
     y += yInc;
 
     struct WinstonTargetData
@@ -161,9 +259,9 @@ void setupUX(winston::hal::DisplayUX::Shared display,
     WinstonTargetData* winstonTargetData = new WinstonTargetData();
     winstonTargetData->callback = winstonTarget;
     lv_obj_t* dropdownWinstonTarget = lv_dropdown_create(lvglScreenSettings);
-    lv_dropdown_set_options(dropdownWinstonTarget, "Black Canary\nTeensy\n");
-    lv_obj_set_size(dropdownWinstonTarget, display->width - 92, ySize);
-    lv_obj_set_pos(dropdownWinstonTarget, 0, y);
+    lv_dropdown_set_options(dropdownWinstonTarget, "Black Canary LAN\nBlack Canary Wifi\nLocalhost\nTeensy\n");
+    lv_obj_set_size(dropdownWinstonTarget, display->width - 92 - 24, ySize);
+    lv_obj_set_pos(dropdownWinstonTarget, x, y);
     lv_obj_add_event_cb(dropdownWinstonTarget,
         [](lv_event_t* e) {
             lv_obj_t* dropdown = (lv_obj_t*)lv_event_get_target(e);
@@ -210,6 +308,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
             }, LV_EVENT_CLICKED, buttonData);
         lv_obj_t* btnRailwayIcon = lv_image_create(btnRailway);
         lv_image_set_src(btnRailwayIcon, &train_FILL0_wght400_GRAD0_opsz24);
+        lv_obj_add_style(btnRailwayIcon, &styleIconRecolor, 0);
         lv_obj_align(btnRailwayIcon, LV_ALIGN_CENTER, 0, 0);
     }
     // slider backlight

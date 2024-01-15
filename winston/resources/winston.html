@@ -471,13 +471,13 @@
         const WinstonTypeLocomotive = "locomotive";
         const TurnoutState_A_B = 0;
         const TurnoutState_A_C = 1;
-        const TurnoutState_Changing = 2;
+        const TurnoutState_Changing = 8;
 
-        const DoubleSlipTurnoutState_A_B = 0;
-        const DoubleSlipTurnoutState_A_C = 1;
-        const DoubleSlipTurnoutState_C_D = 2;
-        const DoubleSlipTurnoutState_B_D = 3;
-        const DoubleSlipTurnoutState_Changing = 4;
+        const DoubleSlipTurnoutState_A_B = 2;
+        const DoubleSlipTurnoutState_A_C = 3;
+        const DoubleSlipTurnoutState_C_D = 4;
+        const DoubleSlipTurnoutState_B_D = 5;
+        const DoubleSlipTurnoutState_Changing = 8;
 
         const RouteState_Unset = 0;
         const RouteState_Setting = 1;
@@ -895,11 +895,24 @@
                     updateBounds(to);
 
                     if (edge.hasClass("internal")) {
-                        layout.turnouts.push({
-                            id: edge.data("track"),
-                            connection: edge.data("connection"),
-                            p: [from.x, from.y, to.x, to.y]
-                        });
+                        let id = edge.data("track");
+
+                        let turnout = _.find(layout.turnouts, t => t.id === id);
+                        if (turnout) {
+                            turnout.connections.push({
+                                connection: edge.data("connection"),
+                                p: [from.x, from.y, to.x, to.y]
+                            });
+                        }
+                        else {
+                            layout.turnouts.push({
+                                id: edge.data("track"),
+                                connections: [{
+                                    connection: edge.data("connection"),
+                                    p: [from.x, from.y, to.x, to.y]
+                                }]
+                            });
+                        }
                     }
                     else
                         tracks.push({ from: from, to: to });

@@ -33,9 +33,6 @@
     <ClCompile Include="Cinema.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="winston-display-hal-x64.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="external\lvgl-win32drv.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
@@ -948,9 +945,6 @@
     <ClCompile Include="external\lvgl\src\osal\lv_windows.c">
       <Filter>external\lvgl\src</Filter>
     </ClCompile>
-    <ClCompile Include="..\winston\winston-shared-hal-x64.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="UX.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -963,15 +957,15 @@
     <ClCompile Include="res\train_png.c">
       <Filter>res</Filter>
     </ClCompile>
+    <ClCompile Include="..\winston\winston-hal-x64.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="winston-display.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Cinema.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="winston-display-hal-x64.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="external\lvgl-win32drv.h">
@@ -1687,6 +1681,9 @@
     </ClInclude>
     <ClInclude Include="external\lv_conf.h">
       <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\winston\winston-hal-x64.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

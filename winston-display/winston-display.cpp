@@ -4,14 +4,19 @@
 #include "winston-display.h"
 #include "Cinema.h"
 
+#define ARDUINOJSON_ENABLE_STD_STRING 1
+#define ARDUINOJSON_ENABLE_STD_STREAM 0
+#define ARDUINOJSON_ENABLE_ARDUINO_STRING 0
+#define ARDUINOJSON_ENABLE_ARDUINO_STREAM 0
+#define ARDUINOJSON_ENABLE_ARDUINO_PRINT 0
+#include "../libwinston/external/ArduinoJson-v7.0.1.h"
+
 #ifdef WINSTON_PLATFORM_WIN_x64
-#include "winston-display-hal-x64.h"
+#include "../winston/winston-hal-x64.h"
 #endif
 #ifdef WINSTON_PLATFORM_ESP32
 #include "winston-display-hal-esp32.h"
 #endif
-
-#include "../libwinston/external/ArduinoJson-v7.0.1.h"
 
 Screen currentScreen = Screen::Cinema;
 DisplayUX::Shared display = DisplayUX::make(480, 320);
@@ -19,6 +24,33 @@ Cinema cinema(display);
 
 WebSocketClient webSocketClient;
 winston::RailwayMicroLayout rml;
+
+Settings settings;
+Storage::Shared storageSettings;
+
+winston::EventLooper eventLooper;
+
+void saveSettings(Storage::Shared &storageSettings)
+{
+    storageSettings->write(0, settings.brightness);
+    storageSettings->write(1, (unsigned char)settings.target);
+    storageSettings->write(2, (unsigned char)settings.screen);
+    storageSettings->sync();
+}
+
+void loadSettings(Storage::Shared &storageSettings)
+{
+    storageSettings->read(0, settings.brightness);
+    storageSettings->read(1, (unsigned char&)settings.target);
+    storageSettings->read(2, (unsigned char&)settings.screen);
+}
+
+void applySettings()
+{
+    display->brightness(settings.brightness);
+    currentScreen = settings.screen;
+    // target
+}
 
 void winston_setup()
 {
@@ -32,15 +64,24 @@ void winston_setup()
     //display = DisplayUX::make(480, 320);
     display->init();
 
+    storageSettings = Storage::make("winston-display.settings", 3);
+    storageSettings->init();
+    loadSettings(storageSettings);
+    applySettings();
+
     setupUX(display,
         [](unsigned char value) -> winston::Result
         {
+            settings.brightness = value;
+            saveSettings(storageSettings);
             return display->brightness(value);
         },
         []() -> unsigned char { return display->brightness(); },
         [](Screen screen) -> winston::Result
         {
             currentScreen = screen;
+            settings.screen = screen;
+            saveSettings(storageSettings);
             if (currentScreen == Screen::Cinema)
                 return winston::Result::OK;
             else
@@ -48,6 +89,22 @@ void winston_setup()
         },
         [](WinstonTarget target) -> winston::Result
         {
+            std::string ipPort = "ws://localhost:8080";
+            switch (target)
+            {
+            case WinstonTarget::BlackCanaryLAN:
+                ipPort = "ws://192.168.188.57:8080";
+                break;
+            case WinstonTarget::BlackCanaryWifi:
+                ipPort = "ws://192.168.188.56:8080";
+                break;
+            case WinstonTarget::Teensy:
+                ipPort = "ws://192.168.188.133:8080";
+                break;
+            default:
+                break;
+            }
+
             webSocketClient.init([](ConnectionWSPP& client, const std::string message) {
                 JsonDocument msg;
                 deserializeJson(msg, message);
@@ -74,35 +131,84 @@ void winston_setup()
                     {
                         winston::RailwayMicroLayout::Track t;
                         JsonArray points = track.as<JsonArray>();
-                        for(size_t i = 0; i < points.size(); i += 2)
+                        for (size_t i = 0; i < points.size(); i += 2)
                         {
-                            winston::RailwayMicroLayout::Point p{ points[i+0].as<int32_t>(), points[i+1].as<int32_t>() };
+                            winston::RailwayMicroLayout::Point p{ points[i + 0].as<int32_t>(), points[i + 1].as<int32_t>() };
                             t.push_back(p);
                         }
                         rml.tracks.push_back(t);
                     }
 
-                    for (JsonVariant turnout: turnouts)
+                    for (JsonVariant turnout : turnouts)
                     {
                         winston::RailwayMicroLayout::Turnout t;
-                        auto id = turnout["id"].as<std::string>();
-                        auto connection = turnout["connection"].as<std::string>();
-                        auto points = turnout["p"].as<JsonArray>();
-
                         t.id = turnout["id"].as<std::string>();
-                        t.connection = turnout["connection"].as<std::string>();
-                        t.p[0].x = points[0].as<int32_t>();
-                        t.p[0].y = points[1].as<int32_t>();
-                        t.p[1].x = points[2].as<int32_t>();
-                        t.p[1].y = points[3].as<int32_t>();
+                        auto connections = turnout["connections"].as<JsonArray>();
+                        for (JsonVariant connection : connections)
+                        {
+                            winston::RailwayMicroLayout::Connection c;
+                            c.connection = connection["connection"].as<std::string>();
+                            auto points = connection["p"].as<JsonArray>();
+                            c.p[0].x = points[0].as<int32_t>();
+                            c.p[0].y = points[1].as<int32_t>();
+                            c.p[1].x = points[2].as<int32_t>();
+                            c.p[1].y = points[3].as<int32_t>();
+                            t.connections.push_back(c);
+                        }
                         rml.turnouts.push_back(t);
                     }
                     int offset = 8;
                     rml.scale({ offset, offset, 480 - 4 * offset, 320 - 2 * offset });
-                    uxUpdateRailwayLayout(rml);
+                    uxUpdateRailwayLayout(rml, [](const std::string turnout) -> const winston::Result {
+                        eventLooper.order(winston::Command::make([turnout](const winston::TimePoint& created) -> const winston::State {
+                            std::string json("");
+                            {
+                                JsonDocument msg;
+                                msg["op"] = "doTurnoutToggle";
+                                auto data = msg["data"].to<JsonObject>();
+                                data["id"] = turnout;
+                                serializeJson(msg, json);
+                            }
+                            webSocketClient.send(json);
+                            return winston::State::Finished;
+                            }, __PRETTY_FUNCTION__));
+                        return winston::Result::OK;
+                        });
+
+                    unsigned int idx = 1;
+                    for (const auto& turnout : rml.turnouts)
+                    {
+                        eventLooper.order(winston::Command::make([turnout, idx](const winston::TimePoint& created) -> const winston::State
+                        {
+                            if (created + toMilliseconds(idx * 50) > winston::hal::now())
+                                    return winston::State::Delay;
+
+                            std::string json("");
+                            {
+                                JsonDocument msg;
+                                msg["op"] = "getTurnoutState";
+                                auto data = msg["data"].to<JsonObject>();
+                                data["id"] = turnout.id;
+                                serializeJson(msg, json);
+                            }
+                            webSocketClient.send(json);
+                            return winston::State::Finished;
+                        }, __PRETTY_FUNCTION__));
+                        idx++;
+                    }
+                }
+                else if (std::string("\"turnoutState\"").compare(op) == 0)
+                {
+                    std::string track = data["id"].as<std::string>();
+                    int state = data["state"].as<int>();
+                    bool locked = data["direction"].as<bool>();
+                    uxUpdateTurnout(track, state, locked);
                 }
                 
-                }, target == WinstonTarget::BlackCanary ? "ws://192.168.188.57:8080" : "ws://192.168.188.133:8080");
+                }, ipPort);
+
+            settings.target = target;
+            saveSettings(storageSettings);
 
             JsonDocument msg;
             msg["op"] = "getRailwayMicroLayout";
@@ -118,6 +224,7 @@ void winston_setup()
     );
 
     cinema.collectMovies();
+    showUX(currentScreen);
 }
 
 void lvgl_loop()
@@ -129,10 +236,10 @@ void lvgl_loop()
 void cinema_loop()
 {
     cinema.play();
-    /*
+#ifndef WINSTON_PLATFORM_WIN_x64
     if(touch)
         displayMode = DisplayMode::LVGL;
-    */
+#endif
 }
 
 void winston_loop()
@@ -144,6 +251,7 @@ void winston_loop()
 #endif
         lvgl_loop();
 
+    eventLooper.work();
     webSocketClient.step();
 }
 

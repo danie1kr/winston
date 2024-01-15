@@ -8,9 +8,64 @@
 
 #include "winston-hal-x64.h"
 
+#ifdef WINSTON_HAL_USE_SOCKETS
+#include <iostream>
+#include <WinSock2.h>
+#include <WS2tcpip.h>
+#pragma comment(lib, "ws2_32.lib")
+#endif
+
+const char* operator "" _s(const char* in, size_t len)
+{
+    return in;
+}
+
+namespace winston
+{
+    namespace hal {
+        void init()
+        {
+            {
+#ifdef WINSTON_HAL_USE_SOCKETS
+                WSADATA wsaData;
+                if (!WSAStartup(MAKEWORD(1, 1), &wsaData))
+                    runtimeEnableNetwork();
+#endif
+            }
+        }
+
+        void text(const std::string& text)
+        {
+            std::cout << text << std::endl;
+        }
+
+        void error(const std::string& error)
+        {
+            logger.err(error);
+        }
+
+        void fatal(const std::string reason)
+        {
+            logger.log(reason, Logger::Entry::Level::Fatal);
+            throw std::exception(reason.c_str());
+            exit(-1);
+        }
+
+        void delay(const unsigned int ms)
+        {
+            Sleep(ms);
+        }
+
+        TimePoint now()
+        {
+            return std::chrono::system_clock::now();
+        }
+    }
+}
+
+#ifdef WINSTON_HAL_USE_WEBSERVER
 using websocketpp::lib::placeholders::_1;
 using websocketpp::lib::placeholders::_2;
-
 
 WebServerWSPP::HTTPConnectionWSPP::HTTPConnectionWSPP(HTTPClient& connection) 
     : HTTPConnection(), connection(connection) 
@@ -148,6 +203,8 @@ const size_t WebServerWSPP::maxMessageSize()
 {
     return this->server.get_max_message_size();
 }
+#endif
+
 /*
 UDPSocketWinSock::UDPSocketWinSock(const std::string ip, const unsigned short port) : winston::hal::UDPSocket(ip, port)
 {
@@ -224,6 +281,7 @@ const winston::Result UDPSocketWinSock::recv(std::vector<unsigned char>& data)
     return winston::Result::OK;
 }
 */
+#ifdef WINSTON_HAL_USE_SERIAL
 SerialDeviceWin::SerialDeviceWin()
     : winston::hal::SerialDevice(), winston::Shared_Ptr<SerialDeviceWin>()
 {
@@ -397,7 +455,9 @@ const winston::Result SerialDeviceWin::send(const std::vector<DataType> data)
 #endif
     return dwBytesWritten == (DWORD)data.size() ? winston::Result::OK : winston::Result::SendFailed;
 }
+#endif
 
+#ifdef WINSTON_HAL_USE_STORAGE
 StorageWin::StorageWin(const std::string filename, const size_t maxSize)
     : StorageInterface(maxSize), filename(filename)
 {
@@ -444,6 +504,21 @@ const winston::Result StorageWin::read(const size_t address, std::string& conten
     const size_t maxI = min(address + count, this->mmap.size());
     for (size_t i = address; i < maxI; ++i)
         content.push_back(this->mmap[i]);
+
+    return winston::Result::OK;
+}
+
+const winston::Result StorageWin::read(const size_t address, unsigned char& content)
+{
+    if (!this->mmap.is_open())
+        return winston::Result::NotInitialized;
+
+    if (this->mmap.size() < address + 1)
+    {
+        winston::logger.err("storage too small");
+        return winston::Result::OutOfBounds;
+    }
+    content = this->mmap[address];
 
     return winston::Result::OK;
 }
@@ -514,6 +589,144 @@ const int StorageWin::handleError(const std::error_code& error) const
     winston::error(error.message());
     return error.value();
 }
+#endif
+
+#ifdef WINSTON_HAL_USE_DISPLAYUX
+#include "../winston-display/external/lvgl-win32drv.h"
+
+DisplayUXWin::DisplayUXWin(const unsigned int width, const unsigned int height)
+    : winston::hal::DisplayUX(width, height)
+{
+
+}
+
+const winston::Result DisplayUXWin::init()
+{
+    lv_init();
+
+    lv_tick_set_cb([]() -> uint32_t { return GetTickCount(); });
+
+    if (!lv_windows_init(
+        GetModuleHandleW(NULL),
+        SW_SHOW,
+        this->width,
+        this->height,
+        0))//LoadIconW(GetModuleHandleW(NULL), MAKEINTRESOURCE(IDI_LVGL_WINDOWS))))
+    {
+        return winston::Result::InternalError;
+    }
+
+    return winston::Result::OK;
+}
+
+const winston::Result DisplayUXWin::setCursor(unsigned int x, unsigned int y)
+{
+    return winston::Result::NotImplemented;
+}
+
+const bool DisplayUXWin::getTouch(unsigned int& x, unsigned int& y)
+{
+    return false;
+}
+
+const winston::Result DisplayUXWin::draw(unsigned int x, unsigned int y, unsigned int w, unsigned int h, void* data)
+{
+    return winston::Result::NotImplemented;
+}
+
+
+const winston::Result DisplayUXWin::brightness(unsigned char value)
+{
+    return winston::Result::OK;
+}
+
+const unsigned char DisplayUXWin::brightness()
+{
+    return 24;
+}
+
+const unsigned int DisplayUXWin::tick()
+{
+    return lv_timer_handler();
+}
+#endif
+
+#ifdef WINSTON_HAL_USE_WEBSOCKETCLIENT
+WebSocketClientWin::WebSocketClientWin()
+{
+}
+
+void WebSocketClientWin::init(OnMessage onMessage, std::string uri)
+{
+    using websocketpp::lib::placeholders::_1;
+    using websocketpp::lib::placeholders::_2;
+    using websocketpp::lib::bind;
+
+    this->onMessage = onMessage;
+
+    this->client.init_asio();
+    this->client.set_access_channels(websocketpp::log::alevel::all);
+    this->client.clear_access_channels(websocketpp::log::alevel::frame_payload);
+    this->client.set_message_handler(websocketpp::lib::bind(&WebSocketClientWin::on_msg, this, websocketpp::lib::placeholders::_1, websocketpp::lib::placeholders::_2));
+    this->client.set_fail_handler(websocketpp::lib::bind(&WebSocketClientWin::on_fail, this, websocketpp::lib::placeholders::_1));
+
+    websocketpp::lib::error_code ec;
+    this->connection = this->client.get_connection(uri, ec);
+    if (ec) {
+        std::cout << "Echo failed because: " << ec.message() << std::endl;
+    }
+    this->client.connect(this->connection);
+
+    while (!this->connected())
+        this->client.poll_one();
+}
+
+
+void WebSocketClientWin::send(const std::string message)
+{
+    if (this->connected())
+        this->client.send(this->connection->get_handle(), message, websocketpp::frame::opcode::text);
+}
+
+void WebSocketClientWin::step()
+{
+    if (this->connected())// && this->client.poll_one())
+        this->client.poll_one();
+}
+
+void WebSocketClientWin::shutdown()
+{
+    this->client.close(this->connection->get_handle(), websocketpp::close::status::normal, "thank you!");
+}
+
+const bool WebSocketClientWin::connected()
+{
+    return this->connection && this->connection->get_state() == websocketpp::session::state::open;
+}
+
+const size_t WebSocketClientWin::maxMessageSize()
+{
+    return this->client.get_max_message_size();
+}
+
+void WebSocketClientWin::on_msg(Client hdl, websocketpp::config::asio_client::message_type::ptr msg)
+{
+    this->onMessage(hdl, msg->get_payload());
+}
+
+void WebSocketClientWin::on_fail(websocketpp::connection_hdl hdl)
+{
+    auto con = this->client.get_con_from_hdl(hdl);
+
+    std::cout << "WebSocketClientWin Fail handler" << std::endl;
+    std::cout << con->get_state() << std::endl;
+    std::cout << con->get_local_close_code() << std::endl;
+    std::cout << con->get_local_close_reason() << std::endl;
+    std::cout << con->get_remote_close_code() << std::endl;
+    std::cout << con->get_remote_close_reason() << std::endl;
+    std::cout << con->get_ec() << " - " << con->get_ec().message() << std::endl;
+}
+#endif
 
 DisplayWin::DisplayWin()
 {

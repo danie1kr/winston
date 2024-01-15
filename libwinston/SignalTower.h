@@ -7,10 +7,11 @@
 #include "Signal.h"
 #include "WinstonTypes.h"
 #include "Railway.h"
+#include "EventLooper.h"
 
 namespace winston
 {
-	class SignalTower : public Shared_Ptr<SignalTower>
+	class SignalTower : public EventLooper, public Shared_Ptr<SignalTower>
 	{
 	public:
 
@@ -30,20 +31,20 @@ namespace winston
 
 		static void setSignalOn(Track& track, const Track::Connection signalGuardedConnection, const Signal::Aspect aspect, const Signal::Aspect preAspect = Signal::Aspect::Off);
 		
-		void order(Command::Shared command);
-		bool work();
+		//void order(Command::Shared command);
+		//bool work();
 		using Shared_Ptr<SignalTower>::Shared;
 		using Shared_Ptr<SignalTower>::make;
 	private:
 
 		static Signal::Shared nextSignal(Track::Shared& track, const bool guarding, Track::Connection& leaving, const bool main, const bool includingFirst);
-		std::queue<Command::Shared> commands;
+		/*std::queue<Command::Shared> commands;
 
 #if defined(WINSTON_STATISTICS) && defined(WINSTON_STATISTICS_DETAILLED)
 	public:
 		const std::string statistics(const size_t withTop = 0) const;
 	private:
 		StopwatchJournal stopwatchJournal;
-#endif
+#endif*/
 	};
 }

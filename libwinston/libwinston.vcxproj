@@ -113,6 +113,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="EventLooper.h" />
     <ClInclude Include="Section.h" />
     <ClInclude Include="Command.h" />
     <ClInclude Include="Detector.h" />
@@ -143,6 +144,7 @@
     <ClInclude Include="WinstonTypes.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="EventLooper.cpp" />
     <ClCompile Include="Section.cpp" />
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="Detector.cpp" />

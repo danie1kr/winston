@@ -249,9 +249,9 @@ namespace winston
 	public:
 		enum class Direction : unsigned int
 		{
-			A_B,
-			A_C,
-			Changing
+			A_B = 0,
+			A_C = 1,
+			Changing = 8
 		};
 		static const std::string DirectionToString(const Direction direction);
 
@@ -320,11 +320,11 @@ namespace winston
 	public:
 		enum class Direction : unsigned int
 		{
-			A_B,
-			A_C,
-			C_D,
-			B_D,
-			Changing
+			A_B = 2,
+			A_C = 3,
+			C_D = 4,
+			B_D = 5,
+			Changing = 8
 		};
 
 		static const std::string DirectionToString(const Direction direction);

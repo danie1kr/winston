@@ -13,7 +13,7 @@ namespace winston {
         using OnMessage = std::function<void(_WebSocketClientConnection& client, const std::string& message)>;
         using Connection = _WebSocketClientConnection;
 
-        virtual void init(OnMessage onMessage, std::string uri) = 0;
+        virtual void init(OnMessage onMessage, const URI &uri) = 0;
         virtual void send(const std::string message) = 0;
         virtual void step() = 0;
         virtual void shutdown() = 0;

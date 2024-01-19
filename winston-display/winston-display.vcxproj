@@ -105,7 +105,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);WINSTON_PLATFORM_WIN_x64;LV_USE_DEV_VERSION;_CRT_SECURE_NO_WARNINGS;TCB_SPAN_NAMESPACE_NAME=std;WINSTON_HAL_USE_STORAGE;WINSTON_HAL_USE_DISPLAYUX;WINSTON_HAL_USE_WEBSOCKETCLIENT</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);WINSTON_PLATFORM_WIN_x64;_CRT_SECURE_NO_WARNINGS;TCB_SPAN_NAMESPACE_NAME=std;WINSTON_HAL_USE_STORAGE;WINSTON_HAL_USE_DISPLAYUX;WINSTON_HAL_USE_WEBSOCKETCLIENT</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>external\lvgl\src;..\winston\external;..\winston\external\asio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -123,7 +123,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);WINSTON_PLATFORM_WIN_x64;LV_LVGL_H_INCLUDE_SIMPLE;LV_USE_DEV_VERSION;_CRT_SECURE_NO_WARNINGS;TCB_SPAN_NAMESPACE_NAME=std;WINSTON_HAL_USE_STORAGE;WINSTON_HAL_USE_DISPLAYUX;WINSTON_HAL_USE_WEBSOCKETCLIENT</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);WINSTON_PLATFORM_WIN_x64;LV_LVGL_H_INCLUDE_SIMPLE;_CRT_SECURE_NO_WARNINGS;TCB_SPAN_NAMESPACE_NAME=std;WINSTON_HAL_USE_STORAGE;WINSTON_HAL_USE_DISPLAYUX;WINSTON_HAL_USE_WEBSOCKETCLIENT</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>external\lvgl\src;..\winston\external;..\winston\external\asio\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp14</LanguageStandard>
@@ -154,8 +154,14 @@
     <ClCompile Include="external\lvgl\src\core\lv_refr.c" />
     <ClCompile Include="external\lvgl\src\dev\display\drm\lv_linux_drm.c" />
     <ClCompile Include="external\lvgl\src\dev\display\fb\lv_linux_fbdev.c" />
+    <ClCompile Include="external\lvgl\src\dev\display\ili9341\lv_ili9341.c" />
+    <ClCompile Include="external\lvgl\src\dev\display\lcd\lv_lcd_generic_mipi.c" />
+    <ClCompile Include="external\lvgl\src\dev\display\st7735\lv_st7735.c" />
+    <ClCompile Include="external\lvgl\src\dev\display\st7789\lv_st7789.c" />
+    <ClCompile Include="external\lvgl\src\dev\display\st7796\lv_st7796.c" />
     <ClCompile Include="external\lvgl\src\dev\display\tft_espi\lv_tft_espi.cpp" />
     <ClCompile Include="external\lvgl\src\dev\evdev\lv_evdev.c" />
+    <ClCompile Include="external\lvgl\src\dev\nuttx\lv_nuttx_cache.c" />
     <ClCompile Include="external\lvgl\src\dev\nuttx\lv_nuttx_entry.c" />
     <ClCompile Include="external\lvgl\src\dev\nuttx\lv_nuttx_fbdev.c" />
     <ClCompile Include="external\lvgl\src\dev\nuttx\lv_nuttx_lcd.c" />
@@ -165,6 +171,9 @@
     <ClCompile Include="external\lvgl\src\dev\sdl\lv_sdl_mouse.c" />
     <ClCompile Include="external\lvgl\src\dev\sdl\lv_sdl_mousewheel.c" />
     <ClCompile Include="external\lvgl\src\dev\sdl\lv_sdl_window.c" />
+    <ClCompile Include="external\lvgl\src\dev\windows\lv_windows_context.c" />
+    <ClCompile Include="external\lvgl\src\dev\windows\lv_windows_display.c" />
+    <ClCompile Include="external\lvgl\src\dev\windows\lv_windows_input.c" />
     <ClCompile Include="external\lvgl\src\dev\x11\lv_x11_display.c" />
     <ClCompile Include="external\lvgl\src\dev\x11\lv_x11_input.c" />
     <ClCompile Include="external\lvgl\src\display\lv_display.c" />
@@ -182,7 +191,6 @@
     <ClCompile Include="external\lvgl\src\draw\lv_image_decoder.c" />
     <ClCompile Include="external\lvgl\src\draw\nxp\pxp\lv_draw_buf_pxp.c" />
     <ClCompile Include="external\lvgl\src\draw\nxp\pxp\lv_draw_pxp.c" />
-    <ClCompile Include="external\lvgl\src\draw\nxp\pxp\lv_draw_pxp_bg_img.c" />
     <ClCompile Include="external\lvgl\src\draw\nxp\pxp\lv_draw_pxp_fill.c" />
     <ClCompile Include="external\lvgl\src\draw\nxp\pxp\lv_draw_pxp_img.c" />
     <ClCompile Include="external\lvgl\src\draw\nxp\pxp\lv_draw_pxp_layer.c" />
@@ -192,13 +200,13 @@
     <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_draw_buf_vglite.c" />
     <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_draw_vglite.c" />
     <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_draw_vglite_arc.c" />
-    <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_draw_vglite_bg_img.c" />
     <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_draw_vglite_border.c" />
     <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_draw_vglite_fill.c" />
     <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_draw_vglite_img.c" />
     <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_draw_vglite_label.c" />
     <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_draw_vglite_layer.c" />
     <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_draw_vglite_line.c" />
+    <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_draw_vglite_triangle.c" />
     <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_vglite_buf.c" />
     <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_vglite_matrix.c" />
     <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_vglite_path.c" />
@@ -212,7 +220,7 @@
     <ClCompile Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_line.c" />
     <ClCompile Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_mask_rectangle.c" />
     <ClCompile Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_triangle.c" />
-    <ClCompile Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_uitls.c" />
+    <ClCompile Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_utils.c" />
     <ClCompile Include="external\lvgl\src\draw\sdl\lv_draw_sdl.c" />
     <ClCompile Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend.c" />
     <ClCompile Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_to_argb8888.c" />
@@ -289,9 +297,9 @@
     <ClCompile Include="external\lvgl\src\libs\bmp\lv_bmp.c" />
     <ClCompile Include="external\lvgl\src\libs\ffmpeg\lv_ffmpeg.c" />
     <ClCompile Include="external\lvgl\src\libs\freetype\lv_freetype.c" />
+    <ClCompile Include="external\lvgl\src\libs\freetype\lv_freetype_glyph.c" />
     <ClCompile Include="external\lvgl\src\libs\freetype\lv_freetype_image.c" />
     <ClCompile Include="external\lvgl\src\libs\freetype\lv_freetype_outline.c" />
-    <ClCompile Include="external\lvgl\src\libs\freetype\lv_freetype_sbit.c" />
     <ClCompile Include="external\lvgl\src\libs\freetype\lv_ftsystem.c" />
     <ClCompile Include="external\lvgl\src\libs\fsdrv\lv_fs_cbfs.c" />
     <ClCompile Include="external\lvgl\src\libs\fsdrv\lv_fs_fatfs.c" />
@@ -348,14 +356,16 @@
     <ClCompile Include="external\lvgl\src\libs\tjpgd\lv_tjpgd.c" />
     <ClCompile Include="external\lvgl\src\libs\tjpgd\tjpgd.c" />
     <ClCompile Include="external\lvgl\src\lv_init.c" />
+    <ClCompile Include="external\lvgl\src\misc\cache\lv_cache.c" />
+    <ClCompile Include="external\lvgl\src\misc\cache\lv_cache_entry.c" />
+    <ClCompile Include="external\lvgl\src\misc\cache\lv_image_cache.c" />
+    <ClCompile Include="external\lvgl\src\misc\cache\_lv_cache_lru_rb.c" />
     <ClCompile Include="external\lvgl\src\misc\lv_anim.c" />
     <ClCompile Include="external\lvgl\src\misc\lv_anim_timeline.c" />
     <ClCompile Include="external\lvgl\src\misc\lv_area.c" />
     <ClCompile Include="external\lvgl\src\misc\lv_array.c" />
     <ClCompile Include="external\lvgl\src\misc\lv_async.c" />
     <ClCompile Include="external\lvgl\src\misc\lv_bidi.c" />
-    <ClCompile Include="external\lvgl\src\misc\lv_cache.c" />
-    <ClCompile Include="external\lvgl\src\misc\lv_cache_builtin.c" />
     <ClCompile Include="external\lvgl\src\misc\lv_color.c" />
     <ClCompile Include="external\lvgl\src\misc\lv_color_op.c" />
     <ClCompile Include="external\lvgl\src\misc\lv_event.c" />
@@ -363,7 +373,6 @@
     <ClCompile Include="external\lvgl\src\misc\lv_ll.c" />
     <ClCompile Include="external\lvgl\src\misc\lv_log.c" />
     <ClCompile Include="external\lvgl\src\misc\lv_lru.c" />
-    <ClCompile Include="external\lvgl\src\misc\lv_lru_rb.c" />
     <ClCompile Include="external\lvgl\src\misc\lv_math.c" />
     <ClCompile Include="external\lvgl\src\misc\lv_palette.c" />
     <ClCompile Include="external\lvgl\src\misc\lv_profiler_builtin.c" />
@@ -391,6 +400,8 @@
     <ClCompile Include="external\lvgl\src\others\observer\lv_observer.c" />
     <ClCompile Include="external\lvgl\src\others\snapshot\lv_snapshot.c" />
     <ClCompile Include="external\lvgl\src\others\sysmon\lv_sysmon.c" />
+    <ClCompile Include="external\lvgl\src\others\vg_lite_tvg\vg_lite_matrix.c" />
+    <ClCompile Include="external\lvgl\src\others\vg_lite_tvg\vg_lite_tvg.cpp" />
     <ClCompile Include="external\lvgl\src\stdlib\builtin\lv_mem_core_builtin.c" />
     <ClCompile Include="external\lvgl\src\stdlib\builtin\lv_sprintf_builtin.c" />
     <ClCompile Include="external\lvgl\src\stdlib\builtin\lv_string_builtin.c" />
@@ -442,6 +453,7 @@
     <ClCompile Include="external\lvgl\src\widgets\textarea\lv_textarea.c" />
     <ClCompile Include="external\lvgl\src\widgets\tileview\lv_tileview.c" />
     <ClCompile Include="external\lvgl\src\widgets\win\lv_win.c" />
+    <ClCompile Include="res\arrow_back.c" />
     <ClCompile Include="res\movie_png.c" />
     <ClCompile Include="res\settings_png.c" />
     <ClCompile Include="res\train_png.c" />
@@ -467,8 +479,14 @@
     <ClInclude Include="external\lvgl\src\core\lv_refr.h" />
     <ClInclude Include="external\lvgl\src\dev\display\drm\lv_linux_drm.h" />
     <ClInclude Include="external\lvgl\src\dev\display\fb\lv_linux_fbdev.h" />
+    <ClInclude Include="external\lvgl\src\dev\display\ili9341\lv_ili9341.h" />
+    <ClInclude Include="external\lvgl\src\dev\display\lcd\lv_lcd_generic_mipi.h" />
+    <ClInclude Include="external\lvgl\src\dev\display\st7735\lv_st7735.h" />
+    <ClInclude Include="external\lvgl\src\dev\display\st7789\lv_st7789.h" />
+    <ClInclude Include="external\lvgl\src\dev\display\st7796\lv_st7796.h" />
     <ClInclude Include="external\lvgl\src\dev\display\tft_espi\lv_tft_espi.h" />
     <ClInclude Include="external\lvgl\src\dev\evdev\lv_evdev.h" />
+    <ClInclude Include="external\lvgl\src\dev\nuttx\lv_nuttx_cache.h" />
     <ClInclude Include="external\lvgl\src\dev\nuttx\lv_nuttx_entry.h" />
     <ClInclude Include="external\lvgl\src\dev\nuttx\lv_nuttx_fbdev.h" />
     <ClInclude Include="external\lvgl\src\dev\nuttx\lv_nuttx_lcd.h" />
@@ -478,6 +496,9 @@
     <ClInclude Include="external\lvgl\src\dev\sdl\lv_sdl_mouse.h" />
     <ClInclude Include="external\lvgl\src\dev\sdl\lv_sdl_mousewheel.h" />
     <ClInclude Include="external\lvgl\src\dev\sdl\lv_sdl_window.h" />
+    <ClInclude Include="external\lvgl\src\dev\windows\lv_windows_context.h" />
+    <ClInclude Include="external\lvgl\src\dev\windows\lv_windows_display.h" />
+    <ClInclude Include="external\lvgl\src\dev\windows\lv_windows_input.h" />
     <ClInclude Include="external\lvgl\src\dev\x11\lv_x11.h" />
     <ClInclude Include="external\lvgl\src\display\lv_display.h" />
     <ClInclude Include="external\lvgl\src\display\lv_display_private.h" />
@@ -505,6 +526,10 @@
     <ClInclude Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d.h" />
     <ClInclude Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_utils.h" />
     <ClInclude Include="external\lvgl\src\draw\sdl\lv_draw_sdl.h" />
+    <ClInclude Include="external\lvgl\src\draw\sw\arm2d\lv_draw_sw_arm2d.h" />
+    <ClInclude Include="external\lvgl\src\draw\sw\arm2d\lv_draw_sw_helium.h" />
+    <ClInclude Include="external\lvgl\src\draw\sw\blend\arm2d\lv_blend_arm2d.h" />
+    <ClInclude Include="external\lvgl\src\draw\sw\blend\arm2d\lv_blend_helium.h" />
     <ClInclude Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend.h" />
     <ClInclude Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_to_argb8888.h" />
     <ClInclude Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_to_rgb565.h" />
@@ -599,6 +624,12 @@
     <ClInclude Include="external\lvgl\src\lv_conf_internal.h" />
     <ClInclude Include="external\lvgl\src\lv_conf_kconfig.h" />
     <ClInclude Include="external\lvgl\src\lv_init.h" />
+    <ClInclude Include="external\lvgl\src\misc\cache\lv_cache.h" />
+    <ClInclude Include="external\lvgl\src\misc\cache\lv_cache_entry.h" />
+    <ClInclude Include="external\lvgl\src\misc\cache\lv_cache_entry_private.h" />
+    <ClInclude Include="external\lvgl\src\misc\cache\lv_cache_private.h" />
+    <ClInclude Include="external\lvgl\src\misc\cache\lv_image_cache.h" />
+    <ClInclude Include="external\lvgl\src\misc\cache\_lv_cache_lru_rb.h" />
     <ClInclude Include="external\lvgl\src\misc\lv_anim.h" />
     <ClInclude Include="external\lvgl\src\misc\lv_anim_timeline.h" />
     <ClInclude Include="external\lvgl\src\misc\lv_area.h" />
@@ -606,8 +637,6 @@
     <ClInclude Include="external\lvgl\src\misc\lv_assert.h" />
     <ClInclude Include="external\lvgl\src\misc\lv_async.h" />
     <ClInclude Include="external\lvgl\src\misc\lv_bidi.h" />
-    <ClInclude Include="external\lvgl\src\misc\lv_cache.h" />
-    <ClInclude Include="external\lvgl\src\misc\lv_cache_builtin.h" />
     <ClInclude Include="external\lvgl\src\misc\lv_color.h" />
     <ClInclude Include="external\lvgl\src\misc\lv_color_op.h" />
     <ClInclude Include="external\lvgl\src\misc\lv_event.h" />
@@ -615,7 +644,6 @@
     <ClInclude Include="external\lvgl\src\misc\lv_ll.h" />
     <ClInclude Include="external\lvgl\src\misc\lv_log.h" />
     <ClInclude Include="external\lvgl\src\misc\lv_lru.h" />
-    <ClInclude Include="external\lvgl\src\misc\lv_lru_rb.h" />
     <ClInclude Include="external\lvgl\src\misc\lv_math.h" />
     <ClInclude Include="external\lvgl\src\misc\lv_palette.h" />
     <ClInclude Include="external\lvgl\src\misc\lv_profiler.h" />
@@ -645,6 +673,7 @@
     <ClInclude Include="external\lvgl\src\others\observer\lv_observer.h" />
     <ClInclude Include="external\lvgl\src\others\snapshot\lv_snapshot.h" />
     <ClInclude Include="external\lvgl\src\others\sysmon\lv_sysmon.h" />
+    <ClInclude Include="external\lvgl\src\others\vg_lite_tvg\vg_lite.h" />
     <ClInclude Include="external\lvgl\src\stdlib\builtin\lv_tlsf.h" />
     <ClInclude Include="external\lvgl\src\stdlib\lv_mem.h" />
     <ClInclude Include="external\lvgl\src\stdlib\lv_sprintf.h" />

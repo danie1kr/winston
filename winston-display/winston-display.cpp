@@ -15,12 +15,19 @@
 #include "../winston/winston-hal-x64.h"
 #endif
 #ifdef WINSTON_PLATFORM_ESP32
+#include "../winston-teensy/winston-hal-teensy.h"
 #include "winston-display-hal-esp32.h"
+#include "winston-display-hal-esp32-websocketclient.hpp"
 #endif
 
 Screen currentScreen = Screen::Cinema;
 DisplayUX::Shared display = DisplayUX::make(480, 320);
+
+#ifdef WINSTON_PLATFORM_ESP32
+Cinema cinema(SD, display);
+#else
 Cinema cinema(display);
+#endif
 
 WebSocketClient webSocketClient;
 winston::RailwayMicroLayout rml;
@@ -56,7 +63,7 @@ void winston_setup()
 {
     winston::hal::init();
     winston::hal::text("Hello from Winston!"_s);
-    std::srand((unsigned int)(inMilliseconds(winston::hal::now().time_since_epoch())));
+    std::srand((unsigned int)(0));// inMilliseconds(winston::hal::now().time_since_epoch())));
 
     // setup
     winston::hal::text("Setup complete!"_s);
@@ -87,25 +94,26 @@ void winston_setup()
             else
                 return showUX(screen);
         },
-        [](WinstonTarget target) -> winston::Result
+        [&](WinstonTarget target) -> winston::Result
         {
-            std::string ipPort = "ws://localhost:8080";
+            std::string ip = "localhost";
             switch (target)
             {
             case WinstonTarget::BlackCanaryLAN:
-                ipPort = "ws://192.168.188.57:8080";
+                ip = "192.168.188.57";
                 break;
             case WinstonTarget::BlackCanaryWifi:
-                ipPort = "ws://192.168.188.56:8080";
+                ip = "192.168.188.56";
                 break;
             case WinstonTarget::Teensy:
-                ipPort = "ws://192.168.188.133:8080";
+                ip = "192.168.188.133";
                 break;
             default:
                 break;
             }
+            winston::URI uri(ip);
 
-            webSocketClient.init([](ConnectionWSPP& client, const std::string message) {
+            webSocketClient.init([](WebSocketClient::Client& client, const std::string message) {
                 JsonDocument msg;
                 deserializeJson(msg, message);
                 JsonObject obj = msg.as<JsonObject>();
@@ -158,7 +166,8 @@ void winston_setup()
                         rml.turnouts.push_back(t);
                     }
                     int offset = 8;
-                    rml.scale({ offset, offset, 480 - 4 * offset, 320 - 2 * offset });
+                    const winston::RailwayMicroLayout::Bounds screen(offset, offset, 480 - 4 * offset, 320 - 2 * offset);
+                    rml.scale(screen);
                     uxUpdateRailwayLayout(rml, [](const std::string turnout) -> const winston::Result {
                         eventLooper.order(winston::Command::make([turnout](const winston::TimePoint& created) -> const winston::State {
                             std::string json("");
@@ -205,7 +214,7 @@ void winston_setup()
                     uxUpdateTurnout(track, state, locked);
                 }
                 
-                }, ipPort);
+                }, uri);
 
             settings.target = target;
             saveSettings(storageSettings);
@@ -237,8 +246,9 @@ void cinema_loop()
 {
     cinema.play();
 #ifndef WINSTON_PLATFORM_WIN_x64
-    if(touch)
-        displayMode = DisplayMode::LVGL;
+    unsigned int x, y;
+    if(display->getTouch(x, y))
+        currentScreen = Screen::Settings;
 #endif
 }
 

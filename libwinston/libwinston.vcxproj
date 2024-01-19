@@ -114,6 +114,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="EventLooper.h" />
+    <ClInclude Include="RailwayMicroLayout.h" />
     <ClInclude Include="Section.h" />
     <ClInclude Include="Command.h" />
     <ClInclude Include="Detector.h" />
@@ -145,6 +146,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EventLooper.cpp" />
+    <ClCompile Include="Log.cpp" />
     <ClCompile Include="Section.cpp" />
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="Detector.cpp" />
@@ -165,7 +167,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="design.md" />
-    <None Include="WinstonSharedTypes.cpp" />
+    <ClCompile Include="WinstonSharedTypes.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="NatvisFile.natvis">

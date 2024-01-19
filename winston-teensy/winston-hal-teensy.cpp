@@ -15,8 +15,8 @@ const char* operator "" _s(const char* in, size_t len)
 }
 #endif
 
-#include "HAL.h"
-#include "Util.h"
+#include "../libwinston/HAL.h"
+#include "../libwinston/Util.h"
 
 #undef WINSTON_WITH_WEBSOCKET
 
@@ -317,6 +317,8 @@ void ensureStorageFile()
 #endif
 }
 */
+
+#ifdef WINSTON_HAL_USE_SOCKETS
 UDPSocketTeensy::UDPSocketTeensy(const std::string ip, const unsigned short port) : winston::hal::Socket(ip, port), ip(ip), port(port)
 {
     Udp.begin(port);
@@ -341,7 +343,9 @@ const winston::Result UDPSocketTeensy::recv(std::vector<unsigned char>& data)
     }
     return winston::Result::OK;
 }
+#endif
 
+#ifdef WINSTON_HAL_USE_SPI
 Arduino_SPIDevice::Arduino_SPIDevice(const Pin chipSelect, const unsigned int speed, SPIDataOrder order, SPIMode mode, const Pin clock, const Pin mosi, const Pin miso)
     : SPIDevice<unsigned char>(chipSelect, speed, order, mode, clock, mosi, miso), spiSettings(speed, Arduino_SPIDevice::BitOrder(order), Arduino_SPIDevice::DataMode(mode))
 {
@@ -405,7 +409,9 @@ const winston::Result Arduino_SPIDevice::send(const std::vector<DataType> data)
     digitalWrite(this->chipSelect, LOW);
     return winston::Result::OK;
 }
+#endif
 
+#ifdef WINSTON_HAL_USE_GPIO
 Arduino_GPIOOutputPin::Arduino_GPIOOutputPin(const Pin pin, const State initial)
     : winston::GPIODigitalPinOutputDevice(pin, initial), winston::Shared_Ptr<Arduino_GPIOOutputPin>()
 {
@@ -417,8 +423,9 @@ void Arduino_GPIOOutputPin::Arduino_GPIOOutputPin::set(const State value)
 {
     digitalWriteFast(pin, value == State::Low ? LOW : HIGH);
 }
+#endif
 
-
+#ifdef WINSTON_HAL_USE_STORAGE
 StorageArduino::StorageArduino(const std::string filename, const size_t maxSize)
     : StorageInterface(maxSize), filename(filename)
 {
@@ -485,6 +492,17 @@ const winston::Result StorageArduino::read(const size_t address, std::string& co
     return winston::Result::OK;
 }
 
+const winston::Result StorageArduino::read(const size_t address, unsigned char& content)
+{
+#ifdef WINSTON_WITH_SDFAT
+    if (!this->file)
+        return winston::Result::NotInitialized;
+    this->file.seek(address);
+    this->file.readBytes(&content, 1);
+#endif
+    return winston::Result::OK;
+}
+
 const winston::Result StorageArduino::write(const size_t address, unsigned char content)
 {
 #ifdef WINSTON_WITH_SDFAT
@@ -544,7 +562,9 @@ const winston::Result StorageArduino::sync()
 #endif
     return winston::Result::OK;
 }
+#endif
 
+#ifdef WINSTON_PLATFORM_TEENSY
 void teensyMAC(uint8_t* mac) { // there are 2 MAC addresses each 48bit 
     const unsigned int m1 = HW_OCOTP_MAC1;
     const unsigned int m2 = HW_OCOTP_MAC0;
@@ -724,3 +744,4 @@ namespace winston
         }*/
     }
 }
+#endif

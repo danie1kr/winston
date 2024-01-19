@@ -350,7 +350,7 @@ static void lv_windows_release_pointer_device_event_callback(lv_event_t* e)
         return;
     }
 
-    lv_display_t* display = lv_indev_get_disp(indev);
+    lv_display_t* display = lv_indev_get_display(indev);
     if (!display)
     {
         return;
@@ -434,7 +434,7 @@ static void lv_windows_release_keypad_device_event_callback(lv_event_t* e)
         return;
     }
 
-    lv_display_t* display = lv_indev_get_disp(indev);
+    lv_display_t* display = lv_indev_get_display(indev);
     if (!display)
     {
         return;
@@ -522,7 +522,7 @@ static void lv_windows_release_encoder_device_event_callback(lv_event_t* e)
         return;
     }
 
-    lv_display_t* display = lv_indev_get_disp(indev);
+    lv_display_t* display = lv_indev_get_display(indev);
     if (!display)
     {
         return;
@@ -944,7 +944,7 @@ static void lv_windows_pointer_driver_read_callback(
     lv_indev_data_t* data)
 {
     lv_windows_window_context_t* context = (lv_windows_window_context_t*)(
-        lv_windows_get_display_context(lv_indev_get_disp(indev)));
+        lv_windows_get_display_context(lv_indev_get_display(indev)));
     if (!context)
     {
         return;
@@ -959,7 +959,7 @@ static void lv_windows_keypad_driver_read_callback(
     lv_indev_data_t* data)
 {
     lv_windows_window_context_t* context = (lv_windows_window_context_t*)(
-        lv_windows_get_display_context(lv_indev_get_disp(indev)));
+        lv_windows_get_display_context(lv_indev_get_display(indev)));
     if (!context)
     {
         return;
@@ -988,7 +988,7 @@ static void lv_windows_encoder_driver_read_callback(
     lv_indev_data_t* data)
 {
     lv_windows_window_context_t* context = (lv_windows_window_context_t*)(
-        lv_windows_get_display_context(lv_indev_get_disp(indev)));
+        lv_windows_get_display_context(lv_indev_get_display(indev)));
     if (!context)
     {
         return;
@@ -1053,7 +1053,7 @@ static void lv_windows_display_timer_callback(lv_timer_t* timer)
                     &context->display_framebuffer_size);
             if (context->display_framebuffer_context_handle)
             {
-                lv_display_set_draw_buffers(
+                lv_display_set_buffers(
                     context->display_device_object,
                     context->display_framebuffer_base,
                     NULL,

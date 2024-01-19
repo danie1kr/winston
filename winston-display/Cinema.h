@@ -2,16 +2,17 @@
 
 #include "../libwinston/HAL.h"
 
-#ifdef WINSTON_PLATFORM_EXP32
+#ifdef WINSTON_PLATFORM_ESP32
 #define SPI_DRIVER_SELECT 0
 #include <SPI.h>
 #include <SdFat.h>
+#include <JPEGDEC.h>
 #endif
 
 class Cinema
 {
 public:
-#ifdef WINSTON_PLATFORM_EXP32
+#ifdef WINSTON_PLATFORM_ESP32
 	Cinema(SdFat& sd, winston::hal::DisplayUX::Shared display);
 #else
 	Cinema(winston::hal::DisplayUX::Shared display);
@@ -35,7 +36,7 @@ private:
 		Movie(const std::string path, const unsigned int frames) : path(path), frames(frames) { };
 	};
 	winston::hal::DisplayUX::Shared _display;
-#ifdef WINSTON_PLATFORM_EXP32
+#ifdef WINSTON_PLATFORM_ESP32
 	SdFat& sd;
 
 	File fileJPEG;

@@ -40,4 +40,14 @@ namespace winston
 		return this->data & 0x0F;
 	}
 
+	URI::URI(const std::string host, const unsigned int port, const std::string resource, const bool secure)
+		: host{ host }, port{ port }, resource{ resource }, secure{ secure }
+	{
+
+	}
+
+	const std::string URI::toString() const
+	{
+		return (secure ? "wss://" : "ws://") + host + ":" + std::to_string(port) + resource;
+	}
 }

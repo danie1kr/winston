@@ -20,6 +20,8 @@
 #define TOUCH_REG_YL 0x06
 #define TOUCH_REG_YH 0x05
 
+extern SdFat SD;
+
 class DisplayUXESP32 : public winston::hal::DisplayUX, public winston::Shared_Ptr<DisplayUXESP32>
 {
 	class LGFX : public lgfx::LGFX_Device
@@ -62,7 +64,8 @@ public:
 
     static LGFX lcd;
 	const unsigned int lvBufferSize;
-	lv_disp_draw_buf_t lvDisplayDraw;
-	lv_color_t* lvBuffer;
+	lv_display_t *lvDisplay;
+	lv_indev_t* lvInput;
+	void* lvBuffer;
 };
 using DisplayUX = DisplayUXESP32;

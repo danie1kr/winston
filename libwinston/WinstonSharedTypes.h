@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <stddef.h>
+#include <string>
 
 namespace winston
 {
@@ -33,5 +34,16 @@ namespace winston
 
 		const bool present() const;
 		const unsigned char zone() const;
+	};
+
+	struct URI
+	{
+		const bool secure;
+		const std::string host;
+		const unsigned int port;
+		const std::string resource;
+
+		URI(const std::string host, const unsigned int port = 8080, const std::string resource = "/", const bool secure = false);
+		const std::string toString() const;
 	};
 };

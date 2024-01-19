@@ -1,6 +1,9 @@
 
-#ifdef WINSTON_PLATFORM_EXP32
+#ifdef WINSTON_PLATFORM_ESP32
 #define LGFX_USE_V1
+
+#include "../libwinston/external/ArduinoJson-v7.0.1.h"
+#include "../libwinston/Log.h"
 
 #include <LovyanGFX.hpp>
 #include <driver/i2c.h>
@@ -32,57 +35,64 @@ winston::hal::DisplayUX::Shared Cinema::display()
 void Cinema::collectMovies()
 {
 #ifndef WINSTON_PLATFORM_WIN_x64
-    Serial.printf("Listing directory: %s\n", "/movies");
+    std::string path("/movies/movies.json");
+    File jsonFile = this->sd.open(path.c_str());
+    if (jsonFile)
+    {
+        winston::logger.info("Using movies.json");
+        size_t jsonFileSize = jsonFile.size();
+        unsigned char* jsonBuffer = (unsigned char*)malloc(jsonFileSize + 1);
+        memset(jsonBuffer, 0, jsonFileSize + 1);
+        jsonFile.read(jsonBuffer, jsonFileSize);
 
-    File root = this->sd.open("movies");
-    if (!root)
-    {
-        Serial.println("Failed to open directory");
-        return;
-    }
-    if (!root.isDirectory())
-    {
-        Serial.println("Not a directory");
-        return;
-    }
-
-    File file = root.openNextFile();
-    while (file)
-    {
-        if (file.isDirectory())
+        JsonDocument json;
+        deserializeJson(json, jsonBuffer);
+        this->largestJPEGFileSize = json["maxFileSize"].as<size_t>();
+        auto jsonMovies = json["movies"].as<JsonArray>();
+        for (auto movie : jsonMovies)
         {
-            char fileName[64];
-            file.getName(fileName, 64);
-            std::string path = std::string("/movies") + std::string(fileName);
-            unsigned int frames = movieFrameStart;
-            /*  File movieDir = SD.open(path.c_str());
-              std::string frame = frameFileName(movieFrameStart);
-              Serial.print("Dir:"); Serial.print(path.c_str());
-              while(movieDir.exists(frame.c_str()))
-              {
-                ++frames;
-                frame = frameFileName(frames);
-                Serial.print(" Frames: ") + Serial.println(frames);
-              }
-              movies.emplace_back(path, frames);
-              */
-            File frameFile;
-            while (frameFile = file.openNextFile())
-            {
-                if (largestJPEGFileSize < frameFile.size())
-                    largestJPEGFileSize = frameFile.size();
-                ++frames;
-            }
-            Serial.print("Dir: "); Serial.print(path.c_str()); Serial.print(" Frames: "); Serial.print(frames); Serial.print(" Maximum size: "); Serial.println(largestJPEGFileSize);
+            std::string path = std::string("/movies/") + movie["name"].as<std::string>();
+            auto frames = movie["frameCount"].as<unsigned int>();
+            winston::logger.info("Dir: ", path.c_str(), "Frames: ", frames);
             movies.emplace_back(path, frames);
         }
-        file = root.openNextFile();
+        jsonFile.close();
+        winston::logger.info("Maximum size: ", this->largestJPEGFileSize);
+        free(jsonBuffer);
+    }
+    else
+    {
+        File moviesDir = this->sd.open("/movies");
+
+        winston::logger.info("Manual frame counting");
+        File file = moviesDir.openNextFile();
+        while (file)
+        {
+            if (file.isDirectory())
+            {
+                char fileName[64];
+                file.getName(fileName, 64);
+                std::string path = std::string("/movies/") + std::string(fileName);
+                unsigned int frames = movieFrameStart;
+
+                File frameFile;
+                while (frameFile = file.openNextFile())
+                {
+                    if (largestJPEGFileSize < frameFile.size())
+                        largestJPEGFileSize = frameFile.size();
+                    ++frames;
+                }
+                winston::logger.info("Dir: ", path.c_str(), " Frames: ", frames, " Maximum size: ", largestJPEGFileSize);
+                movies.emplace_back(path, frames);
+            }
+            file = moviesDir.openNextFile();
+        }
     }
 
-    this->jpegBuffer = (uint8_t*)malloc(sizeof(uint8_t) * largestJPEGFileSize);
+    this->jpegBuffer = (uint8_t*)malloc(sizeof(uint8_t) * this->largestJPEGFileSize);
     if (!this->jpegBuffer)
     {
-        //lcd.print("JPEG alloc error");
+        winston::logger.err("Cinema.cpp: JPEG alloc error");
         while (true);
 }
 #else
@@ -103,10 +113,8 @@ void Cinema::play()
     if (this->playing())
     {
 #ifndef WINSTON_PLATFORM_WIN_x64
-        this->_display->setCursor(0, 0);
         auto& movie = this->movies[currentMovie];
         std::string jpegFileName = movie.path + "/";
-        //currentFrame = 666;
         if (currentFrame < 1000)
             jpegFileName += "0";
         if (currentFrame < 100)

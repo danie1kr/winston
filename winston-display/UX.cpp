@@ -1,4 +1,5 @@
 #include <string>
+#include <map>
 
 #include "winston-display.h"
 #ifdef WINSTON_PLATFORM_WIN_x64
@@ -12,6 +13,7 @@ extern "C" {
 LV_IMG_DECLARE(movie_FILL0_wght400_GRAD0_opsz24);
 LV_IMG_DECLARE(settings_FILL0_wght400_GRAD0_opsz24);
 LV_IMG_DECLARE(train_FILL0_wght400_GRAD0_opsz24);
+LV_IMG_DECLARE(arrow_back_FILL0_wght400_GRAD0_opsz24);
 #ifdef __cplusplus
 }
 #endif
@@ -311,16 +313,6 @@ void setupUX(winston::hal::DisplayUX::Shared display,
         lv_obj_add_style(btnRailwayIcon, &styleIconRecolor, 0);
         lv_obj_align(btnRailwayIcon, LV_ALIGN_CENTER, 0, 0);
     }
-    // slider backlight
-    // label: ip
-    // led: wlan connected
-    // dropdown: teensy or blackcanary
-    // button cinema
-    // button graph
-
-  // graph
-    // button settings
-    // button cinema
 
     lvglScreenRailway = lv_obj_create(NULL);
     {

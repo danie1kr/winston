@@ -656,7 +656,7 @@ WebSocketClientWin::WebSocketClientWin()
 {
 }
 
-void WebSocketClientWin::init(OnMessage onMessage, std::string uri)
+void WebSocketClientWin::init(OnMessage onMessage, const winston::URI& uri)
 {
     using websocketpp::lib::placeholders::_1;
     using websocketpp::lib::placeholders::_2;
@@ -671,7 +671,7 @@ void WebSocketClientWin::init(OnMessage onMessage, std::string uri)
     this->client.set_fail_handler(websocketpp::lib::bind(&WebSocketClientWin::on_fail, this, websocketpp::lib::placeholders::_1));
 
     websocketpp::lib::error_code ec;
-    this->connection = this->client.get_connection(uri, ec);
+    this->connection = this->client.get_connection(uri.toString(), ec);
     if (ec) {
         std::cout << "Echo failed because: " << ec.message() << std::endl;
     }

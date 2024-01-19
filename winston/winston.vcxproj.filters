@@ -51,9 +51,6 @@
     <ClCompile Include="TLC5947_SignalDevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="winston-shared-hal-x64.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\central-z21\Z21Const.h">

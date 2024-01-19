@@ -16,6 +16,9 @@
     <Filter Include="libwinston-src">
       <UniqueIdentifier>{1c531b19-cd37-4ef8-9f63-ab24ef521d6d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="res">
+      <UniqueIdentifier>{fdad11f5-7c7a-4b1d-86a5-4a400e339405}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\arduino folders read me.txt">
@@ -45,6 +48,30 @@
     <ClCompile Include="winston-display-hal-esp32.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\winston-display\res\arrow_back.c">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="..\winston-display\res\movie_png.c">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="..\winston-display\res\settings_png.c">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="..\winston-display\res\train_png.c">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libwinston\Command.cpp">
+      <Filter>libwinston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libwinston\EventLooper.cpp">
+      <Filter>libwinston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\winston-teensy\winston-hal-teensy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libwinston\Log.cpp">
+      <Filter>libwinston-src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.winston-display-esp.vsarduino.h">
@@ -72,6 +99,18 @@
       <Filter>libwinston-src</Filter>
     </ClInclude>
     <ClInclude Include="winston-display-hal-esp32.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libwinston\Command.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libwinston\EventLooper.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="winston-display-hal-esp32-websocketclient.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\winston-teensy\winston-hal-teensy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

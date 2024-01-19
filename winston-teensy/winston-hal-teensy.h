@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 
+#ifdef WINSTON_PLATTFORM_TEENSY
 #include "Winston.h"
 #include "Signal.h"
 #include "HAL.h"
@@ -22,6 +23,7 @@ using namespace qindesign::network;
 #define USE_NATIVE_ETHERNET         true
 #define USE_QN_ETHERNET             false
 #include <NativeEthernet.h>
+#endif
 #endif
 /*
 #define WINSTON_WITH_WEBSOCKET
@@ -70,6 +72,7 @@ const char* operator "" _s(const char* in, size_t len)
 */
 #endif
 
+#ifdef WINSTON_HAL_USE_SOCKETS
 class UDPSocketTeensy : public winston::hal::Socket, winston::Shared_Ptr<UDPSocketTeensy>
 {
 public:
@@ -86,7 +89,9 @@ private:
 	const unsigned short port;
 };
 using UDPSocket = UDPSocketTeensy;
+#endif
 
+#ifdef WINSTON_HAL_USE_SPI
 class Arduino_SPIDevice : public winston::hal::SPIDevice<unsigned char>, public winston::Shared_Ptr<Arduino_SPIDevice>
 {
 public:
@@ -105,7 +110,9 @@ private:
 	SPISettings spiSettings;
 };
 using SignalInterfaceDevice = Arduino_SPIDevice;
+#endif
 
+#ifdef WINSTON_HAL_USE_GPIO
 class Arduino_GPIOOutputPin : public winston::GPIODigitalPinOutputDevice, public winston::Shared_Ptr<Arduino_GPIOOutputPin>
 {
 public:
@@ -115,7 +122,9 @@ public:
     using winston::Shared_Ptr<Arduino_GPIOOutputPin>::Shared;
     using winston::Shared_Ptr<Arduino_GPIOOutputPin>::make;
 };
+#endif
 
+#ifdef WINSTON_HAL_USE_STORAGE
 #ifdef WINSTON_WITH_SDFAT
 //#define SDFAT_FILE_TYPE 2 //exfat only
 #include <SD.h>
@@ -128,6 +137,7 @@ public:
 	const winston::Result init();
 	const winston::Result read(const size_t address, std::vector<unsigned char>& content, const size_t length = 1);
 	const winston::Result read(const size_t address, std::string& content, const size_t length = 1);
+	const winston::Result read(const size_t address, unsigned char& content);
 	const winston::Result write(const size_t address, unsigned char content);
 	const winston::Result write(const size_t address, std::vector<unsigned char>& content, const size_t length = 0);
 	const winston::Result write(const size_t address, std::string& content, const size_t length = 0);
@@ -142,6 +152,7 @@ private:
 #endif
 };
 using Storage = StorageArduino;
+#endif
 /*
 class DisplayArduino : public winston::TaskConfirm::Display, public winston::Shared_Ptr<DisplayArduino>
 {

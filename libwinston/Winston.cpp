@@ -14,8 +14,6 @@ namespace winston
 	RUNTIME_LAMBDAS(Network);
 	RUNTIME_LAMBDAS(Railway);
 
-	Logger logger;
-
 	GPIOPinDevice::GPIOPinDevice(const Pin pin) 
 		: Shared_Ptr<GPIOPinDevice>(), pin(pin)
 	{ }

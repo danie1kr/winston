@@ -1,5 +1,7 @@
 #pragma once
 
+#include "HAL.h"
+#include "Util.h"
 #include <deque>
 #include <string>
 

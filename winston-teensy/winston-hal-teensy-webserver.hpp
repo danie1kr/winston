@@ -408,6 +408,6 @@ void WebServerTeensy::shutdown()
 
 const size_t WebServerTeensy::maxMessageSize()
 {
-    return 512;
+    return WINSTON_WEBSOCKET_MAXSIZE;
 }
 #endif

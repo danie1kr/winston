@@ -1,4 +1,125 @@
+#include "Log.h"
 #include "winston-display-hal-esp32.h"
+
+
+#define SPI_MOSI 2 //1
+#define SPI_MISO 41
+#define SPI_SCK 42
+#define SD_CS 1 //2
+#define LCD_CS 37
+#define LCD_BLK 45
+
+#define I2C_SCL 39
+#define I2C_SDA 38
+
+// Try max SPI clock for an SD. Reduce SPI_CLOCK if errors occur.
+#define SPI_CLOCK SD_SCK_MHZ(50)
+#define SD_CONFIG SdSpiConfig(SD_CS, USER_SPI_BEGIN | DEDICATED_SPI, SPI_CLOCK)//, &mySpi)
+
+SdFat SD;
+extern winston::Logger winston::logger;
+
+namespace winston
+{
+    namespace hal {
+        void init()
+        {
+            {
+                pinMode(LCD_CS, OUTPUT);
+                pinMode(LCD_BLK, OUTPUT);
+
+                digitalWrite(LCD_CS, LOW);
+                digitalWrite(LCD_BLK, HIGH);
+
+                Serial.begin(115200);/*
+                while (!Serial) { //}&& millis() < 2000) {
+                    // Wait for Serial to initialize
+                }*/
+                text("Winston Display Init Hello");
+
+                SPI.begin(SPI_SCK, SPI_MISO, SPI_MOSI);
+
+                Serial.begin(115200);
+                Serial.println("hello from board");
+                Serial.flush();
+
+                /*
+                lcd.fillScreen(TFT_BLUE);
+                lcd.setTextColor(TFT_YELLOW);
+                lcd.setTextSize(2);
+                lcd.setCursor(0, 0);
+                lcd.print("Makerfabs ESP32-S3");
+                lcd.setCursor(0, 16);
+                lcd.print("Parallel TFT with Touch");
+                lcd.setCursor(0, 32);
+                lcd.setRotation(3);*/
+
+                /*
+                const char loadingScreenJPEG[] = "/loading.jpg";
+                jpeg.open(loadingScreenJPEG, jpegOpen, jpegClose, jpegRead, jpegSeek, jpegDraw);
+                jpeg.decode(0, 0, 0);
+                jpeg.close();
+                */
+                if (!SD.begin(SD_CONFIG))
+                {
+                    Serial.println("Card Mount Failed");
+                    SD.initErrorHalt(&Serial);
+                    while (1);
+                }
+                winston::runtimeEnablePersistence();
+
+                //I2C init
+                Wire.begin(I2C_SDA, I2C_SCL);
+                byte error, address;
+
+                Wire.beginTransmission(TOUCH_I2C_ADD);
+                error = Wire.endTransmission();
+
+                if (error == 0)
+                {
+                    Serial.print("I2C device found at address 0x");
+                    Serial.print(TOUCH_I2C_ADD, HEX);
+                    Serial.println("  !");
+                    //lcd.print("TOUCH INIT OVER");
+                }
+                else
+                {
+                    Serial.print("Unknown error at address 0x");
+                    Serial.println(TOUCH_I2C_ADD, HEX);
+                    //lcd.print("ERROR:   TOUCH");
+                }
+
+                winston::runtimeEnableNetwork();
+
+                logRuntimeStatus();
+        }
+
+        void text(const std::string& text)
+        {
+            Serial.println(text.c_str());
+        }
+
+        void error(const std::string& error)
+        {
+            logger.err(error);
+        }
+
+        void fatal(const std::string reason)
+        {
+            logger.log(reason, Logger::Entry::Level::Fatal);
+        }
+
+        void delay(const unsigned int ms)
+        {
+            ::delay(ms);
+        }
+
+        TimePoint now()
+        {
+            return ::millis();
+        }
+    }
+}
 
 DisplayUXESP32::LGFX DisplayUXESP32::lcd(480, 320);
 DisplayUXESP32::LGFX::LGFX(const unsigned int screenWidth, const unsigned int screenHeight)
@@ -114,38 +235,31 @@ bool DisplayUXESP32::LGFX::init_impl(bool use_reset, bool use_clear)
 
 DisplayUXESP32::DisplayUXESP32(const unsigned int width, const unsigned int height)
     : winston::hal::DisplayUX(width, height),
-    lvBufferSize(width * 10), lvDisplayDraw(), lvBuffer(nullptr)
+    lvBufferSize(width * 10), lvDisplay(), lvInput(), lvBuffer(nullptr)
 {
 
 }
 
 const winston::Result DisplayUXESP32::init()
 {
-    lvBuffer = (lv_color_t*)malloc(sizeof(lv_color_t) * lvBufferSize);
+    lvBuffer = malloc(sizeof(lv_color_t) * lvBufferSize);
     if (!lvBuffer)
         return winston::Result::OutOfMemory;
 
     lv_init();
-    lv_disp_draw_buf_init(&lvDisplayDraw, lvBuffer, NULL, lvBufferSize);
 
-    static lv_disp_drv_t disp_drv;
-    lv_disp_drv_init(&disp_drv);
-    disp_drv.hor_res = width;
-    disp_drv.ver_res = height;
-    disp_drv.flush_cb = [](lv_disp_drv_t* disp, const lv_area_t* area, lv_color_t
-        * color_p) {
+    this->lvDisplay = lv_display_create(this->width, this->height);
+    lv_display_set_flush_cb(this->lvDisplay, [](lv_display_t* display, const lv_area_t* area, unsigned char* data) {
             uint32_t w = (area->x2 - area->x1 + 1);
             uint32_t h = (area->y2 - area->y1 + 1);
-            lcd.pushImageDMA(area->x1, area->y1, w, h, &color_p->full);
-            lv_disp_flush_ready(disp);
-        };
-    disp_drv.draw_buf = &lvDisplayDraw;
-    lv_disp_drv_register(&disp_drv);
+            DisplayUXESP32::lcd.pushImageDMA(area->x1, area->y1, w, h, data);
+            lv_display_flush_ready(display);
+        });
+    lv_display_set_buffers(this->lvDisplay, this->lvBuffer, nullptr, sizeof(lv_color_t)* this->lvBufferSize, LV_DISPLAY_RENDER_MODE_PARTIAL);
 
-    static lv_indev_drv_t indev_drv;
-    lv_indev_drv_init(&indev_drv);
-    indev_drv.type = LV_INDEV_TYPE_POINTER;
-    indev_drv.read_cb = [](lv_indev_drv_t* drv, lv_indev_data_t* data) {
+    this->lvInput = lv_indev_create();
+    lv_indev_set_type(this->lvInput, LV_INDEV_TYPE_POINTER);
+    lv_indev_set_read_cb(this->lvInput, [](lv_indev_t* dev, lv_indev_data_t* data) {
         uint16_t touchX, touchY;
 
         data->state = LV_INDEV_STATE_REL;
@@ -156,8 +270,7 @@ const winston::Result DisplayUXESP32::init()
             data->point.x = touchX;
             data->point.y = touchY;
         }
-        };
-    lv_indev_drv_register(&indev_drv);
+        });
 
     return winston::Result::OK;
 }
@@ -181,12 +294,13 @@ const winston::Result DisplayUXESP32::draw(unsigned int x, unsigned int y, unsig
 
 const winston::Result DisplayUXESP32::brightness(unsigned char value)
 {
+    DisplayUXESP32::lcd.setBrightness(value);
     return winston::Result::OK;
 }
 
 const unsigned char DisplayUXESP32::brightness()
 {
-    return 24;
+    return DisplayUXESP32::lcd.getBrightness();
 }
 
 const unsigned int DisplayUXESP32::tick()
@@ -217,7 +331,7 @@ int DisplayUXESP32::ft6236_getTouchPointX()
     //Serial.println(XH >> 6,HEX);
     if (XH >> 6 == 1)
         return -1;
-    XL = ft6236_readTouchReg(TOUCH_REG_XL);
+    XL = DisplayUXESP32::ft6236_readTouchReg(TOUCH_REG_XL);
 
     return ((XH & 0x0F) << 8) | XL;
 }

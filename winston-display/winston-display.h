@@ -15,7 +15,7 @@
 
 #include "../libwinston/HAL.h"
 #include "../libwinston/EventLooper.h"
-#include "../libwinston/Railway.h"
+#include "../libwinston/RailwayMicroLayout.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

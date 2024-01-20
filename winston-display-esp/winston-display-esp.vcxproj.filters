@@ -113,6 +113,9 @@
     <ClInclude Include="..\winston-teensy\winston-hal-teensy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\libwinston\WinstonTypes.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="board.txt">

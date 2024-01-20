@@ -1,7 +1,7 @@
 #pragma once
 
-#include "HAL.h"
-#include "Util.h"
+#include "../libwinston/HAL.h"
+#include "../libwinston/Util.h"
 #include <deque>
 #include <string>
 

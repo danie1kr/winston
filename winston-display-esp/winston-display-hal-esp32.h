@@ -19,7 +19,6 @@
 #define TOUCH_REG_XH 0x03
 #define TOUCH_REG_YL 0x06
 #define TOUCH_REG_YH 0x05
-
 extern SdFat SD;
 
 class DisplayUXESP32 : public winston::hal::DisplayUX, public winston::Shared_Ptr<DisplayUXESP32>

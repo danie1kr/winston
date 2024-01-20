@@ -36,7 +36,7 @@ void Cinema::collectMovies()
 {
 #ifndef WINSTON_PLATFORM_WIN_x64
     std::string path("/movies/movies.json");
-    File jsonFile = this->sd.open(path.c_str());
+    auto jsonFile = this->sd.open(path.c_str());
     if (jsonFile)
     {
         winston::logger.info("Using movies.json");
@@ -62,10 +62,10 @@ void Cinema::collectMovies()
     }
     else
     {
-        File moviesDir = this->sd.open("/movies");
+        auto moviesDir = this->sd.open("/movies");
 
         winston::logger.info("Manual frame counting");
-        File file = moviesDir.openNextFile();
+        auto file = moviesDir.openNextFile();
         while (file)
         {
             if (file.isDirectory())
@@ -75,7 +75,7 @@ void Cinema::collectMovies()
                 std::string path = std::string("/movies/") + std::string(fileName);
                 unsigned int frames = movieFrameStart;
 
-                File frameFile;
+                FsFile frameFile;
                 while (frameFile = file.openNextFile())
                 {
                     if (largestJPEGFileSize < frameFile.size())
@@ -123,7 +123,7 @@ void Cinema::play()
             jpegFileName += "0";
         jpegFileName += std::to_string(currentFrame);
         jpegFileName += ".jpg";
-        File f = this->sd.open(jpegFileName.c_str());
+        auto f = this->sd.open(jpegFileName.c_str());
         if (f)
         {
             size_t size = f.size();

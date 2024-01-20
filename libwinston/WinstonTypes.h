@@ -9,8 +9,7 @@
 #include <string>
 #include <array>
 #include <vector>
-#include "external/span.hpp"
-#include "external/better_enum.hpp"
+#include "../libwinston/external/better_enum.hpp"
 #ifdef __GNUC__ 
 #pragma GCC pop_options
 #endif

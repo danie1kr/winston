@@ -92,6 +92,7 @@ namespace winston
                 winston::runtimeEnableNetwork();
 
                 logRuntimeStatus();
+            }
         }
 
         void text(const std::string& text)

@@ -127,7 +127,7 @@ public:
 #ifdef WINSTON_HAL_USE_STORAGE
 #ifdef WINSTON_WITH_SDFAT
 //#define SDFAT_FILE_TYPE 2 //exfat only
-#include <SD.h>
+#include <SdFat.h>
 #endif
 class StorageArduino: public winston::hal::StorageInterface, winston::Shared_Ptr<StorageArduino>
 {

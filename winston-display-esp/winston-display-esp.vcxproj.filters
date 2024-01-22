@@ -72,6 +72,9 @@
     <ClCompile Include="..\libwinston\Log.cpp">
       <Filter>libwinston-src</Filter>
     </ClCompile>
+    <ClCompile Include="..\libwinston\Winston.cpp">
+      <Filter>libwinston-src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="__vm\.winston-display-esp.vsarduino.h">

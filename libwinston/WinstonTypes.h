@@ -1,6 +1,7 @@
 #pragma once
 #ifndef WINSTON_TYPES_H
 #define WINSTON_TYPES_H
+#include "../libwinston/WinstonConfig.h"
 
 #ifdef __GNUC__ 
 #pragma GCC push_options

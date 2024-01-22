@@ -1,8 +1,9 @@
 #pragma once
+#include "../libwinston/WinstonConfig.h"
 
 #include <string>
 #include <vector>
-#include "WinstonTypes.h"
+#include "../libwinston/WinstonTypes.h"
 
 #if !defined(__PRETTY_FUNCTION__) && !defined(__GNUC__)
 #define __PRETTY_FUNCTION__ __FUNCSIG__

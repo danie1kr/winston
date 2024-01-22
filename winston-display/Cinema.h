@@ -1,9 +1,10 @@
 #pragma once
 
+#include "../libwinston/WinstonConfig.h"
 #include "../libwinston/HAL.h"
 
 #ifdef WINSTON_PLATFORM_ESP32
-#define SPI_DRIVER_SELECT 0
+#include <stdint.h>
 #include <SPI.h>
 #include <SdFat.h>
 #include <JPEGDEC.h>

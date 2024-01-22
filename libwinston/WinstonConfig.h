@@ -1,5 +1,37 @@
 #pragma once
 
+#ifdef WINSTON_PROJECT_CINEMA
+/*
+* MaTouch_ESP32-S3 Parallel TFT with Touch 3.5'' ILI9488
+* https://www.makerfabs.com/esp32-s3-parallel-tft-with-touch-ili9488.html
+
+* Display 480*320
+* SD-Card for storing movies as jpeg sequences
+* WiFi for WebsocketClient
+*/
+
+#define WINSTON_PLATFORM_ESP32
+#define WINSTON_WITH_SDFAT
+#define WINSTON_HAL_USE_STORAGE
+#define WINSTON_HAL_USE_DISPLAYUX
+#define WINSTON_HAL_USE_WEBSOCKETCLIENT
+
+// SDfat
+#define SDFAT_FILE_TYPE 3
+#define SPI_DRIVER_SELECT 0
+
+// Lavoyan GFX
+#define LGFX_USE_V1
+
+// Arduino JSON
+#define ARDUINOJSON_ENABLE_STD_STRING 1
+#define ARDUINOJSON_ENABLE_STD_STREAM 0
+#define ARDUINOJSON_ENABLE_ARDUINO_STRING 0
+#define ARDUINOJSON_ENABLE_ARDUINO_STREAM 0
+#define ARDUINOJSON_ENABLE_ARDUINO_PRINT 0
+
+#endif
+
 #define WINSTON_SIGNAL_LIGHT_DIV 4
 
 //#define WINSTON_STATISTICS

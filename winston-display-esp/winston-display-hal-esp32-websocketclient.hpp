@@ -1,5 +1,4 @@
 #pragma once
-
 #include "../libwinston/WinstonConfig.h"
 
 #include <WebSockets2_Generic.h>

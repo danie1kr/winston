@@ -426,6 +426,7 @@ void Arduino_GPIOOutputPin::Arduino_GPIOOutputPin::set(const State value)
 #endif
 
 #ifdef WINSTON_HAL_USE_STORAGE
+SdFat SD;
 StorageArduino::StorageArduino(const std::string filename, const size_t maxSize)
     : StorageInterface(maxSize), filename(filename)
 {
@@ -450,7 +451,7 @@ const winston::Result StorageArduino::init()
         Serial.println("file found");
 
     //SD.sdfs.chdir();
-    this->file = SD/*.sdfs*/.open(this->filename.c_str(), FILE_WRITE_BEGIN);
+    this->file = SD/*.sdfs*/.open(this->filename.c_str(), O_RDWR);
     if (!this->file)
     {
         Serial.println("could not open file!");
@@ -465,7 +466,12 @@ const winston::Result StorageArduino::read(const size_t address, std::vector<uns
 #ifdef WINSTON_WITH_SDFAT
     if (!this->file)
         return winston::Result::NotInitialized;
-    const size_t count = length == 0 ? this->file.size(): min(this->file.size(), length);
+    const size_t count = length == 0 ? this->file.size(): min((size_t)this->file.size(), length);
+    if (this->file.size() < address + count)
+    {
+        winston::logger.err("storage too small");
+        return winston::Result::OutOfBounds;
+    }
     content.reserve(count);
     this->file.seek(address);
     this->file.read(content.data(), count);
@@ -478,7 +484,12 @@ const winston::Result StorageArduino::read(const size_t address, std::string& co
 #ifdef WINSTON_WITH_SDFAT
     if (!this->file)
         return winston::Result::NotInitialized;
-    const size_t count = length == 0 ? this->file.size() : min(this->file.size(), length);
+    const size_t count = length == 0 ? this->file.size() : min((size_t)this->file.size(), length);
+    if (this->file.size() < address + count)
+    {
+        winston::logger.err("storage too small");
+        return winston::Result::OutOfBounds;
+    }
     content.clear();
     content.reserve(count);
     this->file.seek(address);
@@ -497,6 +508,11 @@ const winston::Result StorageArduino::read(const size_t address, unsigned char& 
 #ifdef WINSTON_WITH_SDFAT
     if (!this->file)
         return winston::Result::NotInitialized;
+    if (this->file.size() < address + 1)
+    {
+        winston::logger.err("storage too small");
+        return winston::Result::OutOfBounds;
+    }
     this->file.seek(address);
     this->file.readBytes(&content, 1);
 #endif
@@ -524,7 +540,7 @@ const winston::Result StorageArduino::write(const size_t address, std::vector<un
 #ifdef WINSTON_WITH_SDFAT
     if (!this->file)
         return winston::Result::NotInitialized;
-    const size_t count = length == 0 ? content.size() : min(content.size(), length);
+    const size_t count = length == 0 ? content.size() : min((size_t)content.size(), length);
     if (this->file.size() < address + count)
     {
         winston::logger.err("storage too small");

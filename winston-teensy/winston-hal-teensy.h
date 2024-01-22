@@ -1,12 +1,13 @@
 #pragma once
+#include "../libwinston/WinstonConfig.h"
 
 #include <Arduino.h>
+#include "../libwinston/HAL.h"
+#include "../libwinston/Log.h"
 
 #ifdef WINSTON_PLATTFORM_TEENSY
-#include "Winston.h"
-#include "Signal.h"
-#include "HAL.h"
-#include "Log.h"
+#include "../libwinston/Winston.h"
+#include "../libwinston/Signal.h"
 
 #define WINSTON_WITH_HTTP
 #define WINSTON_WITH_SDFAT
@@ -125,10 +126,8 @@ public:
 #endif
 
 #ifdef WINSTON_HAL_USE_STORAGE
-#ifdef WINSTON_WITH_SDFAT
-//#define SDFAT_FILE_TYPE 2 //exfat only
 #include <SdFat.h>
-#endif
+extern SdFat SD;
 class StorageArduino: public winston::hal::StorageInterface, winston::Shared_Ptr<StorageArduino>
 {
 public:

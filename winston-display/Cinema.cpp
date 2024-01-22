@@ -1,6 +1,6 @@
+#include "Cinema.h"
 
 #ifdef WINSTON_PLATFORM_ESP32
-#define LGFX_USE_V1
 
 #include "../libwinston/external/ArduinoJson-v7.0.1.h"
 #include "../libwinston/Log.h"
@@ -9,7 +9,6 @@
 #include <driver/i2c.h>
 #include <JPEGDEC.h>
 
-#include "Cinema.h"
 
 Cinema::Cinema(SdFat &sd, winston::hal::DisplayUX::Shared display)
 	: sd(sd), _display(display), fileJPEG(), jpegBuffer(nullptr), largestJPEGFileSize(0), jpeg(), movies(), currentFrame(0), currentMovie(0)
@@ -18,7 +17,6 @@ Cinema::Cinema(SdFat &sd, winston::hal::DisplayUX::Shared display)
     jpeg.setUserPointer(this);
 }
 #else
-#include "Cinema.h"
 Cinema::Cinema(winston::hal::DisplayUX::Shared display)
     : _display(display), movies(), currentFrame(0), currentMovie(0)
 {

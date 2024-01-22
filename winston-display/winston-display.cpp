@@ -1,14 +1,8 @@
 // winston-main.cpp : This file contains the 'main' function. Program execution begins and ends there.
 
-
 #include "winston-display.h"
 #include "Cinema.h"
 
-#define ARDUINOJSON_ENABLE_STD_STRING 1
-#define ARDUINOJSON_ENABLE_STD_STREAM 0
-#define ARDUINOJSON_ENABLE_ARDUINO_STRING 0
-#define ARDUINOJSON_ENABLE_ARDUINO_STREAM 0
-#define ARDUINOJSON_ENABLE_ARDUINO_PRINT 0
 #include "../libwinston/external/ArduinoJson-v7.0.1.h"
 
 #ifdef WINSTON_PLATFORM_WIN_x64

@@ -1,17 +1,7 @@
 #pragma once
+#include "../libwinston/WinstonConfig.h"
+
 #include <functional>
-
-#ifndef WINSTON_HAL_USE_STORAGE
-#define WINSTON_HAL_USE_STORAGE
-#endif
-
-#ifndef WINSTON_HAL_USE_DISPLAYUX
-#define WINSTON_HAL_USE_DISPLAYUX
-#endif
-
-#ifndef WINSTON_HAL_USE_WEBSOCKETCLIENT
-#define WINSTON_HAL_USE_WEBSOCKETCLIENT
-#endif
 
 #include "../libwinston/HAL.h"
 #include "../libwinston/EventLooper.h"

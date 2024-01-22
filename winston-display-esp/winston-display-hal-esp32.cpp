@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "Log.h"
 #include "winston-display-hal-esp32.h"
 
@@ -16,7 +17,7 @@
 #define SPI_CLOCK SD_SCK_MHZ(50)
 #define SD_CONFIG SdSpiConfig(SD_CS, USER_SPI_BEGIN | DEDICATED_SPI, SPI_CLOCK)//, &mySpi)
 
-SdFat SD;
+extern SdFat SD;
 extern winston::Logger winston::logger;
 
 namespace winston

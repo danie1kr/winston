@@ -1,8 +1,7 @@
 #pragma once
-#include "../libwinston/HAL.h"
+#include "../libwinston/WinstonConfig.h"
 
-#define SPI_DRIVER_SELECT 0
-#define LGFX_USE_V1
+#include "../libwinston/HAL.h"
 
 #include <SPI.h>
 #include <SdFat.h>

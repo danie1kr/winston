@@ -5,8 +5,9 @@
 
 #include <SPI.h>
 #include <SdFat.h>
+#include <WiFi.h>
 #include <LovyanGFX.hpp>
-
+#include <JPEGDEC.h>
 #include <lvgl.h>
 
 #include <Wire.h>

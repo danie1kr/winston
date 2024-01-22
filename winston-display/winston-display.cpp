@@ -222,7 +222,14 @@ void winston_setup()
         },
         []() -> std::string
         {
+#ifdef WINSTON_PLATFORM_ESP32
+            if (WiFi.status() != WL_CONNECTED)
+                return std::string("not connected");
+            else
+                return std::string(WiFi.localIP().toString().c_str());
+#else
             return std::string("not connected");
+#endif
         }
     );
 

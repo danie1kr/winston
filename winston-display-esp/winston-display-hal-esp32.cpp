@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include "Log.h"
 #include "winston-display-hal-esp32.h"
-
+#include "winston-secrets.h"
 
 #define SPI_MOSI 2 //1
 #define SPI_MISO 41
@@ -44,6 +44,7 @@ namespace winston
                 Serial.println("hello from board");
                 Serial.flush();
 
+                WiFi.begin(WINSONT_WIFI_SSID, WINSONT_WIFI_PASS);
                 /*
                 lcd.fillScreen(TFT_BLUE);
                 lcd.setTextColor(TFT_YELLOW);
@@ -55,12 +56,6 @@ namespace winston
                 lcd.setCursor(0, 32);
                 lcd.setRotation(3);*/
 
-                /*
-                const char loadingScreenJPEG[] = "/loading.jpg";
-                jpeg.open(loadingScreenJPEG, jpegOpen, jpegClose, jpegRead, jpegSeek, jpegDraw);
-                jpeg.decode(0, 0, 0);
-                jpeg.close();
-                */
                 if (!SD.begin(SD_CONFIG))
                 {
                     Serial.println("Card Mount Failed");
@@ -68,6 +63,12 @@ namespace winston
                     while (1);
                 }
                 winston::runtimeEnablePersistence();
+                /*
+                const char loadingScreenJPEG[] = "/loading.jpg";
+                jpeg.open(loadingScreenJPEG, jpegOpen, jpegClose, jpegRead, jpegSeek, jpegDraw);
+                jpeg.setPixelType(RGB565_BIG_ENDIAN);
+                jpeg.decode(0, 0, 0);
+                jpeg.close();*/
 
                 //I2C init
                 Wire.begin(I2C_SDA, I2C_SCL);
@@ -272,7 +273,7 @@ const winston::Result DisplayUXESP32::init()
             data->point.x = touchX;
             data->point.y = touchY;
         }
-        });
+    });
 
     return winston::Result::OK;
 }

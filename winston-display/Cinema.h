@@ -8,6 +8,8 @@
 #include <SPI.h>
 #include <SdFat.h>
 #include <JPEGDEC.h>
+
+extern JPEGDEC jpeg;
 #endif
 
 class Cinema
@@ -43,8 +45,6 @@ private:
 	File fileJPEG;
 	uint8_t* jpegBuffer;
 	size_t largestJPEGFileSize;
-
-	JPEGDEC jpeg;
 #endif
 
 	std::vector<Movie> movies;

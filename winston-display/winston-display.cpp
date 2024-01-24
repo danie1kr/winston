@@ -53,17 +53,50 @@ void applySettings()
     // target
 }
 
+int jpegDraw(JPEGDRAW* pDraw)
+{
+    display->lcd.pushImage(pDraw->x, pDraw->y, pDraw->iWidth, pDraw->iHeight, pDraw->pPixels);
+    return 1;
+}
+
+File globalFile;
+void* jpegOpen(const char* filename, int32_t* size) {
+    globalFile = SD.open(filename);
+    *size = globalFile.size();
+    return &globalFile;
+}
+
+void jpegClose(void* handle) {
+    if (globalFile) globalFile.close();
+}
+
+int32_t jpegRead(JPEGFILE* handle, uint8_t* buffer, int32_t length) {
+    if (!globalFile) return 0;
+    return globalFile.read(buffer, length);
+}
+
+int32_t jpegSeek(JPEGFILE* handle, int32_t position) {
+    if (!globalFile) return 0;
+    return globalFile.seek(position);
+}
+
 void winston_setup()
 {
     winston::hal::init();
     winston::hal::text("Hello from Winston!"_s);
-    std::srand((unsigned int)(0));// inMilliseconds(winston::hal::now().time_since_epoch())));
+    std::srand((unsigned int)(24));// inMilliseconds(winston::hal::now().time_since_epoch())));
 
     // setup
     winston::hal::text("Setup complete!"_s);
 
     //display = DisplayUX::make(480, 320);
     display->init();
+
+    const char loadingScreenJPEG[] = "/loading.jpg";
+    jpeg.open(loadingScreenJPEG, jpegOpen, jpegClose, jpegRead, jpegSeek, jpegDraw);
+    jpeg.setPixelType(RGB565_BIG_ENDIAN);
+    jpeg.decode(0, 0, 0);
+    jpeg.close();
 
     storageSettings = Storage::make("winston-display.settings", 3);
     storageSettings->init();
@@ -243,13 +276,23 @@ void lvgl_loop()
     winston::hal::delay(timeTillNext);
 }
 
+unsigned int consecutiveCinemaTouches = 0;
 void cinema_loop()
 {
     cinema.play();
 #ifndef WINSTON_PLATFORM_WIN_x64
     unsigned int x, y;
-    if(display->getTouch(x, y))
-        currentScreen = Screen::Settings;
+    if (display->getTouch(x, y))
+    {
+        ++consecutiveCinemaTouches;
+        if (consecutiveCinemaTouches > 24)
+        {
+            winston::logger.info("touch on", x, ", ", y);
+            currentScreen = Screen::Settings;
+        }
+    }
+    else
+        consecutiveCinemaTouches = 0;
 #endif
 }
 

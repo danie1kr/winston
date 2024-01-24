@@ -18,11 +18,11 @@ LV_IMG_DECLARE(arrow_back_FILL0_wght400_GRAD0_opsz24);
 }
 #endif
 
-lv_obj_t* lvglScreenSettings;
-lv_obj_t* lvglScreenRailway;
+lv_obj_t* lvglScreenSettings = nullptr;
+lv_obj_t* lvglScreenRailway = nullptr;
 
-lv_obj_t* labelWifiIP;
-lv_obj_t* ledWifi;
+lv_obj_t* labelWifiIP = nullptr;
+lv_obj_t* ledWifi = nullptr;
 
 std::vector<lv_obj_t*> tracks;
 std::map<lv_obj_t*, const winston::RailwayMicroLayout::TurnoutConnection> turnouts;
@@ -160,10 +160,13 @@ void uxUpdateWifiIP(const std::string ip)
 
 void uxUpdateWifiLED(const bool on)
 {
-    if (on)
-        lv_led_on(ledWifi);
-    else
-        lv_led_off(ledWifi);
+    if (ledWifi)
+    {
+        if (on)
+            lv_led_on(ledWifi);
+        else
+            lv_led_off(ledWifi);
+    }
 }
 
 void setupUX(winston::hal::DisplayUX::Shared display, 

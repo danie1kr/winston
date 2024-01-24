@@ -9,12 +9,13 @@
 #include <driver/i2c.h>
 #include <JPEGDEC.h>
 
+JPEGDEC jpeg;
 
 Cinema::Cinema(SdFat &sd, winston::hal::DisplayUX::Shared display)
-	: sd(sd), _display(display), fileJPEG(), jpegBuffer(nullptr), largestJPEGFileSize(0), jpeg(), movies(), currentFrame(0), currentMovie(0)
+	: sd(sd), _display(display), fileJPEG(), jpegBuffer(nullptr), largestJPEGFileSize(0), movies(), currentFrame(0), currentMovie(0)
 {
-    jpeg.setPixelType(RGB565_BIG_ENDIAN);
-    jpeg.setUserPointer(this);
+    //jpeg.setPixelType(RGB565_BIG_ENDIAN);
+    //jpeg.setUserPointer(this);
 }
 #else
 Cinema::Cinema(winston::hal::DisplayUX::Shared display)
@@ -51,8 +52,11 @@ void Cinema::collectMovies()
         {
             std::string path = std::string("/movies/") + movie["name"].as<std::string>();
             auto frames = movie["frameCount"].as<unsigned int>();
-            winston::logger.info("Dir: ", path.c_str(), "Frames: ", frames);
-            movies.emplace_back(path, frames);
+            if (frames > 0)
+            {
+                winston::logger.info("Dir: ", path.c_str(), "Frames: ", frames);
+                movies.emplace_back(path, frames);
+            }
         }
         jsonFile.close();
         winston::logger.info("Maximum size: ", this->largestJPEGFileSize);
@@ -141,6 +145,8 @@ void Cinema::play()
                         cinema->display()->draw(pDraw->x, pDraw->y, pDraw->iWidth, pDraw->iHeight, pDraw->pPixels);
                         return 1;
                     });
+                jpeg.setPixelType(RGB565_BIG_ENDIAN);
+                jpeg.setUserPointer(this);
                 jpeg.decode(0, 0, 0);
                 jpeg.close();
 #ifdef SHOW_TIMINGS

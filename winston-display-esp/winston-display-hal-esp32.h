@@ -61,10 +61,11 @@ public:
 	using winston::Shared_Ptr<DisplayUXESP32>::Shared;
 	using winston::Shared_Ptr<DisplayUXESP32>::make;
 
-    static LGFX lcd;
+    LGFX lcd;
 	const unsigned int lvBufferSize;
 	lv_display_t *lvDisplay;
 	lv_indev_t* lvInput;
 	void* lvBuffer;
+	winston::TimePoint lastTick;
 };
 using DisplayUX = DisplayUXESP32;

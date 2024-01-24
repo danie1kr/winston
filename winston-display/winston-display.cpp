@@ -86,9 +86,6 @@ void winston_setup()
     winston::hal::text("Hello from Winston!"_s);
     std::srand((unsigned int)(24));// inMilliseconds(winston::hal::now().time_since_epoch())));
 
-    // setup
-    winston::hal::text("Setup complete!"_s);
-
     //display = DisplayUX::make(480, 320);
     display->init();
 
@@ -268,6 +265,8 @@ void winston_setup()
 
     cinema.collectMovies();
     showUX(currentScreen);
+    // setup
+    winston::hal::text("Setup complete!"_s);
 }
 
 void lvgl_loop()

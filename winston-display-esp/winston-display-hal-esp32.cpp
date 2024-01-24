@@ -26,7 +26,6 @@ namespace winston
         void init()
         {
             {
-            //    pinMode(SD_CS, OUTPUT);
                 pinMode(LCD_CS, OUTPUT);
                 pinMode(LCD_BLK, OUTPUT);
 
@@ -34,27 +33,15 @@ namespace winston
                 digitalWrite(LCD_BLK, HIGH);
 
                 Serial.begin(115200);
-                delay(200);
+                /*    delay(200);
                 while (!Serial) { //}&& millis() < 2000) {
                     // Wait for Serial to initialize
-                }
+                }*/
                 text("Winston Display Init Hello");
-
-                Serial.println("hello from board");
                 Serial.flush();
 
-                //WiFi.begin(WINSONT_WIFI_SSID, WINSONT_WIFI_PASS);
+                WiFi.begin(WINSONT_WIFI_SSID, WINSONT_WIFI_PASS);
                 winston::runtimeEnableNetwork();
-                /*
-                lcd.fillScreen(TFT_BLUE);
-                lcd.setTextColor(TFT_YELLOW);
-                lcd.setTextSize(2);
-                lcd.setCursor(0, 0);
-                lcd.print("Makerfabs ESP32-S3");
-                lcd.setCursor(0, 16);
-                lcd.print("Parallel TFT with Touch");
-                lcd.setCursor(0, 32);
-                lcd.setRotation(3);*/
 
                 SPI.begin(SPI_SCK, SPI_MISO, SPI_MOSI);
                 if (!SD.begin(SD_CONFIG))
@@ -246,14 +233,6 @@ DisplayUXESP32::DisplayUXESP32(const unsigned int width, const unsigned int heig
 const winston::Result DisplayUXESP32::init()
 {
     this->lcd.init();
-    lcd.fillScreen(TFT_BLUE);
-    lcd.setTextColor(TFT_YELLOW);
-    lcd.setTextSize(2);
-    lcd.setCursor(0, 0);
-    lcd.print("Makerfabs ESP32-S3");
-    lcd.setCursor(0, 16);
-    lcd.print("Parallel TFT with Touch");
-    lcd.setCursor(0, 32);
     this->lcd.setRotation(3);
 
     lvBuffer = malloc(lvBufferSize);
@@ -314,7 +293,7 @@ const bool DisplayUXESP32::getTouch(unsigned int& x, unsigned int& y)
 
 const winston::Result DisplayUXESP32::draw(unsigned int x, unsigned int y, unsigned int w, unsigned int h, void* data)
 {
-    this->lcd.pushImage(x, y, w, h, data);
+    this->lcd.pushImage(x, y, w, h, (uint16_t*)data);
     return winston::Result::OK;
 }
 

@@ -1,0 +1,8 @@
+#pragma once
+
+#define WINSTON_WIFI_SSID "TheoristsFort"
+#define WINSTON_WIFI_PASS "Erdbeerto5teMitSahne"
+
+#define WINSTON_IP_BLACKCANARY_LAN  "192.168.188.57"
+#define WINSTON_IP_BLACKCANARY_WIFI "192.168.188.56"
+#define WINSTON_IP_TEENSY			"192.168.188.133"

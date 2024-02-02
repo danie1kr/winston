@@ -1,13 +1,13 @@
 // winston-main.cpp : This file contains the 'main' function. Program execution begins and ends there.
 
 /*
-    lovyangfx + single files: (406,37 secs)
-
-
+    lovyangfx + multiple files: (406,37 secs)
+    bb_lcd & bb_touch: (364,96 secs)
 */
 
 #include "winston-display.h"
 #include "Cinema.h"
+#include "../winston-display/winston-secrets.h"
 
 #include "../libwinston/external/ArduinoJson-v7.0.1.h"
 
@@ -59,7 +59,7 @@ void applySettings()
     // target
 }
 
-#ifndef WINSTON_PLATFORM_WIN_x64
+#ifndef WINSTON_PLATFORM_WIN_x64/*
 int jpegDraw(JPEGDRAW* pDraw)
 {
     display->lcd.pushImage(pDraw->x, pDraw->y, pDraw->iWidth, pDraw->iHeight, pDraw->pPixels);
@@ -85,7 +85,7 @@ int32_t jpegRead(JPEGFILE* handle, uint8_t* buffer, int32_t length) {
 int32_t jpegSeek(JPEGFILE* handle, int32_t position) {
     if (!globalFile) return 0;
     return globalFile.seek(position);
-}
+}*/
 #endif
 
 void winston_setup()
@@ -95,14 +95,15 @@ void winston_setup()
     std::srand((unsigned int)(24));// inMilliseconds(winston::hal::now().time_since_epoch())));
 
     display->init();
-
+    display->displayLoadingScreen();
+    /*
 #ifndef WINSTON_PLATFORM_WIN_x64
     const char loadingScreenJPEG[] = "/loading.jpg";
     jpeg.open(loadingScreenJPEG, jpegOpen, jpegClose, jpegRead, jpegSeek, jpegDraw);
     jpeg.setPixelType(RGB565_BIG_ENDIAN);
     jpeg.decode(0, 0, 0);
     jpeg.close();
-#endif
+#endif*/
 
     storageSettings = Storage::make("winston-display.settings", 3);
     storageSettings->init();
@@ -133,13 +134,13 @@ void winston_setup()
             switch (target)
             {
             case WinstonTarget::BlackCanaryLAN:
-                ip = "192.168.188.57";
+                ip = WINSTON_IP_BLACKCANARY_LAN;
                 break;
             case WinstonTarget::BlackCanaryWifi:
-                ip = "192.168.188.56";
+                ip = WINSTON_IP_BLACKCANARY_WIFI;
                 break;
             case WinstonTarget::Teensy:
-                ip = "192.168.188.133";
+                ip = WINSTON_IP_TEENSY;
                 break;
             default:
                 break;
@@ -272,7 +273,7 @@ void winston_setup()
         }
     );
 
-    cinema.collectMovies();
+    cinema.init();
     showUX(currentScreen);
     // setup
     winston::hal::text("Setup complete!"_s);

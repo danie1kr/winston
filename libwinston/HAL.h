@@ -154,6 +154,7 @@ namespace winston
 			virtual const Result setCursor(unsigned int x, unsigned int y) = 0;
 			virtual const bool getTouch(unsigned int &x, unsigned int &y) = 0;
 			virtual const Result draw(unsigned int x, unsigned int y, unsigned int w, unsigned int h, void* data) = 0;
+			virtual void displayLoadingScreen() = 0;
 			virtual const unsigned char brightness() = 0;
 			virtual const unsigned int tick() = 0;
 

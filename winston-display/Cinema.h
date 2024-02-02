@@ -22,11 +22,11 @@ public:
 #endif
 	~Cinema() = default;
 
-	void collectMovies();
-	void play();
+	void init();
+	const unsigned int play();
 	void stop();
 
-	bool playing();
+	const bool playing();
 	winston::hal::DisplayUX::Shared display();
 
 private:
@@ -38,17 +38,28 @@ private:
 
 		Movie(const std::string path, const unsigned int frames) : path(path), frames(frames) { };
 	};
+
+	void collectMovies();
+	static const std::string frameToFilename(const unsigned int frame);
+	void packMovie(Movie& movie, const std::string targetFileName, const size_t chunkSize);
+	void checkAndpackMovies();
+	void initPackedMovie(const std::string path);
+	const bool packPlayNextFrame();
+
 	winston::hal::DisplayUX::Shared _display;
 #ifdef WINSTON_PLATFORM_ESP32
 	SdFat& sd;
 
-	File fileJPEG;
+	File fileMoviePack;
 	uint8_t* jpegBuffer;
 	size_t largestJPEGFileSize;
 #endif
 
 	std::vector<Movie> movies;
-	unsigned int currentFrame;
+	bool moviePlaying;
+	unsigned int lastFrameTime;
 	unsigned int currentMovie;
+
+	const unsigned int targetMSperFrame;
 };
 

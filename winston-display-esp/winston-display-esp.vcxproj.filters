@@ -107,9 +107,6 @@
     <ClInclude Include="..\libwinston\WinstonTypes.h">
       <Filter>libwinston-src</Filter>
     </ClInclude>
-    <ClInclude Include="winston-secrets.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="board.txt">

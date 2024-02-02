@@ -5,17 +5,16 @@
 #include "../libwinston/external/ArduinoJson-v7.0.1.h"
 #include "../libwinston/Log.h"
 
-#include <LovyanGFX.hpp>
-#include <driver/i2c.h>
 #include <JPEGDEC.h>
 
 JPEGDEC jpeg;
 
 Cinema::Cinema(SdFat &sd, winston::hal::DisplayUX::Shared display)
-	: sd(sd), _display(display), fileJPEG(), jpegBuffer(nullptr), largestJPEGFileSize(0), movies(), currentFrame(0), currentMovie(0)
+	: sd(sd), _display(display), fileMoviePack(), jpegBuffer(nullptr), 
+    largestJPEGFileSize(0), movies(), moviePlaying(false), 
+    lastFrameTime(0), currentMovie(0), targetMSperFrame(1000 / 20)
 {
-    //jpeg.setPixelType(RGB565_BIG_ENDIAN);
-    //jpeg.setUserPointer(this);
+
 }
 #else
 Cinema::Cinema(winston::hal::DisplayUX::Shared display)
@@ -29,6 +28,19 @@ Cinema::Cinema(winston::hal::DisplayUX::Shared display)
 winston::hal::DisplayUX::Shared Cinema::display()
 {
     return this->_display;
+}
+
+void Cinema::init()
+{
+    this->collectMovies();
+    this->checkAndpackMovies();
+
+    this->jpegBuffer = (uint8_t*)malloc(sizeof(uint8_t) * this->largestJPEGFileSize);
+    if (!this->jpegBuffer)
+    {
+        winston::logger.err("Cinema.cpp: JPEG alloc error");
+        while (true);
+    }
 }
 
 void Cinema::collectMovies()
@@ -90,13 +102,13 @@ void Cinema::collectMovies()
             file = moviesDir.openNextFile();
         }
     }
-
+    /*
     this->jpegBuffer = (uint8_t*)malloc(sizeof(uint8_t) * this->largestJPEGFileSize);
     if (!this->jpegBuffer)
     {
         winston::logger.err("Cinema.cpp: JPEG alloc error");
         while (true);
-}
+}*/
 #else
     std::string path("/");
     unsigned int frames = movieFrameStart;
@@ -104,84 +116,198 @@ void Cinema::collectMovies()
 #endif
 }
 
-void Cinema::play()
+const std::string Cinema::frameToFilename(const unsigned int frame)
 {
+    // ffmpeg created files with setting %04d.jpg
+    std::string name;
+    if (frame < 1000)
+        name += "0";
+    if (frame < 100)
+        name += "0";
+    if (frame < 10)
+        name += "0";
+    name += std::to_string(frame);
+    name += ".jpg";
+    return name;
+}
+
+void Cinema::packMovie(Movie & movie, const std::string targetFileName, const size_t chunkSize)
+{
+    if (sd.exists(targetFileName.c_str()))
+    {
+        winston::logger.info("Cinema::packMovie: deleting ", targetFileName.c_str());
+        sd.remove(targetFileName.c_str());
+    }
+
+    auto currentFrame = movieFrameStart;
+    File target = sd.open(targetFileName.c_str(), O_RDWR | O_CREAT);
+
+    //this->display()->setCursor(0, 20);
+    winston::logger.info("Cinema::packMovie: working on ", targetFileName.c_str());
+
+    //lcd.setCursor(0, 32);
+    winston::logger.info("Cinema::packMovie: Getting sizes");
+    uint32_t largestFrameOfMovie = 0;
+    for (currentFrame = movieFrameStart; currentFrame < movie.frames; ++currentFrame)
+    {
+        std::string jpegFileName = movie.path + "/" + frameToFilename(currentFrame);
+        File f = sd.open(jpegFileName.c_str());
+        if (f)
+        {
+            uint32_t size = f.size();
+            if (size < largestFrameOfMovie)
+                largestFrameOfMovie = size;
+            f.close();
+        }
+    }
+    winston::logger.info("largest file: %dkb\n", largestFrameOfMovie);
+    //Serial.printf("largest file: %dkb\n", largestFrameOfMovie);
+    //lcd.setCursor(0, 44);
+    //lcd.print("Packing");
+
+    uint32_t bufferSize = chunkSize;
+    uint8_t* buffer = (uint8_t*)malloc(bufferSize);
+
+    target.write(&largestFrameOfMovie, sizeof(largestFrameOfMovie));
+    uint32_t overallSize = sizeof(uint32_t) * (movie.frames + 1);
+    for (currentFrame = movieFrameStart; currentFrame <= movie.frames; ++currentFrame)
+    {
+        std::string jpegFileName = movie.path + "/" + frameToFilename(currentFrame);
+        File f = sd.open(jpegFileName.c_str());
+        if (f)
+        {
+            uint32_t size = f.size();
+            target.write(&size, sizeof(size));
+
+            uint32_t read = 0;
+            uint32_t left = size;
+            while (read < size)
+            {
+                uint32_t toRead = min(left, bufferSize);
+                f.read(buffer, toRead);
+                target.write(buffer, toRead);
+                read += toRead;
+                if (toRead > left)
+                {
+                    winston::logger.err("Cinema::packMovie: issue with toRead left when packing a movie");
+                }
+                left -= toRead;
+            }
+            overallSize += size;
+            f.close();
+        }
+        //lcd.setCursor(0, 56);
+        //lcd.print(jpegFileName.c_str());
+    }
+    free(buffer);
+    winston::logger.info("File ", targetFileName.c_str(), " size on disk ", target.size(), " content ", overallSize);
+    target.close();
+    winston::logger.info("done");
+}
+
+void Cinema::checkAndpackMovies()
+{
+    for (auto& movie : this->movies)
+    {
+        std::string packedFileName = movie.path + ".pack";
+        if (!sd.exists(packedFileName.c_str()))
+        {
+            this->packMovie(movie, packedFileName, 32 * 1024);
+            this->display()->displayLoadingScreen();
+        }
+    }
+}
+
+void Cinema::initPackedMovie(const std::string path)
+{
+    this->fileMoviePack = sd.open(path.c_str());
+    if (!fileMoviePack)
+    {
+        winston::logger.err("Cinema::initPackedMovie: cannot open packfile");
+        return;
+    }
+
+    uint32_t largestFrameOfMovie;
+    this->fileMoviePack.read(&largestFrameOfMovie, sizeof(largestFrameOfMovie));
+
+    if (largestFrameOfMovie > this->largestJPEGFileSize)
+    {
+        this->largestJPEGFileSize = largestFrameOfMovie;
+        if (this->jpegBuffer)
+            free(this->jpegBuffer);
+        winston::logger.info("Cinema::initPackedMovie: realloc ", largestJPEGFileSize, " for jpeg buffer");
+
+        jpegBuffer = (uint8_t*)malloc(sizeof(uint8_t) * largestJPEGFileSize);
+        if (!jpegBuffer)
+            winston::logger.err("Cinema::initPackedMovie: cannot alloc memory for movie frame JPEG :(");
+    }
+}
+
+const unsigned int Cinema::play()
+{
+    unsigned int returnDelay = 0;
     if (!this->playing())
     {
         currentMovie = std::rand() % movies.size();
-        currentFrame = movieFrameStart;
+        this->moviePlaying = true;
+
+        auto& movie = this->movies[currentMovie];
+        this->initPackedMovie(movie.path + ".pack");
     }
 
     if (this->playing())
     {
 #ifndef WINSTON_PLATFORM_WIN_x64
-        auto& movie = this->movies[currentMovie];
-        std::string jpegFileName = movie.path + "/";
-        if (currentFrame < 1000)
-            jpegFileName += "0";
-        if (currentFrame < 100)
-            jpegFileName += "0";
-        if (currentFrame < 10)
-            jpegFileName += "0";
-        jpegFileName += std::to_string(currentFrame);
-        jpegFileName += ".jpg";
-        auto f = this->sd.open(jpegFileName.c_str());
-        if (f)
-        {
-            size_t size = f.size();
-            if (size < largestJPEGFileSize)
-            {
-#ifdef SHOW_TIMINGS
-                const unsigned long tStart = millis();
-#endif
-                f.read(jpegBuffer, size);
-#ifdef SHOW_TIMINGS
-                const unsigned long tRead = millis();
-#endif
+        this->moviePlaying = packPlayNextFrame();
 
-                jpeg.openRAM((uint8_t*)jpegBuffer, size, [](JPEGDRAW* pDraw)
-                    {
-                        Cinema* cinema = (Cinema*)pDraw->pUser;
-                        cinema->display()->draw(pDraw->x, pDraw->y, pDraw->iWidth, pDraw->iHeight, pDraw->pPixels);
-                        return 1;
-                    });
-                jpeg.setPixelType(RGB565_BIG_ENDIAN);
-                jpeg.setUserPointer(this);
-                jpeg.decode(0, 0, 0);
-                jpeg.close();
-#ifdef SHOW_TIMINGS
-                const unsigned long tDraw = millis();
-#endif
-                f.close();
-
-#ifdef SHOW_TIMINGS
-                const unsigned long lastFrameDuration = millis() - lastFrame;
-                std::string t = std::string("Read: ") + std::to_string(tRead - tStart) + std::string("ms");
-                lcd.setCursor(0, 0);
-                lcd.print(t.c_str());
-                t = std::string("Draw: ") + std::to_string(tDraw - tRead) + std::string("ms");
-                lcd.setCursor(0, 16);
-                lcd.print(t.c_str());
-#endif
-            }
-
-            ++currentFrame;
-
-            if (currentFrame > movie.frames)
-                currentFrame = 0;
-        }
-        else
-            currentFrame = 0;
+        const unsigned long lastFrameDuration = millis() - lastFrameTime;
+        if (lastFrameDuration < targetMSperFrame)
+            returnDelay = targetMSperFrame - lastFrameDuration - 1;
+        lastFrameTime = millis();
 #endif
     }
+
+    if (!this->playing())
+    {
+        this->fileMoviePack.close();
+        return 0;
+    }
+    
+    return returnDelay;
+}
+
+const bool Cinema::packPlayNextFrame()
+{
+    if (this->fileMoviePack.available())
+    {
+        uint32_t frameSize;
+        this->fileMoviePack.read(&frameSize, sizeof(frameSize));
+        this->fileMoviePack.read(jpegBuffer, frameSize);
+
+        jpeg.openRAM((uint8_t*)jpegBuffer, frameSize, [](JPEGDRAW* pDraw)
+            {
+                Cinema* cinema = (Cinema*)pDraw->pUser;
+                cinema->display()->draw(pDraw->x, pDraw->y, pDraw->iWidth, pDraw->iHeight, pDraw->pPixels);
+                return 1;
+            });
+
+        jpeg.setPixelType(RGB565_BIG_ENDIAN);
+        jpeg.setUserPointer(this);
+        jpeg.decode(0, 0, 0);
+        jpeg.close();
+
+        return true;
+    }
+    else
+        return false;
 }
 
 void Cinema::stop()
 {
-	this->currentFrame = 0;
+    this->moviePlaying = false;
 }
 
-bool Cinema::playing()
+const bool Cinema::playing()
 {
-	return this->currentFrame != 0;
+	return this->moviePlaying;
 }

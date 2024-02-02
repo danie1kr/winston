@@ -6,12 +6,15 @@
 #include <SPI.h>
 #include <SdFat.h>
 #include <WiFi.h>
-#include <LovyanGFX.hpp>
+//#include <LovyanGFX.hpp>
 #include <JPEGDEC.h>
 #include <lvgl.h>
 
-#include <Wire.h>
-#include <driver/i2c.h>
+//#include <Wire.h>
+//#include <driver/i2c.h>
+
+#include <bb_captouch.h>
+#include <bb_spi_lcd.h>
 
 // https://www.makerfabs.com/esp32-s3-parallel-tft-with-touch-ili9488.html
 #define TOUCH_I2C_ADD 0x38
@@ -23,6 +26,7 @@ extern SdFat SD;
 
 class DisplayUXESP32 : public winston::hal::DisplayUX, public winston::Shared_Ptr<DisplayUXESP32>
 {
+	/*
 	class LGFX : public lgfx::LGFX_Device
 	{
 		static constexpr int I2C_PORT_NUM = I2C_NUM_0;
@@ -41,7 +45,7 @@ class DisplayUXESP32 : public winston::hal::DisplayUX, public winston::Shared_Pt
 	public:
 		LGFX(const unsigned int screenWidth, const unsigned int screenHeight);
 		const unsigned int screenWidth, screenHeight;
-	};
+	};*/
 public:
 	DisplayUXESP32(const unsigned int width, const unsigned int height);
 	virtual ~DisplayUXESP32() = default;
@@ -49,19 +53,28 @@ public:
 	virtual const winston::Result setCursor(unsigned int x, unsigned int y);
 	virtual const bool getTouch(unsigned int& x, unsigned int& y);
 	virtual const winston::Result draw(unsigned int x, unsigned int y, unsigned int w, unsigned int h, void* data);
+	virtual void displayLoadingScreen();
 	virtual const winston::Result brightness(unsigned char value); 
 	virtual const unsigned char brightness();
 	virtual const unsigned int tick();
-
+	/*
 	static int ft6236_readTouchReg(int reg);
 	static int ft6236_getTouchPointX();
 	static int ft6236_getTouchPointY();
 	static int ft6236_getPos(int pos[2]);
-
+	*/
 	using winston::Shared_Ptr<DisplayUXESP32>::Shared;
 	using winston::Shared_Ptr<DisplayUXESP32>::make;
 
-    LGFX lcd;
+private:
+	/*
+	void calibrateTouch();
+	void convertRawTouch();
+	float touchCalibrationAffine[6] = { 1,0,0,0,1,0 };*/
+
+    //LGFX lcd;
+	BBCapTouch touch;
+	BB_SPI_LCD lcd;
 	const unsigned int lvBufferSize;
 	lv_display_t *lvDisplay;
 	lv_indev_t* lvInput;

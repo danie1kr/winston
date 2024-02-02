@@ -10,10 +10,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-LV_IMG_DECLARE(movie_FILL0_wght400_GRAD0_opsz24);
-LV_IMG_DECLARE(settings_FILL0_wght400_GRAD0_opsz24);
-LV_IMG_DECLARE(train_FILL0_wght400_GRAD0_opsz24);
-LV_IMG_DECLARE(arrow_back_FILL0_wght400_GRAD0_opsz24);
+LV_IMG_DECLARE(icon_arrow_back);
+LV_IMG_DECLARE(icon_movie);
+LV_IMG_DECLARE(icon_settings);
+LV_IMG_DECLARE(icon_train);
 #ifdef __cplusplus
 }
 #endif
@@ -296,7 +296,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
             }, LV_EVENT_CLICKED, buttonData);
 
         lv_obj_t *btnCinemaIcon = lv_image_create(btnCinema);
-        lv_image_set_src(btnCinemaIcon, &movie_FILL0_wght400_GRAD0_opsz24);
+        lv_image_set_src(btnCinemaIcon, &icon_movie);
         lv_obj_align(btnCinemaIcon, LV_ALIGN_CENTER, 0, 0);
     } 
     {
@@ -312,7 +312,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
             userData->callback(userData->screen);
             }, LV_EVENT_CLICKED, buttonData);
         lv_obj_t* btnRailwayIcon = lv_image_create(btnRailway);
-        lv_image_set_src(btnRailwayIcon, &train_FILL0_wght400_GRAD0_opsz24);
+        lv_image_set_src(btnRailwayIcon, &icon_train);
         lv_obj_add_style(btnRailwayIcon, &styleIconRecolor, 0);
         lv_obj_align(btnRailwayIcon, LV_ALIGN_CENTER, 0, 0);
     }
@@ -331,7 +331,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
             userData->callback(userData->screen);
             }, LV_EVENT_CLICKED, buttonData);
         lv_obj_t* btnSettingsIcon = lv_image_create(btnSettings);
-        lv_image_set_src(btnSettingsIcon, &settings_FILL0_wght400_GRAD0_opsz24);
+        lv_image_set_src(btnSettingsIcon, &icon_settings);
         lv_obj_align(btnSettingsIcon, LV_ALIGN_CENTER, 0, 0);
     }
     {
@@ -347,7 +347,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
             userData->callback(userData->screen);
             }, LV_EVENT_CLICKED, buttonData);
         lv_obj_t* btnRailwayIcon = lv_image_create(btnRailway);
-        lv_image_set_src(btnRailwayIcon, &train_FILL0_wght400_GRAD0_opsz24);
+        lv_image_set_src(btnRailwayIcon, &icon_train);
         lv_obj_align(btnRailwayIcon, LV_ALIGN_CENTER, 0, 0);
     }
 

@@ -16,9 +16,6 @@
     <Filter Include="libwinston-src">
       <UniqueIdentifier>{1c531b19-cd37-4ef8-9f63-ab24ef521d6d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="res">
-      <UniqueIdentifier>{fdad11f5-7c7a-4b1d-86a5-4a400e339405}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="src\arduino folders read me.txt">
@@ -48,18 +45,6 @@
     <ClCompile Include="winston-display-hal-esp32.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\winston-display\res\arrow_back.c">
-      <Filter>res</Filter>
-    </ClCompile>
-    <ClCompile Include="..\winston-display\res\movie_png.c">
-      <Filter>res</Filter>
-    </ClCompile>
-    <ClCompile Include="..\winston-display\res\settings_png.c">
-      <Filter>res</Filter>
-    </ClCompile>
-    <ClCompile Include="..\winston-display\res\train_png.c">
-      <Filter>res</Filter>
-    </ClCompile>
     <ClCompile Include="..\libwinston\Command.cpp">
       <Filter>libwinston-src</Filter>
     </ClCompile>
@@ -74,6 +59,9 @@
     </ClCompile>
     <ClCompile Include="..\libwinston\Winston.cpp">
       <Filter>libwinston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="icons.c">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

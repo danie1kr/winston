@@ -453,10 +453,16 @@
     <ClCompile Include="external\lvgl\src\widgets\textarea\lv_textarea.c" />
     <ClCompile Include="external\lvgl\src\widgets\tileview\lv_tileview.c" />
     <ClCompile Include="external\lvgl\src\widgets\win\lv_win.c" />
-    <ClCompile Include="res\arrow_back.c" />
-    <ClCompile Include="res\movie_png.c" />
-    <ClCompile Include="res\settings_png.c" />
-    <ClCompile Include="res\train_png.c" />
+    <ClCompile Include="res\icon_arrow_back.c" />
+    <ClCompile Include="res\icon_backlight.c" />
+    <ClCompile Include="res\icon_close.c" />
+    <ClCompile Include="res\icon_done.c" />
+    <ClCompile Include="res\icon_lan.c" />
+    <ClCompile Include="res\icon_movie.c" />
+    <ClCompile Include="res\icon_refresh.c" />
+    <ClCompile Include="res\icon_settings.c" />
+    <ClCompile Include="res\icon_train.c" />
+    <ClCompile Include="res\icon_wifi.c" />
     <ClCompile Include="UX.cpp" />
     <ClCompile Include="winston-display.cpp" />
   </ItemGroup>

@@ -36,20 +36,8 @@
     <ClCompile Include="UX.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="res\settings_png.c">
-      <Filter>res</Filter>
-    </ClCompile>
-    <ClCompile Include="res\movie_png.c">
-      <Filter>res</Filter>
-    </ClCompile>
-    <ClCompile Include="res\train_png.c">
-      <Filter>res</Filter>
-    </ClCompile>
     <ClCompile Include="..\winston\winston-hal-x64.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="res\arrow_back.c">
-      <Filter>res</Filter>
     </ClCompile>
     <ClCompile Include="external\lvgl\src\core\lv_group.c">
       <Filter>external\lvgl</Filter>
@@ -992,6 +980,36 @@
     </ClCompile>
     <ClCompile Include="external\lvgl\src\widgets\win\lv_win.c">
       <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="res\icon_settings.c">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="res\icon_train.c">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="res\icon_wifi.c">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="res\icon_arrow_back.c">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="res\icon_backlight.c">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="res\icon_close.c">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="res\icon_done.c">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="res\icon_lan.c">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="res\icon_movie.c">
+      <Filter>res</Filter>
+    </ClCompile>
+    <ClCompile Include="res\icon_refresh.c">
+      <Filter>res</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

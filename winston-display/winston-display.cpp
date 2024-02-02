@@ -1,5 +1,11 @@
 // winston-main.cpp : This file contains the 'main' function. Program execution begins and ends there.
 
+/*
+    lovyangfx + single files: (406,37 secs)
+
+
+*/
+
 #include "winston-display.h"
 #include "Cinema.h"
 
@@ -53,6 +59,7 @@ void applySettings()
     // target
 }
 
+#ifndef WINSTON_PLATFORM_WIN_x64
 int jpegDraw(JPEGDRAW* pDraw)
 {
     display->lcd.pushImage(pDraw->x, pDraw->y, pDraw->iWidth, pDraw->iHeight, pDraw->pPixels);
@@ -79,6 +86,7 @@ int32_t jpegSeek(JPEGFILE* handle, int32_t position) {
     if (!globalFile) return 0;
     return globalFile.seek(position);
 }
+#endif
 
 void winston_setup()
 {
@@ -86,14 +94,15 @@ void winston_setup()
     winston::hal::text("Hello from Winston!"_s);
     std::srand((unsigned int)(24));// inMilliseconds(winston::hal::now().time_since_epoch())));
 
-    //display = DisplayUX::make(480, 320);
     display->init();
 
+#ifndef WINSTON_PLATFORM_WIN_x64
     const char loadingScreenJPEG[] = "/loading.jpg";
     jpeg.open(loadingScreenJPEG, jpegOpen, jpegClose, jpegRead, jpegSeek, jpegDraw);
     jpeg.setPixelType(RGB565_BIG_ENDIAN);
     jpeg.decode(0, 0, 0);
     jpeg.close();
+#endif
 
     storageSettings = Storage::make("winston-display.settings", 3);
     storageSettings->init();

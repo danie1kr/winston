@@ -36,6 +36,7 @@ Settings settings;
 Storage::Shared storageSettings;
 
 winston::EventLooper eventLooper;
+winston::TimePoint lastWebsocketConnectionCheck;
 
 void saveSettings(Storage::Shared &storageSettings)
 {
@@ -110,6 +111,111 @@ void winston_setup()
     loadSettings(storageSettings);
     applySettings();
 
+    webSocketClient.init([](WebSocketClient::Client& client, const std::string message) {
+        JsonDocument msg;
+        deserializeJson(msg, message);
+        JsonObject obj = msg.as<JsonObject>();
+        std::string op("\"");
+        op.append(obj["op"].as<std::string>());
+        op.append("\"");
+        JsonObject data = obj["data"];
+
+        if (std::string("\"microLayout\"").compare(op) == 0)
+        {
+            rml.tracks.clear();
+            rml.turnouts.clear();
+
+            JsonDocument layoutDoc;
+            std::string layoutJSON = data["layout"].as<std::string>();
+            deserializeJson(layoutDoc, layoutJSON);
+            JsonArray tracks = layoutDoc["tracks"].as<JsonArray>();
+            JsonArray turnouts = layoutDoc["turnouts"].as<JsonArray>();
+            JsonObject bounds = layoutDoc["bounds"];
+            rml.bounds.min.x = bounds["min"]["x"].as<int32_t>();
+            rml.bounds.min.y = bounds["min"]["y"].as<int32_t>();
+            rml.bounds.max.x = bounds["max"]["x"].as<int32_t>();
+            rml.bounds.max.y = bounds["max"]["y"].as<int32_t>();
+
+            for (JsonVariant track : tracks)
+            {
+                winston::RailwayMicroLayout::Track t;
+                JsonArray points = track.as<JsonArray>();
+                for (size_t i = 0; i < points.size(); i += 2)
+                {
+                    winston::RailwayMicroLayout::Point p{ points[i + 0].as<int32_t>(), points[i + 1].as<int32_t>() };
+                    t.push_back(p);
+                }
+                rml.tracks.push_back(t);
+            }
+
+            for (JsonVariant turnout : turnouts)
+            {
+                winston::RailwayMicroLayout::Turnout t;
+                t.id = turnout["id"].as<std::string>();
+                auto connections = turnout["connections"].as<JsonArray>();
+                for (JsonVariant connection : connections)
+                {
+                    winston::RailwayMicroLayout::Connection c;
+                    c.connection = connection["connection"].as<std::string>();
+                    auto points = connection["p"].as<JsonArray>();
+                    c.p[0].x = points[0].as<int32_t>();
+                    c.p[0].y = points[1].as<int32_t>();
+                    c.p[1].x = points[2].as<int32_t>();
+                    c.p[1].y = points[3].as<int32_t>();
+                    t.connections.push_back(c);
+                }
+                rml.turnouts.push_back(t);
+            }
+            int offset = 8;
+            const winston::RailwayMicroLayout::Bounds screen(offset, offset, 480 - 4 * offset, 320 - 2 * offset);
+            rml.scale(screen);
+            uxUpdateRailwayLayout(rml, [](const std::string turnout) -> const winston::Result {
+                eventLooper.order(winston::Command::make([turnout](const winston::TimePoint& created) -> const winston::State {
+                    std::string json("");
+                    {
+                        JsonDocument msg;
+                        msg["op"] = "doTurnoutToggle";
+                        auto data = msg["data"].to<JsonObject>();
+                        data["id"] = turnout;
+                        serializeJson(msg, json);
+                    }
+                    webSocketClient.send(json);
+                    return winston::State::Finished;
+                    }, __PRETTY_FUNCTION__));
+                return winston::Result::OK;
+                });
+
+            unsigned int idx = 1;
+            for (const auto& turnout : rml.turnouts)
+            {
+                eventLooper.order(winston::Command::make([turnout, idx](const winston::TimePoint& created) -> const winston::State
+                    {
+                        if (created + toMilliseconds(idx * 50) > winston::hal::now())
+                            return winston::State::Delay;
+
+                        std::string json("");
+                        {
+                            JsonDocument msg;
+                            msg["op"] = "getTurnoutState";
+                            auto data = msg["data"].to<JsonObject>();
+                            data["id"] = turnout.id;
+                            serializeJson(msg, json);
+                        }
+                        webSocketClient.send(json);
+                        return winston::State::Finished;
+                    }, __PRETTY_FUNCTION__));
+                idx++;
+            }
+        }
+        else if (std::string("\"turnoutState\"").compare(op) == 0)
+        {
+            std::string track = data["id"].as<std::string>();
+            int state = data["state"].as<int>();
+            bool locked = data["direction"].as<bool>();
+            uxUpdateTurnout(track, state, locked);
+        }
+    });
+
     setupUX(display,
         [](unsigned char value) -> winston::Result
         {
@@ -130,8 +236,24 @@ void winston_setup()
         },
         [&](WinstonTarget target) -> winston::Result
         {
+            settings.target = target;
+            saveSettings(storageSettings);
+            return winston::Result::OK;
+        },
+        []() -> std::string
+        {
+#ifdef WINSTON_PLATFORM_ESP32
+            if (WiFi.status() != WL_CONNECTED)
+                return std::string("not connected");
+            else
+                return std::string(WiFi.localIP().toString().c_str());
+#else
+            return std::string("not connected");
+#endif
+        },
+        [](){
             std::string ip = "localhost";
-            switch (target)
+            switch (settings.target)
             {
             case WinstonTarget::BlackCanaryLAN:
                 ip = WINSTON_IP_BLACKCANARY_LAN;
@@ -147,129 +269,30 @@ void winston_setup()
             }
             winston::URI uri(ip);
 
-            webSocketClient.init([](WebSocketClient::Client& client, const std::string message) {
-                JsonDocument msg;
-                deserializeJson(msg, message);
-                JsonObject obj = msg.as<JsonObject>();
-                std::string op("\"");
-                op.append(obj["op"].as<std::string>());
-                op.append("\"");
-                JsonObject data = obj["data"];
-
-                if (std::string("\"microLayout\"").compare(op) == 0)
-                {
-                    JsonDocument layoutDoc;
-                    std::string layoutJSON = data["layout"].as<std::string>();
-                    deserializeJson(layoutDoc, layoutJSON);
-                    JsonArray tracks = layoutDoc["tracks"].as<JsonArray>();
-                    JsonArray turnouts = layoutDoc["turnouts"].as<JsonArray>();
-                    JsonObject bounds = layoutDoc["bounds"];
-                    rml.bounds.min.x = bounds["min"]["x"].as<int32_t>();
-                    rml.bounds.min.y = bounds["min"]["y"].as<int32_t>();
-                    rml.bounds.max.x = bounds["max"]["x"].as<int32_t>();
-                    rml.bounds.max.y = bounds["max"]["y"].as<int32_t>();
-
-                    for (JsonVariant track : tracks)
-                    {
-                        winston::RailwayMicroLayout::Track t;
-                        JsonArray points = track.as<JsonArray>();
-                        for (size_t i = 0; i < points.size(); i += 2)
-                        {
-                            winston::RailwayMicroLayout::Point p{ points[i + 0].as<int32_t>(), points[i + 1].as<int32_t>() };
-                            t.push_back(p);
-                        }
-                        rml.tracks.push_back(t);
-                    }
-
-                    for (JsonVariant turnout : turnouts)
-                    {
-                        winston::RailwayMicroLayout::Turnout t;
-                        t.id = turnout["id"].as<std::string>();
-                        auto connections = turnout["connections"].as<JsonArray>();
-                        for (JsonVariant connection : connections)
-                        {
-                            winston::RailwayMicroLayout::Connection c;
-                            c.connection = connection["connection"].as<std::string>();
-                            auto points = connection["p"].as<JsonArray>();
-                            c.p[0].x = points[0].as<int32_t>();
-                            c.p[0].y = points[1].as<int32_t>();
-                            c.p[1].x = points[2].as<int32_t>();
-                            c.p[1].y = points[3].as<int32_t>();
-                            t.connections.push_back(c);
-                        }
-                        rml.turnouts.push_back(t);
-                    }
-                    int offset = 8;
-                    const winston::RailwayMicroLayout::Bounds screen(offset, offset, 480 - 4 * offset, 320 - 2 * offset);
-                    rml.scale(screen);
-                    uxUpdateRailwayLayout(rml, [](const std::string turnout) -> const winston::Result {
-                        eventLooper.order(winston::Command::make([turnout](const winston::TimePoint& created) -> const winston::State {
-                            std::string json("");
-                            {
-                                JsonDocument msg;
-                                msg["op"] = "doTurnoutToggle";
-                                auto data = msg["data"].to<JsonObject>();
-                                data["id"] = turnout;
-                                serializeJson(msg, json);
-                            }
-                            webSocketClient.send(json);
-                            return winston::State::Finished;
-                            }, __PRETTY_FUNCTION__));
-                        return winston::Result::OK;
-                        });
-
-                    unsigned int idx = 1;
-                    for (const auto& turnout : rml.turnouts)
-                    {
-                        eventLooper.order(winston::Command::make([turnout, idx](const winston::TimePoint& created) -> const winston::State
-                        {
-                            if (created + toMilliseconds(idx * 50) > winston::hal::now())
-                                    return winston::State::Delay;
-
-                            std::string json("");
-                            {
-                                JsonDocument msg;
-                                msg["op"] = "getTurnoutState";
-                                auto data = msg["data"].to<JsonObject>();
-                                data["id"] = turnout.id;
-                                serializeJson(msg, json);
-                            }
-                            webSocketClient.send(json);
-                            return winston::State::Finished;
-                        }, __PRETTY_FUNCTION__));
-                        idx++;
-                    }
-                }
-                else if (std::string("\"turnoutState\"").compare(op) == 0)
-                {
-                    std::string track = data["id"].as<std::string>();
-                    int state = data["state"].as<int>();
-                    bool locked = data["direction"].as<bool>();
-                    uxUpdateTurnout(track, state, locked);
-                }
-                
-                }, uri);
-
-            settings.target = target;
-            saveSettings(storageSettings);
+            webSocketClient.connect(uri);
 
             JsonDocument msg;
             msg["op"] = "getRailwayMicroLayout";
             std::string json("");
             serializeJson(msg, json);
             webSocketClient.send(json);
+
+            eventLooper.order(winston::Command::make([](const winston::TimePoint& created) -> const winston::State
+                {
+                    if (winston::hal::now() - lastWebsocketConnectionCheck > 2000ms)
+                    {
+                        lastWebsocketConnectionCheck = winston::hal::now();
+                        if (!webSocketClient.connected())
+                        {
+                            uxScreenRailwayShowButtonReconnect();
+                            uxScreenRailwayClear();
+                            return winston::State::Finished;
+                        }
+                    }
+                    return winston::State::Delay;
+                }, __PRETTY_FUNCTION__));
+
             return winston::Result::OK;
-        },
-        []() -> std::string
-        {
-#ifdef WINSTON_PLATFORM_ESP32
-            if (WiFi.status() != WL_CONNECTED)
-                return std::string("not connected");
-            else
-                return std::string(WiFi.localIP().toString().c_str());
-#else
-            return std::string("not connected");
-#endif
         }
     );
 

@@ -45,16 +45,36 @@ using CallbackUX = std::function<const winston::Result()>;
 template<typename T>
 using ValueGetterUX = std::function<const T()>;
 
+template<typename T>
+struct ValueCallbackUXTriggerData
+{
+	T value;
+	ValueCallbackUX<T> callback;
+};
+struct CallbackUXTriggerData
+{
+	CallbackUX callback;
+};
+
+template<typename T>
+struct ValueGetterUXTriggerData
+{
+	ValueGetterUX<T> callback;
+};
+
 void setupUX(winston::hal::DisplayUX::Shared display,
 	ValueCallbackUX<unsigned char> brightnessCallback,
 	ValueGetterUX<unsigned char> brightness,
 	ValueCallbackUX<Screen> gotoScreen,
 	ValueCallbackUX<WinstonTarget> winstonTarget,
-	ValueGetterUX<std::string> wifiIP);
+	ValueGetterUX<std::string> wifiIP,
+	CallbackUX reconnect);
 
 void uxUpdateRailwayLayout(winston::RailwayMicroLayout& rml, ValueCallbackUX<std::string> turnoutToggle);
 void uxUpdateTurnout(const std::string& id, const int& state, const bool& locked);
 void uxUpdateWifiIP(const std::string ip);
 void uxUpdateWifiLED(const bool on);
+void uxScreenRailwayShowButtonReconnect();
+void uxScreenRailwayClear();
 
 const winston::Result showUX(const Screen screen);

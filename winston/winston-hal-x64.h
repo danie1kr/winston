@@ -212,6 +212,7 @@ public:
 	virtual const winston::Result setCursor(unsigned int x, unsigned int y);
 	virtual const bool getTouch(unsigned int& x, unsigned int& y);
 	virtual const winston::Result draw(unsigned int x, unsigned int y, unsigned int w, unsigned int h, void* data);
+	virtual void displayLoadingScreen();
 	virtual const winston::Result brightness(unsigned char value);
 	virtual const unsigned char brightness();
 	virtual const unsigned int tick();
@@ -237,7 +238,8 @@ public:
 	WebSocketClientWin();
 	~WebSocketClientWin() = default;
 
-	void init(OnMessage onMessage, const winston::URI &uri);
+	winston::Result init(OnMessage onMessage);
+	winston::Result connect(const winston::URI& uri);
 	void send(const std::string message);
 	void step();
 	void shutdown();

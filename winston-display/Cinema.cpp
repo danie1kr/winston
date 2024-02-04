@@ -18,7 +18,7 @@ Cinema::Cinema(SdFat &sd, winston::hal::DisplayUX::Shared display)
 }
 #else
 Cinema::Cinema(winston::hal::DisplayUX::Shared display)
-    : _display(display), movies(), currentFrame(0), currentMovie(0)
+    : _display(display), movies(), moviePlaying(false), lastFrameTime(0), currentMovie(0), targetMSperFrame(1000 / 20)
 {
 
 }
@@ -32,6 +32,7 @@ winston::hal::DisplayUX::Shared Cinema::display()
 
 void Cinema::init()
 {
+#ifndef WINSTON_PLATFORM_WIN_x64
     this->collectMovies();
     this->checkAndpackMovies();
 
@@ -41,6 +42,7 @@ void Cinema::init()
         winston::logger.err("Cinema.cpp: JPEG alloc error");
         while (true);
     }
+#endif
 }
 
 void Cinema::collectMovies()
@@ -116,6 +118,7 @@ void Cinema::collectMovies()
 #endif
 }
 
+#ifndef WINSTON_PLATFORM_WIN_x64
 const std::string Cinema::frameToFilename(const unsigned int frame)
 {
     // ffmpeg created files with setting %04d.jpg
@@ -243,39 +246,6 @@ void Cinema::initPackedMovie(const std::string path)
     }
 }
 
-const unsigned int Cinema::play()
-{
-    unsigned int returnDelay = 0;
-    if (!this->playing())
-    {
-        currentMovie = std::rand() % movies.size();
-        this->moviePlaying = true;
-
-        auto& movie = this->movies[currentMovie];
-        this->initPackedMovie(movie.path + ".pack");
-    }
-
-    if (this->playing())
-    {
-#ifndef WINSTON_PLATFORM_WIN_x64
-        this->moviePlaying = packPlayNextFrame();
-
-        const unsigned long lastFrameDuration = millis() - lastFrameTime;
-        if (lastFrameDuration < targetMSperFrame)
-            returnDelay = targetMSperFrame - lastFrameDuration - 1;
-        lastFrameTime = millis();
-#endif
-    }
-
-    if (!this->playing())
-    {
-        this->fileMoviePack.close();
-        return 0;
-    }
-    
-    return returnDelay;
-}
-
 const bool Cinema::packPlayNextFrame()
 {
     if (this->fileMoviePack.available())
@@ -300,6 +270,40 @@ const bool Cinema::packPlayNextFrame()
     }
     else
         return false;
+}
+#endif
+
+const unsigned int Cinema::play()
+{
+    unsigned int returnDelay = 0;
+#ifndef WINSTON_PLATFORM_WIN_x64
+    if (!this->playing())
+    {
+        currentMovie = std::rand() % movies.size();
+        this->moviePlaying = true;
+
+        auto& movie = this->movies[currentMovie];
+        this->initPackedMovie(movie.path + ".pack");
+    }
+
+    if (this->playing())
+    {
+        this->moviePlaying = packPlayNextFrame();
+
+        const unsigned long lastFrameDuration = millis() - lastFrameTime;
+        if (lastFrameDuration < targetMSperFrame)
+            returnDelay = targetMSperFrame - lastFrameDuration - 1;
+        lastFrameTime = millis();
+    }
+
+    if (!this->playing())
+    {
+        this->fileMoviePack.close();
+        return 0;
+    }
+#endif
+
+    return returnDelay;
 }
 
 void Cinema::stop()

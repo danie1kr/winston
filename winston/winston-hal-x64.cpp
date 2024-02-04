@@ -629,6 +629,10 @@ const bool DisplayUXWin::getTouch(unsigned int& x, unsigned int& y)
     return false;
 }
 
+void DisplayUXWin::displayLoadingScreen()
+{
+}
+
 const winston::Result DisplayUXWin::draw(unsigned int x, unsigned int y, unsigned int w, unsigned int h, void* data)
 {
     return winston::Result::NotImplemented;
@@ -656,7 +660,7 @@ WebSocketClientWin::WebSocketClientWin()
 {
 }
 
-void WebSocketClientWin::init(OnMessage onMessage, const winston::URI& uri)
+winston::Result WebSocketClientWin::init(OnMessage onMessage)
 {
     using websocketpp::lib::placeholders::_1;
     using websocketpp::lib::placeholders::_2;
@@ -670,6 +674,11 @@ void WebSocketClientWin::init(OnMessage onMessage, const winston::URI& uri)
     this->client.set_message_handler(websocketpp::lib::bind(&WebSocketClientWin::on_msg, this, websocketpp::lib::placeholders::_1, websocketpp::lib::placeholders::_2));
     this->client.set_fail_handler(websocketpp::lib::bind(&WebSocketClientWin::on_fail, this, websocketpp::lib::placeholders::_1));
 
+    return winston::Result::OK;
+}
+
+winston::Result WebSocketClientWin::connect(const winston::URI& uri)
+{
     websocketpp::lib::error_code ec;
     this->connection = this->client.get_connection(uri.toString(), ec);
     if (ec) {
@@ -679,8 +688,9 @@ void WebSocketClientWin::init(OnMessage onMessage, const winston::URI& uri)
 
     while (!this->connected())
         this->client.poll_one();
-}
 
+    return winston::Result::OK;
+}
 
 void WebSocketClientWin::send(const std::string message)
 {

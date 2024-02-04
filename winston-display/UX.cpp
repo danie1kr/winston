@@ -24,6 +24,8 @@ lv_obj_t* lvglScreenRailway = nullptr;
 lv_obj_t* labelWifiIP = nullptr;
 lv_obj_t* ledWifi = nullptr;
 
+lv_obj_t* lvglScreenRailwayButtonRecconect = nullptr;
+
 std::vector<lv_obj_t*> tracks;
 std::map<lv_obj_t*, const winston::RailwayMicroLayout::TurnoutConnection> turnouts;
 std::map<lv_obj_t*, const std::string> turnoutTogglers;
@@ -33,30 +35,19 @@ lv_style_t lvglStyleTrack, lvglStyleTurnout, lvglStyleCenteredText;
 constexpr int uiButtonPadding = 8;
 constexpr int uiButtonSize = 32;
 
-void uxUpdateRailwayLayout(winston::RailwayMicroLayout& rml, ValueCallbackUX<std::string> turnoutToggle)
+void uxScreenRailwayShowButtonReconnect()
 {
-    struct TurnoutToggleData
-    {
-        ValueCallbackUX<std::string> callback;
-        std::string turnoutId;
-    };
+    lv_obj_remove_flag(lvglScreenRailwayButtonRecconect, LV_OBJ_FLAG_HIDDEN);
+}
 
+void uxScreenRailwayClear()
+{
     for (auto& track : tracks)
         lv_obj_delete(track);
-
     tracks.clear();
-    for (const auto& track : rml.tracks)
-    {
-        auto line = lv_line_create(lvglScreenRailway);
-        lv_line_set_points(line, (lv_point_precise_t*) &track.front(), (unsigned int)track.size());
-        lv_obj_add_style(line, &lvglStyleTrack, 0);
-        tracks.push_back(line);
-    }
 
     for (auto& turnout : turnouts)
-    {
         lv_obj_delete(turnout.first);
-    }
     turnouts.clear();
 
     for (auto& turnoutToggler : turnoutTogglers)
@@ -67,6 +58,26 @@ void uxUpdateRailwayLayout(winston::RailwayMicroLayout& rml, ValueCallbackUX<std
         lv_obj_delete(turnoutToggler.first);
     }
     turnoutTogglers.clear();
+}
+
+void uxUpdateRailwayLayout(winston::RailwayMicroLayout& rml, ValueCallbackUX<std::string> turnoutToggle)
+{
+    lv_obj_add_flag(lvglScreenRailwayButtonRecconect, LV_OBJ_FLAG_HIDDEN);
+    struct TurnoutToggleData
+    {
+        ValueCallbackUX<std::string> callback;
+        std::string turnoutId;
+    };
+
+    uxScreenRailwayClear();
+
+    for (const auto& track : rml.tracks)
+    {
+        auto line = lv_line_create(lvglScreenRailway);
+        lv_line_set_points(line, (lv_point_precise_t*)&track.front(), (unsigned int)track.size());
+        lv_obj_add_style(line, &lvglStyleTrack, 0);
+        tracks.push_back(line);
+    }
 
     for (const auto& turnout : rml.turnouts)
     {
@@ -174,7 +185,8 @@ void setupUX(winston::hal::DisplayUX::Shared display,
     ValueGetterUX<unsigned char> brightness, 
     ValueCallbackUX<Screen> gotoScreen,
     ValueCallbackUX<WinstonTarget> winstonTarget,
-    ValueGetterUX<std::string> wifiIP)
+    ValueGetterUX<std::string> wifiIP,
+    CallbackUX reconnect)
 {
     unsigned int y = 0;
     const unsigned int x = 8;
@@ -249,7 +261,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
     lv_led_on(ledWifi);
     y += yInc;
 
-    // websocket connect
+    // websocket target
     lv_obj_t* labelDropdownWinstonTarget = lv_label_create(lvglScreenSettings);
     lv_label_set_text(labelDropdownWinstonTarget, "Winston");
     lv_obj_set_size(labelDropdownWinstonTarget, display->width - 92, ySize);
@@ -276,14 +288,10 @@ void setupUX(winston::hal::DisplayUX::Shared display,
         },
         LV_EVENT_VALUE_CHANGED, winstonTargetData);
 
-    struct ButtonData
-    {
-        Screen screen;
-        ValueCallbackUX<Screen> callback;
-    };
+    using ButtonData = ValueCallbackUXTriggerData<Screen>;
     {
         ButtonData* buttonData = new ButtonData();
-        buttonData->screen = Screen::Cinema;
+        buttonData->value = Screen::Cinema;
         buttonData->callback = gotoScreen;
         lv_obj_t* btnCinema = lv_button_create(lvglScreenSettings);
         lv_obj_set_content_width(btnCinema, uiButtonSize);
@@ -292,7 +300,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
         //lv_obj_padd
         lv_obj_add_event_cb(btnCinema, [](lv_event_t* e) {
             ButtonData* userData = (ButtonData*)lv_event_get_user_data(e);
-            userData->callback(userData->screen);
+            userData->callback(userData->value);
             }, LV_EVENT_CLICKED, buttonData);
 
         lv_obj_t *btnCinemaIcon = lv_image_create(btnCinema);
@@ -301,7 +309,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
     } 
     {
         ButtonData* buttonData = new ButtonData();
-        buttonData->screen = Screen::Railway;
+        buttonData->value = Screen::Railway;
         buttonData->callback = gotoScreen;
         lv_obj_t* btnRailway = lv_button_create(lvglScreenSettings);
         lv_obj_set_content_width(btnRailway, uiButtonSize);
@@ -309,7 +317,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
         lv_obj_align(btnRailway, LV_ALIGN_BOTTOM_RIGHT, -uiButtonPadding, -(4* uiButtonPadding + uiButtonSize));
         lv_obj_add_event_cb(btnRailway, [](lv_event_t* e) {
             ButtonData* userData = (ButtonData*)lv_event_get_user_data(e);
-            userData->callback(userData->screen);
+            userData->callback(userData->value);
             }, LV_EVENT_CLICKED, buttonData);
         lv_obj_t* btnRailwayIcon = lv_image_create(btnRailway);
         lv_image_set_src(btnRailwayIcon, &icon_train);
@@ -320,7 +328,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
     lvglScreenRailway = lv_obj_create(NULL);
     {
         ButtonData* buttonData = new ButtonData();
-        buttonData->screen = Screen::Settings;
+        buttonData->value = Screen::Settings;
         buttonData->callback = gotoScreen;
         lv_obj_t* btnSettings = lv_button_create(lvglScreenRailway);
         lv_obj_set_content_width(btnSettings, uiButtonSize);
@@ -328,15 +336,16 @@ void setupUX(winston::hal::DisplayUX::Shared display,
         lv_obj_align(btnSettings, LV_ALIGN_BOTTOM_RIGHT, -uiButtonPadding, -uiButtonPadding);
         lv_obj_add_event_cb(btnSettings, [](lv_event_t* e) {
             ButtonData* userData = (ButtonData*)lv_event_get_user_data(e);
-            userData->callback(userData->screen);
+            userData->callback(userData->value);
             }, LV_EVENT_CLICKED, buttonData);
+        
         lv_obj_t* btnSettingsIcon = lv_image_create(btnSettings);
         lv_image_set_src(btnSettingsIcon, &icon_settings);
         lv_obj_align(btnSettingsIcon, LV_ALIGN_CENTER, 0, 0);
     }
     {
         ButtonData* buttonData = new ButtonData();
-        buttonData->screen = Screen::Railway;
+        buttonData->value = Screen::Railway;
         buttonData->callback = gotoScreen;
         lv_obj_t* btnRailway = lv_button_create(lvglScreenRailway);
         lv_obj_set_content_width(btnRailway, uiButtonSize);
@@ -344,11 +353,25 @@ void setupUX(winston::hal::DisplayUX::Shared display,
         lv_obj_align(btnRailway, LV_ALIGN_BOTTOM_RIGHT, -uiButtonPadding, -(4 * uiButtonPadding + uiButtonSize));
         lv_obj_add_event_cb(btnRailway, [](lv_event_t* e) {
             ButtonData* userData = (ButtonData*)lv_event_get_user_data(e);
-            userData->callback(userData->screen);
+            userData->callback(userData->value);
             }, LV_EVENT_CLICKED, buttonData);
+        
         lv_obj_t* btnRailwayIcon = lv_image_create(btnRailway);
         lv_image_set_src(btnRailwayIcon, &icon_train);
         lv_obj_align(btnRailwayIcon, LV_ALIGN_CENTER, 0, 0);
+    }
+    {
+        CallbackUXTriggerData* buttonData = new CallbackUXTriggerData();
+        buttonData->callback = reconnect;
+        lvglScreenRailwayButtonRecconect = lv_button_create(lvglScreenRailway);
+        lv_obj_align(lvglScreenRailwayButtonRecconect, LV_ALIGN_CENTER, 0, 0);
+        lv_obj_add_event_cb(lvglScreenRailwayButtonRecconect, [](lv_event_t* e) {
+            CallbackUXTriggerData* userData = (CallbackUXTriggerData*)lv_event_get_user_data(e);
+            userData->callback();
+            }, LV_EVENT_CLICKED, buttonData);
+        
+        lv_obj_t* btnReconnectLabel = lv_label_create(lvglScreenRailwayButtonRecconect);
+        lv_label_set_text_static(btnReconnectLabel, "reconnect");
     }
 
     lv_style_init(&lvglStyleTrack);
@@ -371,9 +394,11 @@ const winston::Result showUX(const Screen screen)
         break;
     case Screen::Railway:
         lv_screen_load(lvglScreenRailway);
+        lv_obj_invalidate(lv_screen_active());
         break;
     case Screen::Settings:
         lv_screen_load(lvglScreenSettings);
+        lv_obj_invalidate(lv_screen_active());
     default:
         return winston::Result::NotFound;
     }

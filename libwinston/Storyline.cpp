@@ -127,14 +127,14 @@ namespace winston
 
 	void TaskRandomCars::findCars(const RailCar::Groups::Group group, const unsigned char probOneOnly, const unsigned char maxNumCars, const Length maxLength)
 	{
-		if (std::rand() % 100 < probOneOnly)
-			return;
-
 		// find all cars fitting the chosen type
-		auto otherCars = filter(this->railCarShed, [&group](const RailCarShed::value_type& car) -> bool { return car->is(group); });
+		auto otherCars = filter(this->railCarShed, [&group](const RailCarShed::value_type& car) -> bool 
+			{ 
+				return car->is(group); 
+			});
 
 		// shuffle them and take 3
-		otherCars = random(otherCars, maxNumCars);
+		otherCars = random(otherCars, std::rand() % 100 < probOneOnly ? 1 : maxNumCars);
 
 		// restrict train length
 		Length length = 0;

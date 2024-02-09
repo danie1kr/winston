@@ -540,36 +540,29 @@ void Kornweinheim::populateSheds()
     this->addLocomotive(callbacks, 7, functionsGravita, pos, winston::Locomotive::defaultThrottleSpeedMap, "Gravita", 195, (unsigned char)winston::Locomotive::Type::Shunting | (unsigned char)winston::Locomotive::Type::Goods);
     this->addLocomotive(callbacks, 9, standardFunctions, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 335", 90, (unsigned char)winston::Locomotive::Type::Shunting);
 
-
-    auto ConstructionTrain = winston::RailCar::Groups::create();
-    auto Heavy = winston::RailCar::Groups::create();
-
-    auto Person = winston::RailCar::Groups::create();
     auto DR = winston::RailCar::Groups::create();
 
-    auto Industry = winston::RailCar::Groups::create();
+    this->railCarShed.push_back(winston::RailCar::make("Bauzug lang", winston::RailCar::Groups::ConstructionTrain, 300));
+    this->railCarShed.push_back(winston::RailCar::make("Bauzug doppel", winston::RailCar::Groups::ConstructionTrain, 312));
+    this->railCarShed.push_back(winston::RailCar::make("Bauzug Kran", winston::RailCar::Groups::ConstructionTrain, 300));
 
-    this->railCarShed.push_back(winston::RailCar::make("Bauzug lang", ConstructionTrain, 300));
-    this->railCarShed.push_back(winston::RailCar::make("Bauzug doppel", ConstructionTrain, 312));
-    this->railCarShed.push_back(winston::RailCar::make("Bauzug Kran", ConstructionTrain, 300));
+    this->railCarShed.push_back(winston::RailCar::make("Personenwagen 1", winston::RailCar::Groups::Person | DR, 300));
+    this->railCarShed.push_back(winston::RailCar::make("Personenwagen 2", winston::RailCar::Groups::Person | DR, 300));
+    this->railCarShed.push_back(winston::RailCar::make("Gepäckwagen", winston::RailCar::Groups::Person | DR, 300));
 
-    this->railCarShed.push_back(winston::RailCar::make("Personenwagen 1", Person | DR, 300));
-    this->railCarShed.push_back(winston::RailCar::make("Personenwagen 2", Person | DR, 300));
-    this->railCarShed.push_back(winston::RailCar::make("Gepäckwagen", Person | DR, 300));
+    this->railCarShed.push_back(winston::RailCar::make("Uaai 819", winston::RailCar::Groups::Heavy, 355));
 
-    this->railCarShed.push_back(winston::RailCar::make("Uaai 819", Heavy, 355));
+    this->railCarShed.push_back(winston::RailCar::make("Tankwagen lang", winston::RailCar::Groups::Goods, 100));
+    this->railCarShed.push_back(winston::RailCar::make("Tankwagen Shell", winston::RailCar::Groups::Goods, 355));
 
-    this->railCarShed.push_back(winston::RailCar::make("Tankwagen lang", Industry, 100));
-    this->railCarShed.push_back(winston::RailCar::make("Tankwagen Shell", Industry, 355));
+    this->railCarShed.push_back(winston::RailCar::make("Kiara", winston::RailCar::Groups::Goods, 114));
+    this->railCarShed.push_back(winston::RailCar::make("Alter Güterwagen", winston::RailCar::Groups::Goods, 114));
 
-    this->railCarShed.push_back(winston::RailCar::make("Kiara", Industry, 114));
-    this->railCarShed.push_back(winston::RailCar::make("Alter Güterwagen", Industry, 114));
+    this->railCarShed.push_back(winston::RailCar::make("Schiebehaubenwagen", winston::RailCar::Groups::Goods, 146));
+    this->railCarShed.push_back(winston::RailCar::make("Offener Wagen", winston::RailCar::Groups::Goods, 160));
 
-    this->railCarShed.push_back(winston::RailCar::make("Schiebehaubenwagen", Industry, 146));
-    this->railCarShed.push_back(winston::RailCar::make("Offener Wagen", Industry, 160));
-
-    this->railCarShed.push_back(winston::RailCar::make("Schwarzer Wagen", Industry, 102));
-    this->railCarShed.push_back(winston::RailCar::make("Brauner Wagen", Industry, 98));
+    this->railCarShed.push_back(winston::RailCar::make("Schwarzer Wagen", winston::RailCar::Groups::Goods, 102));
+    this->railCarShed.push_back(winston::RailCar::make("Brauner Wagen", winston::RailCar::Groups::Goods, 98));
 }
 
 void Kornweinheim::inventStorylines()

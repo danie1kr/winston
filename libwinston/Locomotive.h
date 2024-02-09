@@ -176,10 +176,10 @@ namespace winston
 				return 1 << ++RailCar::Groups::groupCounter;
 			}
 
-			static constexpr Group Person = 1 << 0;
-			static constexpr Group Goods = 1 << 1;
-			static constexpr Group ConstructionTrain = 1 << 2;
-			static constexpr Group Heavy = 1 << 3;
+			static constexpr Group Person = 1 << 1;
+			static constexpr Group Goods = 1 << 2;
+			static constexpr Group ConstructionTrain = 1 << 3;
+			static constexpr Group Heavy = 1 << 4;
 		private:
 			static unsigned int groupCounter;
 		};

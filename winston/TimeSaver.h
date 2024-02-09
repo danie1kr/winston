@@ -109,7 +109,7 @@ private:
     // accept new requests and loop over what the signal box has to do
     void systemLoop();
 
-    void populateLocomotiveShed();
+    void populateSheds();
 
     void inventStorylines();
     std::vector<winston::Storyline::Shared> storylines;

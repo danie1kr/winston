@@ -14,31 +14,34 @@ namespace winston {
 	public:
 		enum class Type : unsigned char
 		{
-			Free,      // free trak
+			Free,      // free track
 			Transit,   // transit track
 			Siding,    // park
 			Platform,  // in a station
 		};
 
-		Section(const Type type, const Trackset tracks);
+		Section(const std::string name, const Type type, const TrackSet tracks);
 
 		using MarkCallback = std::function<const bool(const Track&)>;
 		const bool validate(MarkCallback mark) const;
 
 		const bool contains(Track &track) const;
-		const Trackset tracks() const;
+		const TrackSet tracks() const;
 
 		const Type type;
 
 		using Shared_Ptr<Section>::Shared;
 		using Shared_Ptr<Section>::make;
+
+		const std::string name;
 	private:
-		const Trackset _tracks;
+		const TrackSet _tracks;
 		const SectionEntrySet buildEntriesSet() const;
 
 	public:
 		const SectionEntrySet entriesSet;
 	};
-	using Sectionset = std::set<Section::Shared>;
+	using SectionSet = std::set<Section::Shared>;
+	using SectionList = std::list<Section::Shared>;
 }
 

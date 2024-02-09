@@ -459,6 +459,7 @@
     <ClCompile Include="res\icon_done.c" />
     <ClCompile Include="res\icon_lan.c" />
     <ClCompile Include="res\icon_movie.c" />
+    <ClCompile Include="res\icon_quest.c" />
     <ClCompile Include="res\icon_refresh.c" />
     <ClCompile Include="res\icon_settings.c" />
     <ClCompile Include="res\icon_train.c" />

@@ -193,6 +193,7 @@ namespace winston {
 
 		ConflictingRoutes conflictingRoutes;
 	};
-	using Routemap = std::unordered_map<Address, Route::Shared>;
+	using RouteMap = std::unordered_map<Address, Route::Shared>;
+	using RouteList = std::list<Route::Shared>;
 }
 

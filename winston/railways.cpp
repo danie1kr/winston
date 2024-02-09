@@ -212,11 +212,11 @@ RailwayWithSiding::Section::Shared RailwayWithSiding::define(const RailwayWithSi
     switch (section)
     {
     case RailwayWithSiding::Sections::A:
-        return RailwayWithSiding::Section::make(RailwayWithSiding::Sections::A, winston::Section::Type::Free, winston::Trackset({ a, t1 }));
+        return RailwayWithSiding::Section::make(RailwayWithSiding::Sections::A, winston::Section::Type::Free, winston::TrackSet({ a, t1 }));
     case RailwayWithSiding::Sections::B:
-        return RailwayWithSiding::Section::make(RailwayWithSiding::Sections::B, winston::Section::Type::Free, winston::Trackset({ b }));
+        return RailwayWithSiding::Section::make(RailwayWithSiding::Sections::B, winston::Section::Type::Free, winston::TrackSet({ b }));
     case RailwayWithSiding::Sections::C:
-        return RailwayWithSiding::Section::make(RailwayWithSiding::Sections::C, winston::Section::Type::Free, winston::Trackset({ c, t2 }));
+        return RailwayWithSiding::Section::make(RailwayWithSiding::Sections::C, winston::Section::Type::Free, winston::TrackSet({ c, t2 }));
     default:
         winston::hal::fatal(std::string("section ") + std::string(section._to_string()) + std::string("not in switch"));
         return nullptr;
@@ -862,7 +862,7 @@ Y2021Railway::Section::Shared Y2021Railway::define(const Y2021Railway::Sections 
     LOCAL_TRACK(Turnout19);
     LOCAL_TRACK(Turnout20);
 
-#define SECTION(id, type, ...)  case Y2021Railway::Sections::id: { return Y2021Railway::Section::make(Y2021Railway::Sections::id, type, winston::Trackset(__VA_ARGS__)); }
+#define SECTION(id, type, ...)  case Y2021Railway::Sections::id: { return Y2021Railway::Section::make(Y2021Railway::Sections::id, type, winston::TrackSet(__VA_ARGS__)); }
 #define FREE        winston::Section::Type::Free
 #define TRANSIT     winston::Section::Type::Transit
 #define SIDING      winston::Section::Type::Siding

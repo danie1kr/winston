@@ -94,7 +94,7 @@ namespace winston
 		};
 		using Functions = std::vector<Function>;
 		
-		Locomotive(const Callbacks callbacks, const Address address, const Functions functions, const Position start, const ThrottleSpeedMap speedMap, const std::string name, const Types types);
+		Locomotive(const Callbacks callbacks, const Address address, const Functions functions, const Position start, const ThrottleSpeedMap speedMap, const std::string name, const unsigned int length, const Types types);
 		inline void light(bool on);
 		const bool light();
 		inline void function(const unsigned int id, const bool value);
@@ -119,6 +119,7 @@ namespace winston
 		const Position& update();
 		const Address& address() const;
 		const std::string& name();
+
 
 		const bool isType(const Type type) const;
 		const Types types() const;
@@ -149,6 +150,7 @@ namespace winston
 			Position position;
 			TimePoint lastPositionUpdate, lastSpeedUpdate;
 			std::string name = { "" };
+			const Length length;
 			bool busy = { false };
 			bool forward = { true };
 			Throttle throttle = { 0 };
@@ -161,5 +163,40 @@ namespace winston
 		TimePoint speedTrapStart;
 	};
 	using LocomotiveShed = std::vector<Locomotive::Shared>;
+
+	class RailCar : public Shared_Ptr<RailCar>
+	{
+	public:
+		class Groups
+		{
+		public:
+			using Group = unsigned int;
+			static constexpr Group create()
+			{
+				return 1 << ++RailCar::Groups::groupCounter;
+			}
+
+			static constexpr Group Person = 1 << 0;
+			static constexpr Group Goods = 1 << 1;
+			static constexpr Group ConstructionTrain = 1 << 2;
+			static constexpr Group Heavy = 1 << 3;
+		private:
+			static unsigned int groupCounter;
+		};
+
+		RailCar(const std::string name, const Groups::Group groups, const Length length);
+		~RailCar() = default;
+
+		const bool is(Groups::Group group) const;
+
+		using Shared_Ptr<RailCar>::Shared;
+		using Shared_Ptr<RailCar>::make;
+		using Shared_Ptr<RailCar>::enable_shared_from_this_virtual::shared_from_this;
+
+		const std::string name;
+		const Groups::Group groups;
+		const Length length;
+	};
+	using RailCarShed = std::vector<RailCar::Shared>;
 }
 

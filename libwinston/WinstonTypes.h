@@ -10,6 +10,7 @@
 #include <string>
 #include <array>
 #include <vector>
+#include <list>
 #include "../libwinston/external/better_enum.hpp"
 #ifdef __GNUC__ 
 #pragma GCC pop_options
@@ -316,6 +317,7 @@ namespace winston
 	class Rail;
 	class Turnout;
 	class Task;
+	class Route;
 
 	class Signal;
 	class SignalDevice;

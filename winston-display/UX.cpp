@@ -14,17 +14,21 @@ LV_IMG_DECLARE(icon_arrow_back);
 LV_IMG_DECLARE(icon_movie);
 LV_IMG_DECLARE(icon_settings);
 LV_IMG_DECLARE(icon_train);
+LV_IMG_DECLARE(icon_refresh);
+LV_IMG_DECLARE(icon_close);
 #ifdef __cplusplus
 }
 #endif
 
 lv_obj_t* lvglScreenSettings = nullptr;
 lv_obj_t* lvglScreenRailway = nullptr;
+lv_obj_t* lvglScreenStoryline = nullptr;
 
 lv_obj_t* labelWifiIP = nullptr;
 lv_obj_t* ledWifi = nullptr;
+lv_obj_t* labelStorylineText = nullptr;
 
-lv_obj_t* lvglScreenRailwayButtonRecconect = nullptr;
+lv_obj_t* lvglScreenRailwayButtonReconnect = nullptr;
 
 std::vector<lv_obj_t*> tracks;
 std::map<lv_obj_t*, const winston::RailwayMicroLayout::TurnoutConnection> turnouts;
@@ -37,7 +41,7 @@ constexpr int uiButtonSize = 32;
 
 void uxScreenRailwayShowButtonReconnect()
 {
-    lv_obj_remove_flag(lvglScreenRailwayButtonRecconect, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_remove_flag(lvglScreenRailwayButtonReconnect, LV_OBJ_FLAG_HIDDEN);
 }
 
 void uxScreenRailwayClear()
@@ -62,7 +66,7 @@ void uxScreenRailwayClear()
 
 void uxUpdateRailwayLayout(winston::RailwayMicroLayout& rml, ValueCallbackUX<std::string> turnoutToggle)
 {
-    lv_obj_add_flag(lvglScreenRailwayButtonRecconect, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_add_flag(lvglScreenRailwayButtonReconnect, LV_OBJ_FLAG_HIDDEN);
     struct TurnoutToggleData
     {
         ValueCallbackUX<std::string> callback;
@@ -180,12 +184,18 @@ void uxUpdateWifiLED(const bool on)
     }
 }
 
+void uxUpdateStorylineText(const std::string text)
+{
+    lv_label_set_text(labelStorylineText, text.c_str());
+}
+
 void setupUX(winston::hal::DisplayUX::Shared display, 
     ValueCallbackUX<unsigned char> brightnessCallback, 
     ValueGetterUX<unsigned char> brightness, 
     ValueCallbackUX<Screen> gotoScreen,
     ValueCallbackUX<WinstonTarget> winstonTarget,
     ValueGetterUX<std::string> wifiIP,
+    ValueCallbackUX<std::string> storylineReply,
     CallbackUX reconnect)
 {
     unsigned int y = 0;
@@ -363,14 +373,14 @@ void setupUX(winston::hal::DisplayUX::Shared display,
     {
         CallbackUXTriggerData* buttonData = new CallbackUXTriggerData();
         buttonData->callback = reconnect;
-        lvglScreenRailwayButtonRecconect = lv_button_create(lvglScreenRailway);
-        lv_obj_align(lvglScreenRailwayButtonRecconect, LV_ALIGN_CENTER, 0, 0);
-        lv_obj_add_event_cb(lvglScreenRailwayButtonRecconect, [](lv_event_t* e) {
+        lvglScreenRailwayButtonReconnect = lv_button_create(lvglScreenRailway);
+        lv_obj_align(lvglScreenRailwayButtonReconnect, LV_ALIGN_CENTER, 0, 0);
+        lv_obj_add_event_cb(lvglScreenRailwayButtonReconnect, [](lv_event_t* e) {
             CallbackUXTriggerData* userData = (CallbackUXTriggerData*)lv_event_get_user_data(e);
             userData->callback();
             }, LV_EVENT_CLICKED, buttonData);
         
-        lv_obj_t* btnReconnectLabel = lv_label_create(lvglScreenRailwayButtonRecconect);
+        lv_obj_t* btnReconnectLabel = lv_label_create(lvglScreenRailwayButtonReconnect);
         lv_label_set_text_static(btnReconnectLabel, "reconnect");
     }
 
@@ -382,6 +392,48 @@ void setupUX(winston::hal::DisplayUX::Shared display,
     lv_style_set_line_width(&lvglStyleTurnout, 8);
     lv_style_set_line_color(&lvglStyleTurnout, lv_palette_main(LV_PALETTE_ORANGE));
     lv_style_set_line_rounded(&lvglStyleTurnout, true);
+
+    using StorylineReplyButtonData = ValueCallbackUXTriggerData<std::string>;
+    lvglScreenStoryline = lv_obj_create(NULL);
+    {
+        auto buttonData = new StorylineReplyButtonData();
+        buttonData->value = "refresh";
+        buttonData->callback = storylineReply;
+        lv_obj_t* btnRefresh = lv_button_create(lvglScreenStoryline);
+        lv_obj_set_content_width(btnRefresh, uiButtonSize);
+        lv_obj_set_content_height(btnRefresh, uiButtonSize);
+        lv_obj_align(btnRefresh, LV_ALIGN_BOTTOM_RIGHT, -uiButtonPadding, -uiButtonPadding);
+        lv_obj_add_event_cb(btnRefresh, [](lv_event_t* e) {
+            ButtonData* userData = (ButtonData*)lv_event_get_user_data(e);
+            userData->callback(userData->value);
+            }, LV_EVENT_CLICKED, buttonData);
+
+        lv_obj_t* btnRefreshIcon = lv_image_create(btnRefresh);
+        lv_image_set_src(btnRefreshIcon, &icon_refresh);
+        lv_obj_align(btnRefreshIcon, LV_ALIGN_CENTER, 0, 0);
+    }
+    {
+        auto buttonData = new StorylineReplyButtonData();
+        buttonData->value = "cancel";
+        buttonData->callback = storylineReply;
+        lv_obj_t* btnCancel = lv_button_create(lvglScreenStoryline);
+        lv_obj_set_content_width(btnCancel, uiButtonSize);
+        lv_obj_set_content_height(btnCancel, uiButtonSize);
+        lv_obj_align(btnCancel, LV_ALIGN_BOTTOM_RIGHT, -uiButtonPadding, -(4 * uiButtonPadding + uiButtonSize));
+        lv_obj_add_event_cb(btnCancel, [](lv_event_t* e) {
+            ButtonData* userData = (ButtonData*)lv_event_get_user_data(e);
+            userData->callback(userData->value);
+            }, LV_EVENT_CLICKED, buttonData);
+
+        lv_obj_t* btnCancelIcon = lv_image_create(btnCancel);
+        lv_image_set_src(btnCancelIcon, &icon_close);
+        lv_obj_align(btnCancelIcon, LV_ALIGN_CENTER, 0, 0);
+    }
+    {
+        labelStorylineText = lv_label_create(lvglScreenStoryline);
+        lv_obj_align(labelStorylineText, LV_ALIGN_CENTER, 0, 0);
+        lv_label_set_text_static(labelStorylineText, "???");
+    }
 
     lv_screen_load(lvglScreenSettings);
 }

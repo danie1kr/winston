@@ -52,6 +52,9 @@ namespace winston
 		virtual ~Railway() = default;
 
 		virtual const Result init() = 0;
+		virtual const TrackList trackList() const = 0;
+		virtual const RouteList routeList() const = 0;
+		virtual const SectionList sectionList() const = 0;
 
 	protected:
 		const Callbacks callbacks;
@@ -486,7 +489,7 @@ namespace winston
 		class Section : public Shared_Ptr<Section>, public winston::Section
 		{
 		public:
-			Section(const Sections id, const Type type, const Trackset trackset) : winston::Section(type, trackset), id{ id }
+			Section(const Sections id, const Type type, const TrackSet trackset) : winston::Section(id._to_string(), type, trackset), id{ id }
 			{
 
 			};
@@ -554,6 +557,33 @@ namespace winston
 		
 	protected:
 		SectionMap _sections;
+
+	public:
+
+		const TrackList trackList() const
+		{
+			TrackList list;
+			for (auto it = this->tracks.begin(); it != this->tracks.end(); ++it)
+				list.push_back(*it);
+			return list;
+		};
+
+		const RouteList routeList() const
+		{
+			RouteList list;
+			for (auto it = this->routes.begin(); it != this->routes.end(); ++it)
+				list.push_back(*it);
+			return list;
+		};
+
+		const SectionList sectionList() const
+		{
+			SectionList list;
+			for (auto it = this->_sections.begin(); it != this->_sections.end(); ++it)
+				list.push_back(it->second);
+
+			return list;
+		};
 	};
 
 }

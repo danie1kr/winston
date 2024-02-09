@@ -248,7 +248,7 @@ const winston::Result TimeSaver::on_http(WebServer::HTTPConnection& connection, 
 void TimeSaver::systemSetup() {
     // the user defined railway and its address translator
     this->railway = TimeSaverRailway::make(railwayCallbacks());
-    this->populateLocomotiveShed();
+    this->populateSheds();
 
     // z21
     z21Socket = UDPSocket::make(z21IP, z21Port);
@@ -493,7 +493,7 @@ void TimeSaver::systemSetupComplete()
     this->signalTower->order(this->signalDevice->flushCommand());
 }
 
-void TimeSaver::populateLocomotiveShed()
+void TimeSaver::populateSheds()
 {
     auto callbacks = locoCallbacks();
     winston::Position pos(this->railway->track(Tracks::A), winston::Track::Connection::A, 100);

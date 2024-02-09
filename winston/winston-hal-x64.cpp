@@ -737,7 +737,7 @@ void WebSocketClientWin::on_fail(websocketpp::connection_hdl hdl)
     std::cout << con->get_ec() << " - " << con->get_ec().message() << std::endl;
 }
 #endif
-
+/*
 DisplayWin::DisplayWin()
 {
 
@@ -749,3 +749,4 @@ const winston::Result DisplayWin::send(const std::vector<DataType> data)
         winston::hal::text(winston::build(line, "\n"));
     return winston::Result::OK;
 }
+*/

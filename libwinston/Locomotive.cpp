@@ -6,8 +6,8 @@
 namespace winston
 {
 	const Locomotive::ThrottleSpeedMap Locomotive::defaultThrottleSpeedMap = { {0, 0},{255, 50} };
-	Locomotive::Locomotive(const Callbacks callbacks, const Address address, const Functions functionTable, const Position start, const ThrottleSpeedMap throttleSpeedMap, const std::string name, const Types types) :
-		callbacks(callbacks), details{ address, functionTable, start, hal::now(), hal::now(), name, false, true, 0, 0.f, 0, types }, speedMap(throttleSpeedMap), speedTrapStart(hal::now())
+	Locomotive::Locomotive(const Callbacks callbacks, const Address address, const Functions functionTable, const Position start, const ThrottleSpeedMap throttleSpeedMap, const std::string name, const unsigned int length, const Types types) :
+		callbacks(callbacks), details{ address, functionTable, start, hal::now(), hal::now(), name, length, false, true, 0, 0.f, 0, types }, speedMap(throttleSpeedMap), speedTrapStart(hal::now())
 	{
 	}
 
@@ -205,4 +205,21 @@ namespace winston
 			return upper;
 		return (Speed)(frac * upper + (1.0f - frac) * lower);
 	}*/
+
+	RailCar::Groups::Group RailCar::Groups::groupCounter = 3;
+	/*constexpr RailCar::Groups::Group RailCar::Groups::create()
+	{
+		return 1 << ++RailCar::Groups::groupCounter;
+	}*/
+
+	RailCar::RailCar(const std::string name, const Groups::Group groups, const Length length)
+		: Shared_Ptr<RailCar>(), name{name}, groups{groups}, length{length}
+	{
+
+	}
+
+	const bool RailCar::is(Groups::Group group) const
+	{
+		return this->groups & group;
+	}
 }

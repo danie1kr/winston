@@ -68,6 +68,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
 	ValueCallbackUX<Screen> gotoScreen,
 	ValueCallbackUX<WinstonTarget> winstonTarget,
 	ValueGetterUX<std::string> wifiIP,
+	ValueCallbackUX<std::string> storylineReply,
 	CallbackUX reconnect);
 
 void uxUpdateRailwayLayout(winston::RailwayMicroLayout& rml, ValueCallbackUX<std::string> turnoutToggle);
@@ -76,5 +77,6 @@ void uxUpdateWifiIP(const std::string ip);
 void uxUpdateWifiLED(const bool on);
 void uxScreenRailwayShowButtonReconnect();
 void uxScreenRailwayClear();
+void uxUpdateStorylineText(const std::string text);
 
 const winston::Result showUX(const Screen screen);

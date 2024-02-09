@@ -61,7 +61,7 @@ namespace winstontests
                 // A ==== T1
                 auto A = testRailway->track(RailwayWithSiding::Tracks::A);
                 auto T1 = testRailway->track(RailwayWithSiding::Tracks::Turnout1);
-                auto section = RailwayWithSiding::Section::make(RailwayWithSidingsSections::A, winston::Section::Type::Platform, winston::Trackset({ A, T1  }));
+                auto section = RailwayWithSiding::Section::make(RailwayWithSidingsSections::A, winston::Section::Type::Platform, winston::TrackSet({ A, T1  }));
 
                 marked.clear();
                 auto result = section->validate(marker);
@@ -71,7 +71,7 @@ namespace winstontests
                 // A and B are not connected
                 auto A = testRailway->track(RailwayWithSiding::Tracks::A);
                 auto B = testRailway->track(RailwayWithSiding::Tracks::B);
-                auto section = RailwayWithSiding::Section::make(RailwayWithSidingsSections::A, winston::Section::Type::Platform, winston::Trackset({ A, B }));
+                auto section = RailwayWithSiding::Section::make(RailwayWithSidingsSections::A, winston::Section::Type::Platform, winston::TrackSet({ A, B }));
 
                 marked.clear();
                 auto result = section->validate(marker);
@@ -82,7 +82,7 @@ namespace winstontests
                 auto C = testRailway->track(RailwayWithSiding::Tracks::C);
                 auto Turnout1 = testRailway->track(RailwayWithSiding::Tracks::Turnout1);
                 auto A = testRailway->track(RailwayWithSiding::Tracks::A);
-                auto section = RailwayWithSiding::Section::make(RailwayWithSidingsSections::A, winston::Section::Type::Platform, winston::Trackset({ C, Turnout1, A }));
+                auto section = RailwayWithSiding::Section::make(RailwayWithSidingsSections::A, winston::Section::Type::Platform, winston::TrackSet({ C, Turnout1, A }));
 
                 marked.clear();
                 auto result = section->validate(marker);
@@ -93,7 +93,7 @@ namespace winstontests
                 auto C = testRailway->track(RailwayWithSiding::Tracks::C);
                 auto Turnout1 = testRailway->track(RailwayWithSiding::Tracks::Turnout1);
                 auto A = testRailway->track(RailwayWithSiding::Tracks::A);
-                auto section = RailwayWithSiding::Section::make(RailwayWithSidingsSections::A, winston::Section::Type::Platform, winston::Trackset({ C, A }));
+                auto section = RailwayWithSiding::Section::make(RailwayWithSidingsSections::A, winston::Section::Type::Platform, winston::TrackSet({ C, A }));
 
                 marked.clear();
                 auto result = section->validate(marker);
@@ -110,7 +110,7 @@ namespace winstontests
             auto C = testRailway->track(RailwayWithSiding::Tracks::C);
             auto Turnout1 = testRailway->track(RailwayWithSiding::Tracks::Turnout1);
             auto A = testRailway->track(RailwayWithSiding::Tracks::A);
-            auto section = RailwayWithSiding::Section::make(RailwayWithSidingsSections::A, winston::Section::Type::Platform, winston::Trackset({ C, Turnout1, A }));
+            auto section = RailwayWithSiding::Section::make(RailwayWithSidingsSections::A, winston::Section::Type::Platform, winston::TrackSet({ C, Turnout1, A }));
 
             {
                 winston::SectionEntry entry{ C, winston::Track::Connection::B };

@@ -50,13 +50,13 @@ private:
     // accept new requests and loop over what the signal box has to do
     void systemLoop();
 
-    void populateLocomotiveShed();
+    void populateSheds();
 
     void inventStorylines();
     std::vector<winston::Storyline::Shared> storylines;
     winston::Storyline::Shared activeStory = nullptr;
-    winston::ConfirmationProvider::Shared userConfirmation;
-    winston::TaskConfirm::Display::Shared display;
+    //winston::ConfirmationProvider::Shared userConfirmation;
+    //winston::TaskConfirm::Display::Shared display;
 
     /* z21 */
     UDPSocket::Shared z21Socket;

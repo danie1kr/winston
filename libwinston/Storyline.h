@@ -5,7 +5,182 @@
 #include "Command.h"
 #include "Locomotive.h"
 #include "Section.h"
-namespace winston {
+namespace winston
+{
+	class Storyline : public BasicCommand, public Shared_Ptr<Storyline>
+	{
+	public:
+
+		Storyline();
+		~Storyline() = default;
+		using Shared_Ptr<Storyline>::Shared;
+		using Shared_Ptr<Storyline>::make;
+		using Shared_Ptr<Storyline>::enable_shared_from_this_virtual::shared_from_this;
+		
+		struct Context;
+		
+		class Task : public Shared_Ptr<Task>
+		{
+		public:
+			Task();
+			virtual ~Task() = default;
+			using Shared_Ptr<Task>::Shared;
+			using Shared_Ptr<Task>::make;
+			using List = std::list<Task::Shared>;
+
+			virtual const State execute(const Storyline::Shared storyline, const List& context) = 0;
+			virtual const std::string text() const = 0;
+
+			void reset();
+			const bool valid() const;
+
+		private:
+			bool _valid;
+		};
+
+		struct Reply
+		{
+			enum class Answer : unsigned char
+			{
+				None, Refresh, Cancel
+			};
+			using Callback = std::function<const State(const Answer)>;
+		};
+
+		const State execute();
+
+		using Invent = std::function<Task::List()>;
+		using TextCallback = std::function<const std::string(const Task::List& context)>;
+
+		void invent(const Invent invent, const TextCallback textCallback);
+		const std::string text() const;
+
+		const Result reply(const Reply::Answer answer);
+		const Result reply(const std::string& answer);
+
+		template<typename T>
+		static const typename T::Shared get(const Task::List& tasks)
+		{
+			for (auto& task : tasks)
+			{
+				auto t = std::dynamic_pointer_cast<T>(task);
+				if (t)
+					return t;
+			}
+			return nullptr;
+		}
+
+		template<typename T>
+		const typename T::Shared getAhead() const
+		{
+			return this->get<T>(this->tasks);
+		}
+
+		template<typename T>
+		const typename T::Shared getContext() const
+		{
+			return this->get<T>(this->context);
+		}
+
+
+	private:
+		Task::List tasks;
+		Task::List context;
+		TextCallback textCallback;
+	};
+
+	class TaskRandomCars : public Storyline::Task, public Shared_Ptr<TaskRandomCars>
+	{
+	public:
+		TaskRandomCars(const RailCarShed& railCarShed);
+		~TaskRandomCars() = default;
+		using Shared_Ptr<TaskRandomCars>::Shared;
+		using Shared_Ptr<TaskRandomCars>::make;
+
+		const State execute(const Storyline::Shared storyline, const Task::List& context);
+		const std::string text() const;
+
+		const std::list<RailCar::Shared> railCars() const;
+
+	private:
+		const RailCarShed& railCarShed;
+		std::list<RailCar::Shared> _railCars;
+
+		void findCars(const RailCar::Groups::Group group, const unsigned char probOneOnly, const unsigned char maxNumCars, const Length maxLength);
+	};
+
+	class TaskRandomAction : public Storyline::Task, public Shared_Ptr<TaskRandomAction>
+	{
+	public:
+		enum class Action {
+			Assemble,
+			Drive,
+			Stable
+		};
+		TaskRandomAction();
+		~TaskRandomAction() = default;
+		using Shared_Ptr<TaskRandomAction>::Shared;
+		using Shared_Ptr<TaskRandomAction>::make;
+
+		const State execute(const Storyline::Shared storyline, const Task::List& context);
+		const std::string text() const;
+
+		const Action action() const;
+	private:
+		Action _action;
+	};
+
+	class TaskRandomLoco : public Storyline::Task, public Shared_Ptr<TaskRandomLoco>
+	{
+	public:
+		TaskRandomLoco(const LocomotiveShed &locoShed);
+		~TaskRandomLoco() = default;
+		using Shared_Ptr<TaskRandomLoco>::Shared;
+		using Shared_Ptr<TaskRandomLoco>::make;
+
+		const State execute(const Storyline::Shared storyline, const Task::List& context);
+		const std::string text() const;
+
+		const Locomotive::Shared locomotive() const;
+	private:
+		const LocomotiveShed& locoShed;
+		Locomotive::Shared _locomotive;
+	};
+
+	class TaskRandomSection : public Storyline::Task, public Shared_Ptr<TaskRandomSection>
+	{
+	public:
+		TaskRandomSection(const SectionList &list);
+		~TaskRandomSection() = default;
+		using Shared_Ptr<TaskRandomSection>::Shared;
+		using Shared_Ptr<TaskRandomSection>::make;
+
+		const State execute(const Storyline::Shared storyline, const Task::List& context);
+		const std::string text() const;
+
+		const Section::Shared section() const;
+	private:
+		const SectionList list;
+		Section::Shared _section;
+	};
+
+	class TaskReply : public Storyline::Task, Shared_Ptr<TaskReply>
+	{
+	public:
+		TaskReply(const Storyline::Reply::Callback callback);
+		virtual ~TaskReply() = default;
+		using Shared_Ptr<TaskReply>::Shared;
+		using Shared_Ptr<TaskReply>::make;
+
+		const State execute(const Storyline::Shared storyline, const Task::List& context);
+		const std::string text() const;
+		void reply(const Storyline::Reply::Answer answer);
+	private:
+		const Storyline::Reply::Callback callback;
+		Storyline::Reply::Answer lastAnswer;
+	};
+
+	/*
 	class Storyline : public BasicCommand, public Shared_Ptr<Storyline>
 	{
 	public:
@@ -122,7 +297,7 @@ namespace winston {
 		using winston::Shared_Ptr<DisplayLog>::make;
 	};
 
-		/*
+		*
 
 		std::function<State()> abort = [](std::string message) -> State { return State::Aborted; };
 		

@@ -521,14 +521,14 @@ namespace winston
 		virtual void systemSetup() = 0;
 		virtual void systemSetupComplete() = 0;
 		virtual void systemLoop() { };
-		virtual void populateLocomotiveShed() = 0;
+		virtual void populateSheds() = 0;
 
 		virtual void setupSignals() = 0;
 		virtual void setupDetectors() = 0;
 
-		void addLocomotive(const winston::Locomotive::Callbacks callbacks, const Address address, const winston::Locomotive::Functions functions, const Position start, const Locomotive::ThrottleSpeedMap speedMap, const std::string name, const Locomotive::Types types)
+		void addLocomotive(const winston::Locomotive::Callbacks callbacks, const Address address, const winston::Locomotive::Functions functions, const Position start, const Locomotive::ThrottleSpeedMap speedMap, const std::string name, const unsigned int length, const Locomotive::Types types)
 		{
-			this->locomotiveShed.push_back(Locomotive::make(callbacks, address, functions, start, speedMap, name, types));
+			this->locomotiveShed.push_back(Locomotive::make(callbacks, address, functions, start, speedMap, name, length, types));
 		}
 
 		Result loadLocomotives()
@@ -573,6 +573,17 @@ namespace winston
 
 		// the locos
 		LocomotiveShed locomotiveShed;
+
+		// the rail cars
+		RailCarShed railCarShed;
+		static const RailCarShed getRailCarsFromShed(const RailCarShed &railCarShed, const RailCar::Groups matching)
+		{
+			RailCarShed result;
+			std::copy_if(railCarShed.begin(), railCarShed.end(), std::back_inserter(result),
+				[](RailCarShed::value_type car) { return car->is(matching); });
+
+			return result;
+		}
 
 		TimePoint lastTurnoutToggleRequest{ winston::hal::now() };
 	};

@@ -254,6 +254,7 @@ private:
 using WebSocketClient = WebSocketClientWin;
 #endif
 
+/*
 #include "../libwinston/Storyline.h"
 class DisplayWin : public winston::TaskConfirm::Display, public winston::Shared_Ptr<DisplayWin>
 {
@@ -265,3 +266,4 @@ public:
 	using winston::Shared_Ptr<DisplayWin>::make;
 };
 using Display = DisplayWin;
+*/

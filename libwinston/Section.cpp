@@ -2,7 +2,7 @@
 #include <list>
 
 namespace winston {
-	Section::Section(const Type type, const Trackset tracks) : Shared_Ptr<Section>(), type(type), _tracks(tracks), entriesSet(this->buildEntriesSet())
+	Section::Section(const std::string name, const Type type, const TrackSet tracks) : Shared_Ptr<Section>(), name{ name }, type(type), _tracks(tracks), entriesSet(this->buildEntriesSet())
 	{
 	}
 
@@ -21,7 +21,7 @@ namespace winston {
 			current = *it;
 			if (mark(*current))
 			{
-				Trackset others;
+				TrackSet others;
 				current->collectAllConnections(others);
 
 				for (auto other : others)
@@ -80,7 +80,7 @@ namespace winston {
 		return set;
 	}
 
-	const Trackset Section::tracks() const
+	const TrackSet Section::tracks() const
 	{
 		return this->_tracks;
 	}

@@ -7,6 +7,8 @@
 #include <memory>
 #include <functional>
 #include <algorithm>
+#include <random>
+#include <iterator>
 
 #include "WinstonTypes.h"
 #include "WinstonConfig.h"
@@ -95,6 +97,68 @@ namespace winston
 	{
 		return std::min(std::max(x, lower), upper);
 	}
+
+	template<typename T>
+	const T filter(const T& container, std::function<const bool(const typename T::value_type& data)> condition)
+	{
+		T result;
+		std::copy_if(container.begin(), container.end(), std::back_inserter(result), condition);
+		return result;
+	}
+
+	template<typename T>
+	T random(T& container, const size_t n)
+	{
+		T result;
+		std::random_device rd;
+		std::default_random_engine g(rd());
+		std::shuffle(container.begin(), container.end(), g);
+		result.insert(result.begin(), container.begin(), container.begin() + std::min(n, container.size()));
+		return result;
+	}
+
+	template<typename T>
+	const typename T::value_type& random(const T& container)
+	{
+		std::random_device rd;
+		std::default_random_engine g(rd());
+		auto start = container.begin();
+		std::uniform_int_distribution<> dis(0, std::distance(container.begin(), container.end()) - 1);
+		
+		std::advance(start, dis(g));
+		return *start;
+	}
+
+	// from https://gist.github.com/cbsmith/5538174
+	template <typename RandomGenerator = std::default_random_engine>
+	struct random_selector
+	{
+		//On most platforms, you probably want to use std::random_device("/dev/urandom")()
+		random_selector(RandomGenerator g = RandomGenerator(std::random_device()()))
+			: gen(g) {}
+
+		template <typename Iter>
+		Iter select(Iter start, Iter end) {
+			std::uniform_int_distribution<> dis(0, std::distance(start, end) - 1);
+			std::advance(start, dis(gen));
+			return start;
+		}
+
+		//convenience function
+		template <typename Iter>
+		Iter operator()(Iter start, Iter end) {
+			return select(start, end);
+		}
+
+		//convenience function that works on anything with a sensible begin() and end(), and returns with a ref to the value type
+		template <typename Container>
+		auto operator()(const Container& c) -> decltype(*begin(c))& {
+			return *select(begin(c), end(c));
+		}
+
+	private:
+		RandomGenerator gen;
+	};
 
 #define STRINGIZE(x) STRINGIZE2(x)
 #define STRINGIZE2(x) #x

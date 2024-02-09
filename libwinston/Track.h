@@ -170,7 +170,8 @@ namespace winston
 		const Length trackLength;
 	};
 
-	using Trackset = std::set<Track::Shared>;
+	using TrackSet = std::set<Track::Shared>;
+	using TrackList = std::list<Track::Shared>;
 	
 	// a====|
 	class Bumper : public Track, public Shared_Ptr<Bumper>

@@ -1011,6 +1011,9 @@
     <ClCompile Include="res\icon_refresh.c">
       <Filter>res</Filter>
     </ClCompile>
+    <ClCompile Include="res\icon_quest.c">
+      <Filter>res</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="winston-display.h">

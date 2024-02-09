@@ -214,6 +214,11 @@ void winston_setup()
             bool locked = data["direction"].as<bool>();
             uxUpdateTurnout(track, state, locked);
         }
+        else if (std::string("\"storyLineText\"").compare(op) == 0)
+        {
+            std::string text = data["text"].as<std::string>();
+            uxUpdateStorylineText(text);
+        }
     });
 
     setupUX(display,
@@ -250,6 +255,18 @@ void winston_setup()
 #else
             return std::string("not connected");
 #endif
+        },
+        [](const std::string reply) -> const winston::Result {
+            std::string json("");
+            {
+                JsonDocument msg;
+                msg["op"] = "storylineReply";
+                auto data = msg["data"].to<JsonObject>();
+                data["reply"] = reply;
+                serializeJson(msg, json);
+            }
+            webSocketClient.send(json);
+            return winston::Result::OK;
         },
         [](){
             std::string ip = "localhost";

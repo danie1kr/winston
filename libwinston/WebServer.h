@@ -6,6 +6,7 @@
 #include "external/better_enum.hpp"
 #include "Railway.h"
 #include "Util.h"
+#include "Storyline.h"
 
 #ifdef __GNUC__ 
 #pragma GCC push_options
@@ -109,6 +110,8 @@ namespace winston
         winston::hal::StorageInterface::Shared storageLayout;
         winston::hal::StorageInterface::Shared storageMicroLayout;
         DigitalCentralStation::Shared digitalCentralStation;
+
+        Storyline::Shared activeStoryline = nullptr;
 	public:
 
         WebUI()
@@ -147,6 +150,11 @@ namespace winston
 
             return Result::OK;
 		}
+
+        void setStoryLine(const Storyline::Shared storyline)
+        {
+            this->activeStoryline = storyline;
+        }
 
     private:
         void turnoutSendState(const std::string turnoutTrackId, const int dir, const bool locked)
@@ -758,6 +766,28 @@ namespace winston
                 */
             }
 #endif
+            else if (std::string("\"getStorylineText\"").compare(op) == 0)
+            {
+                if (this->activeStoryline)
+                {
+                    DynamicJsonDocument obj(256);
+                    obj["op"] = "storyLineText";
+                    auto data = obj.createNestedObject("data");
+                    data["text"] = this->activeStoryline->text();
+                    // get current confirmation task
+                    // send labels and values
+                    std::string json("");
+                    serializeJson(obj, json);
+                    this->webServer.broadcast(json);
+                }
+            }
+            else if (std::string("\"storylineReply\"").compare(op) == 0)
+            {
+                std::string reply = data["reply"];
+                if (this->activeStoryline)
+                    // TODO: might go wrong
+                    this->activeStoryline->reply(reply);
+            }
             else if (std::string("\"toggleDCSstop\"").compare(op) == 0)
             {
                 this->digitalCentralStation->requestEmergencyStop(!this->digitalCentralStation->isEmergencyStop());

@@ -36,9 +36,9 @@ namespace winston
 
                 Serial.begin(115200);
                     delay(200);
-                while (!Serial) { //}&& millis() < 2000) {
+          //      while (!Serial) { //}&& millis() < 2000) {
                     // Wait for Serial to initialize
-                }
+            //    }
                 text("Winston Display Init Hello");
                 Serial.flush();
 
@@ -81,7 +81,7 @@ namespace winston
                     //lcd.print("ERROR:   TOUCH");
                 }*/
 
-                logRuntimeStatus();
+                //logRuntimeStatus();
             }
         }
 

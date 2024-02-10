@@ -159,7 +159,7 @@ namespace winston
     private:
         void turnoutSendState(const std::string turnoutTrackId, const int dir, const bool locked)
         {
-            DynamicJsonDocument obj(200);
+            DynamicJsonDocument obj(480);
             obj["op"] = "turnoutState";
             auto data = obj.createNestedObject("data");
             data["id"] = turnoutTrackId;
@@ -264,7 +264,8 @@ namespace winston
 
         void sendStorylineText(const Storyline::Shared storyline)
         {
-            DynamicJsonDocument obj(1024);
+            const std::string text = storyline->text();
+            DynamicJsonDocument obj(480 + text.length());
             obj["op"] = "storyLineText";
             auto data = obj.createNestedObject("data");
             data["text"] = storyline->text();

@@ -92,7 +92,8 @@ int32_t jpegSeek(JPEGFILE* handle, int32_t position) {
 void winston_setup()
 {
     winston::hal::init();
-    winston::hal::text("Hello from Winston!"_s);
+    Serial.println(ESP.getFreeHeap()); 
+    winston::hal::text("Hello from Winston!");
     std::srand((unsigned int)(24));// inMilliseconds(winston::hal::now().time_since_epoch())));
 
     display->init();
@@ -304,7 +305,11 @@ void winston_setup()
             }
             eventLooper.order(winston::Command::make([](const winston::TimePoint& created) -> const winston::State
                 {
+#ifdef WINSTON_PLATFORM_ESP32
+                    if (winston::hal::now() - lastWebsocketConnectionCheck > 2000)
+#else
                     if (winston::hal::now() - lastWebsocketConnectionCheck > 2000ms)
+#endif
                     {
                         lastWebsocketConnectionCheck = winston::hal::now();
                         if (!webSocketClient.connected())
@@ -324,7 +329,7 @@ void winston_setup()
     cinema.init();
     showUX(currentScreen);
     // setup
-    winston::hal::text("Setup complete!"_s);
+    winston::hal::text("Setup complete!");
 }
 
 void lvgl_loop()

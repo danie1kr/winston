@@ -63,7 +63,8 @@ namespace winston
 				this->_log.pop_front();
 			this->_log.emplace_back(timestamp, level, text);
 			const Entry& entry = this->_log.back();
-			hal::text(entry.build());
+			auto entryText = entry.build();
+			hal::text(entryText);
 			if (this->callback)
 				this->callback(entry);
 		}

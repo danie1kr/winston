@@ -55,26 +55,29 @@ void Cinema::collectMovies()
         winston::logger.info("Using movies.json");
         size_t jsonFileSize = jsonFile.size();
         unsigned char* jsonBuffer = (unsigned char*)malloc(jsonFileSize + 1);
-        memset(jsonBuffer, 0, jsonFileSize + 1);
-        jsonFile.read(jsonBuffer, jsonFileSize);
-
-        JsonDocument json;
-        deserializeJson(json, jsonBuffer);
-        this->largestJPEGFileSize = json["maxFileSize"].as<size_t>();
-        auto jsonMovies = json["movies"].as<JsonArray>();
-        for (auto movie : jsonMovies)
+        if (jsonBuffer)
         {
-            std::string path = std::string("/movies/") + movie["name"].as<std::string>();
-            auto frames = movie["frameCount"].as<unsigned int>();
-            if (frames > 0)
+            memset(jsonBuffer, 0, jsonFileSize + 1);
+            jsonFile.read(jsonBuffer, jsonFileSize);
+
+            JsonDocument json;
+            deserializeJson(json, jsonBuffer);
+            this->largestJPEGFileSize = json["maxFileSize"].as<size_t>();
+            auto jsonMovies = json["movies"].as<JsonArray>();
+            for (auto movie : jsonMovies)
             {
-                winston::logger.info("Dir: ", path.c_str(), "Frames: ", frames);
-                movies.emplace_back(path, frames);
+                std::string path = std::string("/movies/") + movie["name"].as<std::string>();
+                auto frames = movie["frameCount"].as<unsigned int>();
+                if (frames > 0)
+                {
+                    winston::logger.info("Dir: ", path.c_str(), "Frames: ", frames);
+                    movies.emplace_back(path, frames);
+                }
             }
+            jsonFile.close();
+            winston::logger.info("Maximum size: ", this->largestJPEGFileSize);
+            free(jsonBuffer);
         }
-        jsonFile.close();
-        winston::logger.info("Maximum size: ", this->largestJPEGFileSize);
-        free(jsonBuffer);
     }
     else
     {

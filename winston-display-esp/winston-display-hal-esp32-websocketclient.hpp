@@ -14,7 +14,8 @@ public:
 	WebSocketClientESP32();
 	~WebSocketClientESP32() = default;
 
-	void init(OnMessage onMessage, const winston::URI &uri);
+	const winston::Result init(OnMessage onMessage);
+	const winston::Result connect(const winston::URI& uri);
 	void send(const std::string message);
 	void step();
 	void shutdown();
@@ -28,18 +29,21 @@ using WebSocketClient = WebSocketClientESP32;
 
 WebSocketClientESP32::WebSocketClientESP32()
 	: winston::WebSocketClient<websockets2_generic::WebsocketsClient>(),
-	_connected{false}
+	client(), _connected{false}
 {
 
 }
 
-void WebSocketClientESP32::init(OnMessage onMessageCallback, const winston::URI& uri)
+const winston::Result WebSocketClientESP32::init(OnMessage onMessageCallback)
 {
-	this->client.onMessage([onMessageCallback, this](WebsocketsMessage message) {
+	this->client.onMessage([&](WebsocketsMessage message) {
 		std::string msg(message.data().c_str());
 		onMessageCallback(this->client, msg);
 		});
+}
 
+const winston::Result WebSocketClientESP32::connect(const winston::URI& uri)
+{
 	this->_connected = this->client.connect(uri.host.c_str(), uri.port, uri.resource.c_str());
 }
 

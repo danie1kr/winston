@@ -26,9 +26,11 @@ enum class WinstonTarget
 
 enum class Screen
 {
-	Cinema = 0,
-	Settings = 1,
-	Railway = 2,
+	Menu = 0,
+	Cinema = 1,
+	Settings = 2,
+	Railway = 3,
+	Storyline = 4,
 };
 
 struct Settings

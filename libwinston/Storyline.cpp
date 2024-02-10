@@ -37,12 +37,18 @@ namespace winston
 		return this->tasks.size() ? State::Running : State::Finished;
 	}
 
-	void Storyline::invent(const Invent invent, TextCallback callback)
+	void Storyline::invent(const Invent inventCallback, TextCallback textCallback)
+	{
+		this->inventCallback = inventCallback;
+		this->textCallback = textCallback;
+		this->reinvent();
+	}
+
+	void Storyline::reinvent()
 	{
 		this->tasks.clear();
 		this->context.clear();
-		this->tasks = invent();
-		this->textCallback = textCallback;
+		this->tasks = this->inventCallback();
 	}
 
 	const std::string Storyline::text() const
@@ -52,13 +58,16 @@ namespace winston
 
 	const Result Storyline::reply(const Reply::Answer answer)
 	{
+		this->reinvent();
+
+		/*
 		auto& task = this->tasks.front();
 		auto replyTask = std::dynamic_pointer_cast<TaskReply>(task);
 		if (replyTask)
 			replyTask->reply(answer);
 		else
 			return Result::NotFound;
-
+			*/
 		return Result::OK;
 	}
 
@@ -70,6 +79,22 @@ namespace winston
 			
 		return Result::NotFound;
 
+	}
+
+	TaskCallback::TaskCallback(const Callback callback)
+		: callback{ callback }
+	{
+
+	}
+
+	const State TaskCallback::execute(const Storyline::Shared storyline, const Task::List& context)
+	{
+		return this->callback(storyline, context);
+	}
+
+	const std::string TaskCallback::text() const
+	{
+		return "";
 	}
 	
 	TaskRandomCars::TaskRandomCars(const RailCarShed& railCarShed)
@@ -122,7 +147,12 @@ namespace winston
 
 	const std::string TaskRandomCars::text() const
 	{
-		return "Cars";
+		std::string text;
+		for (const auto& car : this->railCars())
+		{
+			text += car->name + " ";
+		}
+		return text;
 	}
 
 	void TaskRandomCars::findCars(const RailCar::Groups::Group group, const unsigned char probOneOnly, const unsigned char maxNumCars, const Length maxLength)
@@ -211,7 +241,7 @@ namespace winston
 				if (action == TaskRandomAction::Action::Assemble || action == TaskRandomAction::Action::Stable)
 				{
 					locos = filter(locos, [](const Locomotive::Shared& loco) -> const bool {
-						return !loco->isType(Locomotive::Type::Shunting);
+						return loco->isType(Locomotive::Type::Shunting);
 						});
 				}
 			}
@@ -242,7 +272,9 @@ namespace winston
 
 	const State TaskRandomSection::execute(const Storyline::Shared storyline, const Task::List& context)
 	{
-		SectionList sections(this->list);
+		SectionList sections = filter(this->list, [](const Section::Shared& section) -> const bool {
+			return section->type != Section::Type::Transit;
+			});;
 		if (!context.empty())
 		{
 			bool personRailCars = false;
@@ -262,18 +294,18 @@ namespace winston
 				{
 					if (personRailCars)
 						sections = filter(sections, [](const Section::Shared& section) -> const bool {
-						return section->type != Section::Type::Platform;
+						return section->type == Section::Type::Platform;
 							});
 					else
 						sections = filter(sections, [](const Section::Shared& section) -> const bool {
-						return section->type != Section::Type::Platform && section->type != Section::Type::Siding;
+						return section->type == Section::Type::Platform || section->type == Section::Type::Siding;
 							});
 
 				}
 				else if(action == TaskRandomAction::Action::Stable)
 				{
 					sections = filter(sections, [](const Section::Shared& section) -> const bool {
-						return section->type != Section::Type::Siding;
+						return section->type == Section::Type::Siding;
 						});
 				}
 			}

@@ -52,7 +52,7 @@ namespace winston
 		using Invent = std::function<Task::List()>;
 		using TextCallback = std::function<const std::string(const Task::List& context)>;
 
-		void invent(const Invent invent, const TextCallback textCallback);
+		void invent(const Invent inventCallback, const TextCallback textCallback);
 		const std::string text() const;
 
 		const Result reply(const Reply::Answer answer);
@@ -84,9 +84,29 @@ namespace winston
 
 
 	private:
+		void reinvent();
+
 		Task::List tasks;
 		Task::List context;
 		TextCallback textCallback;
+		Invent inventCallback;
+	};
+
+	class TaskCallback : public Storyline::Task, public Shared_Ptr<TaskCallback>
+	{
+	public:
+		using Callback = std::function<const State(const Storyline::Shared storyline, const Task::List& context)>;
+
+		TaskCallback(const Callback callback);
+		~TaskCallback() = default;
+		using Shared_Ptr<TaskCallback>::Shared;
+		using Shared_Ptr<TaskCallback>::make;
+
+		const State execute(const Storyline::Shared storyline, const Task::List& context);
+		const std::string text() const;
+
+	private:
+		const Callback callback;
 	};
 
 	class TaskRandomCars : public Storyline::Task, public Shared_Ptr<TaskRandomCars>

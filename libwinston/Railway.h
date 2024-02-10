@@ -489,7 +489,8 @@ namespace winston
 		class Section : public Shared_Ptr<Section>, public winston::Section
 		{
 		public:
-			Section(const Sections id, const Type type, const TrackSet trackset) : winston::Section(id._to_string(), type, trackset), id{ id }
+			Section(const Sections id, const Type type, const TrackSet trackset) 
+				: winston::Section(id._to_string(), type, trackset), id{ id }
 			{
 
 			};

@@ -16,10 +16,12 @@ LV_IMG_DECLARE(icon_settings);
 LV_IMG_DECLARE(icon_train);
 LV_IMG_DECLARE(icon_refresh);
 LV_IMG_DECLARE(icon_close);
+LV_IMG_DECLARE(icon_quest);
 #ifdef __cplusplus
 }
 #endif
 
+lv_obj_t* lvglScreenMenu = nullptr;
 lv_obj_t* lvglScreenSettings = nullptr;
 lv_obj_t* lvglScreenRailway = nullptr;
 lv_obj_t* lvglScreenStoryline = nullptr;
@@ -38,6 +40,12 @@ lv_style_t lvglStyleTrack, lvglStyleTurnout, lvglStyleCenteredText;
 
 constexpr int uiButtonPadding = 8;
 constexpr int uiButtonSize = 32;
+
+template<typename T>
+auto applyToCallback = [](lv_event_t* e) {
+    auto userData = (T*)lv_event_get_user_data(e);
+    userData->callback(userData->value);
+    };
 
 void uxScreenRailwayShowButtonReconnect()
 {
@@ -189,15 +197,17 @@ void uxUpdateStorylineText(const std::string text)
     lv_label_set_text(labelStorylineText, text.c_str());
 }
 
-void setupUX(winston::hal::DisplayUX::Shared display, 
-    ValueCallbackUX<unsigned char> brightnessCallback, 
-    ValueGetterUX<unsigned char> brightness, 
+void setupUX(winston::hal::DisplayUX::Shared display,
+    ValueCallbackUX<unsigned char> brightnessCallback,
+    ValueGetterUX<unsigned char> brightness,
     ValueCallbackUX<Screen> gotoScreen,
     ValueCallbackUX<WinstonTarget> winstonTarget,
     ValueGetterUX<std::string> wifiIP,
     ValueCallbackUX<std::string> storylineReply,
     CallbackUX reconnect)
 {
+    using ButtonDataScreen = ValueCallbackUXTriggerData<Screen>;
+
     unsigned int y = 0;
     const unsigned int x = 8;
     const unsigned int ySize = 24;
@@ -211,228 +221,273 @@ void setupUX(winston::hal::DisplayUX::Shared display,
     lv_style_set_image_recolor(&styleIconRecolor, lv_color_white());
     lv_style_set_img_recolor_opa(&styleIconRecolor, LV_OPA_COVER);
 
+    // menu
+    {
+        auto screen = lvglScreenMenu = lv_obj_create(NULL);
+        lv_obj_t* labelTitle = lv_label_create(screen);
+        lv_label_set_text(labelTitle, "Winston Display");
+        lv_obj_set_size(labelTitle, display->width, ySize);
+        lv_obj_set_pos(labelTitle, 0, y);
+        lv_obj_add_style(labelTitle, &lvglStyleCenteredText, 0);
+        y += yInc;
+
+        // railway
+        {
+            auto buttonData = new ButtonDataScreen();
+            buttonData->value = Screen::Railway;
+            buttonData->callback = gotoScreen;
+            lv_obj_t* button = lv_button_create(screen);
+            lv_obj_set_content_width(button, uiButtonSize);
+            lv_obj_set_content_height(button, uiButtonSize);
+            lv_obj_align(button, LV_ALIGN_LEFT_MID, 60, 0);
+            lv_obj_add_event_cb(button, applyToCallback<ButtonDataScreen>, LV_EVENT_CLICKED, buttonData);
+
+            lv_obj_t* buttonIcon = lv_image_create(button);
+            lv_image_set_src(buttonIcon, &icon_train);
+            lv_obj_align(buttonIcon, LV_ALIGN_CENTER, 0, 0);
+        }
+        // story
+        {
+            auto buttonData = new ButtonDataScreen();
+            buttonData->value = Screen::Storyline;
+            buttonData->callback = gotoScreen;
+            lv_obj_t* button = lv_button_create(screen);
+            lv_obj_set_content_width(button, uiButtonSize);
+            lv_obj_set_content_height(button, uiButtonSize);
+            lv_obj_align(button, LV_ALIGN_RIGHT_MID, -60, 0);
+            lv_obj_add_event_cb(button, applyToCallback<ButtonDataScreen>, LV_EVENT_CLICKED, buttonData);
+
+            lv_obj_t* buttonIcon = lv_image_create(button);
+            lv_image_set_src(buttonIcon, &icon_quest);
+            lv_obj_align(buttonIcon, LV_ALIGN_CENTER, 0, 0);
+        }
+        // cinema
+        {
+            auto buttonData = new ButtonDataScreen();
+            buttonData->value = Screen::Cinema;
+            buttonData->callback = gotoScreen;
+            lv_obj_t* button = lv_button_create(screen);
+            lv_obj_set_content_width(button, uiButtonSize);
+            lv_obj_set_content_height(button, uiButtonSize);
+            lv_obj_align(button, LV_ALIGN_LEFT_MID, 60, 80);
+            lv_obj_add_event_cb(button, applyToCallback<ButtonDataScreen>, LV_EVENT_CLICKED, buttonData);
+
+            lv_obj_t* buttonIcon = lv_image_create(button);
+            lv_image_set_src(buttonIcon, &icon_movie);
+            lv_obj_align(buttonIcon, LV_ALIGN_CENTER, 0, 0);
+        }
+        // settings
+        {
+            auto buttonData = new ButtonDataScreen();
+            buttonData->value = Screen::Settings;
+            buttonData->callback = gotoScreen;
+            lv_obj_t* button = lv_button_create(screen);
+            lv_obj_set_content_width(button, uiButtonSize);
+            lv_obj_set_content_height(button, uiButtonSize);
+            lv_obj_align(button, LV_ALIGN_RIGHT_MID, -60, 80);
+            lv_obj_add_event_cb(button, applyToCallback<ButtonDataScreen>, LV_EVENT_CLICKED, buttonData);
+
+            lv_obj_t* buttonIcon = lv_image_create(button);
+            lv_image_set_src(buttonIcon, &icon_settings);
+            lv_obj_align(buttonIcon, LV_ALIGN_CENTER, 0, 0);
+        }
+    }
+
     // settings
-    lvglScreenSettings = lv_obj_create(NULL);
-    lv_obj_t* labelTitle = lv_label_create(lvglScreenSettings);
-    lv_label_set_text(labelTitle, "Settings");
-    lv_obj_set_size(labelTitle, display->width - 80, ySize);
-    lv_obj_set_pos(labelTitle, 0, y);
-    lv_obj_add_style(labelTitle, &lvglStyleCenteredText, 0);
-    y += yInc;
-
-    lv_obj_t* labelSliderBacklight = lv_label_create(lvglScreenSettings);
-    lv_label_set_text(labelSliderBacklight, "Backlight");
-    lv_obj_set_size(labelSliderBacklight, display->width - 80, ySize);
-    lv_obj_set_pos(labelSliderBacklight, 0, y);
-    lv_obj_add_style(labelSliderBacklight, &lvglStyleCenteredText, 0);
-    y += yInc;
-
-    struct BrightnessData
     {
-        lv_obj_t* label;
-        ValueCallbackUX<unsigned char> callback;
-    };
-    BrightnessData* brightnessData = new BrightnessData();
-    brightnessData->label = labelSliderBacklight;
-    brightnessData->callback = brightnessCallback;
+        y = 0;
+        auto screen = lvglScreenSettings = lv_obj_create(NULL);
+        lv_obj_t* labelTitle = lv_label_create(screen);
+        lv_label_set_text(labelTitle, "Settings");
+        lv_obj_set_size(labelTitle, display->width - 80, ySize);
+        lv_obj_set_pos(labelTitle, 0, y);
+        lv_obj_add_style(labelTitle, &lvglStyleCenteredText, 0);
+        y += yInc;
 
-    lv_obj_t* sliderBacklight = lv_slider_create(lvglScreenSettings);
-    lv_obj_set_size(sliderBacklight, display->width - 92 - 24, ySize);
-    lv_obj_set_pos(sliderBacklight, x, y);
-    lv_obj_add_event_cb(sliderBacklight,
-        [](lv_event_t* e) {
-            lv_obj_t* slider = (lv_obj_t*)lv_event_get_target(e);
-            auto value = lv_slider_get_value(slider);
-            BrightnessData* userData = (BrightnessData*)lv_event_get_user_data(e);
-            userData->callback(value);
-            lv_label_set_text_fmt(userData->label, "Backlight (%d)", value);
-        },
-        LV_EVENT_VALUE_CHANGED, brightnessData);
+        lv_obj_t* labelSliderBacklight = lv_label_create(screen);
+        lv_label_set_text(labelSliderBacklight, "Backlight");
+        lv_obj_set_size(labelSliderBacklight, display->width - 80, ySize);
+        lv_obj_set_pos(labelSliderBacklight, 0, y);
+        lv_obj_add_style(labelSliderBacklight, &lvglStyleCenteredText, 0);
+        y += yInc;
 
-    lv_slider_set_range(sliderBacklight, 0, 255);
-    lv_slider_set_value(sliderBacklight, brightness(), LV_ANIM_OFF);
-    lv_obj_send_event(sliderBacklight, LV_EVENT_VALUE_CHANGED, nullptr);
-    y += yInc;
+        struct BrightnessData
+        {
+            lv_obj_t* label;
+            ValueCallbackUX<unsigned char> callback;
+        };
+        BrightnessData* brightnessData = new BrightnessData();
+        brightnessData->label = labelSliderBacklight;
+        brightnessData->callback = brightnessCallback;
 
-    // wifi on/off + ip
-    lv_obj_t* labelWifi = lv_label_create(lvglScreenSettings);
-    lv_label_set_text(labelWifi, "WiFi");
-    lv_obj_set_size(labelWifi, display->width - 92, ySize);
-    lv_obj_set_pos(labelWifi, 0, y);
-    lv_obj_add_style(labelWifi, &lvglStyleCenteredText, 0);
-    y += yInc;
-    labelWifiIP = lv_label_create(lvglScreenSettings);
-    lv_label_set_text(labelWifiIP, wifiIP().c_str());
-    lv_obj_set_size(labelWifiIP, display->width - 120, ySize);
-    lv_obj_set_pos(labelWifiIP, 40, y);
-    lv_obj_add_style(labelWifiIP, &lvglStyleCenteredText, 0);
-    ledWifi = lv_led_create(lvglScreenSettings);
-    lv_obj_set_pos(ledWifi, 20, y);
-    lv_led_on(ledWifi);
-    y += yInc;
+        lv_obj_t* sliderBacklight = lv_slider_create(screen);
+        lv_obj_set_size(sliderBacklight, display->width - 92 - 24, ySize);
+        lv_obj_set_pos(sliderBacklight, x, y);
+        lv_obj_add_event_cb(sliderBacklight,
+            [](lv_event_t* e) {
+                lv_obj_t* slider = (lv_obj_t*)lv_event_get_target(e);
+                auto value = lv_slider_get_value(slider);
+                BrightnessData* userData = (BrightnessData*)lv_event_get_user_data(e);
+                userData->callback(value);
+                lv_label_set_text_fmt(userData->label, "Backlight (%d)", value);
+            },
+            LV_EVENT_VALUE_CHANGED, brightnessData);
 
-    // websocket target
-    lv_obj_t* labelDropdownWinstonTarget = lv_label_create(lvglScreenSettings);
-    lv_label_set_text(labelDropdownWinstonTarget, "Winston");
-    lv_obj_set_size(labelDropdownWinstonTarget, display->width - 92, ySize);
-    lv_obj_set_pos(labelDropdownWinstonTarget, 0, y);
-    lv_obj_add_style(labelDropdownWinstonTarget, &lvglStyleCenteredText, 0);
-    y += yInc;
+        lv_slider_set_range(sliderBacklight, 0, 255);
+        lv_slider_set_value(sliderBacklight, brightness(), LV_ANIM_OFF);
+        lv_obj_send_event(sliderBacklight, LV_EVENT_VALUE_CHANGED, nullptr);
+        y += yInc;
 
-    struct WinstonTargetData
-    {
-        ValueCallbackUX<WinstonTarget> callback;
-    };
-    WinstonTargetData* winstonTargetData = new WinstonTargetData();
-    winstonTargetData->callback = winstonTarget;
-    lv_obj_t* dropdownWinstonTarget = lv_dropdown_create(lvglScreenSettings);
-    lv_dropdown_set_options(dropdownWinstonTarget, "Black Canary LAN\nBlack Canary Wifi\nLocalhost\nTeensy\n");
-    lv_obj_set_size(dropdownWinstonTarget, display->width - 92 - 24, ySize);
-    lv_obj_set_pos(dropdownWinstonTarget, x, y);
-    lv_obj_add_event_cb(dropdownWinstonTarget,
-        [](lv_event_t* e) {
-            lv_obj_t* dropdown = (lv_obj_t*)lv_event_get_target(e);
-            auto value = lv_dropdown_get_selected(dropdown);
-            WinstonTargetData* userData = (WinstonTargetData*)lv_event_get_user_data(e);
-            userData->callback((WinstonTarget)value);
-        },
-        LV_EVENT_VALUE_CHANGED, winstonTargetData);
+        // wifi on/off + ip
+        lv_obj_t* labelWifi = lv_label_create(screen);
+        lv_label_set_text(labelWifi, "WiFi");
+        lv_obj_set_size(labelWifi, display->width - 92, ySize);
+        lv_obj_set_pos(labelWifi, 0, y);
+        lv_obj_add_style(labelWifi, &lvglStyleCenteredText, 0);
+        y += yInc;
+        labelWifiIP = lv_label_create(screen);
+        lv_label_set_text(labelWifiIP, wifiIP().c_str());
+        lv_obj_set_size(labelWifiIP, display->width - 120, ySize);
+        lv_obj_set_pos(labelWifiIP, 40, y);
+        lv_obj_add_style(labelWifiIP, &lvglStyleCenteredText, 0);
+        ledWifi = lv_led_create(screen);
+        lv_obj_set_pos(ledWifi, 20, y);
+        lv_led_on(ledWifi);
+        y += yInc;
 
-    using ButtonData = ValueCallbackUXTriggerData<Screen>;
-    {
-        ButtonData* buttonData = new ButtonData();
-        buttonData->value = Screen::Cinema;
-        buttonData->callback = gotoScreen;
-        lv_obj_t* btnCinema = lv_button_create(lvglScreenSettings);
-        lv_obj_set_content_width(btnCinema, uiButtonSize);
-        lv_obj_set_content_height(btnCinema, uiButtonSize);
-        lv_obj_align(btnCinema, LV_ALIGN_BOTTOM_RIGHT, -uiButtonPadding, -uiButtonPadding);
-        //lv_obj_padd
-        lv_obj_add_event_cb(btnCinema, [](lv_event_t* e) {
-            ButtonData* userData = (ButtonData*)lv_event_get_user_data(e);
-            userData->callback(userData->value);
-            }, LV_EVENT_CLICKED, buttonData);
+        // websocket target
+        lv_obj_t* labelDropdownWinstonTarget = lv_label_create(screen);
+        lv_label_set_text(labelDropdownWinstonTarget, "Winston");
+        lv_obj_set_size(labelDropdownWinstonTarget, display->width - 92, ySize);
+        lv_obj_set_pos(labelDropdownWinstonTarget, 0, y);
+        lv_obj_add_style(labelDropdownWinstonTarget, &lvglStyleCenteredText, 0);
+        y += yInc;
 
-        lv_obj_t *btnCinemaIcon = lv_image_create(btnCinema);
-        lv_image_set_src(btnCinemaIcon, &icon_movie);
-        lv_obj_align(btnCinemaIcon, LV_ALIGN_CENTER, 0, 0);
-    } 
-    {
-        ButtonData* buttonData = new ButtonData();
-        buttonData->value = Screen::Railway;
-        buttonData->callback = gotoScreen;
-        lv_obj_t* btnRailway = lv_button_create(lvglScreenSettings);
-        lv_obj_set_content_width(btnRailway, uiButtonSize);
-        lv_obj_set_content_height(btnRailway, uiButtonSize);
-        lv_obj_align(btnRailway, LV_ALIGN_BOTTOM_RIGHT, -uiButtonPadding, -(4* uiButtonPadding + uiButtonSize));
-        lv_obj_add_event_cb(btnRailway, [](lv_event_t* e) {
-            ButtonData* userData = (ButtonData*)lv_event_get_user_data(e);
-            userData->callback(userData->value);
-            }, LV_EVENT_CLICKED, buttonData);
-        lv_obj_t* btnRailwayIcon = lv_image_create(btnRailway);
-        lv_image_set_src(btnRailwayIcon, &icon_train);
-        lv_obj_add_style(btnRailwayIcon, &styleIconRecolor, 0);
-        lv_obj_align(btnRailwayIcon, LV_ALIGN_CENTER, 0, 0);
-    }
+        struct WinstonTargetData
+        {
+            ValueCallbackUX<WinstonTarget> callback;
+        };
+        WinstonTargetData* winstonTargetData = new WinstonTargetData();
+        winstonTargetData->callback = winstonTarget;
+        lv_obj_t* dropdownWinstonTarget = lv_dropdown_create(screen);
+        lv_dropdown_set_options(dropdownWinstonTarget, "Black Canary LAN\nBlack Canary Wifi\nLocalhost\nTeensy\n");
+        lv_obj_set_size(dropdownWinstonTarget, display->width - 92 - 24, ySize);
+        lv_obj_set_pos(dropdownWinstonTarget, x, y);
+        lv_obj_add_event_cb(dropdownWinstonTarget,
+            [](lv_event_t* e) {
+                lv_obj_t* dropdown = (lv_obj_t*)lv_event_get_target(e);
+                auto value = lv_dropdown_get_selected(dropdown);
+                WinstonTargetData* userData = (WinstonTargetData*)lv_event_get_user_data(e);
+                userData->callback((WinstonTarget)value);
+            },
+            LV_EVENT_VALUE_CHANGED, winstonTargetData);
 
-    lvglScreenRailway = lv_obj_create(NULL);
-    {
-        ButtonData* buttonData = new ButtonData();
-        buttonData->value = Screen::Settings;
-        buttonData->callback = gotoScreen;
-        lv_obj_t* btnSettings = lv_button_create(lvglScreenRailway);
-        lv_obj_set_content_width(btnSettings, uiButtonSize);
-        lv_obj_set_content_height(btnSettings, uiButtonSize);
-        lv_obj_align(btnSettings, LV_ALIGN_BOTTOM_RIGHT, -uiButtonPadding, -uiButtonPadding);
-        lv_obj_add_event_cb(btnSettings, [](lv_event_t* e) {
-            ButtonData* userData = (ButtonData*)lv_event_get_user_data(e);
-            userData->callback(userData->value);
-            }, LV_EVENT_CLICKED, buttonData);
-        
-        lv_obj_t* btnSettingsIcon = lv_image_create(btnSettings);
-        lv_image_set_src(btnSettingsIcon, &icon_settings);
-        lv_obj_align(btnSettingsIcon, LV_ALIGN_CENTER, 0, 0);
+        // back to menu
+        {
+            auto buttonData = new ButtonDataScreen();
+            buttonData->value = Screen::Menu;
+            buttonData->callback = gotoScreen;
+            lv_obj_t* btnRailway = lv_button_create(screen);
+            lv_obj_set_content_width(btnRailway, uiButtonSize);
+            lv_obj_set_content_height(btnRailway, uiButtonSize);
+            lv_obj_align(btnRailway, LV_ALIGN_BOTTOM_RIGHT, -uiButtonPadding, -uiButtonSize);
+            lv_obj_add_event_cb(btnRailway, applyToCallback<ButtonDataScreen>, LV_EVENT_CLICKED, buttonData);
+            lv_obj_t* btnRailwayIcon = lv_image_create(btnRailway);
+            lv_image_set_src(btnRailwayIcon, &icon_arrow_back);
+            lv_obj_add_style(btnRailwayIcon, &styleIconRecolor, 0);
+            lv_obj_align(btnRailwayIcon, LV_ALIGN_CENTER, 0, 0);
+        }
     }
     {
-        ButtonData* buttonData = new ButtonData();
-        buttonData->value = Screen::Railway;
-        buttonData->callback = gotoScreen;
-        lv_obj_t* btnRailway = lv_button_create(lvglScreenRailway);
-        lv_obj_set_content_width(btnRailway, uiButtonSize);
-        lv_obj_set_content_height(btnRailway, uiButtonSize);
-        lv_obj_align(btnRailway, LV_ALIGN_BOTTOM_RIGHT, -uiButtonPadding, -(4 * uiButtonPadding + uiButtonSize));
-        lv_obj_add_event_cb(btnRailway, [](lv_event_t* e) {
-            ButtonData* userData = (ButtonData*)lv_event_get_user_data(e);
-            userData->callback(userData->value);
-            }, LV_EVENT_CLICKED, buttonData);
-        
-        lv_obj_t* btnRailwayIcon = lv_image_create(btnRailway);
-        lv_image_set_src(btnRailwayIcon, &icon_train);
-        lv_obj_align(btnRailwayIcon, LV_ALIGN_CENTER, 0, 0);
-    }
-    {
-        CallbackUXTriggerData* buttonData = new CallbackUXTriggerData();
-        buttonData->callback = reconnect;
-        lvglScreenRailwayButtonReconnect = lv_button_create(lvglScreenRailway);
-        lv_obj_align(lvglScreenRailwayButtonReconnect, LV_ALIGN_CENTER, 0, 0);
-        lv_obj_add_event_cb(lvglScreenRailwayButtonReconnect, [](lv_event_t* e) {
-            CallbackUXTriggerData* userData = (CallbackUXTriggerData*)lv_event_get_user_data(e);
-            userData->callback();
-            }, LV_EVENT_CLICKED, buttonData);
-        
-        lv_obj_t* btnReconnectLabel = lv_label_create(lvglScreenRailwayButtonReconnect);
-        lv_label_set_text_static(btnReconnectLabel, "reconnect");
+        auto screen = lvglScreenRailway = lv_obj_create(NULL);
+        {
+            auto buttonData = new ButtonDataScreen();
+            buttonData->value = Screen::Menu;
+            buttonData->callback = gotoScreen;
+            lv_obj_t* btnRailway = lv_button_create(screen);
+            lv_obj_set_content_width(btnRailway, uiButtonSize);
+            lv_obj_set_content_height(btnRailway, uiButtonSize);
+            lv_obj_align(btnRailway, LV_ALIGN_BOTTOM_RIGHT, -uiButtonPadding, -(4 * uiButtonPadding + uiButtonSize));
+            lv_obj_add_event_cb(btnRailway, applyToCallback<ButtonDataScreen>, LV_EVENT_CLICKED, buttonData);
+            lv_obj_t* btnRailwayIcon = lv_image_create(btnRailway);
+            lv_image_set_src(btnRailwayIcon, &icon_arrow_back);
+            lv_obj_add_style(btnRailwayIcon, &styleIconRecolor, 0);
+            lv_obj_align(btnRailwayIcon, LV_ALIGN_CENTER, 0, 0);
+        }
+        {
+            CallbackUXTriggerData* buttonData = new CallbackUXTriggerData();
+            buttonData->callback = reconnect;
+            lvglScreenRailwayButtonReconnect = lv_button_create(screen);
+            lv_obj_align(lvglScreenRailwayButtonReconnect, LV_ALIGN_CENTER, 0, 0);
+            lv_obj_add_event_cb(lvglScreenRailwayButtonReconnect, [](lv_event_t* e) {
+                CallbackUXTriggerData* userData = (CallbackUXTriggerData*)lv_event_get_user_data(e);
+                userData->callback();
+                }, LV_EVENT_CLICKED, buttonData);
+
+            lv_obj_t* btnReconnectLabel = lv_label_create(lvglScreenRailwayButtonReconnect);
+            lv_label_set_text_static(btnReconnectLabel, "reconnect");
+        }
+
+        lv_style_init(&lvglStyleTrack);
+        lv_style_set_line_width(&lvglStyleTrack, 6);
+        lv_style_set_line_color(&lvglStyleTrack, lv_palette_main(LV_PALETTE_TEAL));
+        lv_style_set_line_rounded(&lvglStyleTrack, true);
+        lv_style_init(&lvglStyleTurnout);
+        lv_style_set_line_width(&lvglStyleTurnout, 8);
+        lv_style_set_line_color(&lvglStyleTurnout, lv_palette_main(LV_PALETTE_ORANGE));
+        lv_style_set_line_rounded(&lvglStyleTurnout, true);
     }
 
-    lv_style_init(&lvglStyleTrack);
-    lv_style_set_line_width(&lvglStyleTrack, 6);
-    lv_style_set_line_color(&lvglStyleTrack, lv_palette_main(LV_PALETTE_TEAL));
-    lv_style_set_line_rounded(&lvglStyleTrack, true);
-    lv_style_init(&lvglStyleTurnout);
-    lv_style_set_line_width(&lvglStyleTurnout, 8);
-    lv_style_set_line_color(&lvglStyleTurnout, lv_palette_main(LV_PALETTE_ORANGE));
-    lv_style_set_line_rounded(&lvglStyleTurnout, true);
-
-    using StorylineReplyButtonData = ValueCallbackUXTriggerData<std::string>;
-    lvglScreenStoryline = lv_obj_create(NULL);
     {
-        auto buttonData = new StorylineReplyButtonData();
-        buttonData->value = "refresh";
-        buttonData->callback = storylineReply;
-        lv_obj_t* btnRefresh = lv_button_create(lvglScreenStoryline);
-        lv_obj_set_content_width(btnRefresh, uiButtonSize);
-        lv_obj_set_content_height(btnRefresh, uiButtonSize);
-        lv_obj_align(btnRefresh, LV_ALIGN_BOTTOM_RIGHT, -uiButtonPadding, -uiButtonPadding);
-        lv_obj_add_event_cb(btnRefresh, [](lv_event_t* e) {
-            ButtonData* userData = (ButtonData*)lv_event_get_user_data(e);
-            userData->callback(userData->value);
-            }, LV_EVENT_CLICKED, buttonData);
+        using StorylineReplyButtonData = ValueCallbackUXTriggerData<std::string>;
+        auto screen = lvglScreenStoryline = lv_obj_create(NULL);
+        {
+            auto buttonData = new StorylineReplyButtonData();
+            buttonData->value = "refresh";
+            buttonData->callback = storylineReply;
+            lv_obj_t* btnRefresh = lv_button_create(screen);
+            lv_obj_set_content_width(btnRefresh, uiButtonSize);
+            lv_obj_set_content_height(btnRefresh, uiButtonSize);
+            lv_obj_align(btnRefresh, LV_ALIGN_LEFT_MID, 60, 0);
+            lv_obj_add_event_cb(btnRefresh, applyToCallback<StorylineReplyButtonData>, LV_EVENT_CLICKED, buttonData);
 
-        lv_obj_t* btnRefreshIcon = lv_image_create(btnRefresh);
-        lv_image_set_src(btnRefreshIcon, &icon_refresh);
-        lv_obj_align(btnRefreshIcon, LV_ALIGN_CENTER, 0, 0);
-    }
-    {
-        auto buttonData = new StorylineReplyButtonData();
-        buttonData->value = "cancel";
-        buttonData->callback = storylineReply;
-        lv_obj_t* btnCancel = lv_button_create(lvglScreenStoryline);
-        lv_obj_set_content_width(btnCancel, uiButtonSize);
-        lv_obj_set_content_height(btnCancel, uiButtonSize);
-        lv_obj_align(btnCancel, LV_ALIGN_BOTTOM_RIGHT, -uiButtonPadding, -(4 * uiButtonPadding + uiButtonSize));
-        lv_obj_add_event_cb(btnCancel, [](lv_event_t* e) {
-            ButtonData* userData = (ButtonData*)lv_event_get_user_data(e);
-            userData->callback(userData->value);
-            }, LV_EVENT_CLICKED, buttonData);
+            lv_obj_t* btnRefreshIcon = lv_image_create(btnRefresh);
+            lv_image_set_src(btnRefreshIcon, &icon_refresh);
+            lv_obj_align(btnRefreshIcon, LV_ALIGN_CENTER, 0, 0);
+        }
+        {
+            auto buttonData = new StorylineReplyButtonData();
+            buttonData->value = "cancel";
+            buttonData->callback = storylineReply;
+            lv_obj_t* btnCancel = lv_button_create(screen);
+            lv_obj_set_content_width(btnCancel, uiButtonSize);
+            lv_obj_set_content_height(btnCancel, uiButtonSize);
+            lv_obj_align(btnCancel, LV_ALIGN_RIGHT_MID, -60, 0);
+            lv_obj_add_event_cb(btnCancel, applyToCallback<StorylineReplyButtonData>, LV_EVENT_CLICKED, buttonData);
 
-        lv_obj_t* btnCancelIcon = lv_image_create(btnCancel);
-        lv_image_set_src(btnCancelIcon, &icon_close);
-        lv_obj_align(btnCancelIcon, LV_ALIGN_CENTER, 0, 0);
-    }
-    {
-        labelStorylineText = lv_label_create(lvglScreenStoryline);
-        lv_obj_align(labelStorylineText, LV_ALIGN_CENTER, 0, 0);
-        lv_label_set_text_static(labelStorylineText, "???");
+            lv_obj_t* btnCancelIcon = lv_image_create(btnCancel);
+            lv_image_set_src(btnCancelIcon, &icon_close);
+            lv_obj_align(btnCancelIcon, LV_ALIGN_CENTER, 0, 0);
+        }
+        {
+            labelStorylineText = lv_label_create(screen);
+            lv_obj_align(labelStorylineText, LV_ALIGN_CENTER, 0, 0);
+            lv_label_set_text_static(labelStorylineText, "???");
+        }
+        {
+            auto buttonData = new ButtonDataScreen();
+            buttonData->value = Screen::Menu;
+            buttonData->callback = gotoScreen;
+            lv_obj_t* btnRailway = lv_button_create(screen);
+            lv_obj_set_content_width(btnRailway, uiButtonSize);
+            lv_obj_set_content_height(btnRailway, uiButtonSize);
+            lv_obj_align(btnRailway, LV_ALIGN_BOTTOM_RIGHT, -uiButtonPadding, -uiButtonSize);
+            lv_obj_add_event_cb(btnRailway, applyToCallback<ButtonDataScreen>, LV_EVENT_CLICKED, buttonData);
+            lv_obj_t* btnRailwayIcon = lv_image_create(btnRailway);
+            lv_image_set_src(btnRailwayIcon, &icon_arrow_back);
+            lv_obj_add_style(btnRailwayIcon, &styleIconRecolor, 0);
+            lv_obj_align(btnRailwayIcon, LV_ALIGN_CENTER, 0, 0);
+        }
     }
 
     lv_screen_load(lvglScreenSettings);
@@ -451,6 +506,15 @@ const winston::Result showUX(const Screen screen)
     case Screen::Settings:
         lv_screen_load(lvglScreenSettings);
         lv_obj_invalidate(lv_screen_active());
+        break;
+    case Screen::Menu:
+        lv_screen_load(lvglScreenMenu);
+        lv_obj_invalidate(lv_screen_active());
+        break;
+    case Screen::Storyline:
+        lv_screen_load(lvglScreenStoryline);
+        lv_obj_invalidate(lv_screen_active());
+        break;
     default:
         return winston::Result::NotFound;
     }

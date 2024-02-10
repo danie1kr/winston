@@ -308,7 +308,6 @@ void Kornweinheim::systemSetup() {
     this->serial->init(5);
 #endif
     this->routesInProgress.clear();
-    this->inventStorylines();
 
     this->setupWebServer(this->storageLayout, this->storageMicroLayout, this->addressTranslator, 8080);
 
@@ -491,6 +490,8 @@ void Kornweinheim::systemSetupComplete()
         this->stationDebugInjector->injectDoubleSlipTurnoutUpdate(turnout, dir);
         });
  #endif
+
+    this->inventStorylines();
     for (const auto& device : this->signalInterfaceDevices)
         device->skipSend(false);
     this->signalController->flush();
@@ -533,11 +534,11 @@ void Kornweinheim::populateSheds()
     functionsGravita.insert(functionsGravita.begin(), standardFunctions.begin(), standardFunctions.end());
 
     this->addLocomotive(callbacks, 3, functionsBR114, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 114", 164, (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods | (unsigned char)winston::Locomotive::Type::Shunting);
-    this->addLocomotive(callbacks, 4, standardFunctions, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 106", 150, (unsigned char)winston::Locomotive::Type::Shunting | (unsigned char)winston::Locomotive::Type::Goods);
-    this->addLocomotive(callbacks, 5, standardFunctions, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 64", 150, (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods);
+    //this->addLocomotive(callbacks, 4, standardFunctions, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 106", 150, (unsigned char)winston::Locomotive::Type::Shunting | (unsigned char)winston::Locomotive::Type::Goods);
+    //this->addLocomotive(callbacks, 5, standardFunctions, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 64", 150, (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods);
     this->addLocomotive(callbacks, 6, standardFunctions, pos, winston::Locomotive::defaultThrottleSpeedMap, "E 11", 150, (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods);
     this->addLocomotive(callbacks, 8, standardFunctions, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 218", 180, (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods);
-    this->addLocomotive(callbacks, 7, functionsGravita, pos, winston::Locomotive::defaultThrottleSpeedMap, "Gravita", 195, (unsigned char)winston::Locomotive::Type::Shunting | (unsigned char)winston::Locomotive::Type::Goods);
+    //this->addLocomotive(callbacks, 7, functionsGravita, pos, winston::Locomotive::defaultThrottleSpeedMap, "Gravita", 195, (unsigned char)winston::Locomotive::Type::Shunting | (unsigned char)winston::Locomotive::Type::Goods);
     this->addLocomotive(callbacks, 9, standardFunctions, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 335", 90, (unsigned char)winston::Locomotive::Type::Shunting);
 
     auto DR = winston::RailCar::Groups::create();
@@ -579,6 +580,10 @@ void Kornweinheim::inventStorylines()
         tasks.push_back(winston::TaskRandomAction::make());
         tasks.push_back(winston::TaskRandomLoco::make(this->locomotiveShed));
         tasks.push_back(winston::TaskRandomSection::make(this->railway->sectionList()));
+        tasks.push_back(winston::TaskCallback::make([&](const winston::Storyline::Shared storyline, const winston::Storyline::Task::List& context) -> const winston::State {
+            this->webUI.sendStorylineText(storyline);
+            return winston::State::Finished;
+            }));
         tasks.push_back(winston::TaskReply::make([](const winston::Storyline::Reply::Answer answer) -> const winston::State {
 
             switch (answer)
@@ -600,17 +605,29 @@ void Kornweinheim::inventStorylines()
         }, [](const winston::Storyline::Task::List& context) -> const std::string {
 
             std::string text;
-            // Wagen ... mit ... auf Gleis ... [zusammenstellen|fahren|abstellen]
-            text += "Wagen " + winston::Storyline::get<winston::TaskRandomCars>(context)->text() + "\n";
-            text += "mit " + winston::Storyline::get<winston::TaskRandomLoco>(context)->text() + "\n";
-            text += "auf Gleis " + winston::Storyline::get<winston::TaskRandomSection>(context)->text() + "\n";
-            text += winston::Storyline::get<winston::TaskRandomAction>(context)->text() + ".";
 
-            return text;
+            const auto railCars = winston::Storyline::get<winston::TaskRandomCars>(context);
+            const auto loco = winston::Storyline::get<winston::TaskRandomLoco>(context);
+            const auto section = winston::Storyline::get<winston::TaskRandomSection>(context);
+            const auto action = winston::Storyline::get<winston::TaskRandomAction>(context);
+
+            if (railCars && loco && section && action)
+            {
+                // Wagen ... mit ... auf Gleis ... [zusammenstellen|fahren|abstellen]
+                text += "Wagen " + railCars->text() + "\n";
+                text += "mit " + loco->text() + "\n";
+                text += "auf Gleis " + section->text() + "\n";
+                text += action->text() + ".";
+
+                return text;
+            }
+            else
+                return "none yet";
 
         });
     this->storylines.push_back(randomScenario);
     this->activeStory = randomScenario;
+    this->webUI.setStoryLine(this->activeStory);
 
     this->signalTower->order(winston::Command::make([&](const winston::TimePoint& created) -> const winston::State
         {

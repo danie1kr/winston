@@ -262,6 +262,19 @@ namespace winston
             this->webServer.broadcast(json);
         }
 
+        void sendStorylineText(const Storyline::Shared storyline)
+        {
+            DynamicJsonDocument obj(1024);
+            obj["op"] = "storyLineText";
+            auto data = obj.createNestedObject("data");
+            data["text"] = storyline->text();
+            // get current confirmation task
+            // send labels and values
+            std::string json("");
+            serializeJson(obj, json);
+            this->webServer.broadcast(json);
+        }
+
 	private:
 
 		// Define a callback to handle incoming messages
@@ -770,15 +783,7 @@ namespace winston
             {
                 if (this->activeStoryline)
                 {
-                    DynamicJsonDocument obj(256);
-                    obj["op"] = "storyLineText";
-                    auto data = obj.createNestedObject("data");
-                    data["text"] = this->activeStoryline->text();
-                    // get current confirmation task
-                    // send labels and values
-                    std::string json("");
-                    serializeJson(obj, json);
-                    this->webServer.broadcast(json);
+                    this->sendStorylineText(this->activeStoryline);
                 }
             }
             else if (std::string("\"storylineReply\"").compare(op) == 0)

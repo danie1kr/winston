@@ -288,12 +288,20 @@ void winston_setup()
 
             webSocketClient.connect(uri);
 
-            JsonDocument msg;
-            msg["op"] = "getRailwayMicroLayout";
-            std::string json("");
-            serializeJson(msg, json);
-            webSocketClient.send(json);
-
+            {
+                JsonDocument msg;
+                msg["op"] = "getRailwayMicroLayout";
+                std::string json("");
+                serializeJson(msg, json);
+                webSocketClient.send(json);
+            }
+            {
+                JsonDocument msg;
+                msg["op"] = "getStorylineText";
+                std::string json("");
+                serializeJson(msg, json);
+                webSocketClient.send(json);
+            }
             eventLooper.order(winston::Command::make([](const winston::TimePoint& created) -> const winston::State
                 {
                     if (winston::hal::now() - lastWebsocketConnectionCheck > 2000ms)

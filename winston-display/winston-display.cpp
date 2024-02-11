@@ -92,8 +92,7 @@ int32_t jpegSeek(JPEGFILE* handle, int32_t position) {
 void winston_setup()
 {
     winston::hal::init();
-    Serial.println(ESP.getFreeHeap()); 
-    winston::hal::text("Hello from Winston!");
+    { winston::hal::text("Hello from Winston!"); }
     std::srand((unsigned int)(24));// inMilliseconds(winston::hal::now().time_since_epoch())));
 
     display->init();
@@ -112,7 +111,7 @@ void winston_setup()
     loadSettings(storageSettings);
     applySettings();
 
-    webSocketClient.init([](WebSocketClient::Client& client, const std::string message) {
+    webSocketClient.init([](WebSocketClient::Client& client, const std::string& message) {
         JsonDocument msg;
         deserializeJson(msg, message);
         JsonObject obj = msg.as<JsonObject>();
@@ -351,6 +350,7 @@ void cinema_loop()
         {
             winston::logger.info("touch on", x, ", ", y);
             currentScreen = Screen::Settings;
+            showUX(currentScreen);
         }
     }
     else

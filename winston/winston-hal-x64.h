@@ -238,8 +238,8 @@ public:
 	WebSocketClientWin();
 	~WebSocketClientWin() = default;
 
-	winston::Result init(OnMessage onMessage);
-	winston::Result connect(const winston::URI& uri);
+	const winston::Result init(OnMessage onMessage);
+	const winston::Result connect(const winston::URI& uri);
 	void send(const std::string message);
 	void step();
 	void shutdown();

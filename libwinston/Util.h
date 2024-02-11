@@ -15,6 +15,9 @@
 
 namespace winston
 {
+	extern std::random_device randomDevice;
+	extern std::default_random_engine randomEngine;
+
 	extern void error(const std::string &error);
 
     // https://github.com/friedmud/unique_ptr_cast
@@ -110,9 +113,7 @@ namespace winston
 	T random(T& container, const size_t n)
 	{
 		T result;
-		std::random_device rd;
-		std::default_random_engine g(rd());
-		std::shuffle(container.begin(), container.end(), g);
+		std::shuffle(container.begin(), container.end(), randomEngine);
 		result.insert(result.begin(), container.begin(), container.begin() + std::min(n, container.size()));
 		return result;
 	}
@@ -120,15 +121,13 @@ namespace winston
 	template<typename T>
 	const typename T::value_type& random(const T& container)
 	{
-		std::random_device rd;
-		std::default_random_engine g(rd());
 		auto start = container.begin();
 		std::uniform_int_distribution<> dis(0, std::distance(container.begin(), container.end()) - 1);
 		
-		std::advance(start, dis(g));
+		std::advance(start, dis(randomEngine));
 		return *start;
 	}
-
+	/*
 	// from https://gist.github.com/cbsmith/5538174
 	template <typename RandomGenerator = std::default_random_engine>
 	struct random_selector
@@ -158,7 +157,7 @@ namespace winston
 
 	private:
 		RandomGenerator gen;
-	};
+	};*/
 
 #define STRINGIZE(x) STRINGIZE2(x)
 #define STRINGIZE2(x) #x

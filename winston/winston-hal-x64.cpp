@@ -660,7 +660,7 @@ WebSocketClientWin::WebSocketClientWin()
 {
 }
 
-winston::Result WebSocketClientWin::init(OnMessage onMessage)
+const winston::Result WebSocketClientWin::init(OnMessage onMessage)
 {
     using websocketpp::lib::placeholders::_1;
     using websocketpp::lib::placeholders::_2;
@@ -677,7 +677,7 @@ winston::Result WebSocketClientWin::init(OnMessage onMessage)
     return winston::Result::OK;
 }
 
-winston::Result WebSocketClientWin::connect(const winston::URI& uri)
+const winston::Result WebSocketClientWin::connect(const winston::URI& uri)
 {
     websocketpp::lib::error_code ec;
     this->connection = this->client.get_connection(uri.toString(), ec);

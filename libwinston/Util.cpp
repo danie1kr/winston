@@ -6,6 +6,11 @@
 #include "HAL.h"
 //#include "Signal.h"
 
+namespace winston
+{
+	std::random_device randomDevice;
+	std::default_random_engine randomEngine(randomDevice());
+};
 #ifdef WINSTON_PLATFORM_TEENSY
 namespace std
 {

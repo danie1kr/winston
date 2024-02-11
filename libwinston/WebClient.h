@@ -10,7 +10,7 @@ namespace winston {
     public:
         WebSocketClient() : onMessage(), connection() { };
         ~WebSocketClient() = default;
-        using OnMessage = std::function<void(_WebSocketClientConnection& client, const std::string& message)>;
+        using OnMessage = std::function<void(_WebSocketClientConnection &client, const std::string &message)>;
         using Connection = _WebSocketClientConnection;
 
         virtual const Result init(OnMessage onMessage) = 0;

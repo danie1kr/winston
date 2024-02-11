@@ -133,7 +133,7 @@ void WebServerWSPP::send(Client& connection, const std::string &data)
     }
     catch (std::exception e)
     {
-        winston::hal::text(e.what());
+        winston::logger.err("WebServerWSPP::send exception, umlaut in payload? ", data);
         connection.reset();
     }
 }

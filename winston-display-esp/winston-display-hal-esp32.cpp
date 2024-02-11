@@ -81,7 +81,7 @@ namespace winston
                     //lcd.print("ERROR:   TOUCH");
                 }*/
 
-                //logRuntimeStatus();
+                logRuntimeStatus();
             }
         }
 

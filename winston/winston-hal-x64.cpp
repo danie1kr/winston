@@ -107,12 +107,17 @@ void WebServerWSPP::init(OnHTTP onHTTP, OnMessage onMessage, unsigned int port)
     this->onMessage = onMessage;
     this->server.init_asio();
 
+#ifdef WINSTON_WEBSERVER_WITH_DEBUG
+    this->server.set_access_channels(websocketpp::log::alevel::all);
+    this->server.set_error_channels(websocketpp::log::elevel::all);
+#else
     this->server.clear_access_channels(websocketpp::log::alevel::all);
-
+    this->server.clear_error_channels(websocketpp::log::elevel::all);
+#endif
     this->server.set_http_handler(websocketpp::lib::bind(&WebServerWSPP::on_http, this, websocketpp::lib::placeholders::_1));
     this->server.set_message_handler(websocketpp::lib::bind(&WebServerWSPP::on_msg, this, websocketpp::lib::placeholders::_1, websocketpp::lib::placeholders::_2));
     this->server.set_open_handler(websocketpp::lib::bind(&WebServerWSPP::on_open, this, websocketpp::lib::placeholders::_1));
-    this->server.set_fail_handler(websocketpp::lib::bind(&WebServerWSPP::on_close, this, websocketpp::lib::placeholders::_1));
+    this->server.set_fail_handler(websocketpp::lib::bind(&WebServerWSPP::on_fail, this, websocketpp::lib::placeholders::_1));
     this->server.set_close_handler(websocketpp::lib::bind(&WebServerWSPP::on_close, this, websocketpp::lib::placeholders::_1));
 
     this->server.listen(port);
@@ -128,6 +133,7 @@ void WebServerWSPP::send(Client& connection, const std::string &data)
     }
     catch (std::exception e)
     {
+        winston::hal::text(e.what());
         connection.reset();
     }
 }
@@ -164,7 +170,7 @@ void WebServerWSPP::disconnect(Client client)
         this->connections.erase(id);
 }
 
-void WebServerWSPP::on_http(ConnectionWSPP hdl)
+void WebServerWSPP::on_http(Client hdl)
 {
     auto con = this->server.get_con_from_hdl(hdl);
     HTTPConnectionWSPP connection(con);
@@ -181,16 +187,20 @@ void WebServerWSPP::on_http(ConnectionWSPP hdl)
     */
 }
 
-void WebServerWSPP::on_msg(ConnectionWSPP hdl, websocketpp::server<websocketpp::config::asio>::message_ptr msg)
+void WebServerWSPP::on_msg(Client hdl, websocketpp::server<websocketpp::config::asio>::message_ptr msg)
 {
     this->onMessage(hdl, msg->get_payload());
 }
 
-void WebServerWSPP::on_open(ConnectionWSPP hdl) {
+void WebServerWSPP::on_open(Client hdl) {
     this->newConnection(hdl);
 }
 
-void WebServerWSPP::on_close(ConnectionWSPP hdl) {
+void WebServerWSPP::on_fail(Client hdl) {
+    this->disconnect(hdl);
+}
+
+void WebServerWSPP::on_close(Client hdl) {
     this->disconnect(hdl);
 }
 
@@ -669,8 +679,13 @@ const winston::Result WebSocketClientWin::init(OnMessage onMessage)
     this->onMessage = onMessage;
 
     this->client.init_asio();
+#ifdef WINSTON_WEBSERVER_WITH_DEBUG
     this->client.set_access_channels(websocketpp::log::alevel::all);
-    this->client.clear_access_channels(websocketpp::log::alevel::frame_payload);
+    this->client.set_error_channels(websocketpp::log::elevel::all);
+#else
+    this->client.clear_access_channels(websocketpp::log::alevel::all);
+    this->client.clear_error_channels(websocketpp::log::elevel::all);
+#endif
     this->client.set_message_handler(websocketpp::lib::bind(&WebSocketClientWin::on_msg, this, websocketpp::lib::placeholders::_1, websocketpp::lib::placeholders::_2));
     this->client.set_fail_handler(websocketpp::lib::bind(&WebSocketClientWin::on_fail, this, websocketpp::lib::placeholders::_1));
 

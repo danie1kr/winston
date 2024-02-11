@@ -48,12 +48,12 @@ void Kornweinheim::webSocket_sendLocosPosition()
     auto now = winston::hal::now();
     if (inMilliseconds(now - this->lastWebsocketLocoTrackingUpdate) > WINSTON_LOCO_UPDATE_POSITION_WEBSOCKET_RATE)
     {
-        DynamicJsonDocument obj(32 + this->locomotiveShed.size() * 256);
+        JsonDocument obj;
         obj["op"] = "locoPositions";
-        auto data = obj.createNestedArray("data");
+        auto data = obj["data"].to<JsonArray>();
         for (const auto &loco: this->locomotiveShed)
         {
-            auto l = data.createNestedObject();
+            auto l = data.add<JsonObject>();
             l["address"] = loco.address();
 
             const auto& pos = loco.position();
@@ -549,7 +549,7 @@ void Kornweinheim::populateSheds()
 
     this->railCarShed.push_back(winston::RailCar::make("Personenwagen 1", winston::RailCar::Groups::Person | DR, 300));
     this->railCarShed.push_back(winston::RailCar::make("Personenwagen 2", winston::RailCar::Groups::Person | DR, 300));
-    this->railCarShed.push_back(winston::RailCar::make("Gepäckwagen", winston::RailCar::Groups::Person | DR, 300));
+    this->railCarShed.push_back(winston::RailCar::make("Gepaeckwagen", winston::RailCar::Groups::Person | DR, 300));
 
     this->railCarShed.push_back(winston::RailCar::make("Uaai 819", winston::RailCar::Groups::Heavy, 355));
 
@@ -557,7 +557,7 @@ void Kornweinheim::populateSheds()
     this->railCarShed.push_back(winston::RailCar::make("Tankwagen Shell", winston::RailCar::Groups::Goods, 355));
 
     this->railCarShed.push_back(winston::RailCar::make("Kiara", winston::RailCar::Groups::Goods, 114));
-    this->railCarShed.push_back(winston::RailCar::make("Alter Güterwagen", winston::RailCar::Groups::Goods, 114));
+    this->railCarShed.push_back(winston::RailCar::make("Alter Gueterwagen", winston::RailCar::Groups::Goods, 114));
 
     this->railCarShed.push_back(winston::RailCar::make("Schiebehaubenwagen", winston::RailCar::Groups::Goods, 146));
     this->railCarShed.push_back(winston::RailCar::make("Offener Wagen", winston::RailCar::Groups::Goods, 160));

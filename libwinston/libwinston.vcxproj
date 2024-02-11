@@ -114,12 +114,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="EventLooper.h" />
+    <ClInclude Include="external\ArduinoJson-v7.0.1.h" />
     <ClInclude Include="RailwayMicroLayout.h" />
     <ClInclude Include="Section.h" />
     <ClInclude Include="Command.h" />
     <ClInclude Include="Detector.h" />
     <ClInclude Include="DigitalCentralStation.h" />
-    <ClInclude Include="external\ArduinoJson-v6.21.3.h" />
     <ClInclude Include="external\better_enum.hpp" />
     <ClInclude Include="external\optional.hpp" />
     <ClInclude Include="external\span.hpp" />

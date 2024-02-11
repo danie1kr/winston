@@ -48,12 +48,12 @@ void TimeSaver::webSocket_sendLocosPosition()
     auto now = winston::hal::now();
     if (inMilliseconds(now - this->lastWebsocketLocoTrackingUpdate) > WINSTON_LOCO_UPDATE_POSITION_WEBSOCKET_RATE)
     {
-        DynamicJsonDocument obj(32 + this->locomotiveShed.size() * 256);
+        JsonDocument obj;
         obj["op"] = "locoPositions";
-        auto data = obj.createNestedArray("data");
+        auto data = obj["data"].to<JsonArray>();
         for (const auto& loco : this->locomotiveShed)
         {
-            auto l = data.createNestedObject();
+            auto l = data.add<JsonObject>();
             l["address"] = loco.address();
 
             const auto& pos = loco.position();

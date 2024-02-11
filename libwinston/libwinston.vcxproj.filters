@@ -96,9 +96,6 @@
     <ClInclude Include="SignalController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="external\ArduinoJson-v6.21.3.h">
-      <Filter>external</Filter>
-    </ClInclude>
     <ClInclude Include="WebClient.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -107,6 +104,9 @@
     </ClInclude>
     <ClInclude Include="RailwayMicroLayout.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="external\ArduinoJson-v7.0.1.h">
+      <Filter>external</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

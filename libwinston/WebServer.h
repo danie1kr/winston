@@ -17,7 +17,7 @@
 #define ARDUINOJSON_ENABLE_ARDUINO_STRING 0
 #define ARDUINOJSON_ENABLE_ARDUINO_STREAM 0
 #define ARDUINOJSON_ENABLE_ARDUINO_PRINT 0
-#include "external/ArduinoJson-v6.21.3.h"
+#include "external/ArduinoJson-v7.0.1.h"
 #ifdef __GNUC__ 
 #pragma GCC pop_options
 #endif
@@ -159,9 +159,9 @@ namespace winston
     private:
         void turnoutSendState(const std::string turnoutTrackId, const int dir, const bool locked)
         {
-            DynamicJsonDocument obj(480);
+            JsonDocument obj;
             obj["op"] = "turnoutState";
-            auto data = obj.createNestedObject("data");
+            auto data = obj["data"].to<JsonObject>();
             data["id"] = turnoutTrackId;
             data["state"] = (int)dir;
             data["locked"] = locked;
@@ -185,9 +185,9 @@ namespace winston
         // send route state via websocket
         void routeState(const Route &route)
         {
-            DynamicJsonDocument obj(200);
+            JsonDocument obj;
             obj["op"] = "routeState";
-            auto data = obj.createNestedObject("data");
+            auto data = obj["data"].to<JsonObject>();
             data["id"] = route.id;
             data["state"] = (int)route.state();
             data["disabled"] = route.disabled();
@@ -199,9 +199,9 @@ namespace winston
 		// send a signal state via websocket
 		void signalSendState(const std::string trackId, const winston::Track::Connection connection, const winston::Signal::Aspects aspects)
 		{
-			DynamicJsonDocument obj(200);
+			JsonDocument obj;
 			obj["op"] = "signalState";
-			auto data = obj.createNestedObject("data");
+			auto data = obj["data"].to<JsonObject>();
 			data["parentTrack"] = trackId;
 			data["guarding"] = winston::Track::ConnectionToString(connection);
 			data["aspects"] = (int)aspects;
@@ -212,18 +212,18 @@ namespace winston
 
 		void locoSend(winston::Locomotive& loco)
 		{
-			DynamicJsonDocument obj(1024+256*loco.functions().size());
+			JsonDocument obj;
 			obj["op"] = "loco";
-			auto data = obj.createNestedObject("data");
+			auto data = obj["data"].to<JsonObject>();
 			data["address"] = loco.address();
 			data["name"] = loco.name();
 			data["light"] = loco.light();
 			data["forward"] = loco.forward();
 			data["speed"] = loco.speed();
-            auto functions = data.createNestedArray("functions");
+            auto functions = data["functions"].to<JsonArray>();
             for (auto const & function : loco.functions())
             {
-                auto func = functions.createNestedObject();
+                auto func = functions.add<JsonObject>();
                 func["id"] = function.id;
                 func["name"] = function.name;
             }
@@ -240,9 +240,9 @@ namespace winston
 
         void log(const Logger::Entry &entry)
         {
-            DynamicJsonDocument obj(256 + entry.text.size());
+            JsonDocument obj;
             obj["op"] = "log";
-            auto data = obj.createNestedObject("data");
+            auto data = obj["data"].to<JsonObject>();
             data["level"] = entry.levelName();
             data["timestamp"] = inSeconds(entry.timestamp.time_since_epoch());
             data["text"] = entry.text;
@@ -253,9 +253,9 @@ namespace winston
 
         void statusSend()
         {
-            DynamicJsonDocument obj(256);
+            JsonDocument obj;
             obj["op"] = "status";
-            auto data = obj.createNestedObject("data");
+            auto data = obj["data"].to<JsonObject>();
             data["connected"] = this->digitalCentralStation->connected();
             std::string json("");
             serializeJson(obj, json);
@@ -265,9 +265,9 @@ namespace winston
         void sendStorylineText(const Storyline::Shared storyline)
         {
             const std::string text = storyline->text();
-            DynamicJsonDocument obj(480 + text.length());
+            JsonDocument obj;
             obj["op"] = "storyLineText";
-            auto data = obj.createNestedObject("data");
+            auto data = obj["data"].to<JsonObject>();
             data["text"] = storyline->text();
             // get current confirmation task
             // send labels and values
@@ -316,7 +316,7 @@ namespace winston
 		// Define a callback to handle incoming messages
 		void on_message(typename _WebServer::Client& client, const std::string& message)
 		{
-            DynamicJsonDocument msg(32 * 1024);
+            JsonDocument msg;
             deserializeJson(msg, message);
             JsonObject obj = msg.as<JsonObject>();
             std::string op("\"");
@@ -371,12 +371,12 @@ namespace winston
             }
             else if (std::string("\"getRailway\"").compare(op) == 0)
             {
-                DynamicJsonDocument railwayContent(64 * 1024);
-                auto tracks = railwayContent.createNestedArray("tracks");
-                auto signals = railwayContent.createNestedArray("signals");
-                auto sections = railwayContent.createNestedArray("sections");
-                auto routes = railwayContent.createNestedArray("routes");
-                auto detectors = railwayContent.createNestedArray("detectors");
+                JsonDocument railwayContent;
+                auto tracks = railwayContent["tracks"].to<JsonArray>();
+                auto signals = railwayContent["signals"].to<JsonArray>();
+                auto sections = railwayContent["sections"].to<JsonArray>();
+                auto routes = railwayContent["routes"].to<JsonArray>();
+                auto detectors = railwayContent["detectors"].to<JsonArray>();
 
                 for (unsigned int i = 0; i < railway->tracksCount(); ++i)
                 {
@@ -389,7 +389,7 @@ namespace winston
                         winston::Track::Shared a;
                         bumper->connections(a);
 
-                        auto track = tracks.createNestedObject();
+                        auto track = tracks.add<JsonObject>();
                         track["a"] = a->name();
                         track["name"] = bumper->name();
                         track["length"] = bumper->length();
@@ -405,7 +405,7 @@ namespace winston
                         winston::Track::Shared a, b;
                         rail->connections(a, b);
 
-                        auto track = tracks.createNestedObject();
+                        auto track = tracks.add<JsonObject>();
                         track["a"] = a->name();
                         track["b"] = b->name();
                         track["name"] = rail->name();
@@ -424,13 +424,13 @@ namespace winston
 
                         auto address = this->addressTranslator->address(*turnout)+1;
 
-                        auto track = tracks.createNestedObject();
+                        auto track = tracks.add<JsonObject>();
                         track["a"] = a->name();
                         track["b"] = b->name();
                         track["c"] = c->name();
                         track["name"] = turnout->name();
                         track["address"] = winston::build(address);
-                        auto length = track.createNestedObject("lengths");
+                        auto length = track["lengths"].to<JsonObject>();
                         length["a_b"] = turnout->lengthOnDirection(winston::Turnout::Direction::A_B);
                         length["a_c"] = turnout->lengthOnDirection(winston::Turnout::Direction::A_C);
 
@@ -446,14 +446,14 @@ namespace winston
                         turnout->connections(a, b, c, d);
                         auto address = this->addressTranslator->address(*turnout)+1;
 
-                        auto track = tracks.createNestedObject();
+                        auto track = tracks.add<JsonObject>();
                         track["a"] = a->name();
                         track["b"] = b->name();
                         track["c"] = c->name();
                         track["d"] = d->name();
                         track["name"] = turnout->name();
                         track["address"] = winston::build(address, " & ", address + 1);
-                        auto length = track.createNestedObject("lengths");
+                        auto length = track["lengths"].to<JsonObject>();
                         length["a_b"] = turnout->lengthOnDirection(winston::DoubleSlipTurnout::Direction::A_B);
                         length["a_c"] = turnout->lengthOnDirection(winston::DoubleSlipTurnout::Direction::A_C);
                         length["b_d"] = turnout->lengthOnDirection(winston::DoubleSlipTurnout::Direction::B_D);
@@ -472,11 +472,11 @@ namespace winston
                 {
                 /*    for (auto& section : this->railway->sections())
                     {
-                        auto b = sections.createNestedObject();
+                        auto b = sections.add<JsonObject>();
                         b["address"] = section.first;
                         auto bl = section.second;
 
-                        auto sectionTracks = b.createNestedArray("tracks");
+                        auto sectionTracks = b["tracks"].to<JsonArray>();
                         for (auto& track : bl->tracks())
                             sectionTracks.add(track->name());
                     }*/
@@ -485,27 +485,27 @@ namespace winston
                 if (this->railway->supportRoutes())
                 {
                     this->railway->eachRoute([=](const Route::Shared& route) {
-                        auto r = routes.createNestedObject();
+                        auto r = routes.add<JsonObject>();
                         r["id"] = route->id;
                         r["name"] = route->name;
-                        auto start = r.createNestedObject("start");
+                        auto start = r["start"].to<JsonObject>();
                         {
                             winston::Track::Shared track;
                             auto connection = route->start(track);
                             start["track"] = track->name();
                             start["connection"] = Track::ConnectionToString(connection);
                         }
-                        auto end = r.createNestedObject("end");
+                        auto end = r["end"].to<JsonObject>();
                         {
                             winston::Track::Shared track;
                             auto connection = route->end(track);
                             end["track"] = track->name();
                             end["connection"] = Track::ConnectionToString(connection);
                         }
-                        auto routePath = r.createNestedArray("path");
+                        auto routePath = r["path"].to<JsonArray>();
                         for (auto& path : route->path)
                         {
-                            auto p = routePath.createNestedObject();
+                            auto p = routePath.add<JsonObject>();
                             switch (path->type)
                             {
                             case Route::Track::Type::Track:
@@ -534,9 +534,9 @@ namespace winston
 
                 for (size_t i = 0; i < railwayContentJson.length(); i += chunkSize)
                 {
-                    DynamicJsonDocument railwayMessage(chunkSize + 256);
+                    JsonDocument railwayMessage;
                     railwayMessage["op"] = "railway";
-                    auto data = railwayMessage.createNestedObject("data");
+                    auto data = railwayMessage["data"].to<JsonObject>();
                     data["fullSize"] = (unsigned int)railwayContentJson.length();
                     data["offset"] = (unsigned int)i;
 
@@ -573,7 +573,7 @@ namespace winston
 
                 if (offset == fullSize - length)
                 {
-                    DynamicJsonDocument obj(200);
+                    JsonDocument obj;
                     obj["op"] = "storeRailwayLayoutSuccessful";
                     obj["data"] = true;
                     std::string json("");
@@ -606,7 +606,7 @@ namespace winston
 
                 if (offset == fullSize - length)
                 {
-                    DynamicJsonDocument obj(200);
+                    JsonDocument obj;
                     obj["op"] = "storeRailwayMicroLayoutSuccessful";
                     obj["data"] = true;
                     std::string json("");
@@ -637,9 +637,9 @@ namespace winston
                     std::string layout;
                     this->storageLayout->read(address + offset, layout, sent);
 
-                    DynamicJsonDocument obj(sizePerMessage + 1024);
+                    JsonDocument obj;
                     obj["op"] = "layout";
-                    auto data = obj.createNestedObject("data");
+                    auto data = obj["data"].to<JsonObject>();
                     data["offset"] = (int)offset;
                     data["fullSize"] = (int)length;
                     data["layout"] = layout;
@@ -675,9 +675,9 @@ namespace winston
                     std::string layout;
                     this->storageMicroLayout->read(address + offset, layout, sent);
 
-                    DynamicJsonDocument obj(sizePerMessage + 1024);
+                    JsonDocument obj;
                     obj["op"] = "microLayout";
-                    auto data = obj.createNestedObject("data");
+                    auto data = obj["data"].to<JsonObject>();
                     data["offset"] = (int)offset;
                     data["fullSize"] = (int)length;
                     data["layout"] = layout;
@@ -819,16 +819,16 @@ namespace winston
 			auto signal = track->signalGuarding(connection);
 			if (signal)
 			{
-				auto data = signals.createNestedObject();
+				auto data = signals.add<JsonObject>();
 				data["parentTrack"] = track->name();
 				data["guarding"] = winston::Track::ConnectionToString(connection);
 				data["pre"] = signal->preSignal();
 				data["main"] = signal->mainSignal();
                 data["device"] = signal->deviceId;
-				auto lights = data.createNestedArray("lights");
+				auto lights = data["lights"].to<JsonArray>();
 				for (const auto& signalLight : signal->lights())
 				{
-					auto light = lights.createNestedObject();
+					auto light = lights.add<JsonObject>();
 					light["aspect"] = (unsigned int)signalLight.aspect;
 					light["port"] = (unsigned int)signalLight.port;
 				}

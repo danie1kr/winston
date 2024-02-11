@@ -196,6 +196,7 @@ private:
 	void on_msg(Client hdl, websocketpp::server<websocketpp::config::asio>::message_ptr msg);
 	void on_open(Client hdl);
 	void on_close(Client hdl);
+	void on_fail(Client hdl);
 
 	websocketpp::server<websocketpp::config::asio> server;
 };

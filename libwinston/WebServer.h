@@ -1,8 +1,11 @@
 #pragma once
 
+#include "../libwinston/WinstonConfig.h"
+
 #include <string>
 #include <map>
 #include <functional>
+
 #include "external/better_enum.hpp"
 #include "Railway.h"
 #include "Util.h"
@@ -12,11 +15,6 @@
 #pragma GCC push_options
 //#pragma GCC optimize("Os")
 #endif
-#define ARDUINOJSON_ENABLE_STD_STRING 1
-#define ARDUINOJSON_ENABLE_STD_STREAM 0
-#define ARDUINOJSON_ENABLE_ARDUINO_STRING 0
-#define ARDUINOJSON_ENABLE_ARDUINO_STREAM 0
-#define ARDUINOJSON_ENABLE_ARDUINO_PRINT 0
 #include "external/ArduinoJson-v7.0.1.h"
 #ifdef __GNUC__ 
 #pragma GCC pop_options
@@ -627,7 +625,7 @@ namespace winston
                 size_t length = (data[0] << 0) | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
                 address = 4;
 
-                const size_t sizePerMessage = size_t(0.7f * webServer.maxMessageSize());
+                const size_t sizePerMessage = std::min(size_t(0.7f * webServer.maxMessageSize()), size_t((1 << 16) -1));
                 size_t remaining = length;
                 size_t offset = 0;
 

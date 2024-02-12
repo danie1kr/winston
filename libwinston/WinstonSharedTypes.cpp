@@ -3,7 +3,7 @@
 namespace winston
 {
 	SerialMessage::SerialMessage(const Operation op, unsigned char size)
-		: header((op << 4) & 0xF0 | (size & 0x0F))
+		: header(((op << 4) & 0xF0) | (size & 0x0F))
 	{
 
 	}

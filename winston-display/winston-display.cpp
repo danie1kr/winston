@@ -91,9 +91,25 @@ int32_t jpegSeek(JPEGFILE* handle, int32_t position) {
 
 void winston_setup()
 {
+#ifndef WINSTON_PLATFORM_WIN_x64
+    WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
+        uxUpdateWifiLED(false);
+        }, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
+
+    WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
+        uxUpdateWifiLED(true);
+        uxUpdateWifiIP(WiFi.localIP().toString().c_str());
+        }, WiFiEvent_t::ARDUINO_EVENT_ETH_GOT_IP);
+#endif
     winston::hal::init();
     { winston::hal::text("Hello from Winston!"); }
-    std::srand((unsigned int)(24));// inMilliseconds(winston::hal::now().time_since_epoch())));
+
+
+#ifdef WINSTON_PLATFORM_WIN_x64
+    std::srand(inMilliseconds(winston::hal::now().time_since_epoch()));
+#else
+    std::srand(::micros());
+#endif
 
     display->init();
     display->displayLoadingScreen();
@@ -167,7 +183,7 @@ void winston_setup()
                 rml.turnouts.push_back(t);
             }
             int offset = 8;
-            const winston::RailwayMicroLayout::Bounds screen(offset, offset, 480 - 4 * offset, 320 - 2 * offset);
+            const winston::RailwayMicroLayout::Bounds screen(offset, offset, 480 - 2*offset, 320 - 2 * offset);
             rml.scale(screen);
             uxUpdateRailwayLayout(rml, [](const std::string turnout) -> const winston::Result {
                 eventLooper.order(winston::Command::make([turnout](const winston::TimePoint& created) -> const winston::State {
@@ -349,7 +365,7 @@ void cinema_loop()
         if (consecutiveCinemaTouches > 24)
         {
             winston::logger.info("touch on", x, ", ", y);
-            currentScreen = Screen::Settings;
+            currentScreen = Screen::Menu;
             showUX(currentScreen);
         }
     }

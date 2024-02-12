@@ -38,10 +38,10 @@ namespace winston
 
 	struct URI
 	{
-		const bool secure;
 		const std::string host;
 		const unsigned int port;
 		const std::string resource;
+		const bool secure;
 
 		URI(const std::string host, const unsigned int port = 8080, const std::string resource = "/", const bool secure = false);
 		const std::string toString() const;

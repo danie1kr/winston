@@ -10,7 +10,7 @@
 JPEGDEC jpeg;
 
 Cinema::Cinema(SdFat &sd, winston::hal::DisplayUX::Shared display)
-	: sd(sd), _display(display), fileMoviePack(), jpegBuffer(nullptr), 
+	: _display(display), sd(sd), fileMoviePack(), jpegBuffer(nullptr), 
     largestJPEGFileSize(0), movies(), moviePlaying(false), 
     lastFrameTime(0), currentMovie(0), targetMSperFrame(1000 / 20)
 {

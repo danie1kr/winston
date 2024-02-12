@@ -602,7 +602,7 @@ const int StorageWin::handleError(const std::error_code& error) const
 #endif
 
 #ifdef WINSTON_HAL_USE_DISPLAYUX
-#include "../winston-display/external/lvgl-win32drv.h"
+#include <lvgl.h>
 
 DisplayUXWin::DisplayUXWin(const unsigned int width, const unsigned int height)
     : winston::hal::DisplayUX(width, height)
@@ -613,15 +613,32 @@ DisplayUXWin::DisplayUXWin(const unsigned int width, const unsigned int height)
 const winston::Result DisplayUXWin::init()
 {
     lv_init();
-
-    lv_tick_set_cb([]() -> uint32_t { return GetTickCount(); });
-
-    if (!lv_windows_init(
-        GetModuleHandleW(NULL),
-        SW_SHOW,
+    lv_display_t* display = lv_windows_create_display(
+        L"Winston Cinema",
         this->width,
         this->height,
-        0))//LoadIconW(GetModuleHandleW(NULL), MAKEINTRESOURCE(IDI_LVGL_WINDOWS))))
+        100,
+        false,
+        false);
+    if (!display)
+    {
+        return winston::Result::InternalError;
+    }
+
+    lv_indev_t* pointer_device = lv_windows_acquire_pointer_indev(display);
+    if (!pointer_device)
+    {
+        return winston::Result::InternalError;
+    }
+
+    lv_indev_t* keypad_device = lv_windows_acquire_keypad_indev(display);
+    if (!keypad_device)
+    {
+        return winston::Result::InternalError;
+    }
+
+    lv_indev_t* encoder_device = lv_windows_acquire_encoder_indev(display);
+    if (!encoder_device)
     {
         return winston::Result::InternalError;
     }

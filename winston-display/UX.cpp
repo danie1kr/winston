@@ -169,17 +169,17 @@ void uxUpdateTurnout(const std::string &id, const int &state, const bool &locked
 			B_D = 5,
             changing = 8
             */
-            if(state == 0 && tc.connection.compare("b"))
+            if(state == 0 && tc.connection.compare("b") == 0)
                 lv_obj_clear_flag(line, LV_OBJ_FLAG_HIDDEN);
-            else if (state == 1 && tc.connection.compare("c"))
+            else if (state == 1 && tc.connection.compare("c") == 0)
                 lv_obj_clear_flag(line, LV_OBJ_FLAG_HIDDEN);
-            else if (state == 2 && (tc.connection.compare("a") || tc.connection.compare("b")))
+            else if (state == 2 && ((tc.connection.compare("a") == 0) || (tc.connection.compare("b") == 0)))
                 lv_obj_clear_flag(line, LV_OBJ_FLAG_HIDDEN);
-            else if (state == 3 && (tc.connection.compare("a") || tc.connection.compare("c")))
+            else if (state == 3 && ((tc.connection.compare("a") == 0) || (tc.connection.compare("c") == 0)))
                 lv_obj_clear_flag(line, LV_OBJ_FLAG_HIDDEN);
-            else if (state == 4 && (tc.connection.compare("c") || tc.connection.compare("d")))
+            else if (state == 4 && ((tc.connection.compare("c") == 0) || (tc.connection.compare("d") == 0)))
                 lv_obj_clear_flag(line, LV_OBJ_FLAG_HIDDEN);
-            else if (state == 5 && (tc.connection.compare("b") || tc.connection.compare("d")))
+            else if (state == 5 && ((tc.connection.compare("b") == 0) || (tc.connection.compare("d") == 0)))
                 lv_obj_clear_flag(line, LV_OBJ_FLAG_HIDDEN);
             else
                 lv_obj_add_flag(line, LV_OBJ_FLAG_HIDDEN);
@@ -241,7 +241,10 @@ void setupUX(winston::hal::DisplayUX::Shared display,
     */
     lv_style_init(&lvglStyleTurnoutLabel);
     lv_style_set_text_font(&lvglStyleTurnoutLabel, &lv_font_montserrat_10);
-    lv_style_set_pad_top(&lvglStyleTurnoutLabel, 10);
+    lv_point_t p;
+    lv_text_get_size(&p, "1234567890", &lv_font_montserrat_10, 0, 0, LV_COORD_MAX, LV_TEXT_FLAG_EXPAND);
+    lv_style_set_border_color(&lvglStyleTurnoutLabel, lv_palette_main(LV_PALETTE_DEEP_ORANGE));
+    lv_style_set_pad_top(&lvglStyleTurnoutLabel, 32/2 - ((p.y+1) / 2));
 
     lv_theme_t* th = lv_theme_default_init(lv_display_get_default(),
         lv_palette_main(LV_PALETTE_TEAL), lv_palette_main(LV_PALETTE_ORANGE),

@@ -625,7 +625,7 @@ namespace winston
                 size_t length = (data[0] << 0) | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
                 address = 4;
 
-                const size_t sizePerMessage = std::min(size_t(0.7f * webServer.maxMessageSize()), size_t((1 << 16) -1));
+                const size_t sizePerMessage = std::min(size_t(0.7f * webServer.maxMessageSize()), ArduinoJson::detail::StringNode::maxLength);
                 size_t remaining = length;
                 size_t offset = 0;
 
@@ -663,7 +663,7 @@ namespace winston
                 size_t length = (data[0] << 0) | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
                 address = 4;
 
-                const size_t sizePerMessage = size_t(0.7f * webServer.maxMessageSize());
+                const size_t sizePerMessage = std::min(size_t(0.7f * webServer.maxMessageSize()), ArduinoJson::detail::StringNode::maxLength);
                 size_t remaining = length;
                 size_t offset = 0;
 

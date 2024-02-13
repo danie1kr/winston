@@ -36,39 +36,6 @@
     <ClCompile Include="..\winston\winston-hal-x64.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="res\icon_settings.c">
-      <Filter>res</Filter>
-    </ClCompile>
-    <ClCompile Include="res\icon_train.c">
-      <Filter>res</Filter>
-    </ClCompile>
-    <ClCompile Include="res\icon_wifi.c">
-      <Filter>res</Filter>
-    </ClCompile>
-    <ClCompile Include="res\icon_arrow_back.c">
-      <Filter>res</Filter>
-    </ClCompile>
-    <ClCompile Include="res\icon_backlight.c">
-      <Filter>res</Filter>
-    </ClCompile>
-    <ClCompile Include="res\icon_close.c">
-      <Filter>res</Filter>
-    </ClCompile>
-    <ClCompile Include="res\icon_done.c">
-      <Filter>res</Filter>
-    </ClCompile>
-    <ClCompile Include="res\icon_lan.c">
-      <Filter>res</Filter>
-    </ClCompile>
-    <ClCompile Include="res\icon_movie.c">
-      <Filter>res</Filter>
-    </ClCompile>
-    <ClCompile Include="res\icon_refresh.c">
-      <Filter>res</Filter>
-    </ClCompile>
-    <ClCompile Include="res\icon_quest.c">
-      <Filter>res</Filter>
-    </ClCompile>
     <ClCompile Include="external\lvgl\src\misc\cache\_lv_cache_lru_rb.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
@@ -1013,6 +980,9 @@
     </ClCompile>
     <ClCompile Include="external\lvgl\src\others\vg_lite_tvg\vg_lite_tvg.cpp">
       <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="res\lvgl_graphics.c">
+      <Filter>res</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -10,13 +10,13 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-LV_IMG_DECLARE(icon_arrow_back);
-LV_IMG_DECLARE(icon_movie);
-LV_IMG_DECLARE(icon_settings);
-LV_IMG_DECLARE(icon_train);
-LV_IMG_DECLARE(icon_refresh);
-LV_IMG_DECLARE(icon_close);
-LV_IMG_DECLARE(icon_quest);
+LV_IMG_DECLARE(arrow_back_24);
+LV_IMG_DECLARE(close_48);
+LV_IMG_DECLARE(movie_48);
+LV_IMG_DECLARE(quiz_48);
+LV_IMG_DECLARE(settings_48);
+LV_IMG_DECLARE(refresh_48);
+LV_IMG_DECLARE(train_48);
 #ifdef __cplusplus
 }
 #endif
@@ -280,8 +280,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
             lv_obj_add_event_cb(button, APPLY_TO_CALLBACK(ButtonDataScreen) , LV_EVENT_CLICKED, buttonData);
 
             lv_obj_t* buttonIcon = lv_image_create(button);
-            lv_image_set_src(buttonIcon, &icon_train);
-            lv_image_set_scale(buttonIcon, 512);
+            lv_image_set_src(buttonIcon, &train_48);
             lv_obj_add_style(buttonIcon, &styleIconRecolor, 0);
             lv_obj_align(buttonIcon, LV_ALIGN_CENTER, 0, 0);
         }
@@ -297,8 +296,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
             lv_obj_add_event_cb(button, APPLY_TO_CALLBACK(ButtonDataScreen), LV_EVENT_CLICKED, buttonData);
 
             lv_obj_t* buttonIcon = lv_image_create(button);
-            lv_image_set_src(buttonIcon, &icon_quest);
-            lv_image_set_scale(buttonIcon, 512);
+            lv_image_set_src(buttonIcon, &quiz_48);
             lv_obj_add_style(buttonIcon, &styleIconRecolor, 0);
             lv_obj_align(buttonIcon, LV_ALIGN_CENTER, 0, 0);
         }
@@ -314,8 +312,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
             lv_obj_add_event_cb(button, APPLY_TO_CALLBACK(ButtonDataScreen), LV_EVENT_CLICKED, buttonData);
 
             lv_obj_t* buttonIcon = lv_image_create(button);
-            lv_image_set_src(buttonIcon, &icon_movie);
-            lv_image_set_scale(buttonIcon, 512);
+            lv_image_set_src(buttonIcon, &movie_48);
             lv_obj_add_style(buttonIcon, &styleIconRecolor, 0);
             lv_obj_align(buttonIcon, LV_ALIGN_CENTER, 0, 0);
         }
@@ -331,8 +328,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
             lv_obj_add_event_cb(button, APPLY_TO_CALLBACK(ButtonDataScreen), LV_EVENT_CLICKED, buttonData);
 
             lv_obj_t* buttonIcon = lv_image_create(button);
-            lv_image_set_src(buttonIcon, &icon_settings);
-            lv_image_set_scale(buttonIcon, 512);
+            lv_image_set_src(buttonIcon, &settings_48);
             lv_obj_add_style(buttonIcon, &styleIconRecolor, 0);
             lv_obj_align(buttonIcon, LV_ALIGN_CENTER, 0, 0);
         }
@@ -439,7 +435,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
             lv_obj_align(button, LV_ALIGN_BOTTOM_RIGHT, -uiButtonPadding, -uiButtonPadding);
             lv_obj_add_event_cb(button, APPLY_TO_CALLBACK(ButtonDataScreen), LV_EVENT_CLICKED, buttonData);
             lv_obj_t* buttonIcon = lv_image_create(button);
-            lv_image_set_src(buttonIcon, &icon_arrow_back);
+            lv_image_set_src(buttonIcon, &arrow_back_24);
             lv_obj_add_style(buttonIcon, &styleIconRecolor, 0);
             lv_obj_align(buttonIcon, LV_ALIGN_CENTER, 0, 0);
         }
@@ -458,7 +454,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
             lv_obj_align(button, LV_ALIGN_BOTTOM_RIGHT, -uiButtonPadding, -uiButtonPadding);
             lv_obj_add_event_cb(button, APPLY_TO_CALLBACK(ButtonDataScreen), LV_EVENT_CLICKED, buttonData);
             lv_obj_t* buttonIcon = lv_image_create(button);
-            lv_image_set_src(buttonIcon, &icon_arrow_back);
+            lv_image_set_src(buttonIcon, &arrow_back_24);
             lv_obj_add_style(buttonIcon, &styleIconRecolor, 0);
             lv_obj_align(buttonIcon, LV_ALIGN_CENTER, 0, 0);
         }
@@ -501,7 +497,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
             lv_obj_add_event_cb(btnRefresh, APPLY_TO_CALLBACK(StorylineReplyButtonData), LV_EVENT_CLICKED, buttonData);
 
             lv_obj_t* btnRefreshIcon = lv_image_create(btnRefresh);
-            lv_image_set_src(btnRefreshIcon, &icon_refresh);
+            lv_image_set_src(btnRefreshIcon, &refresh_48);
             lv_obj_add_style(btnRefreshIcon, &styleIconRecolor, 0);
             lv_obj_align(btnRefreshIcon, LV_ALIGN_CENTER, 0, 0);
         }
@@ -516,7 +512,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
             lv_obj_add_event_cb(btnCancel, APPLY_TO_CALLBACK(StorylineReplyButtonData), LV_EVENT_CLICKED, buttonData);
 
             lv_obj_t* btnCancelIcon = lv_image_create(btnCancel);
-            lv_image_set_src(btnCancelIcon, &icon_close);
+            lv_image_set_src(btnCancelIcon, &close_48);
             lv_obj_add_style(btnCancelIcon, &styleIconRecolor, 0);
             lv_obj_align(btnCancelIcon, LV_ALIGN_CENTER, 0, 0);
         }
@@ -538,7 +534,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
             lv_obj_align(btnRailway, LV_ALIGN_BOTTOM_RIGHT, -uiButtonPadding, -uiButtonPadding);
             lv_obj_add_event_cb(btnRailway, APPLY_TO_CALLBACK(ButtonDataScreen), LV_EVENT_CLICKED, buttonData);
             lv_obj_t* btnRailwayIcon = lv_image_create(btnRailway);
-            lv_image_set_src(btnRailwayIcon, &icon_arrow_back);
+            lv_image_set_src(btnRailwayIcon, &arrow_back_24);
             lv_obj_add_style(btnRailwayIcon, &styleIconRecolor, 0);
             lv_obj_align(btnRailwayIcon, LV_ALIGN_CENTER, 0, 0);
         }

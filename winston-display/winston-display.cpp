@@ -9,6 +9,10 @@
 #include "Cinema.h"
 #include "../winston-display/winston-secrets.h"
 
+#ifndef WINSTON_SECRET
+pragma error("WINSTON_SECRET not found, see winston-secrets.h.template and create winston-secrets.h from it")
+#endif
+
 #include "../libwinston/external/ArduinoJson-v7.0.1.h"
 
 #ifdef WINSTON_PLATFORM_WIN_x64

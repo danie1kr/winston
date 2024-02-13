@@ -1,4 +1,5 @@
 #pragma once
+#define WINSTON_SECRET
 
 #define WINSTON_WIFI_SSID "TheoristsFort"
 #define WINSTON_WIFI_PASS "Erdbeerto4teMitSahne"

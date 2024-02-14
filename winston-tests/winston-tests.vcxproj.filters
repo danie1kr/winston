@@ -45,9 +45,6 @@
     <ClCompile Include="winston-tests-blocks.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\winston\winston-shared-hal-x64.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\winston\winston-hal-x64.h">

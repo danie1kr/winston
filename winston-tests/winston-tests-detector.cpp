@@ -213,7 +213,7 @@ namespace winstontests
 
             winston::Locomotive::ThrottleSpeedMap map{ {0, 0},{255, 50} };
             winston::Locomotive::Functions functions{};
-            auto loco = winston::Locomotive::make(locoCallbacks(), 0, functions, pos, map, "testloco1", 0);
+            auto loco = winston::Locomotive::make(locoCallbacks(), 0, functions, pos, map, "testloco1", 90, 0);
 
             auto div = 10;// 00;
             auto distance = 320; // mm
@@ -244,7 +244,7 @@ namespace winstontests
 
             winston::Locomotive::ThrottleSpeedMap map{ {0, 0}, {100, 100}, {255, 255} };
             winston::Locomotive::Functions functions = {};
-            auto loco = winston::Locomotive::make(locoCallbacks(), 0, functions, pos, map, "testloco1", 0);
+            auto loco = winston::Locomotive::make(locoCallbacks(), 0, functions, pos, map, "testloco1", 90, 0);
             auto expectedDistance = 10;
             loco->drive<true>(true, 100);
             loco->position(pos);
@@ -267,7 +267,7 @@ namespace winstontests
 
             winston::Locomotive::ThrottleSpeedMap map{ {0, 0}, {100, 1000}, {255, 2550} };
             winston::Locomotive::Functions functions = {};
-            auto loco = winston::Locomotive::make(locoCallbacks(), 0, functions, pos, map, "testloco1", 0);
+            auto loco = winston::Locomotive::make(locoCallbacks(), 0, functions, pos, map, "testloco1", 90, 0);
             auto throttle = 100;
             loco->drive<true>(false, throttle);
             loco->position(pos);
@@ -307,7 +307,7 @@ namespace winstontests
 
             winston::Locomotive::ThrottleSpeedMap map{ {0, 0}, {100, 500000}, {255, 2550} };
             winston::Locomotive::Functions functions = {};
-            auto loco = winston::Locomotive::make(locoCallbacks(), 0, functions, pos, map, "testloco1", 0);
+            auto loco = winston::Locomotive::make(locoCallbacks(), 0, functions, pos, map, "testloco1", 90, 0);
             auto throttle = 100;
             loco->drive<true>(true, throttle);
             loco->position(pos);

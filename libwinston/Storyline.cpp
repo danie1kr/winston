@@ -193,14 +193,28 @@ namespace winston
 
 	const State TaskRandomAction::execute(const Storyline::Shared storyline, const Task::List& context)
 	{
+
+		auto taskRailCars = storyline->getContext<TaskRandomCars>();
+		if (taskRailCars != nullptr)
+		{
+			auto hasOnlyOneCarWhichCannotBeSingle = filter(taskRailCars->railCars(), [](const RailCar::Shared& railCar) -> const bool {
+				return railCar->is(RailCar::Groups::CannotBeSingle);
+				}).size() == 1;
+
+			if (hasOnlyOneCarWhichCannotBeSingle)
+			{
+				this->_action = Action::Stable;
+				return State::Finished;
+			}
+		}
+		
 		auto value = std::rand() % 100;
-		if (value < 20)
+		if (value < 15)
 			this->_action = Action::Assemble;
 		else if (value < 80)
 			this->_action = Action::Drive;
 		else
 			this->_action = Action::Stable;
-
 		return State::Finished;
 	}
 

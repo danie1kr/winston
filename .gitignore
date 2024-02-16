@@ -33,3 +33,4 @@
 /winston-display-esp/winston-secrets.h
 /winston-display-esp/obj/x64/Release
 /winston-display/res/icons/graphics
+/winston-display/res/lvgl_graphics.utf8

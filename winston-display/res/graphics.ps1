@@ -9,7 +9,7 @@ function Get-SVG-And-PNGrize($name, $size) {
 	Start-Sleep 10
 	ts-node d:\apps\lv_img_conv\lib\cli.ts "${name}_${size}.png" -c RGB565A8 -f -o "..\\${name}_${size}.c"
 	
-	Write-Output "#include `"icons\${name}_${size}.c`"" >> ..\..\lvgl_graphics.c
+	Write-Output "#include `"icons\${name}_${size}.c`"" >> ..\..\lvgl_graphics.utf8
 }
 
 Remove-Item lvgl_graphics.c
@@ -34,3 +34,4 @@ Get-SVG-And-PNGrize settings 48
 Get-SVG-And-PNGrize train 48
 
 popd
+gc -en utf8 lvgl_graphics.utf8 | Out-File -en ascii lvgl_graphics.c

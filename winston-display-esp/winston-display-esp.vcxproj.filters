@@ -63,7 +63,7 @@
     <ClCompile Include="..\libwinston\Winston.cpp">
       <Filter>libwinston-src</Filter>
     </ClCompile>
-    <ClCompile Include="icons.c">
+    <ClCompile Include="..\winston-display\res\lvgl_graphics.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

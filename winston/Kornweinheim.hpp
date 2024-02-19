@@ -547,9 +547,9 @@ void Kornweinheim::populateSheds()
     this->railCarShed.push_back(winston::RailCar::make("Bauzug doppel", winston::RailCar::Groups::ConstructionTrain, 312));
     this->railCarShed.push_back(winston::RailCar::make("Bauzug Kran", winston::RailCar::Groups::ConstructionTrain, 300));
 
-    this->railCarShed.push_back(winston::RailCar::make("Personenwagen 1", winston::RailCar::Groups::Person | DR, 300));
-    this->railCarShed.push_back(winston::RailCar::make("Personenwagen 2", winston::RailCar::Groups::Person | DR, 300));
-    this->railCarShed.push_back(winston::RailCar::make("Gepaeckwagen", winston::RailCar::Groups::Person | DR | winston::RailCar::Groups::CannotBeSingle, 300));
+    this->railCarShed.push_back(winston::RailCar::make("Personenwagen 1", winston::RailCar::Groups::Person | DR, 250));
+    this->railCarShed.push_back(winston::RailCar::make("Personenwagen 2", winston::RailCar::Groups::Person | DR, 250));
+    this->railCarShed.push_back(winston::RailCar::make("Gepaeckwagen", winston::RailCar::Groups::Person | DR | winston::RailCar::Groups::CannotBeSingle, 250));
 
     this->railCarShed.push_back(winston::RailCar::make("Uaai 819", winston::RailCar::Groups::Heavy, 355));
 

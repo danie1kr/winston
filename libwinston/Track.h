@@ -5,6 +5,7 @@
 #include <array>
 #include <vector>
 #include <set>
+#include <map>
 #include <unordered_set>
 #include <memory>
 #include <functional>
@@ -287,6 +288,19 @@ namespace winston
 		void unlock(const int route);
 		bool locked() const;
 
+#ifdef WINSTON_ENABLE_TURNOUT_GROUPS
+		enum class GroupDirection : unsigned char
+		{
+			Same,
+			Opposite
+		};
+		void addGroup(const Id group, const GroupDirection dir);
+		const GroupDirection groupDirection(const Id group) const;
+		const bool isInGroup(const Id group) const;
+		const bool isInGroup(const std::map<Id, Turnout::GroupDirection>& groups) const;
+		const std::map<Id, Turnout::GroupDirection> &groups() const;
+
+#endif
 		const Direction direction() const;
 		static const Direction otherDirection(const Direction current);
 		const Connection fromDirection() const;
@@ -309,7 +323,11 @@ namespace winston
 		Track::Shared a, b, c;
 
 		std::unordered_set<unsigned int> lockingRoutes;
+#ifdef WINSTON_ENABLE_TURNOUT_GROUPS
+		std::map<Id, GroupDirection> _groups;
+#endif 
 	};
+	using TurnoutSet = std::unordered_set<Turnout::Shared>;
 
 	/* A   D
 	    \ /

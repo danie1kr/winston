@@ -21,6 +21,7 @@
 #include "Route.h"
 #include "HAL.h"
 #include "Log.h"
+#include "Library.h"
 
 namespace winston
 {
@@ -89,6 +90,14 @@ namespace winston
 				winston::logger.err("Railway::initSections failed with ", result);
 				return result;
 			}
+#ifdef WINSTON_ENABLE_TURNOUT_GROUPS
+			result = this->initTurnoutGroups();
+			if (result != winston::Result::OK)
+			{
+				winston::logger.err("Railway::initTurnoutGroups failed with ", result);
+				return result;
+			}
+#endif
 
 			return winston::Result::OK;
 		}
@@ -585,6 +594,72 @@ namespace winston
 
 			return list;
 		};
+#ifdef WINSTON_ENABLE_TURNOUT_GROUPS
+		const Result initTurnoutGroups()
+		{
+			Id group = 1;
+			this->turnouts([&group](const Tracks track, Turnout& turnout) {
+
+				Track::Shared a, b, c;
+				turnout.connections(a, b, c);
+
+				auto groupify = [&group, &turnout](const Track::Connection connection, Track::Shared track) {
+					auto next = track;
+					auto connector = std::dynamic_pointer_cast<Track>(turnout.shared_from_this());
+					if (next->type() == Track::Type::Rail && next->length() < library::track::Roco::G1)
+					{
+						const auto connection = next->whereConnects(turnout.shared_from_this());
+						const auto otherConnection = next->otherConnection(connection);
+						connector = next;
+						next->traverse(otherConnection, next, true);
+					}
+					if (next->type() == Track::Type::Turnout)
+					{
+						Turnout::Shared other = std::dynamic_pointer_cast<Turnout>(next);
+						const auto otherConnection = other->whereConnects(connector);
+						if (otherConnection == Turnout::Connection::B || otherConnection == Turnout::Connection::C)
+						{
+							if (!turnout.isInGroup(other->groups()))
+							{
+								auto sameOther = connection == otherConnection ? Turnout::GroupDirection::Same : Turnout::GroupDirection::Opposite;
+								turnout.addGroup(group, sameOther);
+								other->addGroup(group, sameOther);
+								++group;
+							}
+						}
+					}
+					};
+
+				groupify(Track::Connection::B, b);
+				groupify(Track::Connection::C, c);
+
+				});
+
+			this->turnouts([&](const Tracks track, Turnout& turnout) {
+
+				auto grouped = this->turnoutsSharingGroupWith(turnout);
+
+				std::string groupString = "";
+				for (const auto g : grouped)
+					groupString += " " + g->name();
+
+				logger.info(turnout.name(), " sharing groups with", groupString);
+
+				});
+
+			return Result::OK;
+		}
+
+		const TurnoutSet turnoutsSharingGroupWith(const Turnout turnout)
+		{
+			TurnoutSet set;
+			this->turnouts([&set, &to = turnout](const Tracks track, Turnout& turnout) {
+				if (turnout.isInGroup(to.groups()))
+					set.insert(turnout.shared_from_this());
+				});
+			return set;
+		}
+#endif
 	};
 
 }

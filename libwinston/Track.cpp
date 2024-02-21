@@ -358,12 +358,18 @@ namespace winston
 
 	Turnout::Turnout(const std::string name, const Callback callback, const bool leftTurnout)
 		: Track(name, 0), Shared_Ptr<Turnout>()/*, std::enable_shared_from_this<Turnout>()*/, callback(callback), trackLengthCalculator(nullptr), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c(), lockingRoutes()
+#ifdef WINSTON_ENABLE_TURNOUT_GROUPS
+		, _groups()
+#endif
 	{
 
 	}
 
 	Turnout::Turnout(const std::string name, const Callback callback, const TrackLengthCalculator trackLengthCalculator, const bool leftTurnout)
 		: Track(name, 0), Shared_Ptr<Turnout>()/*, std::enable_shared_from_this<Turnout>()*/, callback(callback), trackLengthCalculator(trackLengthCalculator), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c(), lockingRoutes()
+#ifdef WINSTON_ENABLE_TURNOUT_GROUPS
+		, _groups()
+#endif
 	{
 
 	}
@@ -596,7 +602,38 @@ namespace winston
 	{
 		return this->trackLengthCalculator ? this->trackLengthCalculator(dir) : 0;
 	}
+#ifdef WINSTON_ENABLE_TURNOUT_GROUPS
+	void Turnout::addGroup(const Id group, GroupDirection dir)
+	{
+		this->_groups.emplace(group, dir);
+	}
 
+	const Turnout::GroupDirection Turnout::groupDirection(const Id group) const
+	{
+		auto it = this->groups().find(group);
+		if (it != this->groups().end())
+			return it->second;
+	}
+
+	const bool Turnout::isInGroup(const Id group) const
+	{
+		return this->_groups.find(group) != this->_groups.end();
+	}
+
+	const bool Turnout::isInGroup(const std::map<Id, Turnout::GroupDirection>& groups) const
+	{
+		for (auto g : this->groups())
+			if (groups.find(g.first) != groups.end())
+				return true;
+
+		return false;
+	}
+
+	const std::map<Id, Turnout::GroupDirection> &Turnout::groups() const
+	{
+		return this->_groups;
+	}
+#endif 
 	const std::string DoubleSlipTurnout::DirectionToString(const Direction direction)
 	{
 		switch (direction)

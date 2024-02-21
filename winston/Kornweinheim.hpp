@@ -158,6 +158,29 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
             }
         }
 
+#ifdef WINSTON_ENABLE_TURNOUT_GROUPS
+        if (direction != winston::Turnout::Direction::Changing)
+        {
+            auto groupedTurnouts = this->railway->turnoutsSharingGroupWith(turnout);
+            groupedTurnouts.erase(turnout.shared_from_this());
+
+            for (auto other : groupedTurnouts)
+            {
+                for (const auto group : other->groups())
+                {
+                    if (turnout.isInGroup(group.first))
+                    {
+                        const auto dir = group.second == winston::Turnout::GroupDirection::Same ? direction : winston::Turnout::otherDirection(direction);
+                        if (other->direction() != dir)
+                        {
+                            this->orderTurnoutToggle(*other, dir);
+                        }
+                    }
+                }
+            }
+        }
+#endif
+
         winston::logger.info("Turnout ", turnout.name(), " set to direction ", winston::Turnout::DirectionToString(direction));
 
         return winston::State::Finished;

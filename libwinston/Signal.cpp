@@ -7,19 +7,6 @@ namespace winston
 		return { port, aspect };
 	}
 
-	constexpr unsigned int Signal::Light::maximum(const Aspect aspect)
-	{
-		switch (aspect)
-		{
-		case Aspect::Off: return 0;
-		case Aspect::Go: return (range / 12) - 1;
-		case Aspect::Halt: return (range / 12) - 1;
-		case Aspect::ExpectGo: return (range / 8) - 1;
-		case Aspect::ExpectHalt: return (range / 4) - 1;
-		}
-		return 0;
-	}
-
 	const std::string Signal::buildAspects(const Aspects first)
 	{
 		std::string s;

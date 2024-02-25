@@ -166,14 +166,28 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
 
             for (auto other : groupedTurnouts)
             {
-                for (const auto group : other->groups())
+                if (other->direction() != winston::Turnout::Direction::Changing)
                 {
-                    if (turnout.isInGroup(group.first))
+                    for (const auto group : other->groups())
                     {
-                        const auto dir = group.second == winston::Turnout::GroupDirection::Same ? direction : winston::Turnout::otherDirection(direction);
-                        if (other->direction() != dir)
+                        if (group.second == winston::Turnout::GroupDirection::Unknown)
+                            continue;
+                        if (turnout.isInGroup(group.first))
                         {
-                            this->orderTurnoutToggle(*other, dir);
+                            const auto dir = group.second == winston::Turnout::GroupDirection::Same ? direction : winston::Turnout::otherDirection(direction);
+                            if (other->direction() != dir)
+                            {
+                                this->signalTower->order(winston::Command::make([other, dir, this](const winston::TimePoint& created) -> const winston::State
+                                    {
+                                        if (winston::hal::now() - created > WINSTON_TURNOUT_GROUP_TOGGLE)
+                                        {
+                                            if (other->direction() != dir)
+                                                this->orderTurnoutToggle(*other, dir);
+                                            return winston::State::Finished;
+                                        }
+                                        return winston::State::Running;
+                                    }, __PRETTY_FUNCTION__));
+                            }
                         }
                     }
                 }
@@ -273,7 +287,7 @@ void Kornweinheim::systemSetup() {
     this->populateSheds();
 
     // z21
-    z21Socket = UDPSocket::make(z21IP, z21Port);
+    this->z21Socket = UDPSocket::make(z21IP, z21Port);
 
     this->addressTranslator = RAILWAY_CLASS::AddressTranslator::make(railway);
 

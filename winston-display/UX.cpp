@@ -201,6 +201,14 @@ void uxUpdateWifiLED(const bool on)
         else
             lv_led_off(ledWifi);
     }
+
+    if (lvglScreenRailwayButtonReconnect)
+    {
+        if (on)
+            lv_obj_clear_state(lvglScreenRailwayButtonReconnect, LV_STATE_DISABLED);
+        else
+            lv_obj_add_state(lvglScreenRailwayButtonReconnect, LV_STATE_DISABLED);
+    }
 }
 
 void uxUpdateStorylineText(const std::string text)
@@ -394,7 +402,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
         ledWifi = lv_led_create(screen);
         lv_obj_set_pos(ledWifi, 20, y);
         lv_led_set_color(ledWifi, lv_palette_main(LV_PALETTE_TEAL));
-        lv_led_on(ledWifi);
+        lv_led_off(ledWifi);
         y += yInc;
 
         // websocket target
@@ -469,6 +477,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
                 }, LV_EVENT_CLICKED, buttonData);
 
             lv_obj_t* btnReconnectLabel = lv_label_create(lvglScreenRailwayButtonReconnect);
+            lv_obj_add_state(lvglScreenRailwayButtonReconnect, LV_STATE_DISABLED);
             lv_label_set_text_static(btnReconnectLabel, "reconnect");
         }
 

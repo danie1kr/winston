@@ -55,7 +55,11 @@ namespace winston
 			this->setupDetectors();
 
 			this->railway->validateFinal();
+#ifdef WINSTON_REALWORLD
 			this->digitalCentralStation->connect();
+#else
+			logger.warn("not connecting to digitalCentralStation as WINSTON_REALWORLD is not defined");
+#endif
 			/*
 			this->railway->turnouts([=](const Tracks track, winston::Turnout::Shared turnout) {
 				

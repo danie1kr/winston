@@ -6,7 +6,7 @@
 
 namespace winston
 {
-	Track::Track(const std::string name, Length trackLength) : Shared_Ptr<Track>()/*, std::enable_shared_from_this<Track>()*/, _name(name), _section(0), trackLength(trackLength)
+	Track::Track(const std::string name, Length trackLength) : Shared_Ptr<Track>(), _name(name), _section(0), trackLength(trackLength)
 	{
 	}
 
@@ -94,7 +94,7 @@ namespace winston
 	}
 
 	Bumper::Bumper(const std::string name, Length tracklength)
-		: Track(name, tracklength), Shared_Ptr<Bumper>()/*, std::enable_shared_from_this<Bumper>()*/, a()
+		: Track(name, tracklength), Shared_Ptr<Bumper>(), a()
 	{
 	}
 
@@ -214,7 +214,7 @@ namespace winston
 	}
 
 	Rail::Rail(const std::string name, Length tracklength)
-		: Track(name, tracklength), Shared_Ptr<Rail>()/*, std::enable_shared_from_this<Rail>()*/, a(), b()
+		: Track(name, tracklength), Shared_Ptr<Rail>(), a(), b()
 	{
 
 	}
@@ -357,7 +357,7 @@ namespace winston
 	}
 
 	Turnout::Turnout(const std::string name, const Callback callback, const bool leftTurnout)
-		: Track(name, 0), Shared_Ptr<Turnout>()/*, std::enable_shared_from_this<Turnout>()*/, callback(callback), trackLengthCalculator(nullptr), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c(), lockingRoutes()
+		: Track(name, 0), Shared_Ptr<Turnout>(), callback(callback), trackLengthCalculator(nullptr), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c(), lockingRoutes()
 #ifdef WINSTON_ENABLE_TURNOUT_GROUPS
 		, _groups()
 #endif
@@ -366,7 +366,7 @@ namespace winston
 	}
 
 	Turnout::Turnout(const std::string name, const Callback callback, const TrackLengthCalculator trackLengthCalculator, const bool leftTurnout)
-		: Track(name, 0), Shared_Ptr<Turnout>()/*, std::enable_shared_from_this<Turnout>()*/, callback(callback), trackLengthCalculator(trackLengthCalculator), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c(), lockingRoutes()
+		: Track(name, 0), Shared_Ptr<Turnout>(), callback(callback), trackLengthCalculator(trackLengthCalculator), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c(), lockingRoutes()
 #ifdef WINSTON_ENABLE_TURNOUT_GROUPS
 		, _groups()
 #endif
@@ -608,13 +608,6 @@ namespace winston
 		this->_groups.emplace(group, dir);
 	}
 
-	const Turnout::GroupDirection Turnout::groupDirection(const Id group) const
-	{
-		auto it = this->groups().find(group);
-		if (it != this->groups().end())
-			return it->second;
-	}
-
 	const bool Turnout::isInGroup(const Id group) const
 	{
 		return this->_groups.find(group) != this->_groups.end();
@@ -622,8 +615,8 @@ namespace winston
 
 	const bool Turnout::isInGroup(const std::map<Id, Turnout::GroupDirection>& groups) const
 	{
-		for (auto g : this->groups())
-			if (groups.find(g.first) != groups.end())
+		for (auto g : groups)
+			if (this->isInGroup(g.first))
 				return true;
 
 		return false;
@@ -648,13 +641,13 @@ namespace winston
 	}
 
 	DoubleSlipTurnout::DoubleSlipTurnout(const std::string name, const Callback callback)
-		: Track(name, 0), Shared_Ptr<DoubleSlipTurnout>()/*, std::enable_shared_from_this<DoubleSlipTurnout>()*/, callback(callback), trackLengthCalculator(nullptr), dir(Direction::A_B), accessoryStates{0xF0, 0x0D}, a(), b(), c(), d(), lockingRoutes()
+		: Track(name, 0), Shared_Ptr<DoubleSlipTurnout>(), callback(callback), trackLengthCalculator(nullptr), dir(Direction::A_B), accessoryStates{0xF0, 0x0D}, a(), b(), c(), d(), lockingRoutes()
 	{
 
 	}
 
 	DoubleSlipTurnout::DoubleSlipTurnout(const std::string name, const Callback callback, const TrackLengthCalculator trackLengthCalculator)
-		: Track(name, 0), Shared_Ptr<DoubleSlipTurnout>()/*, std::enable_shared_from_this<DoubleSlipTurnout>()*/, callback(callback), trackLengthCalculator(trackLengthCalculator), dir(Direction::A_B), accessoryStates{0xF0, 0x0D}, a(), b(), c(), d(), lockingRoutes()
+		: Track(name, 0), Shared_Ptr<DoubleSlipTurnout>(), callback(callback), trackLengthCalculator(trackLengthCalculator), dir(Direction::A_B), accessoryStates{0xF0, 0x0D}, a(), b(), c(), d(), lockingRoutes()
 	{
 
 	}

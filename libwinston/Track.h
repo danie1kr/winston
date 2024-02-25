@@ -291,11 +291,11 @@ namespace winston
 #ifdef WINSTON_ENABLE_TURNOUT_GROUPS
 		enum class GroupDirection : unsigned char
 		{
+			Unknown,
 			Same,
 			Opposite
 		};
 		void addGroup(const Id group, const GroupDirection dir);
-		const GroupDirection groupDirection(const Id group) const;
 		const bool isInGroup(const Id group) const;
 		const bool isInGroup(const std::map<Id, Turnout::GroupDirection>& groups) const;
 		const std::map<Id, Turnout::GroupDirection> &groups() const;

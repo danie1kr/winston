@@ -122,7 +122,9 @@ namespace winston
 	const typename T::value_type& random(const T& container)
 	{
 		auto start = container.begin();
-		std::uniform_int_distribution<> dis(0, std::distance(container.begin(), container.end()) - 1);
+		if (container.size() <= 1)
+			return *start;
+		std::uniform_int_distribution<size_t> dis(0, (size_t)(std::distance(container.begin(), container.end()) - 1));
 		
 		std::advance(start, dis(randomEngine));
 		return *start;

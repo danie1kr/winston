@@ -98,6 +98,7 @@ void winston_setup()
 #ifndef WINSTON_PLATFORM_WIN_x64
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
         uxUpdateWifiLED(false);
+        uxUpdateWifiIP("not connected");
         }, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
 
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
@@ -344,6 +345,20 @@ void winston_setup()
             return winston::Result::OK;
         }
     );
+
+
+#ifdef WINSTON_PLATFORM_WIN_x64
+    eventLooper.order(winston::Command::make([](const winston::TimePoint& created) -> const winston::State
+        {
+            if (winston::hal::now() - created > 2000ms)
+            {
+                uxUpdateWifiLED(true);
+                uxUpdateWifiIP("connected");
+                return winston::State::Finished;
+            }
+            return winston::State::Delay;
+        }, __PRETTY_FUNCTION__));
+#endif
 
     cinema.init();
     showUX(currentScreen);

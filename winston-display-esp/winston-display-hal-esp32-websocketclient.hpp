@@ -41,7 +41,7 @@ const winston::Result WebSocketClientESP32::init(OnMessage onMessageCallback)
 		const std::string msg(message.data().c_str());
 		onMessageCallback(client, msg);
 		});
-	this->client.onEvent([](WebsocketsEvent event, String data)
+	this->client.onEvent([this](WebsocketsEvent event, String data)
 		{
 			(void)data;
 
@@ -51,6 +51,7 @@ const winston::Result WebSocketClientESP32::init(OnMessage onMessageCallback)
 			}
 			else if (event == WebsocketsEvent::ConnectionClosed)
 			{
+				this->_connected = false;
 				Serial.println("Connnection Closed");
 			}
 			else if (event == WebsocketsEvent::GotPing)

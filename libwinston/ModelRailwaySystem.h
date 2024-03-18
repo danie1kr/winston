@@ -36,6 +36,10 @@ namespace winston
 		{ };
 		virtual ~ModelRailwaySystem() { } ;
 
+	private:
+		TimePoint lastDCSConnectedCheck;
+	public:
+
 		void setup() {
 			this->systemSetup();
 
@@ -56,7 +60,21 @@ namespace winston
 
 			this->railway->validateFinal();
 #ifdef WINSTON_REALWORLD
-			this->digitalCentralStation->connect();
+			this->signalTower->order(winston::Command::make([this](const TimePoint& created) -> const winston::State
+				{
+					if (winston::hal::now() - this->lastDCSConnectedCheck > 2000ms)
+					{
+						if (!this->digitalCentralStation->connected())
+						{
+							logger.err("Connecting to DigitalCentralStation.");
+							this->digitalCentralStation->connect();
+						}
+						else
+							logger.err("Connection to DigitalCentralStation lost.");
+					}
+					return winston::State::Delay;
+		}, __PRETTY_FUNCTION__));
+			;
 #else
 			logger.warn("not connecting to digitalCentralStation as WINSTON_REALWORLD is not defined");
 #endif

@@ -54,13 +54,14 @@ namespace winston
 		virtual const bool traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const = 0;
 		virtual const bool canTraverse(const Connection entering) const = 0;
 
-		using TraversalCallback = std::function<bool(Track::Shared track, const Track::Connection connection)>;
+		using TraversalCallback = std::function<const Result(Track::Shared track, const Track::Connection connection)>;
 		enum class TraversalResult : unsigned int
 		{
 			Looped,
 			Bumper,
 			OpenTurnout,
-			Signal
+			Signal,
+			CancelledByCallback
 		}; enum class TraversalSignalHandling : unsigned int
 		{
 			Ignore,
@@ -107,8 +108,9 @@ namespace winston
 						return TraversalResult::Bumper;
 					}
 				}
-				if(callback)
-					callback(onto, connection);
+				if (callback)
+					if (callback(onto, connection) != Result::OK)
+						return TraversalResult::CancelledByCallback;
 				connection = onto->whereConnects(current);
 				if((onto->type() == Track::Type::Turnout || onto->type() == Track::Type::DoubleSlipTurnout) && !onto->canTraverse(connection))
 				{
@@ -130,7 +132,8 @@ namespace winston
 				if (connection == Connection::DeadEnd)
 					return TraversalResult::Bumper;
 				if (callback)
-					callback(onto, connection);
+					if (callback(onto, connection) != Result::OK)
+						return TraversalResult::CancelledByCallback;
 				current = onto;
 			}
 		}

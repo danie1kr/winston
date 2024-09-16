@@ -332,7 +332,7 @@ namespace winston
 	const std::string TaskRandomSection::text() const
 	{
 		if (this->_section)
-			return this->_section->name;
+			return this->_section->id;
 		else
 			return "Section ???";
 	}

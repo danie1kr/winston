@@ -52,7 +52,8 @@ namespace winston
 		OutOfBounds,
 		InvalidParameter,
 		OutOfMemory,
-		NotImplemented
+		NotImplemented,
+		Retry
 	};
 
 	enum class Features : unsigned int
@@ -308,6 +309,7 @@ namespace winston
 	template<typename _Railway, class _AddressTranslator, class _DigitalCentralStation, class _WebServer>
 	class ModelRailwaySystem;
 
+	class Segment;
 	class Section;
 	class Detector;
 	template<typename T> class DetectorAddressable;

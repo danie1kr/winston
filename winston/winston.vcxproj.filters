@@ -51,6 +51,12 @@
     <ClCompile Include="TLC5947_SignalDevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LoDi_GBM8_DetectorDevice.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LoDi_API.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="external\central-z21\Z21Const.h">
@@ -70,9 +76,6 @@
     </ClInclude>
     <ClInclude Include="winston-hal-x64.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="mio.hpp">
-      <Filter>external</Filter>
     </ClInclude>
     <ClInclude Include="TLC5947_SignalDevice.h">
       <Filter>Header Files</Filter>
@@ -99,6 +102,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TimeSaver.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="external\mio.hpp">
+      <Filter>external</Filter>
+    </ClInclude>
+    <ClInclude Include="LoDi_GBM8_DetectorDevice.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LoDi_API.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -3,47 +3,65 @@
 #include "WinstonTypes.h"
 #include "Track.h"
 #include "Position.h"
+#include "Locomotive.h"
+#include "Segment.h"
 
 namespace winston
 {
 	class Detector : public Shared_Ptr<Detector>
 	{
 	public:
-		Detector(Track::Shared track, const Track::Connection connection, const Distance distance);
-		const Position &position() const;
+		enum class Change: uint8_t
+		{
+		    Entered = 0,
+			Left = 1
+		};
+
+		struct Callbacks
+		{
+			using Change = std::function<const Result(const std::string detectorName, const Locomotive::Shared loco, Segment::Shared segment, const Change change, const TimePoint when)>;
+			using Occupied = std::function<const Result(const std::string detectorName, Segment::Shared segment, const Change change)>;
+		};
+		
+		Detector(const std::string name, Segment::Shared segment, Callbacks::Change changeCallback);
+		virtual ~Detector() = default;
+
+		const std::string name;
+
 	protected:
-		const Position pos;
+		const Segment::Shared segment;
+		const Callbacks::Change changeCallback;
+
+	friend class DetectorDevice;
+		const Result change(const Locomotive::Shared loco, const TimePoint when, const Change change) const;
+		const Result occupied(const Locomotive::Shared loco, const TimePoint when, const Change change) const;
 	};
 
-	template<typename T>
-	class DetectorAddressable : public Detector, public Shared_Ptr<DetectorAddressable<T>>
+	class DetectorDevice : public Shared_Ptr<DetectorDevice>
 	{
 	public:
-		using Callback = std::function<Result(Detector::Shared detector, const T address)>;
 
-		DetectorAddressable(Callback callback, Track::Shared track, const Track::Connection connection, const Distance distance)
-			: Detector(track, connection, distance), callback(callback)
+		struct Callbacks
 		{
+			using LocoFromAddress = std::function<Locomotive::Shared(const Address address)>;
+		};
 
-		}
+		DetectorDevice(const std::string name, Callbacks::LocoFromAddress locofromAddressCallback);
 
-		const Result detect(T address)
-		{
-			return this->callback(this->shared_from_this(), address);
-		}
+		using PortSegmentMap = std::map<size_t, Segment::Shared>;
+		using PortDetectorMap = std::map<size_t, winston::Detector::Shared>;
+		
+		virtual ~DetectorDevice() = default;
+		virtual const Result init(PortSegmentMap ports, Detector::Callbacks::Change changeCallback) = 0;
+		const std::string name;
 
-		using Shared_Ptr<DetectorAddressable<T>>::Shared;
-		using Shared_Ptr<DetectorAddressable<T>>::make;
+	protected:
+		PortDetectorMap ports;
+
+		const Result change(const size_t port, const Address locoAddress, const Detector::Change change);
+		const Result occupied(const size_t port, const Detector::Change change);
+
 	private:
-		Callback callback;
-	};
-
-	template<typename T>
-	class DetectorDevice : public Shared_Ptr<DetectorDevice<T>>
-	{
-	public:
-		DetectorDevice(DetectorAddressable<T>& detector) : Shared_Ptr<DetectorDevice<T>>(), detector(detector) {}
-	protected:
-		DetectorAddressable<T>& detector;
+		Callbacks::LocoFromAddress locofromAddressCallback;
 	};
 }

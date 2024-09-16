@@ -108,6 +108,9 @@
     <ClInclude Include="external\ArduinoJson-v7.0.1.h">
       <Filter>external</Filter>
     </ClInclude>
+    <ClInclude Include="Segment.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Signal.cpp">
@@ -168,6 +171,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Log.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Segment.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

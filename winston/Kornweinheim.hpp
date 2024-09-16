@@ -226,11 +226,11 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
         return winston::State::Finished;
     };
 
-    callbacks.dccDetectorCallback = [=](winston::Detector::Shared, const winston::Address address) -> winston::Result
+    /*callbacks.dccDetectorCallback = [=](winston::Detector::Shared, const winston::Address address) -> winston::Result
     {
         // not used here
         return winston::Result::OK;
-    };
+    };*/
 
     return callbacks;
 }
@@ -463,7 +463,7 @@ ms	32	         2,55	  6,13	  8,17	 12,26	 16,35
     this->signalTower->order(winston::Command::make([detector, loco, now](const winston::TimePoint& created) -> const winston::State
         {
             // loco is now at
-            auto current = detector->position();
+            //auto current = detector->position();
            // auto deviation = loco.drive() - current;
 
 

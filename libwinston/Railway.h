@@ -46,7 +46,7 @@ namespace winston
 
 			using SignalUpdateCallback = std::function<const State(Track&  track, Track::Connection connection, const Signal::Aspects aspect)>;
 
-			DCCDetector::Callback dccDetectorCallback;
+			//DCCDetector::Callback dccDetectorCallback;
 		};
 
 		Railway(const Callbacks callbacks);
@@ -510,6 +510,11 @@ namespace winston
 		};
 		using SectionMap = std::unordered_map<Address, typename Section::Shared>;
 
+	protected:
+		SectionMap _sections;
+		std::map<Tracks, typename Section::Shared> trackSections;
+	public:
+
 		typename Section::Shared section(const Sections section) const
 		{
 			auto it = this->_sections.find(section);
@@ -544,7 +549,7 @@ namespace winston
 		const Result validateSections()
 		{
 			std::set<_TracksClass> marked;
-			for (const auto& section : this->_sections)
+			for (auto& section : this->_sections)
 			{
 				if(section.second && !section.second->validate([&marked, this](const Track& track) -> const bool {
 					_TracksClass trackEnum = this->trackEnum(track);
@@ -555,6 +560,11 @@ namespace winston
 					return true;
 					}))
 					return Result::ValidationFailed;
+
+				for (const auto& track : section.second->tracks())
+				{
+					this->trackSections[this->trackEnum(track)] = section.second;
+				}
 			}
 
 			return marked.size() == _TracksClass::_size() ? Result::OK : Result::ValidationFailed;
@@ -564,9 +574,34 @@ namespace winston
 		{
 			return nullptr;
 		}
-		
-	protected:
-		SectionMap _sections;
+
+		typename Section::Shared nextSection(const Track::Shared &track, const Track::Connection entered)
+		{
+			typename Section::Shared initial = this->section(this->trackSections[this->trackEnum(track)]);
+			typename Section::Shared current = initial;
+
+			auto currentTrack = track;
+			auto connection = entered;
+
+			while (current == initial)
+			{
+				Signal::Shared signal;
+				const auto tr = Track::traverse<Track::TraversalSignalHandling::Ignore>(currentTrack, connection, signal, 
+					[initial, &current, this](Track::Shared track, const Track::Connection connection) -> const Result {
+						current = this->section(this->trackSections[this->trackEnum(track)]);
+						if (current == initial)
+							return Result::OK;
+						else
+							return Result::NotFound;
+				});
+				if (tr == Track::TraversalResult::CancelledByCallback)
+				{
+					track = currentTrack;
+					return current;
+				}
+			}
+			return current;
+		}
 
 	public:
 

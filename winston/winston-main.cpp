@@ -47,7 +47,7 @@ void winston_loop()
 #ifdef WINSTON_WITH_QNETHERNET
     Ethernet.loop();
 #endif
-    if (!modelRailWayConfiguration.loop())
+    if (modelRailWayConfiguration.loop() == winston::Result::Idle)
         winston::hal::delay(FRAME_SLEEP);
 #ifdef WINSTON_STATISTICS
     if (winston::hal::now().time_since_epoch() > nextSWJPrint)

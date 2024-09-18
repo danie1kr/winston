@@ -56,7 +56,8 @@ namespace winston
 			}*/
 
 			this->setupSignals();
-			this->setupDetectors();
+			if(this->setupDetectors() != Result::OK)
+				logger.err("Could not set up Detectors.");
 
 			this->railway->validateFinal();
 #ifdef WINSTON_REALWORLD
@@ -491,13 +492,13 @@ namespace winston
 		}
 #endif
 
-		bool loop()
+		const Result loop()
 		{
 			{
 #ifdef WINSTON_STATISTICS
 				StopwatchJournal::Event tracer(this->stopWatchJournal, "digitalCentralStation loop");
 #endif
-				this->digitalCentralStation->tick();
+				this->digitalCentralStation->loop();
 			}
 			{
 #ifdef WINSTON_LOCO_TRACKING
@@ -518,6 +519,13 @@ namespace winston
 			}
 			{
 #ifdef WINSTON_STATISTICS
+				StopwatchJournal::Event tracer(this->stopWatchJournal, "detector network device");
+#endif
+				if(this->detectorDevice)
+					this->detectorDevice->loop();
+			}
+			{
+#ifdef WINSTON_STATISTICS
 				winston::StopwatchJournal::Event tracer(this->stopWatchJournal, "local loop");
 #endif
 				this->systemLoop();
@@ -526,7 +534,7 @@ namespace winston
 #ifdef WINSTON_STATISTICS
 				winston::StopwatchJournal::Event tracer(this->stopWatchJournal, "signalTower");
 #endif
-				return this->signalTower->work();
+				return this->signalTower->loop();
 			}
 		};
 		using Railway = _Railway;
@@ -546,7 +554,7 @@ namespace winston
 		virtual void populateSheds() = 0;
 
 		virtual void setupSignals() = 0;
-		virtual void setupDetectors() = 0;
+		virtual const winston::Result setupDetectors() = 0;
 
 		void addLocomotive(const winston::Locomotive::Callbacks callbacks, const Address address, const winston::Locomotive::Functions functions, const Position start, const Locomotive::ThrottleSpeedMap speedMap, const std::string name, const unsigned int length, const Locomotive::Types types)
 		{
@@ -608,6 +616,8 @@ namespace winston
 		}
 
 		TimePoint lastTurnoutToggleRequest{ winston::hal::now() };
+
+		Looper::Shared detectorDevice;
 	};
 }
 

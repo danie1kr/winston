@@ -8,9 +8,13 @@
 
 namespace winston
 {
-	class DigitalCentralStation : public Shared_Ptr<DigitalCentralStation>
+	class DigitalCentralStation : public Shared_Ptr<DigitalCentralStation>, public Looper
 	{
 	public:
+
+		using Shared_Ptr<DigitalCentralStation>::make;
+		using Shared_Ptr<DigitalCentralStation>::Shared;
+
 		class TurnoutAddressTranslator : public Shared_Ptr<TurnoutAddressTranslator>
 		{
 		public:
@@ -91,7 +95,6 @@ namespace winston
 		virtual ~DigitalCentralStation() = default;
 
 		virtual const winston::Result connect() = 0;
-		virtual const winston::Result tick() = 0;
 
 		virtual void requestTurnoutInfo(Turnout& turnout) = 0;
 		virtual void requestDoubleSlipTurnoutInfo(DoubleSlipTurnout& turnout) = 0;

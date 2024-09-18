@@ -41,27 +41,31 @@ namespace winston
 	{
 	public:
 
-		struct Callbacks
+		struct Callbacks : public Detector::Callbacks
 		{
 			using LocoFromAddress = std::function<Locomotive::Shared(const Address address)>;
+
+			LocoFromAddress locoFromAddress;
+			Change change;
+			Occupied occupied;
 		};
 
-		DetectorDevice(const std::string name, Callbacks::LocoFromAddress locofromAddressCallback);
+		DetectorDevice(const std::string name);
 
 		using PortSegmentMap = std::map<size_t, Segment::Shared>;
 		using PortDetectorMap = std::map<size_t, winston::Detector::Shared>;
 		
 		virtual ~DetectorDevice() = default;
-		virtual const Result init(PortSegmentMap ports, Detector::Callbacks::Change changeCallback) = 0;
+		virtual const Result init(PortSegmentMap ports, Callbacks callbacks) = 0;
+		virtual const bool isReady() = 0;
 		const std::string name;
 
 	protected:
 		PortDetectorMap ports;
+		const Callbacks callbacks;
 
 		const Result change(const size_t port, const Address locoAddress, const Detector::Change change);
 		const Result occupied(const size_t port, const Detector::Change change);
-
-	private:
-		Callbacks::LocoFromAddress locofromAddressCallback;
+		const Result initInternal(Callbacks callbacks);
 	};
 }

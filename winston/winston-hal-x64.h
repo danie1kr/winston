@@ -237,12 +237,12 @@ class WebSocketClientWin : public winston::WebSocketClient<ConnectionWSPP>
 public:
 	using Client = ConnectionWSPP;
 	WebSocketClientWin();
-	~WebSocketClientWin() = default;
+	virtual ~WebSocketClientWin() = default;
 
 	const winston::Result init(OnMessage onMessage);
 	const winston::Result connect(const winston::URI& uri);
 	void send(const std::string message);
-	void step();
+	const winston::Result loop();
 	void shutdown();
 	const bool connected();
 	const size_t maxMessageSize();

@@ -5,10 +5,12 @@
 #include "../libwinston/HAL.h"
 #include "../libwinston/WinstonTypes.h"
 
+#include "../libwinston/Detector.h"
+
 // see https://lokstoredigital.jimdoweb.com/service/ger%C3%A4te-api/allgemeines/
 // and https://www.lokstoredigital.de/hardware/melden/lodi-s88-commander/
 
-class LoDi : public winston::Shared_Ptr<LoDi>
+class LoDi : public winston::Shared_Ptr<LoDi>, public winston::Looper
 {
 public:
 
@@ -98,15 +100,24 @@ public:
 	using winston::Shared_Ptr<LoDi>::Shared;
 	using winston::Shared_Ptr<LoDi>::make;
 
-	const winston::Result tick();
+	const winston::Result loop();
 
-	class S88Commander : public winston::Shared_Ptr<S88Commander>
+	class S88Commander : public winston::Shared_Ptr<S88Commander>, public winston::DetectorDevice
 	{
 	public:
-		S88Commander(LoDi::Shared loDi);
+		enum class State
+		{
+			Initializing = 0,
+			Ready = 1,
+			Unknown = 0xF0
+		};
+
+		S88Commander(LoDi::Shared loDi, const std::string name);
 		virtual ~S88Commander() = default;
 
-		const winston::Result init();
+		const winston::Result init(PortSegmentMap ports, Callbacks callbacks);
+		const State state();
+		virtual const bool isReady();
 
 		const winston::Result getVersion();
 		const winston::Result deviceConfigGet();
@@ -114,7 +125,7 @@ public:
 		const winston::Result s88ModulNameGet();
 		const winston::Result s88ChannelNamesGet();
 		const winston::Result s88MelderGet();
-		const winston::Result s88LokAddrGet();
+		const winston::Result s88LokAddrGet(const uint8_t module);
 		const winston::Result s88CurrentLevelsGet();
 		const winston::Result s88EventsActivate(const bool activate);
 
@@ -123,10 +134,20 @@ public:
 
 	private: 
 		LoDi::Shared loDi;
+		State _state;
+
+		enum class Initialized : unsigned int
+		{
+			Uninitialized = 0b0000,
+			Version = 0b0001,
+			DeviceConfig = 0b0010,
+			EventsActive = 0b0100,
+			Finished = 0b0111
+		};
+		unsigned int initializedComponents;
 	};
 
-	const std::vector<S88Commander::Shared> s88Commanders() const;
-	S88Commander::Shared s88Commander(unsigned int id) const;
+	S88Commander::Shared createS88Commander(winston::hal::Socket::Shared socket) const;
 
 private:
 	const winston::Result send(const API::Command command, const Payload payload, PacketCallback callback);
@@ -136,7 +157,7 @@ private:
 	const winston::Result processEvent(const API::Event event, const Payload payload);
 	const uint8_t nextPacketNumber();
 private:
-	std::vector<S88Commander::Shared> s88;
+
 	uint8_t packetNumber;
 	winston::hal::Socket::Shared socket;
 

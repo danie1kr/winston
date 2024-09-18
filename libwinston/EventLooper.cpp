@@ -4,8 +4,9 @@ namespace winston
 {
 
 	EventLooper::EventLooper()
+		: Looper()
 #if defined(WINSTON_STATISTICS) && defined(WINSTON_STATISTICS_DETAILLED)
-		: stopwatchJournal("EventLooper")
+		, stopwatchJournal("EventLooper")
 #endif
 	{
 	}
@@ -15,7 +16,7 @@ namespace winston
 		this->commands.push(std::move(command));
 	}
 
-	bool EventLooper::work()
+	const Result EventLooper::loop()
 	{
 		if (this->commands.size() > 0)
 		{
@@ -34,9 +35,9 @@ namespace winston
 			if (state == State::Running || state == State::Delay)
 				this->commands.push(std::move(command));
 
-			return state == State::Running || state == State::Finished;
+			return (state == State::Running || state == State::Finished) ? Result::OK : Result::Idle;
 		}
-		return false;
+		return Result::Idle;
 	}
 
 #if defined(WINSTON_STATISTICS) && defined(WINSTON_STATISTICS_DETAILLED)

@@ -51,9 +51,6 @@
     <ClCompile Include="TLC5947_SignalDevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LoDi_GBM8_DetectorDevice.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="LoDi_API.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -106,9 +103,6 @@
     </ClInclude>
     <ClInclude Include="external\mio.hpp">
       <Filter>external</Filter>
-    </ClInclude>
-    <ClInclude Include="LoDi_GBM8_DetectorDevice.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LoDi_API.h">
       <Filter>Header Files</Filter>

@@ -2,12 +2,12 @@
 #include "LoDi_API.h"
 
 LoDi::LoDi(winston::hal::Socket::Shared socket)
-	: winston::Shared_Ptr<LoDi>(), socket(socket), packetNumber(1)
+	: winston::Shared_Ptr<LoDi>(), winston::Looper(), socket(socket), packetNumber(1)
 {
 
 }
 
-const winston::Result LoDi::tick()
+const winston::Result LoDi::loop()
 {
 	std::vector<unsigned char> data;
 	auto result = this->socket->recv(data);
@@ -23,7 +23,7 @@ const winston::Result LoDi::processBuffer()
 {
 	if (this->buffer.size() >= 5)
 	{
-		unsigned int packetSize = ((unsigned int)this->buffer[0]) << 8 + this->buffer[1];
+		unsigned int packetSize = (((unsigned int)this->buffer[0]) << 8) + this->buffer[1];
 		if (this->buffer.size() >= packetSize + 2)
 		{
 			std::vector<uint8_t> packet;
@@ -195,17 +195,120 @@ const winston::Result LoDi::sendAgain(PacketAndCallback& packetAndCallback)
 	return winston::Result::OK;
 }
 
-const winston::Result LoDi::S88Commander::init()
-{
-	this->getVersion();
-	this->s88EventsActivate(true);
-	return winston::Result::OK;
-}
-
 const uint8_t LoDi::nextPacketNumber()
 {
 	this->packetNumber = (this->packetNumber % 250) + 1;
 	return this->packetNumber;
+}
+
+LoDi::S88Commander::S88Commander(LoDi::Shared loDi, const std::string name)
+	: winston::Shared_Ptr<S88Commander>(), winston::DetectorDevice(name), loDi(loDi), _state(State::Unknown), initializedComponents((unsigned int)Initialized::Uninitialized)
+{
+
+}
+
+const winston::Result LoDi::S88Commander::init(PortSegmentMap portSegmentMap, Callbacks callbacks)
+{
+	this->_state = State::Initializing;
+
+	if (const auto result = this->initInternal(callbacks); result != winston::Result::OK)
+		return result;
+
+	for (auto& portSegment : portSegmentMap)
+		this->ports.insert(std::make_pair(portSegment.first, winston::Detector::make(winston::build(this->name, " ", portSegment.first), portSegment.second, callbacks.change)));
+
+	this->getVersion();
+	this->deviceConfigGet();
+	this->s88EventsActivate(true);
+	
+	return winston::Result::OK;
+}
+
+const LoDi::S88Commander::State LoDi::S88Commander::state()
+{
+	if(this->initializedComponents & (unsigned int)Initialized::Finished)
+		this->_state = State::Ready;
+	return this->_state;
+}
+
+const bool LoDi::S88Commander::isReady()
+{
+	return this->state() == State::Ready;
+}
+
+const winston::Result LoDi::S88Commander::getVersion()
+{
+	Payload payload;
+	return this->loDi->send(LoDi::API::Command::GetVersion, payload,
+		[this](const Payload payload) -> const winston::Result
+		{
+			if (payload.size() == 4)
+			{
+				this->initializedComponents &= (unsigned int)Initialized::Version;
+				if (payload[0] == 0x0A)
+				{
+					winston::logger.info("LoDi S88 Commander version: ", payload[1], ".", payload[2], ".", payload[3]);
+					return winston::Result::OK;
+				}
+				else
+				{
+					winston::logger.err("LoDi expected Device type 0x0A but got: ", winston::hex(payload[0]));
+					return winston::Result::ExternalHardwareFailed;
+				}
+			}
+			else
+			return winston::Result::InvalidParameter;
+		}
+	);
+}
+
+const winston::Result LoDi::S88Commander::deviceConfigGet()
+{
+	Payload payload;
+	return this->loDi->send(LoDi::API::Command::DeviceConfigGet, payload,
+		[this](const Payload payload) -> const winston::Result
+		{
+			if (payload.size() == 16)
+			{
+				this->initializedComponents &= (unsigned int)Initialized::DeviceConfig;
+				winston::logger.info("LoDi S88 Commander Device Config Bus0: ", payload[0], ", Bus1: ", payload[1]);
+
+				return winston::Result::OK;
+			}
+			else
+				return winston::Result::InvalidParameter;
+		}
+	);
+}
+
+const winston::Result LoDi::S88Commander::s88BusModulesGet()
+{
+	return winston::Result::NotImplemented;
+}
+
+const winston::Result LoDi::S88Commander::s88ModulNameGet()
+{
+	return winston::Result::NotImplemented;
+}
+
+const winston::Result LoDi::S88Commander::s88ChannelNamesGet()
+{
+	return winston::Result::NotImplemented;
+}
+
+const winston::Result LoDi::S88Commander::s88MelderGet()
+{
+	return winston::Result::NotImplemented;
+}
+
+const winston::Result LoDi::S88Commander::s88LokAddrGet(const uint8_t module)
+{
+	return winston::Result::NotImplemented;
+}
+
+const winston::Result LoDi::S88Commander::s88CurrentLevelsGet()
+{
+	return winston::Result::NotImplemented;
 }
 
 const winston::Result LoDi::S88Commander::s88EventsActivate(const bool activate)
@@ -213,16 +316,11 @@ const winston::Result LoDi::S88Commander::s88EventsActivate(const bool activate)
 	Payload payload;
 	payload.push_back(activate ? 1 : 0);
 	return this->loDi->send(LoDi::API::Command::S88EventsActivate, payload, 
-		[](const Payload payload) -> const winston::Result
+		[this](const Payload payload) -> const winston::Result
 		{
 			// no payload expected
+			this->initializedComponents &= (unsigned int)Initialized::EventsActive;
 			return payload.size() == 0 ? winston::Result::OK : winston::Result::InvalidParameter;
 		}
 	);
-}
-
-LoDi::S88Commander::S88Commander(LoDi::Shared loDi)
-	: winston::Shared_Ptr<S88Commander>(), loDi(loDi)
-{
-
 }

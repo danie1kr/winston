@@ -137,7 +137,6 @@
     <ClCompile Include="FT232_Device.cpp" />
     <ClInclude Include="external\mio.hpp" />
     <ClInclude Include="Kornweinheim.hpp" />
-    <ClCompile Include="LoDi_GBM8_DetectorDevice.cpp" />
     <ClCompile Include="LoDi_API.cpp" />
     <ClCompile Include="railways.cpp" />
     <ClCompile Include="TimeSaver.cpp">
@@ -162,7 +161,6 @@
     <ClInclude Include="external\ftdi-232\libMPSSE_spi.h" />
     <ClInclude Include="FT232_Device.h" />
     <ClInclude Include="Kornweinheim.h" />
-    <ClInclude Include="LoDi_GBM8_DetectorDevice.h" />
     <ClInclude Include="LoDi_API.h" />
     <ClInclude Include="railways.h" />
     <ClInclude Include="resources.h" />

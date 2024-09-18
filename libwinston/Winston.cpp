@@ -29,6 +29,12 @@ namespace winston
 	RuntimeHardwareState runtimeHardwareState;
 	RuntimeHardwareState::RuntimeHardwareState() : state(0) { };
 
+	Looper::Looper()
+		: Shared_Ptr<Looper>()
+	{
+
+	}
+
 	void logRuntimeStatus()
 	{
 #define RHS_Print(what) logger.info(#what ": o", runtime##what() ? "n" : "ff");

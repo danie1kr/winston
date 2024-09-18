@@ -28,7 +28,7 @@ public:
     void processPacket(uint8_t *packet);
 
     const winston::Result connect();
-    const winston::Result tick();
+    const winston::Result loop();
 
     void requestTurnoutInfo(winston::Turnout& turnout);
     void requestDoubleSlipTurnoutInfo(winston::DoubleSlipTurnout& turnout);

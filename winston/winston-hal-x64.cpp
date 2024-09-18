@@ -730,10 +730,12 @@ void WebSocketClientWin::send(const std::string message)
         this->client.send(this->connection->get_handle(), message, websocketpp::frame::opcode::text);
 }
 
-void WebSocketClientWin::step()
+const winston::Result WebSocketClientWin::loop()
 {
     if (this->connected())// && this->client.poll_one())
         this->client.poll_one();
+
+    return winston::Result::OK;
 }
 
 void WebSocketClientWin::shutdown()

@@ -506,8 +506,32 @@ ms	32	         2,55	  6,13	  8,17	 12,26	 16,35
     return winston::Result::OK;
 }
 
-void Kornweinheim::setupDetectors()
+const winston::Result Kornweinheim::setupDetectors()
 {
+    this->loDiSocket = TCPSocket::make(loDiIP, loDiPort);
+    this->loDi = LoDi::make(this->loDiSocket);
+    this->detectorDevice = this->loDi;
+
+    this->loDi->discover();
+    
+    unsigned int count = 0;
+    while (count++ < 24)
+    {
+        this->loDi->loop();
+        winston::hal::delay(50);
+    }
+
+    this->loDiCommander = this->loDi->createS88Commander(this->loDiSocket);
+
+    count = 0;
+    while (!loDiCommander->isReady() && count++ < 24)
+    {
+        this->loDi->loop();
+        winston::hal::delay(50);
+    }
+
+    return winston::Result::OK;
+
 }
 
 void Kornweinheim::systemSetupComplete()

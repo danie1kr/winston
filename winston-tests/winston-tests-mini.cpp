@@ -106,7 +106,7 @@ namespace winstontests
             auto direction = winston::Turnout::Direction::A_C;
             signalTower->order(winston::Command::make([t1, direction](const winston::TimePoint &created) -> const winston::State { return t1->finalizeChangeTo(direction);  }));
             for (int i = 0; i < 10; ++i)
-                signalTower->work();
+                signalTower->loop();
             Assert::IsTrue(t1->direction() == direction);
             Assert::IsTrue(a->traverse(winston::Track::Connection::DeadEnd, onto, false));
             Assert::IsTrue(onto->traverse(winston::Track::Connection::A, onto2, false));
@@ -128,7 +128,7 @@ namespace winstontests
             auto direction = winston::Turnout::Direction::A_B;
             signalTower->order(winston::Command::make([t1](const winston::TimePoint &created) -> const winston::State { return t1->startToggle(); }));
             for (int i = 0; i < 10; ++i)
-                signalTower->work();
+                signalTower->loop();
             Assert::IsTrue(t1->direction() == winston::Turnout::Direction::Changing);
 
             Assert::IsFalse(t1->traverse(winston::Track::Connection::A, onto, false));
@@ -137,7 +137,7 @@ namespace winstontests
 
             signalTower->order(winston::Command::make([t1, direction](const winston::TimePoint &created) -> const winston::State { return t1->finalizeChangeTo(direction); }));
             for (int i = 0; i < 10; ++i)
-                signalTower->work();
+                signalTower->loop();
             Assert::IsTrue(t1->direction() == direction);
             
             Assert::IsTrue(a->traverse(winston::Track::Connection::DeadEnd, onto, false));
@@ -162,19 +162,19 @@ namespace winstontests
 
             signalTower->setSignalsFor(*t1);
             for (int i = 0; i < 10; ++i)
-                signalTower->work();
+                signalTower->loop();
             Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sCA->shows(winston::Signal::Aspect::Halt));
 
             signalTower->order(winston::Command::make([t1](const winston::TimePoint &created) -> const winston::State { return t1->finalizeChangeTo(winston::Turnout::Direction::A_C); }));
             for (int i = 0; i < 10; ++i)
-                signalTower->work();
+                signalTower->loop();
             Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(sCA->shows(winston::Signal::Aspect::Go));
             
             signalTower->order(winston::Command::make([t1](const winston::TimePoint &created) -> const winston::State { return t1->finalizeChangeTo(winston::Turnout::Direction::A_B); }));
             for (int i = 0; i < 10; ++i)
-                signalTower->work();
+                signalTower->loop();
             Assert::IsTrue(sBA->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(sCA->shows(winston::Signal::Aspect::Halt));
         }

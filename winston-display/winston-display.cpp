@@ -494,8 +494,8 @@ void winston_loop()
 #endif
         lvgl_loop();
 
-    eventLooper.work();
-    webSocketClient.step();
+    eventLooper.loop();
+    webSocketClient.loop();
 }
 
 #ifdef WINSTON_PLATFORM_WIN_x64

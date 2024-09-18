@@ -136,7 +136,7 @@ const winston::Result Z21::requestEmergencyStop(const bool emergencyStop)
         return this->send(this->setTrackPowerOn());
 }
 
-const winston::Result Z21::tick()
+const winston::Result Z21::loop()
 {
 //    if (this->socketListen->isConnected())
     {

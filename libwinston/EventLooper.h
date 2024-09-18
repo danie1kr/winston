@@ -6,14 +6,14 @@
 
 namespace winston
 {
-	class EventLooper : public Shared_Ptr<EventLooper>
+	class EventLooper : public Looper, public Shared_Ptr<EventLooper>
 	{
 	public:
 		EventLooper();
 		~EventLooper() = default;
 
 		void order(Command::Shared command);
-		bool work();
+		const Result loop();
 		using Shared_Ptr<EventLooper>::Shared;
 		using Shared_Ptr<EventLooper>::make;
 

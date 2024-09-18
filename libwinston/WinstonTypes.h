@@ -53,7 +53,8 @@ namespace winston
 		InvalidParameter,
 		OutOfMemory,
 		NotImplemented,
-		Retry
+		Retry,
+		Idle,
 	};
 
 	enum class Features : unsigned int
@@ -73,18 +74,7 @@ namespace winston
 	{
 		return static_cast<bool>(static_cast<int>(a) & static_cast<int>(b));
 	}
-/*
-	class Port
-	{
-	public:
-		Port(const size_t device, const size_t port);
 
-		const size_t device() const;
-		const size_t port() const;
-	private:
-		const size_t _device;
-		const size_t _port;
-	};*/
 	using Port = unsigned int;
 
 	// from https://stackoverflow.com/a/14941915
@@ -151,6 +141,16 @@ namespace winston
 		}
 	};
 #endif
+
+	class Looper : public Shared_Ptr<Looper>
+	{
+	public:
+		Looper();
+		virtual ~Looper() = default;
+		virtual const Result loop() = 0;
+		using Shared_Ptr<Looper>::Shared;
+		using Shared_Ptr<Looper>::make;
+	};
 
 	class Device : public Shared_Ptr<Device>
 	{
@@ -312,6 +312,7 @@ namespace winston
 	class Segment;
 	class Section;
 	class Detector;
+	class DetectorDevice;
 	template<typename T> class DetectorAddressable;
 	using DCCDetector = DetectorAddressable<Address>;
 	class Track;

@@ -21,6 +21,8 @@
 #include "external/central-z21/Z21.h"
 #include "TLC5947_SignalDevice.h"
 
+#include "LoDi_API.h"
+
 constexpr auto FRAME_SLEEP = 5;
 
 //#define RAILWAY_CLASS RailwayWithSiding
@@ -34,7 +36,7 @@ class Kornweinheim : public winston::ModelRailwaySystem<RAILWAY_CLASS, RAILWAY_C
 {
 private:
     void setupSignals();
-    void setupDetectors();
+    const winston::Result setupDetectors();
 
     winston::DigitalCentralStation::Callbacks z21Callbacks();
     winston::Locomotive::Callbacks locoCallbacks();
@@ -69,7 +71,12 @@ private:
     std::vector<SignalInterfaceDevice::Shared> signalInterfaceDevices;
     std::vector<winston::SignalDevice::Shared> signalDevices;
 
-    //std::vector<winston::Signal::Shared> signals;
+    /* Detectors using lokstore digital hardware */
+    const std::string loDiIP = { "192.168.188.101" };
+    const unsigned short loDiPort = 11092;
+    TCPSocket::Shared loDiSocket;
+    LoDi::Shared loDi;
+    LoDi::S88Commander::Shared loDiCommander;
 
     /*
     * cie1931 linear LED-PWM mapping

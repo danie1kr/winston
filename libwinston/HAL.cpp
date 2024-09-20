@@ -13,6 +13,33 @@ namespace winston
 			return this->state == State::Connected;
 		}
 
+		DebugSocket::DebugSocket(const std::string ip, const unsigned short port, const Listener listener)
+			: Socket(ip, port), Shared_Ptr<DebugSocket>(), listener(listener), buffer()
+		{
+
+		}
+
+		const Result DebugSocket::send(const std::vector<unsigned char> data)
+		{
+			return this->listener(*this, data);
+		}
+
+		const Result DebugSocket::recv(std::vector<unsigned char>& data)
+		{
+			if (!this->buffer.empty())
+			{
+				const auto &packet = this->buffer.front();
+				data.insert(data.begin(), packet.begin(), packet.end());
+				this->buffer.pop();
+			}
+			return Result::OK;
+		}
+
+		void DebugSocket::addRecvPacket(const Packet data)
+		{
+			this->buffer.push(data);
+		}
+
 		StorageInterface::StorageInterface(const size_t maxSize)
 			: Shared_Ptr<StorageInterface>(), maxSize(maxSize)
 		{

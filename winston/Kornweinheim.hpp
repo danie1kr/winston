@@ -508,7 +508,31 @@ ms	32	         2,55	  6,13	  8,17	 12,26	 16,35
 
 const winston::Result Kornweinheim::setupDetectors()
 {
+#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
+    this->loDiSocket = winston::hal::DebugSocket::make(loDiIP, loDiPort, 
+        [](winston::hal::DebugSocket& socket, const std::vector<unsigned char> data) -> const winston::Result
+        {
+            const auto type = (LoDi::API::PacketType)data[2];
+            const auto command = (LoDi::API::Command)data[3];
+            const uint8_t number = data[4];
+            if (type == LoDi::API::PacketType::REQ && command == LoDi::API::Command::GetVersion)
+            {
+                winston::hal::DebugSocket::Packet packet;
+                packet.push_back(0);     // size
+                packet.push_back(7);     // size
+                packet.push_back(0x21);  // ACK
+                packet.push_back(0x0F);  // GetVersion
+                packet.push_back(number);// Packet number
+                packet.push_back(24);    // major
+                packet.push_back(0);     // minor
+                packet.push_back(1);     // patch
+                socket.addRecvPacket(packet);
+            }
+            return winston::Result::OK;
+        });
+#else
     this->loDiSocket = TCPSocket::make(loDiIP, loDiPort);
+#endif
     this->loDi = LoDi::make(this->loDiSocket);
     this->detectorDevice = this->loDi;
 

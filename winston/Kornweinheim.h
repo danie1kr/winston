@@ -74,7 +74,7 @@ private:
     /* Detectors using lokstore digital hardware */
     const std::string loDiIP = { "192.168.188.101" };
     const unsigned short loDiPort = 11092;
-    TCPSocket::Shared loDiSocket;
+    winston::hal::Socket::Shared loDiSocket;
     LoDi::Shared loDi;
     LoDi::S88Commander::Shared loDiCommander;
 

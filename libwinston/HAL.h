@@ -3,6 +3,8 @@
 
 #include <string>
 #include <vector>
+#include <functional>
+#include <queue>
 #include "../libwinston/WinstonTypes.h"
 
 #if !defined(__PRETTY_FUNCTION__) && !defined(__GNUC__)
@@ -44,6 +46,7 @@ namespace winston
 			};
 
 			Socket(const std::string ip, const unsigned short port);
+			virtual ~Socket() = default;
 			virtual const Result send(const std::vector<unsigned char> data) = 0;
 			virtual const Result recv(std::vector<unsigned char>& data) = 0;
 
@@ -51,6 +54,27 @@ namespace winston
 
 		protected:
 			State state;
+		};
+
+		class DebugSocket : public Socket, public Shared_Ptr<DebugSocket>
+		{
+		public:
+			using Listener = std::function<const Result(DebugSocket &socket, const std::vector<unsigned char> data)>;
+
+			DebugSocket(const std::string ip, const unsigned short port, const Listener listener);
+			virtual ~DebugSocket() = default;
+			const Result send(const std::vector<unsigned char> data);
+			const Result recv(std::vector<unsigned char>& data);
+			using Shared_Ptr<DebugSocket>::Shared;
+			using Shared_Ptr<DebugSocket>::make;
+
+			using Packet = std::vector<uint8_t>;
+			void addRecvPacket(const Packet data);
+
+		private:
+			
+			std::queue<Packet> buffer;
+			const Listener listener;
 		};
 
 		template<typename T>

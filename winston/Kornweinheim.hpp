@@ -374,59 +374,102 @@ void Kornweinheim::setupSignals()
         return winston::State::Finished;
     };
 
+#ifdef WINSTON_KLEINWEINHEIM
+    
+    // Pbf
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::PBF1), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::PBF1), winston::Track::Connection::B, 5U, signalUpdateCallback);
+
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::PBF2), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::PBF2), winston::Track::Connection::B, 5U, signalUpdateCallback);
+
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::PBF1a), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    
+    // N + LS
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::N1), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::N2), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::N3), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::LS1), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::LS2), winston::Track::Connection::A, 5U, signalUpdateCallback);
+
+    // Track
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B1), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B1), winston::Track::Connection::B, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B2), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B2), winston::Track::Connection::B, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B3), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B3), winston::Track::Connection::B, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B4), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B4), winston::Track::Connection::B, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B5), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B5), winston::Track::Connection::B, 5U, signalUpdateCallback);
+
+    // leaving inner tracks
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::Z1), winston::Track::Connection::B, 5U, signalUpdateCallback);
+
+    unsigned int dncPort = 999;
+    dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Tracks::N1), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+    dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Tracks::N2), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+    dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Tracks::N3), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+    dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Tracks::LS1), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+    dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Tracks::LS2), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+    dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Tracks::PBF1a), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+
+#else
     // PBF
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF1), winston::Track::Connection::B, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF2), winston::Track::Connection::B, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF3a), winston::Track::Connection::B, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF1), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF2), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF3), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalH>(this->railway->track(Y2021RailwayTracks::PBF1a), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::PBF1), winston::Track::Connection::B, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::PBF2), winston::Track::Connection::B, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::PBF3a), winston::Track::Connection::B, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::PBF1), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::PBF2), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::PBF3), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalH>(this->railway->track(Tracks::PBF1a), winston::Track::Connection::A, 5U, signalUpdateCallback);
 
     // rechte Strecke
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B1), winston::Track::Connection::B, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B4), winston::Track::Connection::B, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalH>(this->railway->track(Y2021RailwayTracks::B1), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalH>(this->railway->track(Y2021RailwayTracks::B4), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B1), winston::Track::Connection::B, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B4), winston::Track::Connection::B, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalH>(this->railway->track(Tracks::B1), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalH>(this->railway->track(Tracks::B4), winston::Track::Connection::A, 5U, signalUpdateCallback);
 
     // obere Strecke
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B2), winston::Track::Connection::B, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B5), winston::Track::Connection::B, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B2), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B5), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B2), winston::Track::Connection::B, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B5), winston::Track::Connection::B, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B2), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B5), winston::Track::Connection::A, 5U, signalUpdateCallback);
     
     // linke Strecke
-    this->signalController->attach<winston::SignalH>(this->railway->track(Y2021RailwayTracks::B3), winston::Track::Connection::B, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalH>(this->railway->track(Y2021RailwayTracks::B6), winston::Track::Connection::B, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B3), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::B6), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalH>(this->railway->track(Tracks::B3), winston::Track::Connection::B, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalH>(this->railway->track(Tracks::B6), winston::Track::Connection::B, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B3), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B6), winston::Track::Connection::A, 5U, signalUpdateCallback);
     
     // Abstellgleise
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::PBF_To_N), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalH>(this->railway->track(Y2021RailwayTracks::N1), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalH>(this->railway->track(Y2021RailwayTracks::N2), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalH>(this->railway->track(Y2021RailwayTracks::N3), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::PBF_To_N), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalH>(this->railway->track(Tracks::N1), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalH>(this->railway->track(Tracks::N2), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalH>(this->railway->track(Tracks::N3), winston::Track::Connection::A, 5U, signalUpdateCallback);
 
     // GBF
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::GBF1), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::GBF2), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF4a), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::GBF4b), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF4b), winston::Track::Connection::B, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF3a), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Y2021RailwayTracks::GBF3b), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalH>(this->railway->track(Y2021RailwayTracks::GBF3b), winston::Track::Connection::B, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::GBF1), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::GBF2), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalH>(this->railway->track(Tracks::GBF4a), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::GBF4b), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalH>(this->railway->track(Tracks::GBF4b), winston::Track::Connection::B, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalH>(this->railway->track(Tracks::GBF3a), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::GBF3b), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalH>(this->railway->track(Tracks::GBF3b), winston::Track::Connection::B, 5U, signalUpdateCallback);
 
     // don't care for ports here
     unsigned int dncPort = 999;
-    dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::N1), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
-    dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::N2), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
-    dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::N3), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
-    dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::PBF1a), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
-    dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::GBF1), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
-    dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::GBF2), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
-    dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::GBF3a), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
-    dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Y2021RailwayTracks::GBF4a), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+    dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Tracks::N1), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+    dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Tracks::N2), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+    dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Tracks::N3), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+    dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Tracks::PBF1a), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+    dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Tracks::GBF1), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+    dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Tracks::GBF2), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+    dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Tracks::GBF3a), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+    dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Tracks::GBF4a), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+#endif
 }
 
 void Kornweinheim::systemLoop()
@@ -546,6 +589,29 @@ const winston::Result Kornweinheim::setupDetectors()
     }
 
     this->loDiCommander = this->loDi->createS88Commander(this->loDiSocket);
+
+    winston::DetectorDevice::PortSegmentMap portSegmentMap;
+    for (auto const& [id, segment] : this->railway->segments())
+        portSegmentMap.insert({ id, segment });
+    
+    winston::DetectorDevice::Callbacks callbacks;
+    callbacks.change = 
+        [](const std::string detectorName, const winston::Locomotive::Shared loco, winston::Segment::Shared segment, const winston::Detector::Change change, const winston::TimePoint when) -> const winston::Result 
+        { 
+            return winston::Result::NotImplemented; 
+        };
+    callbacks.occupied = 
+        [](const std::string detectorName, winston::Segment::Shared segment, const winston::Detector::Callbacks::Change change) -> const winston::Result 
+        { 
+            return winston::Result::NotImplemented; 
+        };
+    callbacks.locoFromAddress = 
+        [](const winston::Address address) -> winston::Locomotive::Shared 
+        { 
+            return nullptr; 
+        };
+
+    this->loDiCommander->init(portSegmentMap, callbacks);
 
     count = 0;
     while (!loDiCommander->isReady() && count++ < 24)

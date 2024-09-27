@@ -29,8 +29,12 @@ constexpr auto FRAME_SLEEP = 5;
 //#define RAILWAY_CLASS TimeSaverRailway
 //#define RAILWAY_CLASS Y2020Railway
 //#define RAILWAY_CLASS SignalRailway
-#define RAILWAY_CLASS Y2021Railway
 
+#ifdef WINSTON_KLEINWEINHEIM
+#define RAILWAY_CLASS Y2024Railway
+#else
+#define RAILWAY_CLASS Y2021Railway
+#endif
 
 class Kornweinheim : public winston::ModelRailwaySystem<RAILWAY_CLASS, RAILWAY_CLASS::AddressTranslator, Z21, WebServer>
 {
@@ -76,7 +80,7 @@ private:
     const unsigned short loDiPort = 11092;
     winston::hal::Socket::Shared loDiSocket;
     LoDi::Shared loDi;
-    LoDi::S88Commander::Shared loDiCommander;
+    winston::DetectorDevice::Shared loDiCommander;
 
     /*
     * cie1931 linear LED-PWM mapping

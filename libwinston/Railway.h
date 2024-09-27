@@ -56,12 +56,13 @@ namespace winston
 		virtual const TrackList trackList() const = 0;
 		virtual const RouteList routeList() const = 0;
 		virtual const SectionList sectionList() const = 0;
+		virtual const SegmentList segmentList() const = 0;
 
 	protected:
 		const Callbacks callbacks;
 	};
 
-	template<typename _TracksClass, typename _RoutesEnum = RoutesNone, typename _SectionsEnum = SectionsSingle>
+	template<typename _TracksClass, typename _RoutesEnum = RoutesNone, typename _SectionsEnum = SectionsSingle, size_t _Segments = 1>
 	class RailwayWithRails : public Railway
 	{
 	public:
@@ -98,6 +99,12 @@ namespace winston
 				return result;
 			}
 #endif
+			result = this->initSegments();
+			if (result != winston::Result::OK)
+			{
+				winston::logger.err("Railway::initSegments failed with ", result);
+				return result;
+			}
 
 			return winston::Result::OK;
 		}
@@ -492,6 +499,59 @@ namespace winston
 
 		RouteArray routes;
 
+	private:
+		template<typename _Key, typename _Segment>
+		const Result validateBaseSegments(std::map<_Key, typename _Segment::Shared>& segments, std::map<Tracks, typename _Segment::Shared>& trackSegments)
+		{
+			std::set<_TracksClass> marked;
+			for (auto& seg : segments)
+			{
+				if (seg.second && !seg.second->validate([&marked, this](const Track& track) -> const bool {
+					_TracksClass trackEnum = this->trackEnum(track);
+					if (marked.find(trackEnum) != marked.end())
+						return false;
+					else
+						marked.insert(trackEnum);
+					return true;
+					}))
+					return Result::ValidationFailed;
+
+				for (const auto& track : seg.second->tracks())
+					trackSegments[this->trackEnum(track)] = seg.second;
+			}
+
+			return marked.size() == _TracksClass::_size() ? Result::OK : Result::ValidationFailed;
+		}
+
+		template<typename _Segment>
+		typename _Segment::Shared nextBaseSegment(const Track::Shared& track, const Track::Connection entered)
+		{
+			typename _Segment::Shared initial = this->section(this->trackSections[this->trackEnum(track)]);
+			typename _Segment::Shared current = initial;
+
+			auto currentTrack = track;
+			auto connection = entered;
+
+			while (current == initial)
+			{
+				Signal::Shared signal;
+				const auto tr = Track::traverse<Track::TraversalSignalHandling::Ignore>(currentTrack, connection, signal,
+					[initial, &current, this](Track::Shared track, const Track::Connection connection) -> const Result {
+						current = this->section(this->trackSections[this->trackEnum(track)]);
+						if (current == initial)
+							return Result::OK;
+						else
+							return Result::NotFound;
+					});
+				if (tr == Track::TraversalResult::CancelledByCallback)
+				{
+					track = currentTrack;
+					return current;
+				}
+			}
+			return current;
+		}
+
 	public:
 		using Sections = _SectionsEnum;
 
@@ -499,16 +559,17 @@ namespace winston
 		{
 		public:
 			Section(const Sections id, const Type type, const TrackSet trackset) 
-				: winston::Section(id._to_string(), type, trackset), id{ id }
+				: winston::Section(id._to_string(), type, trackset), section{ id }
 			{
 
 			};
+			virtual ~Section() = default;
 
-			const Sections id;
+			const Sections section;
 			using Shared_Ptr<Section>::Shared;
 			using Shared_Ptr<Section>::make;
 		};
-		using SectionMap = std::unordered_map<Address, typename Section::Shared>;
+		using SectionMap = std::map<Sections, typename Section::Shared>;
 
 	protected:
 		SectionMap _sections;
@@ -548,26 +609,7 @@ namespace winston
 
 		const Result validateSections()
 		{
-			std::set<_TracksClass> marked;
-			for (auto& section : this->_sections)
-			{
-				if(section.second && !section.second->validate([&marked, this](const Track& track) -> const bool {
-					_TracksClass trackEnum = this->trackEnum(track);
-					if (marked.find(trackEnum) != marked.end())
-						return false;
-					else
-						marked.insert(trackEnum);
-					return true;
-					}))
-					return Result::ValidationFailed;
-
-				for (const auto& track : section.second->tracks())
-				{
-					this->trackSections[this->trackEnum(track)] = section.second;
-				}
-			}
-
-			return marked.size() == _TracksClass::_size() ? Result::OK : Result::ValidationFailed;
+			return this->validateBaseSegments<Sections, Section>(this->_sections, this->trackSections);
 		}
 
 		virtual typename Section::Shared define(const Sections section)
@@ -604,6 +646,76 @@ namespace winston
 		}
 
 	public:
+		using Segments = Id;
+
+		class Segment : public Shared_Ptr<Segment>, public winston::Segment
+		{
+		public:
+			Segment(const Segments id, const TrackSet trackset)
+				: winston::Segment(id, trackset), segment{ id }
+			{
+
+			};
+			virtual ~Segment() = default;
+
+			const Segments segment;
+			using Shared_Ptr<Segment>::Shared;
+			using Shared_Ptr<Segment>::make;
+		};
+		using SegmentMap = std::map<Segments, typename Segment::Shared>;
+
+	protected:
+		SegmentMap _segments;
+		std::map<Tracks, typename Segment::Shared> trackSegments;
+	public:
+
+		typename Segment::Shared segment(const Segments segment) const
+		{
+			auto it = this->_segments.find(segment);
+			if (it != this->_segments.end())
+				return it->second;
+			return nullptr;
+		}
+
+		const SegmentMap segments() const
+		{
+			return this->_segments;
+		}
+
+		virtual const bool supportSegments() const
+		{
+			return false;
+		}
+
+		const Result initSegments()
+		{
+			if (this->supportSegments())
+			{
+				for (unsigned int segment = 0; segment < _Segments; ++segment)
+					this->_segments[segment] = this->define(segment);
+
+				return this->validateSections();
+			}
+			else
+				return Result::OK;
+		}
+
+		const Result validateSegments()
+		{
+			return this->validateBaseSegments<Segments, Segment>(this->_segments, this->trackSegments);
+		}
+
+		virtual typename Segment::Shared define(const Segments section)
+		{
+			return nullptr;
+		}
+
+		typename Segment::Shared nextSegment(const Track::Shared& track, const Track::Connection entered)
+		{
+			return this->nextBaseSegment<Segment>(track, entered);
+		}
+
+	public:
 
 		const TrackList trackList() const
 		{
@@ -629,6 +741,16 @@ namespace winston
 
 			return list;
 		};
+
+		const SegmentList segmentList() const
+		{
+			SegmentList list;
+			for (auto it = this->_segments.begin(); it != this->_segments.end(); ++it)
+				list.push_back(it->second);
+
+			return list;
+		}
+
 #ifdef WINSTON_ENABLE_TURNOUT_GROUPS
 		const Result initTurnoutGroups()
 		{

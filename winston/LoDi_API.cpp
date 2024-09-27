@@ -2,24 +2,45 @@
 #include "LoDi_API.h"
 
 LoDi::LoDi(winston::hal::Socket::Shared socket)
-	: winston::Shared_Ptr<LoDi>(), winston::Looper(), socket(socket), packetNumber(1)
+	: winston::Shared_Ptr<LoDi>(), winston::Looper(), packetParser(socket)
 {
 
 }
 
+const winston::Result LoDi::discover()
+{
+	return winston::Result::OK;
+}
+
+LoDi::S88Commander::Shared LoDi::createS88Commander(winston::hal::Socket::Shared socket)
+{
+	return LoDi::S88Commander::make(socket, "LoDi Commander");
+}
+
 const winston::Result LoDi::loop()
+{
+	return this->packetParser.loop();
+}
+
+LoDi::PacketParser::PacketParser(winston::hal::Socket::Shared socket)
+	: Looper(), socket(socket), packetNumber(0)
+{
+
+}
+
+const winston::Result LoDi::PacketParser::loop()
 {
 	std::vector<unsigned char> data;
 	auto result = this->socket->recv(data);
 	if (data.size() > 0)
 		this->buffer.insert(this->buffer.end(), data.begin(), data.end());
-	
+
 	this->processBuffer();
 
 	return winston::Result::OK;
 }
 
-const winston::Result LoDi::processBuffer()
+const winston::Result LoDi::PacketParser::processBuffer()
 {
 	if (this->buffer.size() >= 5)
 	{
@@ -38,7 +59,7 @@ const winston::Result LoDi::processBuffer()
 	return winston::Result::OK;
 }
 
-const winston::Result LoDi::processPacket(const Payload payload)
+const winston::Result LoDi::PacketParser::processPacket(const Payload payload)
 {
 	const auto type = (LoDi::API::PacketType)payload[0];
 	const auto packetNumber = payload[2];
@@ -114,7 +135,7 @@ const winston::Result LoDi::processPacket(const Payload payload)
 	return winston::Result::OK;
 }
 
-const winston::Result LoDi::processEvent(const API::Event event, const Payload payload)
+const winston::Result LoDi::PacketParser::processEvent(const API::Event event, const Payload payload)
 {
 	switch (event)
 	{
@@ -163,7 +184,7 @@ const winston::Result LoDi::processEvent(const API::Event event, const Payload p
 	return winston::Result::OK;
 }
 
-const winston::Result LoDi::send(const LoDi::API::Command command, const Payload payload, PacketCallback callback)
+const winston::Result LoDi::PacketParser::send(const LoDi::API::Command command, const Payload payload, PacketCallback callback)
 {
 	uint8_t packetNumber = this->nextPacketNumber();
 	std::vector<uint8_t> data;
@@ -186,7 +207,7 @@ const winston::Result LoDi::send(const LoDi::API::Command command, const Payload
 	return winston::Result::OK;
 }
 
-const winston::Result LoDi::sendAgain(PacketAndCallback& packetAndCallback)
+const winston::Result LoDi::PacketParser::sendAgain(PacketAndCallback& packetAndCallback)
 {
 	packetAndCallback.sentAt = winston::hal::now();
 	packetAndCallback.sentCount++;
@@ -195,14 +216,14 @@ const winston::Result LoDi::sendAgain(PacketAndCallback& packetAndCallback)
 	return winston::Result::OK;
 }
 
-const uint8_t LoDi::nextPacketNumber()
+const uint8_t LoDi::PacketParser::nextPacketNumber()
 {
 	this->packetNumber = (this->packetNumber % 250) + 1;
 	return this->packetNumber;
 }
 
-LoDi::S88Commander::S88Commander(LoDi::Shared loDi, const std::string name)
-	: winston::Shared_Ptr<S88Commander>(), winston::DetectorDevice(name), loDi(loDi), _state(State::Unknown), initializedComponents((unsigned int)Initialized::Uninitialized)
+LoDi::S88Commander::S88Commander(winston::hal::Socket::Shared socket, const std::string name)
+	: winston::Shared_Ptr<S88Commander>(), winston::DetectorDevice(name), PacketParser(socket), _state(State::Unknown), initializedComponents((unsigned int)Initialized::Uninitialized)
 {
 
 }
@@ -239,7 +260,7 @@ const bool LoDi::S88Commander::isReady()
 const winston::Result LoDi::S88Commander::getVersion()
 {
 	Payload payload;
-	return this->loDi->send(LoDi::API::Command::GetVersion, payload,
+	return this->send(LoDi::API::Command::GetVersion, payload,
 		[this](const Payload payload) -> const winston::Result
 		{
 			if (payload.size() == 4)
@@ -265,7 +286,7 @@ const winston::Result LoDi::S88Commander::getVersion()
 const winston::Result LoDi::S88Commander::deviceConfigGet()
 {
 	Payload payload;
-	return this->loDi->send(LoDi::API::Command::DeviceConfigGet, payload,
+	return this->send(LoDi::API::Command::DeviceConfigGet, payload,
 		[this](const Payload payload) -> const winston::Result
 		{
 			if (payload.size() == 16)
@@ -315,7 +336,7 @@ const winston::Result LoDi::S88Commander::s88EventsActivate(const bool activate)
 {
 	Payload payload;
 	payload.push_back(activate ? 1 : 0);
-	return this->loDi->send(LoDi::API::Command::S88EventsActivate, payload, 
+	return this->send(LoDi::API::Command::S88EventsActivate, payload, 
 		[this](const Payload payload) -> const winston::Result
 		{
 			// no payload expected

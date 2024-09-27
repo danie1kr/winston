@@ -111,6 +111,8 @@ namespace winston {
 	class Segment : public BaseSegment<Id>, public Shared_Ptr<Segment>
 	{
 	public:
+		Segment(const IdentifyerType id, const TrackSet tracks);
+		virtual ~Segment() = default;
 		using Shared_Ptr<Segment>::Shared;
 		using Shared_Ptr<Segment>::make;
 	};

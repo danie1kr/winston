@@ -81,28 +81,54 @@ public:
 		const Payload payload;
 	};
 
-	using PacketCallback = std::function<const winston::Result(const Payload payload)>;
-
-	struct PacketAndCallback
-	{
-		Payload data;
-		API::Command command;
-		PacketCallback callback;
-		winston::TimePoint sentAt;
-		unsigned int sentCount;
-	};
-	using ExpectedResponses = std::map<uint8_t, PacketAndCallback>;
-	ExpectedResponses expectedResponse;
-
 	LoDi(winston::hal::Socket::Shared socket);
 	const winston::Result discover();
 
 	using winston::Shared_Ptr<LoDi>::Shared;
 	using winston::Shared_Ptr<LoDi>::make;
 
+private:
+	class PacketParser : public winston::Looper
+	{
+	public:
+
+		using PacketCallback = std::function<const winston::Result(const Payload payload)>;
+
+		struct PacketAndCallback
+		{
+			Payload data;
+			API::Command command;
+			PacketCallback callback;
+			winston::TimePoint sentAt;
+			unsigned int sentCount;
+		};
+		using ExpectedResponses = std::map<uint8_t, PacketAndCallback>;
+		ExpectedResponses expectedResponse;
+
+		PacketParser(winston::hal::Socket::Shared socket);
+		virtual ~PacketParser() = default;
+
+		const winston::Result loop();
+
+	protected:
+		const winston::Result send(const API::Command command, const Payload payload, PacketCallback callback);
+	private:
+		const winston::Result sendAgain(PacketAndCallback& packetAndCallback);
+		const winston::Result processBuffer();
+		const winston::Result processPacket(const Payload payload);
+		const winston::Result processEvent(const API::Event event, const Payload payload);
+		const uint8_t nextPacketNumber();
+
+		uint8_t packetNumber;
+		winston::hal::Socket::Shared socket;
+
+		std::deque<uint8_t> buffer;
+	};
+
+	public:
 	const winston::Result loop();
 
-	class S88Commander : public winston::Shared_Ptr<S88Commander>, public winston::DetectorDevice
+	class S88Commander : public winston::Shared_Ptr<S88Commander>, public winston::DetectorDevice, public PacketParser
 	{
 	public:
 		enum class State
@@ -112,7 +138,7 @@ public:
 			Unknown = 0xF0
 		};
 
-		S88Commander(LoDi::Shared loDi, const std::string name);
+		S88Commander(winston::hal::Socket::Shared socket, const std::string name);
 		virtual ~S88Commander() = default;
 
 		const winston::Result init(PortSegmentMap ports, Callbacks callbacks);
@@ -133,7 +159,6 @@ public:
 		using winston::Shared_Ptr<S88Commander>::make;
 
 	private: 
-		LoDi::Shared loDi;
 		State _state;
 
 		enum class Initialized : unsigned int
@@ -147,19 +172,8 @@ public:
 		unsigned int initializedComponents;
 	};
 
-	S88Commander::Shared createS88Commander(winston::hal::Socket::Shared socket) const;
+	S88Commander::Shared createS88Commander(winston::hal::Socket::Shared socket);
 
 private:
-	const winston::Result send(const API::Command command, const Payload payload, PacketCallback callback);
-	const winston::Result sendAgain(PacketAndCallback& packetAndCallback);
-	const winston::Result processBuffer();
-	const winston::Result processPacket(const Payload payload);
-	const winston::Result processEvent(const API::Event event, const Payload payload);
-	const uint8_t nextPacketNumber();
-private:
-
-	uint8_t packetNumber;
-	winston::hal::Socket::Shared socket;
-
-	std::deque<uint8_t> buffer;
+	PacketParser packetParser;
 };

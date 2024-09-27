@@ -1,5 +1,13 @@
 #include "Segment.h"
 #include <list>
+
+namespace winston {
+	Segment::Segment(const Segment::BaseSegment::IdentifyerType name, const TrackSet tracks) :
+		BaseSegment<Id>(name, tracks), Shared_Ptr<Segment>()
+	{
+	}
+}
+
 /*
 namespace winston {
 	Segment::Segment(const std::string name, const TrackSet tracks) : Shared_Ptr<Segment>(), name{ name }, _tracks(tracks), entriesSet(this->buildEntriesSet())

@@ -21,6 +21,7 @@ namespace winston {
 		};
 
 		Section(const Section::BaseSegment::IdentifyerType name, const Type type, const TrackSet tracks);
+		virtual ~Section() = default;
 
 		const Type type;
 

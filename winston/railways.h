@@ -371,3 +371,94 @@ private:
     Section::Shared define(const Sections section);
     void connect();
 };
+
+BETTER_ENUM(Y2024RailwayTracks, unsigned int,
+    Turnout1,
+    Turnout2,
+    Turnout3,
+    Turnout4,
+    DoubleSlipTurnout5_6,
+    Turnout7,
+    Turnout8,
+    Z1, Z2, Z3,
+    PBF1,
+    PBF1a,
+    PBF2,
+    N1,
+    N2,
+    N3,
+    LS1, LS2,
+    B1, B2, B3, B4, B5
+);
+BETTER_ENUM(Y2024RailwayRoutes, unsigned int,
+    B5_PBF1, B5_PBF2, B1_PBF1, B1_PBF2
+);
+BETTER_ENUM(Y2024RailwaySections, unsigned int,
+    PBF1, PBF1a, PBF2,
+    N1, N2, N3,
+    B1, B2, B3, B4, B5,
+    LS1, LS2,
+    Z
+);
+
+class Y2024Railway :
+    public winston::RailwayWithRails<Y2024RailwayTracks, Y2024RailwayRoutes, Y2024RailwaySections, 13>,
+    public winston::Shared_Ptr<Y2024Railway>
+{
+    /*
+    *   // ========= B4 ======== Turnout4 ==== B3 ===== \\
+    *  //                           \\                   \\
+    * //                             Z1                   B2
+    * ||                              \\                  ||
+    * ||                  N1 ==== Turnout5_6 ==== N2      ||
+    * ||                                \\                ||      
+    * || LS2 ===== \\                    Z2               ||
+    * B5            \\                    \\              ||
+    * || LS1 ==== Turnout8 ==== Z3 ==== Turnout7 ==== N3  || 
+    * ||                                                  ||  
+    * \\            // ==== PBF1 ==== Turnout2 ==== PBF1a //
+    *  \\          //        B1           \\             B1
+    *   \\ ==== Turnout1 ==== PBF2 ==== Turnout3 =======//
+    */
+
+public:
+    Y2024Railway(const Callbacks callbacks);
+    virtual ~Y2024Railway() = default;
+
+    static const std::string name();
+    void attachDetectors();
+
+    const winston::Result validateFinal();
+
+    const bool supportRoutes() const;
+    const bool supportSections() const;
+    const bool supportSegments() const;
+
+    using winston::Shared_Ptr<Y2024Railway>::Shared;
+    using winston::Shared_Ptr<Y2024Railway>::make;
+
+public:
+    class AddressTranslator : public winston::DigitalCentralStation::TurnoutAddressTranslator, winston::Shared_Ptr<AddressTranslator>
+    {
+    public:
+        AddressTranslator(winston::Shared_Ptr<Y2024Railway>::Shared railway);
+        virtual winston::Track::Shared turnout(const winston::Address address) const;
+        virtual const winston::Address address(winston::Track& track) const;
+
+        virtual winston::Route::Shared route(const winston::Address address) const;
+        virtual const winston::Address address(winston::Route::Shared track) const;
+
+        using Shared_Ptr<AddressTranslator>::Shared;
+        using Shared_Ptr<AddressTranslator>::make;
+
+    private:
+        winston::Shared_Ptr<Y2024Railway>::Shared railway;
+        std::vector<winston::Locomotive::Shared> locomotiveShed;
+    };
+private:
+    winston::Track::Shared define(const Tracks track);
+    winston::Route::Shared define(const Routes route);
+    Section::Shared define(const Sections section);
+    Segment::Shared define(const Segments segment);
+    void connect();
+};

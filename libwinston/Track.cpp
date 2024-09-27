@@ -69,6 +69,9 @@ namespace winston
 
 	Result Track::validateSingle(Track::Shared track)
 	{
+		if(!track)
+			return Result::ValidationFailed;
+
 		std::set<Track::Shared> others;
 		track->collectAllConnections(others);
 

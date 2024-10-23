@@ -88,6 +88,7 @@ public:
 	using winston::Shared_Ptr<LoDi>::make;
 
 private:
+
 	class PacketParser : public winston::Looper
 	{
 	public:
@@ -110,8 +111,9 @@ private:
 
 		const winston::Result loop();
 
-	protected:
 		const winston::Result send(const API::Command command, const Payload payload, PacketCallback callback);
+		void setDetectorDevice(winston::DetectorDevice::Shared detectorDevice);
+	protected:
 	private:
 		const winston::Result sendAgain(PacketAndCallback& packetAndCallback);
 		const winston::Result processBuffer();
@@ -123,12 +125,14 @@ private:
 		winston::hal::Socket::Shared socket;
 
 		std::deque<uint8_t> buffer;
+
+		winston::DetectorDevice::Shared detectorDevice;
 	};
 
 	public:
 	const winston::Result loop();
 
-	class S88Commander : public winston::Shared_Ptr<S88Commander>, public winston::DetectorDevice, public PacketParser
+	class S88Commander : public winston::Shared_Ptr<S88Commander>, public winston::DetectorDevice
 	{
 	public:
 		enum class State
@@ -138,7 +142,7 @@ private:
 			Unknown = 0xF0
 		};
 
-		S88Commander(winston::hal::Socket::Shared socket, const std::string name);
+		S88Commander(PacketParser &packetParser, const std::string name);
 		virtual ~S88Commander() = default;
 
 		const winston::Result init(PortSegmentMap ports, Callbacks callbacks);
@@ -157,7 +161,6 @@ private:
 
 		using winston::Shared_Ptr<S88Commander>::Shared;
 		using winston::Shared_Ptr<S88Commander>::make;
-
 	private: 
 		State _state;
 
@@ -170,10 +173,13 @@ private:
 			Finished = 0b0111
 		};
 		unsigned int initializedComponents;
+		PacketParser& packetParser;
 	};
 
-	S88Commander::Shared createS88Commander(winston::hal::Socket::Shared socket);
-
+	S88Commander::Shared createS88Commander();
+#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
+	static winston::hal::DebugSocket::Shared createLoDiDebugSocket();
+#endif
 private:
 	PacketParser packetParser;
 };

@@ -15,7 +15,7 @@ public:
 	using winston::Shared_Ptr<SocketWinSock<SocketType>>::Shared;
 	using winston::Shared_Ptr<SocketWinSock<SocketType>>::make;
 
-	SocketWinSock(const std::string ip, const unsigned short port) : winston::hal::Socket(ip, port)
+	SocketWinSock(const std::string ip, const unsigned short port) : winston::hal::Socket()
 	{
 		this->addr.sin_family = AF_INET;
 		this->addr.sin_port = htons(port);

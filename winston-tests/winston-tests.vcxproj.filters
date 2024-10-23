@@ -36,13 +36,19 @@
     <ClCompile Include="..\winston\FT232_Device.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="winston-tests-detector.cpp">
+    <ClCompile Include="winston-tests-driving-math.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\winston\TLC5947_SignalDevice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="winston-tests-blocks.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="winston-tests-detector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\winston\LoDi_API.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

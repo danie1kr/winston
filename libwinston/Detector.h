@@ -54,18 +54,22 @@ namespace winston
 
 		using PortSegmentMap = std::map<size_t, Segment::Shared>;
 		using PortDetectorMap = std::map<size_t, winston::Detector::Shared>;
+
+		using winston::Shared_Ptr<DetectorDevice>::Shared;
+		using winston::Shared_Ptr<DetectorDevice>::make;
 		
 		virtual ~DetectorDevice() = default;
 		virtual const Result init(PortSegmentMap ports, Callbacks callbacks) = 0;
 		virtual const bool isReady() = 0;
 		const std::string name;
 
+		virtual const Result change(const size_t port, const Address locoAddress, const Detector::Change change);
+		virtual const Result occupied(const size_t port, const Detector::Change change);
+
 	protected:
 		PortDetectorMap ports;
-		const Callbacks callbacks;
+		Callbacks callbacks;
 
-		const Result change(const size_t port, const Address locoAddress, const Detector::Change change);
-		const Result occupied(const size_t port, const Detector::Change change);
 		const Result initInternal(Callbacks callbacks);
 	};
 }

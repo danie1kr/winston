@@ -78,7 +78,7 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions);TCB_SPAN_NAMESPACE_NAME=std;WINSTON_PLATFORM_WIN_x64;ARDUINOJSON_DEBUG;WINSTON_HAL_USE_SOCKETS;WINSTON_HAL_USE_SERIAL;WINSTON_HAL_USE_STORAGE;WINSTON_HAL_USE_WEBSERVER</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -94,7 +94,7 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions);TCB_SPAN_NAMESPACE_NAME=std;WINSTON_PLATFORM_WIN_x64</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -112,7 +112,7 @@
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions);TCB_SPAN_NAMESPACE_NAME=std;WINSTON_PLATFORM_WIN_x64</PreprocessorDefinitions>
       <UseFullPaths>true</UseFullPaths>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp14</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -123,11 +123,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\winston\FT232_Device.cpp" />
+    <ClCompile Include="..\winston\LoDi_API.cpp" />
     <ClCompile Include="..\winston\railways.cpp" />
     <ClCompile Include="..\winston\TLC5947_SignalDevice.cpp" />
     <ClCompile Include="..\winston\winston-hal-x64.cpp" />
     <ClCompile Include="winston-tests-blocks.cpp" />
     <ClCompile Include="winston-tests-detector.cpp" />
+    <ClCompile Include="winston-tests-driving-math.cpp" />
     <ClCompile Include="winston-tests-mini.cpp" />
     <ClCompile Include="winston-tests-signal.cpp" />
     <ClCompile Include="winston-tests-signaldevice.cpp" />

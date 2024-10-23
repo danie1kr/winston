@@ -25,6 +25,8 @@ namespace winston
 		if (!callbacks.occupied) return Result::InvalidParameter;
 		if (!callbacks.locoFromAddress) return Result::InvalidParameter;
 
+		this->callbacks = callbacks;
+
 		return Result::OK;
 	}
 

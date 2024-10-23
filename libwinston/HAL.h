@@ -45,7 +45,7 @@ namespace winston
 				UDP
 			};
 
-			Socket(const std::string ip, const unsigned short port);
+			Socket();
 			virtual ~Socket() = default;
 			virtual const Result send(const std::vector<unsigned char> data) = 0;
 			virtual const Result recv(std::vector<unsigned char>& data) = 0;
@@ -61,7 +61,7 @@ namespace winston
 		public:
 			using Listener = std::function<const Result(DebugSocket &socket, const std::vector<unsigned char> data)>;
 
-			DebugSocket(const std::string ip, const unsigned short port, const Listener listener);
+			DebugSocket(const Listener listener);
 			virtual ~DebugSocket() = default;
 			const Result send(const std::vector<unsigned char> data);
 			const Result recv(std::vector<unsigned char>& data);

@@ -56,12 +56,15 @@ namespace winston
 			n = n / 16;
 		}
 
-		size_t i = 0, j = ret.size() - 1;
-		while (i <= j)
+		if (ret.size() > 1)
 		{
-			std::swap(ret[i], ret[j]);
-			i++;
-			j--;
+			size_t i = 0, j = ret.size() - 1;
+			while (i <= j)
+			{
+				std::swap(ret[i], ret[j]);
+				i++;
+				j--;
+			}
 		}
 		return std::string("0x") + ret;
 	}

@@ -4,7 +4,7 @@ namespace winston
 {
 	namespace hal
 	{
-		Socket::Socket(const std::string ip, const unsigned short port) : state(State::NotConnected)
+		Socket::Socket() : state(State::NotConnected)
 		{
 		}
 
@@ -13,8 +13,8 @@ namespace winston
 			return this->state == State::Connected;
 		}
 
-		DebugSocket::DebugSocket(const std::string ip, const unsigned short port, const Listener listener)
-			: Socket(ip, port), Shared_Ptr<DebugSocket>(), listener(listener), buffer()
+		DebugSocket::DebugSocket(const Listener listener)
+			: Socket(), Shared_Ptr<DebugSocket>(), listener(listener), buffer()
 		{
 
 		}

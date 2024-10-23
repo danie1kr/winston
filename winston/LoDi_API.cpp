@@ -12,9 +12,9 @@ const winston::Result LoDi::discover()
 	return winston::Result::OK;
 }
 
-LoDi::S88Commander::Shared LoDi::createS88Commander(winston::hal::Socket::Shared socket)
+LoDi::S88Commander::Shared LoDi::createS88Commander()
 {
-	return LoDi::S88Commander::make(socket, "LoDi Commander");
+	return LoDi::S88Commander::make(this->packetParser, "LoDi Commander");
 }
 
 const winston::Result LoDi::loop()
@@ -23,7 +23,7 @@ const winston::Result LoDi::loop()
 }
 
 LoDi::PacketParser::PacketParser(winston::hal::Socket::Shared socket)
-	: Looper(), socket(socket), packetNumber(0)
+	: Looper(), packetNumber(0), socket(socket), buffer()
 {
 
 }
@@ -150,6 +150,8 @@ const winston::Result LoDi::PacketParser::processEvent(const API::Event event, c
 			uint8_t high = payload[idx++];
 			uint8_t low = payload[idx++];
 			uint8_t status = payload[idx++];
+
+			this->detectorDevice->change(address * 8 + channel, (high << 8) + low, status == 1 ? winston::Detector::Change::Entered : winston::Detector::Change::Left);
 		}
 		break;
 	}
@@ -162,6 +164,7 @@ const winston::Result LoDi::PacketParser::processEvent(const API::Event event, c
 			uint8_t address = payload[idx++];
 			uint8_t channel = payload[idx++];
 			bool empty = (payload[idx++] == 0) ? true : false;
+			this->detectorDevice->occupied(address * 8 + channel, empty ? winston::Detector::Change::Left : winston::Detector::Change::Entered);
 		}
 		break;
 	}
@@ -197,6 +200,7 @@ const winston::Result LoDi::PacketParser::send(const LoDi::API::Command command,
 	data.insert(data.end(), payload.begin(), payload.end());
 
 	PacketAndCallback pAC;
+	pAC.command = command;
 	pAC.callback = callback;
 	pAC.data = data;
 	pAC.sentCount = 0;
@@ -205,6 +209,11 @@ const winston::Result LoDi::PacketParser::send(const LoDi::API::Command command,
 
 	this->expectedResponse[packetNumber] = pAC;
 	return winston::Result::OK;
+}
+
+void LoDi::PacketParser::setDetectorDevice(winston::DetectorDevice::Shared detectorDevice)
+{
+	this->detectorDevice = detectorDevice;
 }
 
 const winston::Result LoDi::PacketParser::sendAgain(PacketAndCallback& packetAndCallback)
@@ -222,15 +231,15 @@ const uint8_t LoDi::PacketParser::nextPacketNumber()
 	return this->packetNumber;
 }
 
-LoDi::S88Commander::S88Commander(winston::hal::Socket::Shared socket, const std::string name)
-	: winston::Shared_Ptr<S88Commander>(), winston::DetectorDevice(name), PacketParser(socket), _state(State::Unknown), initializedComponents((unsigned int)Initialized::Uninitialized)
+LoDi::S88Commander::S88Commander(PacketParser& packetParser, const std::string name)
+	: winston::Shared_Ptr<S88Commander>(), winston::DetectorDevice(name), _state(State::Unknown), initializedComponents((unsigned int)Initialized::Uninitialized), packetParser(packetParser)
 {
-
 }
 
 const winston::Result LoDi::S88Commander::init(PortSegmentMap portSegmentMap, Callbacks callbacks)
 {
 	this->_state = State::Initializing;
+	this->packetParser.setDetectorDevice(this->DetectorDevice::shared_from_this());
 
 	if (const auto result = this->initInternal(callbacks); result != winston::Result::OK)
 		return result;
@@ -260,12 +269,12 @@ const bool LoDi::S88Commander::isReady()
 const winston::Result LoDi::S88Commander::getVersion()
 {
 	Payload payload;
-	return this->send(LoDi::API::Command::GetVersion, payload,
+	return this->packetParser.send(LoDi::API::Command::GetVersion, payload,
 		[this](const Payload payload) -> const winston::Result
 		{
 			if (payload.size() == 4)
 			{
-				this->initializedComponents &= (unsigned int)Initialized::Version;
+				this->initializedComponents |= (unsigned int)Initialized::Version;
 				if (payload[0] == 0x0A)
 				{
 					winston::logger.info("LoDi S88 Commander version: ", payload[1], ".", payload[2], ".", payload[3]);
@@ -286,12 +295,12 @@ const winston::Result LoDi::S88Commander::getVersion()
 const winston::Result LoDi::S88Commander::deviceConfigGet()
 {
 	Payload payload;
-	return this->send(LoDi::API::Command::DeviceConfigGet, payload,
+	return this->packetParser.send(LoDi::API::Command::DeviceConfigGet, payload,
 		[this](const Payload payload) -> const winston::Result
 		{
 			if (payload.size() == 16)
 			{
-				this->initializedComponents &= (unsigned int)Initialized::DeviceConfig;
+				this->initializedComponents |= (unsigned int)Initialized::DeviceConfig;
 				winston::logger.info("LoDi S88 Commander Device Config Bus0: ", payload[0], ", Bus1: ", payload[1]);
 
 				return winston::Result::OK;
@@ -336,12 +345,83 @@ const winston::Result LoDi::S88Commander::s88EventsActivate(const bool activate)
 {
 	Payload payload;
 	payload.push_back(activate ? 1 : 0);
-	return this->send(LoDi::API::Command::S88EventsActivate, payload, 
+	return this->packetParser.send(LoDi::API::Command::S88EventsActivate, payload,
 		[this](const Payload payload) -> const winston::Result
 		{
 			// no payload expected
-			this->initializedComponents &= (unsigned int)Initialized::EventsActive;
+			this->initializedComponents |= (unsigned int)Initialized::EventsActive;
+			winston::logger.info("LoDi S88 Commander Events active");
 			return payload.size() == 0 ? winston::Result::OK : winston::Result::InvalidParameter;
 		}
 	);
 }
+
+#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
+winston::hal::DebugSocket::Shared LoDi::createLoDiDebugSocket()
+{
+	return winston::hal::DebugSocket::make([](winston::hal::DebugSocket& socket, const std::vector<unsigned char> data) -> const winston::Result
+		{
+			const auto type = (LoDi::API::PacketType)data[2];
+			const auto command = (LoDi::API::Command)data[3];
+			const uint8_t number = data[4];
+			if (type == LoDi::API::PacketType::REQ && command == LoDi::API::Command::GetVersion)
+			{
+				winston::hal::DebugSocket::Packet packet;
+				packet.push_back(0);     // size
+				packet.push_back(7);     // size
+				packet.push_back((unsigned char)LoDi::API::PacketType::ACK);  // ACK
+				packet.push_back((unsigned char)command);  // GetVersion
+				packet.push_back(number);// Packet number
+				packet.push_back(0x0A);  // device type
+				packet.push_back(24);    // major
+				packet.push_back(0);     // minor
+				packet.push_back(1);     // patch
+				packet[1] = (unsigned char)(packet.size() - 2);// update size
+				socket.addRecvPacket(packet);
+			}
+			else if (type == LoDi::API::PacketType::REQ && command == LoDi::API::Command::DeviceConfigGet)
+			{
+				winston::hal::DebugSocket::Packet packet;
+				packet.push_back(0);     // size
+				packet.push_back(19);     // size
+				packet.push_back((unsigned char)LoDi::API::PacketType::ACK);  // ACK
+				packet.push_back((unsigned char)command);  // GetVersion
+				packet.push_back(number);// Packet number
+				packet.push_back(2);  // length bus 1
+				packet.push_back(0);  // length bus 2
+				packet.push_back(0);  // speed bus 1
+				packet.push_back(0);  // speed bus 1
+				packet.push_back(0);  // start delay bus 1
+				packet.push_back(0);  // start delay bus 1
+				packet.push_back(10);  // stop delay bus 1
+				packet.push_back(10);  // stop delay bus 1
+				packet.push_back(0);  // disconnect busses
+				packet.push_back(1);  // µCon compat
+				packet.push_back(1);  // use addresses
+				packet.push_back(0);  // rain mode
+				packet.push_back(1);  // railcom speed
+				packet.push_back(1);  // railcom qos
+				packet.push_back(10000 >> 8);  // baudrate high
+				packet.push_back(0);  // baudrate low
+				packet[1] = (unsigned char)(packet.size() - 2);// update size
+				socket.addRecvPacket(packet);
+			}
+			else if (type == LoDi::API::PacketType::REQ && command == LoDi::API::Command::S88EventsActivate)
+			{
+				winston::hal::DebugSocket::Packet packet;
+				packet.push_back(0);     // size
+				packet.push_back(3);     // size
+				packet.push_back((unsigned char)LoDi::API::PacketType::ACK);  // ACK
+				packet.push_back((unsigned char)command);  // GetVersion
+				packet.push_back(number);// Packet number
+				packet[1] = (unsigned char)(packet.size() - 2);// update size
+				socket.addRecvPacket(packet);
+			}
+			else
+			{
+				winston::logger.info("DebugSocket: unanswered type: ", winston::hex((unsigned char)type), " and command: ", winston::hex((unsigned char)command));
+			}
+			return winston::Result::OK;
+		});
+}
+#endif

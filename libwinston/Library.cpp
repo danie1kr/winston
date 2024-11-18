@@ -30,6 +30,9 @@ namespace winston
 			const Length Roco::D8 = 80;
 			const Length Roco::D12 = 120;
 
+			const Length Roco::R2_14 = curve(3580.0 / 4.0, 30.0 / 4.0);
+			const Length Roco::R3_14 = curve(4196.0 / 4.0, 30.0 / 4.0);
+
 			const Length Roco::R2 = curve(3580.0, 30.0);
 			const Length Roco::R3 = curve(4196.0, 30.0);
 			const Length Roco::R4 = curve(4812.0, 30.0);

@@ -13,7 +13,7 @@ namespace winston
 			{
 				static const Length G1, G12, G14, G4;
 				static const Length DG1, D5, D8, D12;
-				static const Length R2, R3, R4, R5, R6, R9, R10, R20;
+				static const Length R2_14, R3_14, R2, R3, R4, R5, R6, R9, R10, R20;
 				static constexpr Length W15(const winston::Turnout::Direction direction)
 				{
 					switch (direction)

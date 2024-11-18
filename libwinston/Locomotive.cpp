@@ -7,7 +7,7 @@ namespace winston
 {
 	const Locomotive::ThrottleSpeedMap Locomotive::defaultThrottleSpeedMap = { {0, 0},{255, 50} };
 	Locomotive::Locomotive(const Callbacks callbacks, const Address address, const Functions functionTable, const Position start, const ThrottleSpeedMap throttleSpeedMap, const std::string name, const unsigned int length, const Types types) :
-		callbacks(callbacks), details{ address, functionTable, start, hal::now(), hal::now(), name, length, false, true, 0, 0.f, 0, types }, speedMap(throttleSpeedMap), speedTrapStart(hal::now())
+		callbacks(callbacks), details{ address, functionTable, start, hal::now(), hal::now(), name, length, false, true, false, 0, 0.f, 0, types }, speedMap(throttleSpeedMap), speedTrapStart(hal::now())
 	{
 	}
 
@@ -72,6 +72,23 @@ namespace winston
 		this->details.throttle = 0;
 	}
 
+	const bool Locomotive::isRailed() const
+	{
+		return this->details.railed;
+	}
+
+	void Locomotive::railOnto(const Position p)
+	{
+		this->details.lastPositionUpdate = hal::now();
+		this->details.position = p;
+		this->details.railed = true;
+	}
+
+	void Locomotive::railOff()
+	{
+		this->details.railed = false;
+	}
+
 	void Locomotive::update(const bool busy, const bool forward, const Throttle throttle, const uint32_t functions)
 	{
 		this->details.busy = busy;
@@ -87,15 +104,19 @@ namespace winston
 		timeOnTour = now - this->details.lastPositionUpdate;
 		if (inMilliseconds(timeOnTour) > WINSTON_LOCO_POSITION_TRACK_RATE)
 		{
+			Position::PassedSignals passedSignals;
 			if(this->details.throttle != 0)
-				this->details.position.drive((Distance)((this->details.forward ? 1 : -1) * this->speedMap.speed(this->details.throttle) * inMilliseconds(timeOnTour)) / 1000);
+				this->details.position.drive((Distance)((this->details.forward ? 1 : -1) * this->speedMap.speed(this->details.throttle) * inMilliseconds(timeOnTour)) / 1000, passedSignals);
 			this->details.lastPositionUpdate = now;
 		}
 		return this->position();
 	}
 
-	const Position& Locomotive::update()
+	const Result Locomotive::update()
 	{
+		if (!this->isRailed())
+			return Result::NotFound;
+
 		auto now = hal::now();
 		Duration speedUpdateRate = now - this->details.lastSpeedUpdate;
 		if (inMilliseconds(speedUpdateRate) > WINSTON_LOCO_SPEED_TRACK_RATE)
@@ -110,14 +131,16 @@ namespace winston
 			this->details.lastSpeedUpdate = now;
 		}
 		// dont care about the updated duration
-		return this->moved(speedUpdateRate);
-	}
+		this->moved(speedUpdateRate);
 
+		return Result::OK;
+	}
+	/*
 	void Locomotive::position(const Position p)
 	{
 		this->details.lastPositionUpdate = hal::now();
 		this->details.position = p;
-	}
+	}*/
 
 	const Position& Locomotive::position() const
 	{

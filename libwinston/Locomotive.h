@@ -112,14 +112,16 @@ namespace winston
 				this->details.throttle = throttle;
 		}
 		void speedTrap(const Distance distance = 0);
-		const Position& moved(Duration& timeOnTour);
-		void position(const Position p);
+		//void position(const Position p);
 		const Position& position() const;
 		void stop();
-		const Position& update();
+		const Result update();
 		const Address& address() const;
 		const std::string& name();
 
+		const bool isRailed() const;
+		void railOnto(const Position p);
+		void railOff();
 
 		const bool isType(const Type type) const;
 		const Types types() const;
@@ -128,6 +130,7 @@ namespace winston
 		void update(const bool busy, const bool forward, const Throttle throttle, const uint32_t functions);
 	private:
 
+		const Position& moved(Duration& timeOnTour);
 		static const float acceleration(const Throttle throttle);
 
 		class SpeedMap
@@ -135,6 +138,7 @@ namespace winston
 		public:
 			SpeedMap();
 			SpeedMap(ThrottleSpeedMap map);
+			~SpeedMap() = default;
 			const Speed speed(const Throttle throttle) const;
 			void learn(const Throttle throttle, const Speed speed);
 		private:
@@ -153,6 +157,7 @@ namespace winston
 			const Length length;
 			bool busy = { false };
 			bool forward = { true };
+			bool railed = { false };
 			Throttle throttle = { 0 };
 			float modelThrottle = { 0.f };
 			uint32_t functions = { 0 };

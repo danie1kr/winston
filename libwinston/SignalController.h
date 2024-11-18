@@ -37,20 +37,21 @@ namespace winston
 		template<class _Signal>
 		const Result attach(winston::Track::Shared track, const winston::Track::Connection connection, winston::Distance distance, const winston::Railway::Callbacks::SignalUpdateCallback& signalUpdateCallback)
 		{
-			const auto lightsCount = (unsigned int)_Signal::lightsCount();
+			constexpr auto lightsCount = (unsigned int)_Signal::lightsCount();
 
 			if (currentPort + lightsCount > devices[currentDev]->ports)
 			{
 				currentDev++;
 				currentPort = 0;
 			}
+			/*
 			// alignment on 24 ports of TLC5947
-			else if (currentPort / 24 != (currentPort + lightsCount) / 24)
+			else if (currentPort / devices[currentDev]->ports != (currentPort + lightsCount) / devices[currentDev]->ports)
 				currentPort = 24;
 			if (currentDev == 1 && currentPort > 24 && currentPort % 3 > 0)
 			{
 				currentPort += (3-currentPort % 3);
-			}
+			}*/
 
 			if (currentDev > devices.size())
 			{

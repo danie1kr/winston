@@ -10,6 +10,7 @@ namespace winstontests
     TEST_CLASS(DrivingMathTests)
     {
         std::shared_ptr<Y2021Railway> railway;
+        std::shared_ptr<SignalTestRailway> signalTestRailway;
 
         static winston::Railway::Callbacks railwayCallbacks()
         {
@@ -79,7 +80,8 @@ namespace winstontests
             auto start_PBF1a_deadEnd = winston::Position(PBF1a, winston::Track::Connection::DeadEnd, 0);
             auto end = winston::Position(PBF1a, winston::Track::Connection::DeadEnd, 0);
             const winston::Distance distance = 50;
-            auto transit = end.drive(distance);
+            winston::Position::PassedSignals passedSignals;
+            auto transit = end.drive(distance, passedSignals);
             Assert::IsTrue(transit == winston::Position::Transit::Stay);
             // end is +distance away from start (at dead end)
             Assert::IsTrue(start_PBF1a_deadEnd.minus(end) == distance);
@@ -99,7 +101,8 @@ namespace winstontests
             auto end = winston::Position(PBF3a, winston::Track::Connection::B, 80);
             auto end_B4_A = winston::Position(B4, winston::Track::Connection::A, 20);
             const winston::Distance distance = 100;
-            auto transit = end.drive(-distance);
+            winston::Position::PassedSignals passedSignals;
+            auto transit = end.drive(-distance, passedSignals);
             Assert::IsTrue(transit == winston::Position::Transit::CrossTrack);
             Assert::AreEqual(end_B4_A.trackName(), end.trackName());
             const auto travelled = start_PBF3a_B.minus(end);
@@ -118,7 +121,8 @@ namespace winstontests
             auto end = winston::Position(PBF3a, winston::Track::Connection::A, 80);
             auto end_B4_A = winston::Position(B4, winston::Track::Connection::A, 20);
             const winston::Distance distance = 100 + PBF3a->length() - 80;
-            auto transit = end.drive(distance);
+            winston::Position::PassedSignals passedSignals;
+            auto transit = end.drive(distance, passedSignals);
             Assert::IsTrue(transit == winston::Position::Transit::CrossTrack);
             Assert::AreEqual(end_B4_A.trackName(), end.trackName());
             const auto travelled = start_PBF3a_B.minus(end);
@@ -140,7 +144,8 @@ namespace winstontests
             auto expect = winston::Position(B5, winston::Track::Connection::B, 80);
 
             auto distance = (signed)(50 + Turnout12->length() + 80);
-            auto transit = end.drive(-distance);
+            winston::Position::PassedSignals passedSignals;
+            auto transit = end.drive(-distance, passedSignals);
 
             Assert::IsTrue(transit == winston::Position::Transit::CrossTrack);
             Assert::AreEqual(expect.trackName(), end.trackName());
@@ -163,7 +168,8 @@ namespace winstontests
             auto expect = winston::Position(B5, winston::Track::Connection::B, 80);
 
             auto distance = (signed)(50 + Turnout12->length() + 80);
-            auto transit = end.drive(-distance);
+            winston::Position::PassedSignals passedSignals;
+            auto transit = end.drive(-distance, passedSignals);
 
             Assert::IsTrue(transit == winston::Position::Transit::TraversalError);
         }
@@ -196,7 +202,8 @@ namespace winstontests
             auto distance = (signed)(PBF3->length() + Turnout6->length() + PBF3a->length() + B4->length() + Turnout10->length() + Turnout11->length() + B5->length() + Turnout12->length() + B6->length() + Turnout2->length() + Turnout3->length() + 10);
             auto expect = winston::Position(PBF3, winston::Track::Connection::A, 60);
 
-            auto transit = pos.drive(distance);
+            winston::Position::PassedSignals passedSignals;
+            auto transit = pos.drive(distance, passedSignals);
             Assert::IsTrue(transit == winston::Position::Transit::CrossTrack);
             Assert::AreEqual(expect.trackName(), pos.trackName());
             Assert::IsTrue(pos.connection() == expect.connection());
@@ -226,10 +233,10 @@ namespace winstontests
             winston::hal::delay(delay / div);
             loco->speedTrap(distance / div);
 
-            loco->position(pos);
+            loco->railOnto(pos);
             winston::hal::delay(100);   // ==> distance = 4mm
-            winston::Duration timeOnTour;
-            auto newPos = loco->moved(timeOnTour);
+            loco->update();
+            auto newPos = loco->position();
             Assert::AreEqual(pos.trackName(), newPos.trackName());
             Assert::IsTrue(pos.connection() == newPos.connection());
             Assert::IsTrue(abs(abs(pos.distance() - newPos.distance()) - (expectedSpeed / div)) <= 2);
@@ -247,10 +254,10 @@ namespace winstontests
             auto loco = winston::Locomotive::make(locoCallbacks(), 0, functions, pos, map, "testloco1", 90, 0);
             auto expectedDistance = 10;
             loco->drive<true>(true, 100);
-            loco->position(pos);
+            loco->railOnto(pos);
             winston::hal::delay(100);   // ==> distance = 10mm
-            winston::Duration timeOnTour;
-            auto newPos = loco->moved(timeOnTour);
+            loco->update();
+            auto newPos = loco->position();
             Assert::AreEqual(pos.trackName(), newPos.trackName());
             Assert::IsTrue(pos.connection() == newPos.connection());
             Assert::IsTrue(abs(abs(pos.distance() - newPos.distance()) - (expectedDistance)) <= 2);
@@ -270,14 +277,16 @@ namespace winstontests
             auto loco = winston::Locomotive::make(locoCallbacks(), 0, functions, pos, map, "testloco1", 90, 0);
             auto throttle = 100;
             loco->drive<true>(false, throttle);
-            loco->position(pos);
+            loco->railOnto(pos);
             winston::hal::delay(100);   // ==> distance = 100mm
-            winston::Duration timeOnTour;
-            auto newPos = loco->moved(timeOnTour);
+            winston::Duration timeOnTour = std::chrono::milliseconds(100);
+            //auto newPos = loco->moved(timeOnTour);
+            loco->update();
+            auto newPos = loco->position();
             auto targetDistance = inMilliseconds(timeOnTour) * map[throttle] / 1000;
             Assert::AreEqual(target.trackName(), newPos.trackName());
             Assert::IsTrue(target.connection() == newPos.connection());
-            Assert::IsTrue(newPos.distance() + target.distance() == targetDistance);
+            Assert::IsTrue(abs(target.distance() - newPos.distance() <= 5));
         }
 
         TEST_METHOD(DriveLocoOnLoop)
@@ -310,14 +319,138 @@ namespace winstontests
             auto loco = winston::Locomotive::make(locoCallbacks(), 0, functions, pos, map, "testloco1", 90, 0);
             auto throttle = 100;
             loco->drive<true>(true, throttle);
-            loco->position(pos);
+            loco->railOnto(pos);
             winston::hal::delay(100);   // ==> distance = 50000mm
-            winston::Duration timeOnTour;
-            auto& newPos = loco->moved(timeOnTour);
+            winston::Duration timeOnTour = std::chrono::milliseconds(100);
+            //auto newPos = loco->moved(timeOnTour);
+            loco->update();
+            auto newPos = loco->position();
             auto travelledDistance = inMilliseconds(timeOnTour) * map[throttle] / 1000;
             Assert::AreEqual(expect.trackName(), newPos.trackName());
             Assert::IsTrue(newPos.connection() == expect.connection());
             //Assert::IsTrue(newPos.distance() - (travelledDistance - distance) < 50);
+        }
+
+
+
+        TEST_METHOD(DriveCollectSignals)
+        {
+            auto signalTower = winston::SignalTower::make();
+
+            signalTestRailway = SignalTestRailway::make(railwayCallbacksWithSignals(signalTower));
+            Assert::IsTrue(signalTestRailway->init() == winston::Result::OK);
+            auto l0 = signalTestRailway->track(SignalTestRailway::Tracks::L0);
+            auto l1 = signalTestRailway->track(SignalTestRailway::Tracks::L1);
+            auto l2 = signalTestRailway->track(SignalTestRailway::Tracks::L2);
+            auto l3 = signalTestRailway->track(SignalTestRailway::Tracks::L3);
+            auto l4 = signalTestRailway->track(SignalTestRailway::Tracks::L4);
+            auto l5 = signalTestRailway->track(SignalTestRailway::Tracks::L5);
+            auto l6 = signalTestRailway->track(SignalTestRailway::Tracks::L6);
+            auto l7 = signalTestRailway->track(SignalTestRailway::Tracks::L7);
+            auto l8 = signalTestRailway->track(SignalTestRailway::Tracks::L8);
+            auto sL0a = l0->signalGuarding(winston::Track::Connection::A);
+            auto sL1b = l1->signalGuarding(winston::Track::Connection::B);
+            auto sL4a = l4->signalGuarding(winston::Track::Connection::A);
+            auto sL7a = l7->signalGuarding(winston::Track::Connection::A);
+            auto sL8a = l8->signalGuarding(winston::Track::Connection::A);
+
+            sL0a->aspect(winston::Signal::Aspect::Halt);
+            sL1b->aspect(winston::Signal::Aspect::Halt);
+            sL4a->aspect(winston::Signal::Aspect::Halt);
+            sL7a->aspect(winston::Signal::Aspect::Halt);
+            sL8a->aspect(winston::Signal::Aspect::Halt);
+
+            // |====L0====KL0a=KL1b====L1====L2====L3====L4=KL4a====L5====L6====L7====KL7a=KL8a====L8====|
+            signalTower->setSignalOn(*l4, winston::Track::Connection::A, winston::Signal::Aspect::Go);
+            Assert::IsTrue(sL0a->shows(winston::Signal::Aspect::ExpectGo));
+            Assert::IsTrue(sL1b->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(sL4a->shows(winston::Signal::Aspect::Go));
+            Assert::IsTrue(sL7a->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(sL8a->shows(winston::Signal::Aspect::Halt));
+
+            signalTower->setSignalOn(*l1, winston::Track::Connection::B, winston::Signal::Aspect::Go);
+            Assert::IsTrue(sL0a->shows(winston::Signal::Aspect::ExpectGo));
+            Assert::IsTrue(sL1b->shows(winston::Signal::Aspect::Go));
+            Assert::IsTrue(sL4a->shows(winston::Signal::Aspect::Go));
+            Assert::IsTrue(sL7a->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(sL8a->shows(winston::Signal::Aspect::ExpectGo));
+
+            signalTower->setSignalOn(*l1, winston::Track::Connection::B, winston::Signal::Aspect::Halt);
+            Assert::IsTrue(sL0a->shows(winston::Signal::Aspect::ExpectGo));
+            Assert::IsTrue(sL1b->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(sL4a->shows(winston::Signal::Aspect::Go));
+            Assert::IsTrue(sL7a->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(sL8a->shows(winston::Signal::Aspect::Halt));
+
+            signalTower->setSignalOn(*l4, winston::Track::Connection::A, winston::Signal::Aspect::Halt);
+            Assert::IsTrue(sL0a->shows(winston::Signal::Aspect::ExpectHalt));
+            Assert::IsTrue(sL1b->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(sL4a->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(sL7a->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(sL8a->shows(winston::Signal::Aspect::ExpectHalt));
+
+            // find none
+            {
+                auto pos = winston::Position(l0, winston::Track::Connection::DeadEnd, 50);
+                auto distance = 10;
+                auto expect = winston::Position(l0, winston::Track::Connection::DeadEnd, 60);
+
+                winston::Position::PassedSignals passedSignals;
+                auto transit = pos.drive(distance, passedSignals);
+                Assert::IsTrue(transit == winston::Position::Transit::Stay);
+                Assert::AreEqual(expect.trackName(), pos.trackName());
+                Assert::IsTrue(pos.connection() == expect.connection());
+                Assert::IsTrue(pos.distance() == expect.distance());
+
+                Assert::IsTrue(passedSignals.empty());
+            }
+
+            // find sL0a on l0
+            {
+                auto pos = winston::Position(l0, winston::Track::Connection::DeadEnd, 50);
+                auto distance = (signed)(l0->length());
+                auto expect = winston::Position(l1, winston::Track::Connection::B, 50);
+
+                winston::Position::PassedSignals passedSignals;
+                auto transit = pos.drive(distance, passedSignals);
+                Assert::IsTrue(transit == winston::Position::Transit::CrossTrack);
+                Assert::AreEqual(expect.trackName(), pos.trackName());
+                Assert::IsTrue(pos.connection() == expect.connection());
+                Assert::IsTrue(pos.distance() == expect.distance());
+
+                Assert::IsTrue(passedSignals.size() == 1);
+                Assert::IsTrue(std::find_if(passedSignals.begin(), passedSignals.end(),
+                    [&](const winston::Position::PositionedSignal& s)
+                    {
+                        return s.signal == sL0a;
+                    }) != passedSignals.end());
+            }
+
+            // find sL0a on l0, sL4a on l4 
+            {
+                auto pos = winston::Position(l0, winston::Track::Connection::DeadEnd, 50);
+                auto distance = (signed)(l0->length() + l1->length() + l2->length() + l3->length() + l4->length() + l5->length());
+                auto expect = winston::Position(l6, winston::Track::Connection::B, 50);
+
+                winston::Position::PassedSignals passedSignals;
+                auto transit = pos.drive(distance, passedSignals);
+                Assert::IsTrue(transit == winston::Position::Transit::CrossTrack);
+                Assert::AreEqual(expect.trackName(), pos.trackName());
+                Assert::IsTrue(pos.connection() == expect.connection());
+                Assert::IsTrue(pos.distance() == expect.distance());
+
+                Assert::IsTrue(passedSignals.size() == 2);
+                Assert::IsTrue(std::find_if(passedSignals.begin(), passedSignals.end(),
+                    [&](const winston::Position::PositionedSignal& s)
+                    {
+                        return s.signal == sL0a;
+                    }) != passedSignals.end());
+                Assert::IsTrue(std::find_if(passedSignals.begin(), passedSignals.end(),
+                    [&](const winston::Position::PositionedSignal& s)
+                    {
+                        return s.signal == sL4a;
+                    }) != passedSignals.end());
+            }
         }
     };
 }

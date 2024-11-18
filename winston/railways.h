@@ -381,7 +381,7 @@ BETTER_ENUM(Y2024RailwayTracks, unsigned int,
     Turnout7,
     Turnout8,
     Turnout9,
-    Z1, Z2, Z3, Z4,
+    Z1, Z2, Z3, Z4, Z5, Z6, 
     PBF1,
     PBF1a,
     PBF2,
@@ -412,11 +412,11 @@ class Y2024Railway :
     *  //                           \\                                    \\
     * //                             Z1                        //==== N2   B2
     * ||                              \\                      //           ||
-    * ||                  N1 ==== Turnout5_6 ==== Z4 ==== Turnout7 ==== N3 ||
+    * ||          N1 ==== Z2 ==== Turnout5_6 ==== Z3 ==== Turnout7 ==== N3 ||
     * ||                                \\                                 ||      
-    * || LS2 ===== \\                    Z2                                ||
+    * || LS2 ===== \\                    Z4                                ||
     * B5            \\                    \\                               ||
-    * || LS1 ==== Turnout9 ==== Z3 ==== Turnout8 ==== N4                   || 
+    * || LS1 ==== Turnout9 ==== Z5 ==== Turnout8 ==== Z6 ==== N4           || 
     * ||                                                                   ||  
     * \\            // ==== PBF1 ==== Turnout2 ==== PBF1a                  //
     *  \\          //                     \\                              B1

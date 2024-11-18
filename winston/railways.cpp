@@ -50,38 +50,38 @@ SignalTestRailway::SignalTestRailway(const Callbacks callbacks) : winston::Railw
 winston::Track::Shared SignalTestRailway::define(const Tracks track)
 {
     switch (track) {
-    BUMPER(A);
-    BUMPER(B);
-    BUMPER(C);
-    BUMPER(D);
-    BUMPER(F);
-    BUMPER(G);
-    BUMPER(J);
-    BUMPER(K);
-    BUMPER(N);
-    BUMPER(Q);
-    BUMPER(R);
-    BUMPER(U);
-    BUMPER(W);
-    BUMPER(L0);
-    BUMPER(L8);
-    RAIL(E);
-    RAIL(H);
-    RAIL(I);
-    RAIL(L);
-    RAIL(M);
-    RAIL(O);
-    RAIL(P);
-    RAIL(S);
-    RAIL(T);
-    RAIL(V);
-    RAIL(L1);
-    RAIL(L2);
-    RAIL(L3);
-    RAIL(L4);
-    RAIL(L5);
-    RAIL(L6);
-    RAIL(L7);
+    BUMPER(A, winston::library::track::Roco::G1);
+    BUMPER(B, winston::library::track::Roco::G1);
+    BUMPER(C, winston::library::track::Roco::G1);
+    BUMPER(D, winston::library::track::Roco::G1);
+    BUMPER(F, winston::library::track::Roco::G1);
+    BUMPER(G, winston::library::track::Roco::G1);
+    BUMPER(J, winston::library::track::Roco::G1);
+    BUMPER(K, winston::library::track::Roco::G1);
+    BUMPER(N, winston::library::track::Roco::G1);
+    BUMPER(Q, winston::library::track::Roco::G1);
+    BUMPER(R, winston::library::track::Roco::G1);
+    BUMPER(U, winston::library::track::Roco::G1);
+    BUMPER(W, winston::library::track::Roco::G1);
+    BUMPER(L0, winston::library::track::Roco::G1);
+    BUMPER(L8, winston::library::track::Roco::G1);
+    RAIL(E, winston::library::track::Roco::G1);
+    RAIL(H, winston::library::track::Roco::G1);
+    RAIL(I, winston::library::track::Roco::G1);
+    RAIL(L, winston::library::track::Roco::G1);
+    RAIL(M, winston::library::track::Roco::G1);
+    RAIL(O, winston::library::track::Roco::G1);
+    RAIL(P, winston::library::track::Roco::G1);
+    RAIL(S, winston::library::track::Roco::G1);
+    RAIL(T, winston::library::track::Roco::G1);
+    RAIL(V, winston::library::track::Roco::G1);
+    RAIL(L1, winston::library::track::Roco::G1);
+    RAIL(L2, winston::library::track::Roco::G1);
+    RAIL(L3, winston::library::track::Roco::G1);
+    RAIL(L4, winston::library::track::Roco::G1);
+    RAIL(L5, winston::library::track::Roco::G1);
+    RAIL(L6, winston::library::track::Roco::G1);
+    RAIL(L7, winston::library::track::Roco::G1);
     TURNOUT(Turnout1, [this, track](winston::Track& turnout, const winston::Turnout::Direction direction) -> winston::State { return this->callbacks.turnoutUpdateCallback(static_cast<winston::Turnout&>(turnout), direction); });
     TURNOUT(Turnout2, [this, track](winston::Track& turnout, const winston::Turnout::Direction direction) -> winston::State { return this->callbacks.turnoutUpdateCallback(static_cast<winston::Turnout&>(turnout), direction); });
     TURNOUT(Turnout3, [this, track](winston::Track& turnout, const winston::Turnout::Direction direction) -> winston::State { return this->callbacks.turnoutUpdateCallback(static_cast<winston::Turnout&>(turnout), direction); });
@@ -993,10 +993,10 @@ winston::Track::Shared Y2024Railway::define(const Tracks track)
         };
     switch (track)
     {
-        BUMPER(N1, Roco::R2 + Roco::G1 + Roco::G12 + Roco::G14);
+        BUMPER(N1, 3*Roco::R2_14 + Roco::G1 + Roco::G12 + Roco::G14);
         BUMPER(N2, Roco::R10);
         BUMPER(N3, 2 * Roco::G1 + Roco::G12);
-        BUMPER(N4, Roco::R2 + 2 * Roco::G1 + Roco::G12 + 2 * Roco::G14);
+        BUMPER(N4, Roco::R2 + 2 * Roco::G1 + Roco::G12 + Roco::G14);
         BUMPER(PBF1a, Roco::G1 + Roco::G14);
         BUMPER(LS1, Roco::R10 + Roco::G1);
         BUMPER(LS2, Roco::G1 + Roco::G1);
@@ -1007,10 +1007,12 @@ winston::Track::Shared Y2024Railway::define(const Tracks track)
         RAIL(B3, Roco::G1 + Roco::G4 + Roco::G12);
         RAIL(B4, 3 * Roco::R2);
         RAIL(B5, 3 * Roco::R2);
-        RAIL(Z1, Roco::R3);
-        RAIL(Z2, Roco::R2);
-        RAIL(Z3, Roco::G14);
-        RAIL(Z4, Roco::R2);
+        RAIL(Z1, Roco::R3 + Roco::D5);
+        RAIL(Z2, Roco::R2_14);
+        RAIL(Z3, Roco::R2);
+        RAIL(Z4, Roco::R2 + Roco::D8);
+        RAIL(Z5, Roco::R2);
+        RAIL(Z6, Roco::Roco::G14);
         TURNOUT(Turnout1, turnoutCallback, Roco::W15, true);
         TURNOUT(Turnout2, turnoutCallback, Roco::W15, false);
         TURNOUT(Turnout3, turnoutCallback, Roco::W15, false);
@@ -1048,6 +1050,8 @@ void Y2024Railway::connect()
     LOCAL_TRACK(Z2);
     LOCAL_TRACK(Z3);
     LOCAL_TRACK(Z4);
+    LOCAL_TRACK(Z5);
+    LOCAL_TRACK(Z6);
     LOCAL_TRACK(Turnout1);
     LOCAL_TRACK(Turnout2);
     LOCAL_TRACK(Turnout3);
@@ -1082,18 +1086,20 @@ void Y2024Railway::connect()
     // Z
     Turnout4->connect(C, Z1, A)
         ->connect(B, DoubleSlipTurnout5_6, D)
-        ->connect(C, Z2, A)
+        ->connect(C, Z3, A)
         ->connect(B, Turnout7, A)
         ->connect(B, N3, A);
     Turnout7->connect(C, N2, A);
 
-    DoubleSlipTurnout5_6->connect(B, Z3, A)
+    DoubleSlipTurnout5_6->connect(B, Z4, A)
         ->connect(B, Turnout8, B)
-        ->connect(A, N4, A);
+        ->connect(A, Z6, A)
+        ->connect(B, N4, A);
 
-    DoubleSlipTurnout5_6->connect(A, N1, A);
+    DoubleSlipTurnout5_6->connect(A, Z2, A)
+        ->connect(B, N1, A);
 
-    Turnout8->connect(C, Z4, A)
+    Turnout8->connect(C, Z5, A)
         ->connect(B, Turnout9, A)
         ->connect(B, LS2, A);
     Turnout9->connect(C, LS1, A);
@@ -1119,6 +1125,8 @@ winston::Route::Shared Y2024Railway::define(const Routes route)
     LOCAL_TRACK(Z2);
     LOCAL_TRACK(Z3);
     LOCAL_TRACK(Z4);
+    LOCAL_TRACK(Z5);
+    LOCAL_TRACK(Z6);
     LOCAL_TURNOUT(Turnout1);
     LOCAL_TURNOUT(Turnout2);
     LOCAL_TURNOUT(Turnout3);
@@ -1200,6 +1208,8 @@ Y2024Railway::Section::Shared Y2024Railway::define(const Y2024Railway::Sections 
     LOCAL_TRACK(Z2);
     LOCAL_TRACK(Z3);
     LOCAL_TRACK(Z4);
+    LOCAL_TRACK(Z5);
+    LOCAL_TRACK(Z6);
     LOCAL_TRACK(Turnout1);
     LOCAL_TRACK(Turnout2);
     LOCAL_TRACK(Turnout3);
@@ -1225,7 +1235,7 @@ Y2024Railway::Section::Shared Y2024Railway::define(const Y2024Railway::Sections 
 
         SECTION(LS1, SIDING, { LS1 });
         SECTION(LS2, SIDING, { LS2 });
-        SECTION(Z, SIDING, { Z1, Z2, Z3, Z4, DoubleSlipTurnout5_6, Turnout7, Turnout8, Turnout9 });
+        SECTION(Z, SIDING, { Z1, Z2, Z3, Z4, Z5, Z6, DoubleSlipTurnout5_6, Turnout7, Turnout8, Turnout9 });
 
         SECTION(B1, FREE, { Turnout3, B1 });
         SECTION(B2, FREE, { B2 });
@@ -1263,6 +1273,8 @@ Y2024Railway::Segment::Shared Y2024Railway::define(const Segments segment)
     LOCAL_TRACK(Z2);
     LOCAL_TRACK(Z3);
     LOCAL_TRACK(Z4);
+    LOCAL_TRACK(Z5);
+    LOCAL_TRACK(Z6);
     LOCAL_TRACK(Turnout1);
     LOCAL_TRACK(Turnout2);
     LOCAL_TRACK(Turnout3);
@@ -1282,7 +1294,7 @@ Y2024Railway::Segment::Shared Y2024Railway::define(const Segments segment)
         SEGMENT(3, { LS1 });
         SEGMENT(4, { B5, Turnout1 });
         SEGMENT(5, { B2, B3 });
-        SEGMENT(6, { Z1, DoubleSlipTurnout5_6, Z2, Z3, Z4, Turnout7, Turnout8, Turnout9});
+        SEGMENT(6, { Z1, DoubleSlipTurnout5_6, Z2, Z3, Z4, Z5, Z6, Turnout7, Turnout8, Turnout9});
         SEGMENT(7, { PBF1, Turnout2 });
         SEGMENT(8, { PBF2 });
         SEGMENT(9, { N2 });

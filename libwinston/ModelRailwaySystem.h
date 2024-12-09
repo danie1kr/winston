@@ -606,11 +606,15 @@ namespace winston
 
 		// the rail cars
 		RailCarShed railCarShed;
-		static const RailCarShed getRailCarsFromShed(const RailCarShed &railCarShed, const RailCar::Groups matching)
+		static const RailCarShed getRailCarsFromShed(const RailCarShed &railCarShed, const RailCar::Groups::Group matching)
 		{
 			RailCarShed result;
 			std::copy_if(railCarShed.begin(), railCarShed.end(), std::back_inserter(result),
-				[](RailCarShed::value_type car) { return car->is(matching); });
+				[&matching](const RailCarShed::value_type car) -> const bool
+				{ 
+					return car->is(matching); 
+				}
+			);
 
 			return result;
 		}

@@ -126,6 +126,18 @@
     <ClInclude Include="..\libwinston\Section.h">
       <Filter>libwinston-src</Filter>
     </ClInclude>
+    <ClInclude Include="..\libwinston\EventLooper.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libwinston\RailwayMicroLayout.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libwinston\Segment.h">
+      <Filter>libwinston-src</Filter>
+    </ClInclude>
+    <ClInclude Include="..\winston\LoDi_API.h">
+      <Filter>winston-src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\libwinston\Callback.cpp">
@@ -208,6 +220,18 @@
       <Filter>winston-src</Filter>
     </ClCompile>
     <ClCompile Include="..\libwinston\Section.cpp">
+      <Filter>libwinston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libwinston\Segment.cpp">
+      <Filter>libwinston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libwinston\EventLooper.cpp">
+      <Filter>libwinston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\winston\LoDi_API.cpp">
+      <Filter>winston-src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libwinston\Log.cpp">
       <Filter>libwinston-src</Filter>
     </ClCompile>
   </ItemGroup>

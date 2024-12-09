@@ -176,7 +176,7 @@ namespace winston
 		{
 		public:
 			using Group = unsigned int;
-			static constexpr Group create()
+			static const Group create()
 			{
 				return 1 << ++RailCar::Groups::groupCounter;
 			}
@@ -186,6 +186,7 @@ namespace winston
 			static constexpr Group Goods = 1 << 3;
 			static constexpr Group ConstructionTrain = 1 << 4;
 			static constexpr Group Heavy = 1 << 5;
+			static constexpr Group _NextGroupCounterValue = 1 << 6;
 		private:
 			static unsigned int groupCounter;
 		};
@@ -193,7 +194,7 @@ namespace winston
 		RailCar(const std::string name, const Groups::Group groups, const Length length);
 		~RailCar() = default;
 
-		const bool is(Groups::Group group) const;
+		const bool is(const Groups::Group group) const;
 
 		using Shared_Ptr<RailCar>::Shared;
 		using Shared_Ptr<RailCar>::make;

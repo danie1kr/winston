@@ -328,7 +328,7 @@ namespace winston
 	protected:
 		const Result validateFinalRoutes()
 		{
-			for (auto route : this->routes)
+			for (auto &route : this->routes)
 			{
 				auto result = route->validateSignalPlacemet();
 				if (result != Result::OK)
@@ -797,7 +797,7 @@ namespace winston
 				auto grouped = this->turnoutsSharingGroupWith(turnout);
 
 				std::string groupString = "";
-				for (const auto g : grouped)
+				for (const auto &g : grouped)
 					groupString += " " + g->name();
 
 				logger.info(turnout.name(), " sharing groups with", groupString);

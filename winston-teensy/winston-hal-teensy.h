@@ -5,14 +5,14 @@
 #include "../libwinston/HAL.h"
 #include "../libwinston/Log.h"
 
-#ifdef WINSTON_PLATTFORM_TEENSY
+//#ifdef WINSTON_PLATTFORM_TEENSY
 #include "../libwinston/Winston.h"
 #include "../libwinston/Signal.h"
 
 #define WINSTON_WITH_HTTP
 #define WINSTON_WITH_SDFAT
 
-//#define WINSTON_WITH_QNETHERNET
+#define WINSTON_WITH_QNETHERNET
 
 #ifdef WINSTON_WITH_QNETHERNET
 #define USE_NATIVE_ETHERNET         false
@@ -25,7 +25,7 @@ using namespace qindesign::network;
 #define USE_QN_ETHERNET             false
 #include <NativeEthernet.h>
 #endif
-#endif
+//#endif
 /*
 #define WINSTON_WITH_WEBSOCKET
 #define WEBSOCKETS_USE_ETHERNET     true
@@ -90,6 +90,23 @@ private:
 	const unsigned short port;
 };
 using UDPSocket = UDPSocketTeensy;
+
+class TCPSocketTeensy : public winston::hal::Socket, winston::Shared_Ptr<TCPSocketTeensy>
+{
+public:
+	using winston::Shared_Ptr<TCPSocketTeensy>::Shared;
+	using winston::Shared_Ptr<TCPSocketTeensy>::make;
+
+	TCPSocketTeensy(const std::string ip, const unsigned short port);
+	const winston::Result send(const std::vector<unsigned char> data);
+	const winston::Result recv(std::vector<unsigned char>& data);
+private:
+
+	EthernetClient Tcp;
+	const std::string ip;
+	const unsigned short port;
+};
+using TCPSocket = TCPSocketTeensy;
 #endif
 
 #ifdef WINSTON_HAL_USE_SPI
@@ -126,8 +143,8 @@ public:
 #endif
 
 #ifdef WINSTON_HAL_USE_STORAGE
-#include <SdFat.h>
-extern SdFat SD;
+#include <SD.h>
+//extern SdFat SD;
 class StorageArduino: public winston::hal::StorageInterface, winston::Shared_Ptr<StorageArduino>
 {
 public:

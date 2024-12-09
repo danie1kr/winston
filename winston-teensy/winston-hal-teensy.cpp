@@ -319,7 +319,7 @@ void ensureStorageFile()
 */
 
 #ifdef WINSTON_HAL_USE_SOCKETS
-UDPSocketTeensy::UDPSocketTeensy(const std::string ip, const unsigned short port) : winston::hal::Socket(ip, port), ip(ip), port(port)
+UDPSocketTeensy::UDPSocketTeensy(const std::string ip, const unsigned short port) : winston::hal::Socket(), ip(ip), port(port)
 {
     Udp.begin(port);
 }
@@ -340,6 +340,29 @@ const winston::Result UDPSocketTeensy::recv(std::vector<unsigned char>& data)
     if (packetSize) {
         data.resize(packetSize);
         Udp.read(data.data(), data.size());
+    }
+    return winston::Result::OK;
+}
+
+TCPSocketTeensy::TCPSocketTeensy(const std::string ip, const unsigned short port) : winston::hal::Socket(), ip(ip), port(port)
+{
+    Tcp.connect(ip.c_str(), port);
+}
+
+const winston::Result TCPSocketTeensy::send(const std::vector<unsigned char> data)
+{
+    auto sz = (int)(data.size() * sizeof(unsigned char));
+    Tcp.write(reinterpret_cast<const char*>(data.data()), sz);
+
+    return winston::Result::OK;
+}
+
+const winston::Result TCPSocketTeensy::recv(std::vector<unsigned char>& data)
+{
+    int packetSize = Tcp.available();
+    if (packetSize) {
+        data.resize(packetSize);
+        Tcp.read(data.data(), data.size());
     }
     return winston::Result::OK;
 }
@@ -426,7 +449,7 @@ void Arduino_GPIOOutputPin::Arduino_GPIOOutputPin::set(const State value)
 #endif
 
 #ifdef WINSTON_HAL_USE_STORAGE
-SdFat SD;
+//SdFat SD;
 StorageArduino::StorageArduino(const std::string filename, const size_t maxSize)
     : StorageInterface(maxSize), filename(filename)
 {
@@ -514,7 +537,9 @@ const winston::Result StorageArduino::read(const size_t address, unsigned char& 
         return winston::Result::OutOfBounds;
     }
     this->file.seek(address);
-    this->file.readBytes(&content, 1);
+    char readByte;
+    this->file.readBytes(&readByte, 1);
+    content = (unsigned char)readByte;
 #endif
     return winston::Result::OK;
 }

@@ -229,7 +229,7 @@ namespace winston
 		return (Speed)(frac * upper + (1.0f - frac) * lower);
 	}*/
 
-	RailCar::Groups::Group RailCar::Groups::groupCounter = 3;
+	RailCar::Groups::Group RailCar::Groups::groupCounter = RailCar::Groups::_NextGroupCounterValue;
 	/*constexpr RailCar::Groups::Group RailCar::Groups::create()
 	{
 		return 1 << ++RailCar::Groups::groupCounter;
@@ -241,7 +241,7 @@ namespace winston
 
 	}
 
-	const bool RailCar::is(Groups::Group group) const
+	const bool RailCar::is(const Groups::Group group) const
 	{
 		return this->groups & group;
 	}

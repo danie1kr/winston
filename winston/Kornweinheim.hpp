@@ -1,5 +1,6 @@
 ﻿#ifdef WINSTON_PLATFORM_TEENSY
 #define Binary_h
+#undef B1
 // keeps binary_h from beeing used which kills our 
 #endif
 
@@ -310,15 +311,18 @@ void Kornweinheim::systemSetup() {
     this->signalInterfaceDevices.push_back(SignalInterfaceDevice::make(33, TLC5947::SPI_Clock));
     this->signalInterfaceDevices.push_back(SignalInterfaceDevice::make(34, TLC5947::SPI_Clock));
     auto TLC5947Off = Arduino_GPIOOutputPin::make(30, Arduino_GPIOOutputPin::State::High);
+
+
+    this->signalController = winston::SignalController::make(0, this->signalDevices);
 #else
 #pragma message("using one SignalInterfaceDevice for two devices")
     this->signalInterfaceDevices.push_back(SignalInterfaceDevice::make(3, TLC5947::SPI_Clock));
-    this->signalInterfaceDevices.push_back(this->signalInterfaceDevices[0]);
+    this->signalInterfaceDevices.push_back(SignalInterfaceDevice::make(4, TLC5947::SPI_Clock));
     auto TLC5947Off = this->signalInterfaceDevices[0]->getOutputPinDevice(4);
 #endif
-
-    // two chains, each having two TLC5947 devies
-    const unsigned int chainedTLC5947s = 2;
+    /*
+    // two chains, each having two TLC5947 devices
+    const unsigned int chainedTLC5947s = 3;
     unsigned int signalDeviceId = 0;
     for (const auto& device : this->signalInterfaceDevices)
     {
@@ -326,6 +330,18 @@ void Kornweinheim::systemSetup() {
         device->skipSend(true);
         this->signalDevices.push_back(TLC5947::make(signalDeviceId++, chainedTLC5947s * 24, device, TLC5947Off));
     }
+    */
+
+    unsigned int signalDeviceId = 0;
+    for (const auto& device : this->signalInterfaceDevices)
+    {
+        device->init();
+        device->skipSend(true);
+    }
+    // two chains, first having two TLC5947 devices
+    this->signalDevices.push_back(TLC5947::make(signalDeviceId++, 2 * 24, this->signalInterfaceDevices[0], TLC5947Off));
+    // two chains, second having TLC5947
+    this->signalDevices.push_back(TLC5947::make(signalDeviceId++, 1 * 24, this->signalInterfaceDevices[1], TLC5947Off));
 
     this->signalController = winston::SignalController::make(0, this->signalDevices);
 
@@ -335,7 +351,7 @@ void Kornweinheim::systemSetup() {
         winston::logger.err("Kornweinheim.init: Storage Layout Init failed");
     this->storageMicroLayout = Storage::make(std::string(this->name()).append(".").append("winston.micro.storage"), 256 * 1024);
     if (this->storageMicroLayout->init() != winston::Result::OK)
-        winston::logger.err("Kornweinheim.init: Storage Layout Init failed");
+        winston::logger.err("Kornweinheim.init: Storage Micro Layout Init failed");
 
     // detectors
 #ifdef WINSTON_PLATFORM_TEENSY
@@ -386,14 +402,16 @@ void Kornweinheim::setupSignals()
     this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::PBF1a), winston::Track::Connection::A, 5U, signalUpdateCallback);
     
     // N + LS
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::N1), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::N2), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::N3), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::LS1), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::LS2), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalH>(this->railway->track(Tracks::N1), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalH>(this->railway->track(Tracks::N2), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalH>(this->railway->track(Tracks::N3), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalH>(this->railway->track(Tracks::N4), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalH>(this->railway->track(Tracks::N5), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalH>(this->railway->track(Tracks::LS1), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalH>(this->railway->track(Tracks::LS2), winston::Track::Connection::A, 5U, signalUpdateCallback);
 
     // Track
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B1), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalH>(this->railway->track(Tracks::B1), winston::Track::Connection::A, 5U, signalUpdateCallback);
     this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B1), winston::Track::Connection::B, 5U, signalUpdateCallback);
     this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B2), winston::Track::Connection::A, 5U, signalUpdateCallback);
     this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B2), winston::Track::Connection::B, 5U, signalUpdateCallback);
@@ -401,11 +419,14 @@ void Kornweinheim::setupSignals()
     this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B3), winston::Track::Connection::B, 5U, signalUpdateCallback);
     this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B4), winston::Track::Connection::A, 5U, signalUpdateCallback);
     this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B4), winston::Track::Connection::B, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B5), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B5), winston::Track::Connection::B, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B6), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B6), winston::Track::Connection::B, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::B7), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalH>(this->railway->track(Tracks::B7), winston::Track::Connection::B, 5U, signalUpdateCallback);
 
     // leaving inner tracks
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::Z1), winston::Track::Connection::B, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::Z1), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalH>(this->railway->track(Tracks::Z3), winston::Track::Connection::A, 5U, signalUpdateCallback);
 
     unsigned int dncPort = 999;
     dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Tracks::N1), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);

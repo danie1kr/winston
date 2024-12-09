@@ -377,10 +377,13 @@ BETTER_ENUM(Y2024RailwayTracks, unsigned int,
     Turnout2,
     Turnout3,
     Turnout4,
-    DoubleSlipTurnout5_6,
+    Turnout5,
+    Turnout6,
     Turnout7,
-    Turnout8,
-    Turnout9,
+    DoubleSlipTurnout8_9,
+    Turnout10,
+    Turnout11,
+    Turnout12,
     Z1, Z2, Z3, Z4, Z5, Z6, 
     PBF1,
     PBF1a,
@@ -389,16 +392,17 @@ BETTER_ENUM(Y2024RailwayTracks, unsigned int,
     N2,
     N3,
     N4,
+    N5, 
     LS1, LS2,
-    B1, B2, B3, B4, B5
+    B1, B2, B3, B4, B5, B6, B7
 );
 BETTER_ENUM(Y2024RailwayRoutes, unsigned int,
-    B5_PBF1, B5_PBF2, B1_PBF1, B1_PBF2
+    B7_PBF1, B7_PBF2, B1_PBF1, B1_PBF2
 );
 BETTER_ENUM(Y2024RailwaySections, unsigned int,
     PBF1, PBF1a, PBF2,
-    N1, N2, N3, N4,
-    B1, B2, B3, B4, B5,
+    N1, N2, N3, N4, N5,
+    B1, B2, B3, B4, B5, B6, B7,
     LS1, LS2,
     Z
 );
@@ -408,19 +412,21 @@ class Y2024Railway :
     public winston::Shared_Ptr<Y2024Railway>
 {
     /*
-    *   // ========= B4 ======== Turnout4 ========= B3 ================= \\
-    *  //                           \\                                    \\
-    * //                             Z1                        //==== N2   B2
-    * ||                              \\                      //           ||
-    * ||          N1 ==== Z2 ==== Turnout5_6 ==== Z3 ==== Turnout7 ==== N3 ||
-    * ||                                \\                                 ||      
-    * || LS2 ===== \\                    Z4                                ||
-    * B5            \\                    \\                               ||
-    * || LS1 ==== Turnout9 ==== Z5 ==== Turnout8 ==== Z6 ==== N4           || 
-    * ||                                                                   ||  
-    * \\            // ==== PBF1 ==== Turnout2 ==== PBF1a                  //
-    *  \\          //                     \\                              B1
-    *   \\ ==== Turnout1 ==== PBF2 ==== Turnout3 ======================= //
+    *   // ========= B6 ======== Turnout7 ==== B5 ==== Turnout6 ===== B3 ==== Turnout4 ==== \\
+    *  //                          \\                     \\                    //          ||
+    * //                            \\                     \\ ==== B4 ==== Turnout5 ==== N5 ||
+    * ||                             Z1                                                     ||
+    * ||                              \\                        //==== N2                   B2
+    * ||                               \\                      //                           ||
+    * ||          N1 ==== Z2 ==== Turnout8_9 ==== Z3 ==== Turnout10 ==== N3                 ||
+    * ||                                \\                                                  ||      
+    * || LS2 ===== \\                    Z4                                                 ||
+    * B7            \\                    \\                                                ||
+    * || LS1 ==== Turnout12 ==== Z5 ==== Turnout11 ==== Z6 ==== N4                          || 
+    * ||                                                                                    ||  
+    * \\            // ==== PBF1 ==== Turnout2 ==== PBF1a                                   //
+    *  \\          //                     \\                                               B1
+    *   \\ ==== Turnout1 ==== PBF2 ==== Turnout3 ======================================== //
     */
 
 public:

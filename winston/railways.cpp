@@ -943,11 +943,14 @@ winston::Track::Shared Y2024Railway::AddressTranslator::turnout(const winston::A
     case 1: track = Tracks::Turnout2; break;
     case 2: track = Tracks::Turnout3; break;
     case 3: track = Tracks::Turnout4; break;
-    case 4: track = Tracks::DoubleSlipTurnout5_6; break;
-    case 5: track = Tracks::DoubleSlipTurnout5_6; break;
+    case 4: track = Tracks::Turnout5; break;
+    case 5: track = Tracks::Turnout6; break;
     case 6: track = Tracks::Turnout7; break;
-    case 7: track = Tracks::Turnout8; break;
-    case 8: track = Tracks::Turnout9; break;
+    case 7: track = Tracks::DoubleSlipTurnout8_9; break;
+    case 8: track = Tracks::DoubleSlipTurnout8_9; break;
+    case 9: track = Tracks::Turnout10; break;
+    case 10: track = Tracks::Turnout11; break;
+    case 11: track = Tracks::Turnout12; break;
     }
     return railway->track(track);
 }
@@ -962,10 +965,13 @@ const winston::Address Y2024Railway::AddressTranslator::address(winston::Track& 
     case Tracks::Turnout2: return 1; break;
     case Tracks::Turnout3: return 2; break;
     case Tracks::Turnout4: return 3; break;
-    case Tracks::DoubleSlipTurnout5_6: return 4; break;
+    case Tracks::Turnout5: return 4; break;
+    case Tracks::Turnout6: return 5; break;
     case Tracks::Turnout7: return 6; break;
-    case Tracks::Turnout8: return 7; break;
-    case Tracks::Turnout9: return 8; break;
+    case Tracks::DoubleSlipTurnout8_9: return 7; break;
+    case Tracks::Turnout10: return 9; break;
+    case Tracks::Turnout11: return 10; break;
+    case Tracks::Turnout12: return 11; break;
     }
     return 0;
 }
@@ -997,6 +1003,7 @@ winston::Track::Shared Y2024Railway::define(const Tracks track)
         BUMPER(N2, Roco::R10);
         BUMPER(N3, 2 * Roco::G1 + Roco::G12);
         BUMPER(N4, Roco::R2 + 2 * Roco::G1 + Roco::G12 + Roco::G14);
+        BUMPER(N5, Roco::G1 + Roco::G14);
         BUMPER(PBF1a, Roco::G1 + Roco::G14);
         BUMPER(LS1, Roco::R10 + Roco::G1);
         BUMPER(LS2, Roco::G1 + Roco::G1);
@@ -1004,9 +1011,11 @@ winston::Track::Shared Y2024Railway::define(const Tracks track)
         RAIL(PBF2, Roco::G4 + Roco::G12);
         RAIL(B1, 3 * Roco::R2);
         RAIL(B2, 3 * Roco::R2);
-        RAIL(B3, Roco::G1 + Roco::G4 + Roco::G12);
-        RAIL(B4, 3 * Roco::R2);
-        RAIL(B5, 3 * Roco::R2);
+        RAIL(B3, 3 * Roco::G1 + Roco::G14);
+        RAIL(B4, Roco::R10 + Roco::G1 + Roco::G14);
+        RAIL(B5, Roco::G14);
+        RAIL(B6, 3 * Roco::R2);
+        RAIL(B7, 3 * Roco::R2);
         RAIL(Z1, Roco::R3 + Roco::D5);
         RAIL(Z2, Roco::R2_14);
         RAIL(Z3, Roco::R2);
@@ -1016,11 +1025,14 @@ winston::Track::Shared Y2024Railway::define(const Tracks track)
         TURNOUT(Turnout1, turnoutCallback, Roco::W15, true);
         TURNOUT(Turnout2, turnoutCallback, Roco::W15, false);
         TURNOUT(Turnout3, turnoutCallback, Roco::W15, false);
-        TURNOUT(Turnout4, turnoutCallback, Roco::W15, false);
-        DOUBLESLIPTURNOUT(DoubleSlipTurnout5_6, doubleSlipTurnoutCallback, Roco::DKW15);
-        TURNOUT(Turnout7, turnoutCallback, Roco::W15, true);
-        TURNOUT(Turnout8, turnoutCallback, Roco::W15, false);
-        TURNOUT(Turnout9, turnoutCallback, Roco::W15, false);
+        TURNOUT(Turnout4, turnoutCallback, Roco::W15, true);
+        TURNOUT(Turnout5, turnoutCallback, Roco::W15, true);
+        TURNOUT(Turnout6, turnoutCallback, Roco::W15, false);
+        TURNOUT(Turnout7, turnoutCallback, Roco::W15, false);
+        DOUBLESLIPTURNOUT(DoubleSlipTurnout8_9, doubleSlipTurnoutCallback, Roco::DKW15);
+        TURNOUT(Turnout10, turnoutCallback, Roco::W15, true);
+        TURNOUT(Turnout11, turnoutCallback, Roco::W15, false);
+        TURNOUT(Turnout12, turnoutCallback, Roco::W15, false);
     default:
         winston::hal::fatal(std::string("track ") + std::string(track._to_string()) + std::string("not in switch"));
         return winston::Bumper::make();
@@ -1040,10 +1052,13 @@ void Y2024Railway::connect()
     LOCAL_TRACK(B3);
     LOCAL_TRACK(B4);
     LOCAL_TRACK(B5);
+    LOCAL_TRACK(B6);
+    LOCAL_TRACK(B7);
     LOCAL_TRACK(N1);
     LOCAL_TRACK(N2);
     LOCAL_TRACK(N3);
     LOCAL_TRACK(N4);
+    LOCAL_TRACK(N5);
     LOCAL_TRACK(LS1);
     LOCAL_TRACK(LS2);
     LOCAL_TRACK(Z1);
@@ -1056,10 +1071,13 @@ void Y2024Railway::connect()
     LOCAL_TRACK(Turnout2);
     LOCAL_TRACK(Turnout3);
     LOCAL_TRACK(Turnout4);
-    LOCAL_TRACK(DoubleSlipTurnout5_6);
+    LOCAL_TRACK(Turnout5);
+    LOCAL_TRACK(Turnout6);
     LOCAL_TRACK(Turnout7);
-    LOCAL_TRACK(Turnout8);
-    LOCAL_TRACK(Turnout9);
+    LOCAL_TRACK(DoubleSlipTurnout8_9);
+    LOCAL_TRACK(Turnout10);
+    LOCAL_TRACK(Turnout11);
+    LOCAL_TRACK(Turnout12);
 
     const auto A = winston::Track::Connection::A;
     const auto B = winston::Track::Connection::B;
@@ -1071,10 +1089,13 @@ void Y2024Railway::connect()
         ->connect(B, Turnout3, B)
         ->connect(A, B1, A)
         ->connect(B, B2, A)
+        ->connect(B, Turnout4, A)
         ->connect(B, B3, A)
-        ->connect(B, Turnout4, B)
-        ->connect(A, B4, A)
-        ->connect(B, B5, A)
+        ->connect(B, Turnout6, B)
+        ->connect(A, B5, A)
+        ->connect(B, Turnout7, B)
+        ->connect(A, B6, A)
+        ->connect(B, B7, A)
         ->connect(B, Turnout1, A);
 
     // PBF
@@ -1083,26 +1104,32 @@ void Y2024Railway::connect()
         ->connect(B, PBF1a, A);
     Turnout2->connect(C, Turnout3, C);
 
-    // Z
-    Turnout4->connect(C, Z1, A)
-        ->connect(B, DoubleSlipTurnout5_6, D)
-        ->connect(C, Z3, A)
-        ->connect(B, Turnout7, A)
-        ->connect(B, N3, A);
-    Turnout7->connect(C, N2, A);
+    // Ausweichgleis
+    Turnout4->connect(C, Turnout5, C);
+    Turnout6->connect(C, B4, B)
+        ->connect(A, Turnout5, A)
+        ->connect(B, N5, A);
 
-    DoubleSlipTurnout5_6->connect(B, Z4, A)
-        ->connect(B, Turnout8, B)
+    // Z
+    Turnout7->connect(C, Z1, A)
+        ->connect(B, DoubleSlipTurnout8_9, D)
+        ->connect(C, Z3, A)
+        ->connect(B, Turnout10, A)
+        ->connect(B, N3, A);
+    Turnout10->connect(C, N2, A);
+
+    DoubleSlipTurnout8_9->connect(B, Z4, A)
+        ->connect(B, Turnout11, B)
         ->connect(A, Z6, A)
         ->connect(B, N4, A);
 
-    DoubleSlipTurnout5_6->connect(A, Z2, A)
+    DoubleSlipTurnout8_9->connect(A, Z2, A)
         ->connect(B, N1, A);
 
-    Turnout8->connect(C, Z5, A)
-        ->connect(B, Turnout9, A)
+    Turnout11->connect(C, Z5, A)
+        ->connect(B, Turnout12, A)
         ->connect(B, LS2, A);
-    Turnout9->connect(C, LS1, A);
+    Turnout12->connect(C, LS1, A);
 }
 
 winston::Route::Shared Y2024Railway::define(const Routes route)
@@ -1115,10 +1142,13 @@ winston::Route::Shared Y2024Railway::define(const Routes route)
     LOCAL_TRACK(B3);
     LOCAL_TRACK(B4);
     LOCAL_TRACK(B5);
+    LOCAL_TRACK(B6);
+    LOCAL_TRACK(B7);
     LOCAL_TRACK(N1);
     LOCAL_TRACK(N2);
     LOCAL_TRACK(N3);
     LOCAL_TRACK(N4);
+    LOCAL_TRACK(N5);
     LOCAL_TRACK(LS1);
     LOCAL_TRACK(LS2);
     LOCAL_TRACK(Z1);
@@ -1131,10 +1161,13 @@ winston::Route::Shared Y2024Railway::define(const Routes route)
     LOCAL_TURNOUT(Turnout2);
     LOCAL_TURNOUT(Turnout3);
     LOCAL_TURNOUT(Turnout4);
-    LOCAL_DOUBLESLIPTURNOUT(DoubleSlipTurnout5_6);
+    LOCAL_TURNOUT(Turnout5);
+    LOCAL_TURNOUT(Turnout6);
     LOCAL_TURNOUT(Turnout7);
-    LOCAL_TURNOUT(Turnout8);
-    LOCAL_TURNOUT(Turnout9);
+    LOCAL_DOUBLESLIPTURNOUT(DoubleSlipTurnout8_9);
+    LOCAL_TURNOUT(Turnout10);
+    LOCAL_TURNOUT(Turnout11);
+    LOCAL_TURNOUT(Turnout12);
 
 #define ROUTE(id, ...)  case Routes::id: { return winston::Route::make((int)Routes::id, __VA_ARGS__); }
 #define PATH(...)   winston::Route::Path{__VA_ARGS__}
@@ -1144,10 +1177,10 @@ winston::Route::Shared Y2024Railway::define(const Routes route)
 
     switch (route)
     {
-        ROUTE(B5_PBF1,
-            "B5 --> PBF1",
+        ROUTE(B7_PBF1,
+            "B7 --> PBF1",
             PATH(
-                PATH_TRACK(B5),
+                PATH_TRACK(B7),
                 PATH_TURNOUT(Turnout1, A_C),
                 PATH_TRACK(PBF1)
             ),
@@ -1155,10 +1188,10 @@ winston::Route::Shared Y2024Railway::define(const Routes route)
                 PATH_TURNOUT(Turnout2, A_B),
                 PATH_TURNOUT(Turnout3, A_B)
             ))
-        ROUTE(B5_PBF2,
-            "B5 --> PBF2",
+        ROUTE(B7_PBF2,
+            "B7 --> PBF2",
             PATH(
-                PATH_TRACK(B5),
+                PATH_TRACK(B7),
                 PATH_TURNOUT(Turnout1, A_B),
                 PATH_TRACK(PBF2)
             ))
@@ -1198,10 +1231,13 @@ Y2024Railway::Section::Shared Y2024Railway::define(const Y2024Railway::Sections 
     LOCAL_TRACK(B3);
     LOCAL_TRACK(B4);
     LOCAL_TRACK(B5);
+    LOCAL_TRACK(B6);
+    LOCAL_TRACK(B7);
     LOCAL_TRACK(N1);
     LOCAL_TRACK(N2);
     LOCAL_TRACK(N3);
     LOCAL_TRACK(N4);
+    LOCAL_TRACK(N5);
     LOCAL_TRACK(LS1);
     LOCAL_TRACK(LS2);
     LOCAL_TRACK(Z1);
@@ -1214,10 +1250,13 @@ Y2024Railway::Section::Shared Y2024Railway::define(const Y2024Railway::Sections 
     LOCAL_TRACK(Turnout2);
     LOCAL_TRACK(Turnout3);
     LOCAL_TRACK(Turnout4);
-    LOCAL_TRACK(DoubleSlipTurnout5_6);
+    LOCAL_TRACK(Turnout5);
+    LOCAL_TRACK(Turnout6);
     LOCAL_TRACK(Turnout7);
-    LOCAL_TRACK(Turnout8);
-    LOCAL_TRACK(Turnout9);
+    LOCAL_TRACK(DoubleSlipTurnout8_9);
+    LOCAL_TRACK(Turnout10);
+    LOCAL_TRACK(Turnout11);
+    LOCAL_TRACK(Turnout12);
 
 #define SECTION(id, type, ...)  case Y2024Railway::Sections::id: { return Y2024Railway::Section::make(Y2024Railway::Sections::id, type, winston::TrackSet(__VA_ARGS__)); }
 #define FREE        winston::Section::Type::Free
@@ -1232,16 +1271,19 @@ Y2024Railway::Section::Shared Y2024Railway::define(const Y2024Railway::Sections 
         SECTION(N2, SIDING, { N2 });
         SECTION(N3, SIDING, { N3 });
         SECTION(N4, SIDING, { N4 });
+        SECTION(N5, SIDING, { N5 });
 
         SECTION(LS1, SIDING, { LS1 });
         SECTION(LS2, SIDING, { LS2 });
-        SECTION(Z, SIDING, { Z1, Z2, Z3, Z4, Z5, Z6, DoubleSlipTurnout5_6, Turnout7, Turnout8, Turnout9 });
+        SECTION(Z, SIDING, { Z1, Z2, Z3, Z4, Z5, Z6, DoubleSlipTurnout8_9, Turnout10, Turnout11, Turnout12 });
 
         SECTION(B1, FREE, { Turnout3, B1 });
-        SECTION(B2, FREE, { B2 });
+        SECTION(B2, FREE, { B2, Turnout4 });
         SECTION(B3, FREE, { B3 });
-        SECTION(B4, FREE, { B4, Turnout4 });
-        SECTION(B5, FREE, { B5, Turnout1 });
+        SECTION(B4, FREE, { B4, Turnout5 });
+        SECTION(B5, FREE, { B5, Turnout6 });
+        SECTION(B6, FREE, { B6, Turnout7 });
+        SECTION(B7, FREE, { B7, Turnout1 });
 
         SECTION(PBF1, PLATFORM, { PBF1, Turnout2 });
         SECTION(PBF2, PLATFORM, { PBF2 });
@@ -1263,10 +1305,13 @@ Y2024Railway::Segment::Shared Y2024Railway::define(const Segments segment)
     LOCAL_TRACK(B3);
     LOCAL_TRACK(B4);
     LOCAL_TRACK(B5);
+    LOCAL_TRACK(B6);
+    LOCAL_TRACK(B7);
     LOCAL_TRACK(N1);
     LOCAL_TRACK(N2);
     LOCAL_TRACK(N3);
     LOCAL_TRACK(N4);
+    LOCAL_TRACK(N5);
     LOCAL_TRACK(LS1);
     LOCAL_TRACK(LS2);
     LOCAL_TRACK(Z1);
@@ -1279,22 +1324,25 @@ Y2024Railway::Segment::Shared Y2024Railway::define(const Segments segment)
     LOCAL_TRACK(Turnout2);
     LOCAL_TRACK(Turnout3);
     LOCAL_TRACK(Turnout4);
-    LOCAL_TRACK(DoubleSlipTurnout5_6);
+    LOCAL_TRACK(Turnout5);
+    LOCAL_TRACK(Turnout6);
     LOCAL_TRACK(Turnout7);
-    LOCAL_TRACK(Turnout8);
-    LOCAL_TRACK(Turnout9);
+    LOCAL_TRACK(DoubleSlipTurnout8_9);
+    LOCAL_TRACK(Turnout10);
+    LOCAL_TRACK(Turnout11);
+    LOCAL_TRACK(Turnout12);
 
 #define SEGMENT(id, ...)  case id: { return Y2024Railway::Segment::make(id, winston::TrackSet(__VA_ARGS__)); }
 
     switch (segment)
     {
-        SEGMENT(0, { B4, Turnout4 });
+        SEGMENT(0, { B6, Turnout7 });
         SEGMENT(1, { N1 });
         SEGMENT(2, { LS2 });
         SEGMENT(3, { LS1 });
-        SEGMENT(4, { B5, Turnout1 });
-        SEGMENT(5, { B2, B3 });
-        SEGMENT(6, { Z1, DoubleSlipTurnout5_6, Z2, Z3, Z4, Z5, Z6, Turnout7, Turnout8, Turnout9});
+        SEGMENT(4, { B7, Turnout1 });
+        SEGMENT(5, { B2, Turnout4, B3, Turnout5, B5 });
+        SEGMENT(6, { Z1, DoubleSlipTurnout8_9, Z2, Z3, Z4, Z5, Z6, Turnout10, Turnout11, Turnout12});
         SEGMENT(7, { PBF1, Turnout2 });
         SEGMENT(8, { PBF2 });
         SEGMENT(9, { N2 });
@@ -1302,6 +1350,8 @@ Y2024Railway::Segment::Shared Y2024Railway::define(const Segments segment)
         SEGMENT(11, { N4 });
         SEGMENT(12, { PBF1a });
         SEGMENT(13, { Turnout3, B1 });
+        SEGMENT(14, { Turnout5, B4 });
+        SEGMENT(15, { N5 });
     default:
         winston::logger.warn("undefined segment: ", segment);
         break;

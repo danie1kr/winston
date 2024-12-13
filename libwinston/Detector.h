@@ -19,11 +19,11 @@ namespace winston
 
 		struct Callbacks
 		{
-			using Change = std::function<const Result(const std::string detectorName, const Locomotive::Shared loco, Segment::Shared segment, const Change change, const TimePoint when)>;
-			using Occupied = std::function<const Result(const std::string detectorName, Segment::Shared segment, const Change change)>;
+			using Change = std::function<const Result(const std::string detectorName, const Locomotive::Shared loco, const bool forward, Segment::Shared segment, const Detector::Change change, const TimePoint when)>;
+			using Occupied = std::function<const Result(const std::string detectorName, Segment::Shared segment, const Detector::Change change, const TimePoint when)>;
 		};
 		
-		Detector(const std::string name, Segment::Shared segment, Callbacks::Change changeCallback);
+		Detector(const std::string name, Segment::Shared segment, Callbacks::Change changeCallback, Callbacks::Occupied occupiedCallback);
 		virtual ~Detector() = default;
 
 		const std::string name;
@@ -31,10 +31,11 @@ namespace winston
 	protected:
 		const Segment::Shared segment;
 		const Callbacks::Change changeCallback;
+		const Callbacks::Occupied occupiedCallback;
 
 	friend class DetectorDevice;
-		const Result change(const Locomotive::Shared loco, const TimePoint when, const Change change) const;
-		const Result occupied(const Locomotive::Shared loco, const TimePoint when, const Change change) const;
+		const Result change(const Locomotive::Shared loco, const bool forward, const TimePoint when, const Change change) const;
+		const Result occupied(const TimePoint when, const Change change) const;
 	};
 
 	class DetectorDevice : public Shared_Ptr<DetectorDevice>
@@ -63,7 +64,7 @@ namespace winston
 		virtual const bool isReady() = 0;
 		const std::string name;
 
-		virtual const Result change(const size_t port, const Address locoAddress, const Detector::Change change);
+		virtual const Result change(const size_t port, const Address locoAddress, const bool forward, const Detector::Change change);
 		virtual const Result occupied(const size_t port, const Detector::Change change);
 
 	protected:

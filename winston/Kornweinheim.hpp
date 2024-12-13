@@ -139,9 +139,13 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
     winston::Railway::Callbacks callbacks;
 
     callbacks.turnoutUpdateCallback = [=](winston::Turnout&  turnout, const winston::Turnout::Direction direction) -> const winston::State
-    {
+    {    
         // tell the signal box to update the signals
         this->signalTower->setSignalsFor(turnout);
+        
+        // stop here if we are still initializing and learn the initial states of the turnouts
+        if (!this->isReady())
+            return winston::State::Finished;
 
 #ifdef WINSTON_WITH_WEBSOCKET
         // tell the ui what happens
@@ -205,6 +209,10 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
     {
         // tell the signal box to update the signals
         this->signalTower->setSignalsFor(turnout);
+
+        // stop here if we are still initializing and learn the initial states of the turnouts
+        if (!this->isReady())
+            return winston::State::Finished;
 
 #ifdef WINSTON_WITH_WEBSOCKET
         // tell the ui what happens
@@ -311,9 +319,6 @@ void Kornweinheim::systemSetup() {
     this->signalInterfaceDevices.push_back(SignalInterfaceDevice::make(33, TLC5947::SPI_Clock));
     this->signalInterfaceDevices.push_back(SignalInterfaceDevice::make(34, TLC5947::SPI_Clock));
     auto TLC5947Off = Arduino_GPIOOutputPin::make(30, Arduino_GPIOOutputPin::State::High);
-
-
-    this->signalController = winston::SignalController::make(0, this->signalDevices);
 #else
 #pragma message("using one SignalInterfaceDevice for two devices")
     this->signalInterfaceDevices.push_back(SignalInterfaceDevice::make(3, TLC5947::SPI_Clock));
@@ -399,7 +404,7 @@ void Kornweinheim::setupSignals()
     this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::PBF2), winston::Track::Connection::A, 5U, signalUpdateCallback);
     this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::PBF2), winston::Track::Connection::B, 5U, signalUpdateCallback);
 
-    this->signalController->attach<winston::SignalKS>(this->railway->track(Tracks::PBF1a), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    this->signalController->attach<winston::SignalH>(this->railway->track(Tracks::PBF1a), winston::Track::Connection::A, 5U, signalUpdateCallback);
     
     // N + LS
     this->signalController->attach<winston::SignalH>(this->railway->track(Tracks::N1), winston::Track::Connection::A, 5U, signalUpdateCallback);
@@ -432,6 +437,8 @@ void Kornweinheim::setupSignals()
     dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Tracks::N1), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
     dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Tracks::N2), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
     dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Tracks::N3), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+    dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Tracks::N4), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+    dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Tracks::N5), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
     dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Tracks::LS1), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
     dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Tracks::LS2), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
     dncPort = 999; this->signalController->attach<winston::SignalAlwaysHalt>(this->railway->track(Tracks::PBF1a), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
@@ -597,14 +604,16 @@ const winston::Result Kornweinheim::setupDetectors()
     
     winston::DetectorDevice::Callbacks callbacks;
     callbacks.change = 
-        [](const std::string detectorName, const winston::Locomotive::Shared loco, winston::Segment::Shared segment, const winston::Detector::Change change, const winston::TimePoint when) -> const winston::Result 
+        [](const std::string detectorName, const winston::Locomotive::Shared loco, const bool forward, winston::Segment::Shared segment, const winston::Detector::Change change, const winston::TimePoint when) -> const winston::Result
         { 
-            return winston::Result::NotImplemented; 
+            winston::logger.info(loco->name(), change == winston::Detector::Change::Entered ? "entered" : "left", segment->id);
+            return winston::Result::OK; 
         };
     callbacks.occupied = 
-        [](const std::string detectorName, winston::Segment::Shared segment, const winston::Detector::Callbacks::Change change) -> const winston::Result 
+        [](const std::string detectorName, winston::Segment::Shared segment, const winston::Detector::Change change, const winston::TimePoint when) -> const winston::Result
         { 
-            return winston::Result::NotImplemented; 
+            winston::logger.info("something ", change == winston::Detector::Change::Entered ? "entered" : "left", segment->id);
+            return winston::Result::OK;
         };
     callbacks.locoFromAddress = 
         [](const winston::Address address) -> winston::Locomotive::Shared 
@@ -696,17 +705,17 @@ void Kornweinheim::populateSheds()
     auto DR = winston::RailCar::Groups::create();
 
     this->railCarShed.push_back(winston::RailCar::make("Bauzug lang", winston::RailCar::Groups::ConstructionTrain, 300));
-    this->railCarShed.push_back(winston::RailCar::make("Bauzug doppel", winston::RailCar::Groups::ConstructionTrain, 312));
-    this->railCarShed.push_back(winston::RailCar::make("Bauzug Kran", winston::RailCar::Groups::ConstructionTrain, 300));
+    //this->railCarShed.push_back(winston::RailCar::make("Bauzug doppel", winston::RailCar::Groups::ConstructionTrain, 312));
+    //this->railCarShed.push_back(winston::RailCar::make("Bauzug Kran", winston::RailCar::Groups::ConstructionTrain, 300));
 
     this->railCarShed.push_back(winston::RailCar::make("Personenwagen 1", winston::RailCar::Groups::Person | DR, 250));
-    this->railCarShed.push_back(winston::RailCar::make("Personenwagen 2", winston::RailCar::Groups::Person | DR, 250));
+    //this->railCarShed.push_back(winston::RailCar::make("Personenwagen 2", winston::RailCar::Groups::Person | DR, 250));
     this->railCarShed.push_back(winston::RailCar::make("Gepaeckwagen", winston::RailCar::Groups::Person | DR | winston::RailCar::Groups::CannotBeSingle, 250));
 
-    this->railCarShed.push_back(winston::RailCar::make("Uaai 819", winston::RailCar::Groups::Heavy, 355));
+    //this->railCarShed.push_back(winston::RailCar::make("Uaai 819", winston::RailCar::Groups::Heavy, 355));
 
     this->railCarShed.push_back(winston::RailCar::make("Tankwagen lang", winston::RailCar::Groups::Goods, 100));
-    this->railCarShed.push_back(winston::RailCar::make("Tankwagen Shell", winston::RailCar::Groups::Goods, 355));
+    //this->railCarShed.push_back(winston::RailCar::make("Tankwagen Shell", winston::RailCar::Groups::Goods, 355));
 
     this->railCarShed.push_back(winston::RailCar::make("Kiara", winston::RailCar::Groups::Goods, 114));
     this->railCarShed.push_back(winston::RailCar::make("Alter Gueterwagen", winston::RailCar::Groups::Goods, 114));
@@ -714,8 +723,8 @@ void Kornweinheim::populateSheds()
     this->railCarShed.push_back(winston::RailCar::make("Schiebehaubenwagen", winston::RailCar::Groups::Goods, 146));
     this->railCarShed.push_back(winston::RailCar::make("Offener Wagen", winston::RailCar::Groups::Goods, 160));
 
-    this->railCarShed.push_back(winston::RailCar::make("Schwarzer Wagen", winston::RailCar::Groups::Goods, 102));
-    this->railCarShed.push_back(winston::RailCar::make("Brauner Wagen", winston::RailCar::Groups::Goods, 98));
+    //this->railCarShed.push_back(winston::RailCar::make("Schwarzer Wagen", winston::RailCar::Groups::Goods, 102));
+    //this->railCarShed.push_back(winston::RailCar::make("Brauner Wagen", winston::RailCar::Groups::Goods, 98));
 }
 
 void Kornweinheim::inventStorylines()

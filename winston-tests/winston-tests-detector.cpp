@@ -78,12 +78,12 @@ namespace winstontests
 
             winston::DetectorDevice::Callbacks callbacks;
             callbacks.change =
-                [](const std::string detectorName, const winston::Locomotive::Shared loco, winston::Segment::Shared segment, const winston::Detector::Change change, const winston::TimePoint when) -> const winston::Result
+                [](const std::string detectorName, const winston::Locomotive::Shared loco, const bool forward, winston::Segment::Shared segment, const winston::Detector::Change change, const winston::TimePoint when) -> const winston::Result
                 {
                     return winston::Result::NotImplemented;
                 };
             callbacks.occupied =
-                [](const std::string detectorName, winston::Segment::Shared segment, const winston::Detector::Callbacks::Change change) -> const winston::Result
+                [](const std::string detectorName, winston::Segment::Shared segment, const winston::Detector::Change change, const winston::TimePoint when) -> const winston::Result
                 {
                     return winston::Result::NotImplemented;
                 };

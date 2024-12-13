@@ -151,7 +151,7 @@ const winston::Result LoDi::PacketParser::processEvent(const API::Event event, c
 			uint8_t low = payload[idx++];
 			uint8_t status = payload[idx++];
 
-			this->detectorDevice->change(address * 8 + channel, (high << 8) + low, status == 1 ? winston::Detector::Change::Entered : winston::Detector::Change::Left);
+			this->detectorDevice->change(address * 8 + channel, (high << 8) + low, high & 0x80, status == 1 ? winston::Detector::Change::Entered : winston::Detector::Change::Left);
 		}
 		break;
 	}
@@ -245,7 +245,7 @@ const winston::Result LoDi::S88Commander::init(PortSegmentMap portSegmentMap, Ca
 		return result;
 
 	for (auto& portSegment : portSegmentMap)
-		this->ports.insert(std::make_pair(portSegment.first, winston::Detector::make(winston::build(this->name, " ", portSegment.first), portSegment.second, callbacks.change)));
+		this->ports.insert(std::make_pair(portSegment.first, winston::Detector::make(winston::build(this->name, " ", portSegment.first), portSegment.second, callbacks.change, callbacks.occupied)));
 
 	this->getVersion();
 	this->deviceConfigGet();

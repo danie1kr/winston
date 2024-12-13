@@ -2,15 +2,20 @@
 
 namespace winston
 {
-	Detector::Detector(const std::string name, Segment::Shared segment, Callbacks::Change changeCallback)
-		: Shared_Ptr<Detector>(), name(name), segment(segment), changeCallback(changeCallback)
+	Detector::Detector(const std::string name, Segment::Shared segment, Callbacks::Change changeCallback, Callbacks::Occupied occupiedCallback)
+		: Shared_Ptr<Detector>(), name(name), segment(segment), changeCallback(changeCallback), occupiedCallback(occupiedCallback)
 	{
 
 	}
 
-	const Result Detector::change(const Locomotive::Shared loco, const TimePoint when, const Change change) const
+	const Result Detector::change(const Locomotive::Shared loco, const bool forward, const TimePoint when, const Change change) const
 	{
-		return this->changeCallback(this->name, loco, this->segment, change, when);
+		return this->changeCallback(this->name, loco, forward, this->segment, change, when);
+	}
+
+	const Result Detector::occupied(const TimePoint when, const Change change) const
+	{
+		return this->occupiedCallback(this->name, this->segment, change, when);
 	}
 
 	DetectorDevice::DetectorDevice(const std::string name)
@@ -30,7 +35,7 @@ namespace winston
 		return Result::OK;
 	}
 
-	const Result DetectorDevice::change(const size_t port, const Address locoAddress, const Detector::Change change)
+	const Result DetectorDevice::change(const size_t port, const Address locoAddress, const bool forward, const Detector::Change change)
 	{
 		if (this->ports.find(port) != this->ports.end())
 		{
@@ -43,7 +48,7 @@ namespace winston
 				return Result::NotFound;
 			}
 				
-			return detector->change(loco, hal::now(), change);
+			return detector->change(loco, forward, hal::now(), change);
 		}
 		else
 		{
@@ -54,6 +59,15 @@ namespace winston
 
 	const Result DetectorDevice::occupied(const size_t port, const Detector::Change change)
 	{
-		return Result::NotImplemented;
+		if (this->ports.find(port) != this->ports.end())
+		{
+			auto detector = this->ports.find(port)->second;
+			return detector->occupied(hal::now(), change);
+		}
+		else
+		{
+			winston::logger.err("DetectorDevice::change on unkown port: ", port);
+			return Result::NotFound;
+		}
 	}
 }

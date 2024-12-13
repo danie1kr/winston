@@ -12,7 +12,7 @@ TimeSaver modelRailWayConfiguration;
 void winston_setup()
 {
 #ifdef WINSTON_PLATFORM_TEENSY
-    int led = 14;
+    int led = 22;
     pinMode(led, OUTPUT);
     digitalWrite(led, HIGH);
     pinMode(13, OUTPUT);
@@ -33,7 +33,7 @@ void winston_setup()
     modelRailWayConfiguration.setup();
     winston::hal::text("Setup complete!"_s);
 #ifdef WINSTON_PLATFORM_TEENSY
-    digitalWrite(led, HIGH);
+    digitalWriteFast(led, HIGH);
 #endif
 }
 

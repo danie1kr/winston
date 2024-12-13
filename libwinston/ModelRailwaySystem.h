@@ -30,6 +30,7 @@ namespace winston
 	{
 	public:
 		ModelRailwaySystem()
+			: _status{ Status::Initializing }
 #ifdef WINSTON_STATISTICS
 			, stopWatchJournal("MRS")
 #endif
@@ -79,31 +80,7 @@ namespace winston
 #else
 			logger.warn("not connecting to digitalCentralStation as WINSTON_REALWORLD is not defined");
 #endif
-			/*
-			this->railway->turnouts([=](const Tracks track, winston::Turnout::Shared turnout) {
-				
-				this->signalTower->order(winston::Command::make([this, turnout](const TimePoint &created) -> const winston::State
-					{
-						this->digitalCentralStation->requestTurnoutInfo(turnout);
-						winston::hal::delay(50);
-						this->signalTower->setSignalsFor(turnout);
-						winston::hal::delay(100);
-						return winston::State::Finished;
-					}, __PRETTY_FUNCTION__));
-			});
-
-			this->railway->doubleSlipTurnouts([=](const Tracks track, winston::DoubleSlipTurnout::Shared turnout) {
-
-				this->signalTower->order(winston::Command::make([this, turnout](const TimePoint& created) -> const winston::State
-					{
-						this->digitalCentralStation->requestDoubleSlipTurnoutInfo(turnout);
-						winston::hal::delay(50);
-						this->signalTower->setSignalsFor(turnout);
-						winston::hal::delay(100);
-						return winston::State::Finished;
-					}, __PRETTY_FUNCTION__));
-				});*/
-
+			
 			this->signalTower->order(winston::Command::make([](const TimePoint &created) -> const winston::State
 				{
 					logger.log("Init tasks complete");
@@ -111,6 +88,7 @@ namespace winston
 				}, __PRETTY_FUNCTION__));
 
 			this->systemSetupComplete();
+			this->_status = Status::Ready;
 		};
 
 		void setupWebServer(winston::hal::StorageInterface::Shared storageLayout, winston::hal::StorageInterface::Shared storageMicroLayout, typename _Railway::AddressTranslator::Shared addressTranslator, const unsigned int port)
@@ -201,6 +179,13 @@ namespace winston
 						winston::hal::delay(50);
 						this->signalTower->setSignalsFor(turnout);
 						winston::hal::delay(100);
+
+						this->signalTower->order(winston::Command::make([this, &turnout](const TimePoint& created) -> const winston::State
+							{
+								this->turnoutChangeTo(turnout, turnout.direction());
+								return winston::State::Finished;
+							}, __PRETTY_FUNCTION__));
+
 						return winston::State::Finished;
 					}, __PRETTY_FUNCTION__));
 				});
@@ -213,6 +198,13 @@ namespace winston
 						winston::hal::delay(50);
 						this->signalTower->setSignalsFor(turnout);
 						winston::hal::delay(100);
+
+						this->signalTower->order(winston::Command::make([this, &turnout](const TimePoint& created) -> const winston::State
+							{
+								this->doubleSlipChangeTo(turnout, turnout.direction());
+								return winston::State::Finished;
+							}, __PRETTY_FUNCTION__));
+
 						return winston::State::Finished;
 					}, __PRETTY_FUNCTION__));
 				});
@@ -547,7 +539,24 @@ namespace winston
 	protected:
 		StopwatchJournal stopWatchJournal;
 #endif
+		const bool isReady() const
+		{
+			return this->status() == Status::Ready;
+		}
 	protected:
+
+		enum class Status : uint8_t
+		{
+			Initializing = 0,
+			Ready,
+			Faulty
+		};
+		Status _status;
+		const Status status() const
+		{
+			return this->_status;
+		}
+
 		virtual void systemSetup() = 0;
 		virtual void systemSetupComplete() = 0;
 		virtual void systemLoop() { };

@@ -10,7 +10,7 @@ public:
 #ifdef __GNUC__ 
 	inline 
 #endif
-	static const unsigned int SPI_Clock = 20000;
+	static const unsigned int SPI_Clock = 1000000;
 	#pragma message("TLC5947 Chaining: For more than 3 devices, use a very low clock (<10khz) or spi buffer/repeaters like 74lvc245 or TXU0304")
 	// see https://forums.adafruit.com/viewtopic.php?t=58367&start=15
 

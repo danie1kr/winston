@@ -64,7 +64,7 @@ namespace winston
 			// only signal and we do not jump tracks
 			if (auto signal = this->track->signalFacing(this->reference))
 			{
-				auto signalDistanceFromPositionView = track->length() - signal->distance();
+				auto signalDistanceFromPositionView = std::abs((signed)track->length() - (signed)signal->distance());
 				if (distOnThisTrack < signalDistanceFromPositionView && this->dist >= signalDistanceFromPositionView)
 				{
 					passedSignals.push_back(PositionedSignal(this->track, this->reference, signal, signalDistanceFromPositionView));
@@ -111,7 +111,7 @@ namespace winston
 					// we travelled all the way to a new track which might have a signal we just passed
 					if (auto signal = current->signalFacing(connection))
 					{
-						auto signalDistanceFromPositionView = track->length() - signal->distance();
+						auto signalDistanceFromPositionView = std::abs((signed)track->length() - (signed)signal->distance());
 						if (distOnThisTrack < signalDistanceFromPositionView && this->dist >= signalDistanceFromPositionView)
 						{
 							passedSignals.push_back(PositionedSignal(current, connection, signal, signalDistanceFromPositionView));

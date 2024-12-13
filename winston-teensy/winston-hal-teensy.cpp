@@ -421,15 +421,15 @@ const winston::Result Arduino_SPIDevice::send(const std::vector<DataType> data)
 #endif
 
     const unsigned int spiDelay = 1;
-    digitalWrite(this->chipSelect, LOW);
+    digitalWriteFast(this->chipSelect, LOW);
     delay(spiDelay);
     SPI.beginTransaction(this->spiSettings);
     SPI.transfer((unsigned char*)&data.front(), data.size() * sizeof(DataType));
     SPI.endTransaction();
     delay(spiDelay);
-    digitalWrite(this->chipSelect, HIGH);
+    digitalWriteFast(this->chipSelect, HIGH);
     delay(spiDelay);
-    digitalWrite(this->chipSelect, LOW);
+    digitalWriteFast(this->chipSelect, LOW);
     return winston::Result::OK;
 }
 #endif

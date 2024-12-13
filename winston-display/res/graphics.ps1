@@ -3,14 +3,11 @@ function Get-SVG-And-PNGrize($name, $size) {
 	
 	"Doing ${name} for ${size}x${size}"
 
-# <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=monitor_heart" />
-#	Invoke-RestMethod -method Get -URI https://fonts.gstatic.com/s/i/short-term/release/materialsymbolsoutlined/$name/default/24px.svg -OutFile "${name}.svg" 
 	Invoke-RestMethod -method Get -URI "https://raw.githubusercontent.com/google/material-design-icons/refs/heads/master/symbols/web/${name}/materialsymbolsoutlined/${name}_48px.svg" -OutFile "${name}.svg" 
 	Start-Sleep 1
 	inkscape.exe -w $size -h $size "${name}.svg" -o "${name}_${size}.png"
 	Start-Sleep 10
 	python3.12.exe ..\..\LVGLImage.py --ofmt C --cf RGB565A8 -o "..\\${name}_${size}.c" "${name}_${size}.png"
-#	ts-node d:\apps\lv_img_conv\lib\cli.ts "${name}_${size}.png" -c RGB565A8 -f -o ".."
 	
 	Write-Output "#include `"icons\${name}_${size}.c\${name}_${size}.c`"" >> ..\..\lvgl_graphics.utf8
 }

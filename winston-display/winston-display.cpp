@@ -204,7 +204,7 @@ void winston_setup()
 
 
 #ifdef WINSTON_PLATFORM_WIN_x64
-    std::srand(inMilliseconds(winston::hal::now().time_since_epoch()));
+    std::srand((unsigned int)inMilliseconds(winston::hal::now().time_since_epoch()));
 #else
     std::srand(::micros());
 #endif

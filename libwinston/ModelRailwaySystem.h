@@ -42,8 +42,10 @@ namespace winston
 	public:
 
 		void setup() {
+			logger.info("System: Setup");
 			this->systemSetup();
 
+			logger.info("System: Railway Init");
 			this->railway->init();/*
 
 			for(const auto &loco : this->locomotiveShed ) {
@@ -56,10 +58,14 @@ namespace winston
 					}, __PRETTY_FUNCTION__));
 			}*/
 
+			logger.info("System: Signal Setup");
 			this->setupSignals();
+
+			logger.info("System: Detector Setup");
 			if(this->setupDetectors() != Result::OK)
 				logger.err("Could not set up Detectors.");
 
+			logger.info("System: Railway Final Validation");
 			this->railway->validateFinal();
 #ifdef WINSTON_REALWORLD
 			this->signalTower->order(winston::Command::make([this](const TimePoint& created) -> const winston::State
@@ -71,8 +77,10 @@ namespace winston
 							logger.err("Connecting to DigitalCentralStation.");
 							this->digitalCentralStation->connect();
 						}
-						else
-							logger.err("Connection to DigitalCentralStation lost.");
+						//else
+						//	logger.err("Connection to DigitalCentralStation lost.");
+
+						this->lastDCSConnectedCheck = winston::hal::now();
 					}
 					return winston::State::Delay;
 		}, __PRETTY_FUNCTION__));
@@ -88,6 +96,7 @@ namespace winston
 				}, __PRETTY_FUNCTION__));
 
 			this->systemSetupComplete();
+			logger.info("System: Setup complete");
 			this->_status = Status::Ready;
 		};
 

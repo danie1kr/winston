@@ -293,34 +293,38 @@ namespace winston
 		{
 			bool personRailCars = false;
 			auto taskRailCars = storyline->getContext<TaskRandomCars>();
-			if (taskRailCars != nullptr)
-				personRailCars = taskRailCars->railCars().begin()->get()->is(RailCar::Groups::Person);
 
-			auto taskAction = storyline->getContext<TaskRandomAction>();
-			if (taskAction != nullptr)
+			if (!taskRailCars->railCars().empty())
 			{
-				auto action = taskAction->action();
-				// Assemble on any section
-				// Drive Person to Plattform
-				// Drive others to Plattform or Sidings
-				// Stable on Sidings
-				if (action == TaskRandomAction::Action::Drive)
-				{
-					if (personRailCars)
-						sections = filter(sections, [](const Section::Shared& section) -> const bool {
-						return section->type == Section::Type::Platform;
-							});
-					else
-						sections = filter(sections, [](const Section::Shared& section) -> const bool {
-						return section->type == Section::Type::Platform || section->type == Section::Type::Siding;
-							});
+				if (taskRailCars != nullptr)
+					personRailCars = taskRailCars->railCars().begin()->get()->is(RailCar::Groups::Person);
 
-				}
-				else if(action == TaskRandomAction::Action::Stable)
+				auto taskAction = storyline->getContext<TaskRandomAction>();
+				if (taskAction != nullptr)
 				{
-					sections = filter(sections, [](const Section::Shared& section) -> const bool {
-						return section->type == Section::Type::Siding;
-						});
+					auto action = taskAction->action();
+					// Assemble on any section
+					// Drive Person to Plattform
+					// Drive others to Plattform or Sidings
+					// Stable on Sidings
+					if (action == TaskRandomAction::Action::Drive)
+					{
+						if (personRailCars)
+							sections = filter(sections, [](const Section::Shared& section) -> const bool {
+							return section->type == Section::Type::Platform;
+								});
+						else
+							sections = filter(sections, [](const Section::Shared& section) -> const bool {
+							return section->type == Section::Type::Platform || section->type == Section::Type::Siding;
+								});
+
+					}
+					else if (action == TaskRandomAction::Action::Stable)
+					{
+						sections = filter(sections, [](const Section::Shared& section) -> const bool {
+							return section->type == Section::Type::Siding;
+							});
+					}
 				}
 			}
 		}

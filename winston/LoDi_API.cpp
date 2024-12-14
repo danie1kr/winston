@@ -298,7 +298,7 @@ const winston::Result LoDi::S88Commander::deviceConfigGet()
 	return this->packetParser.send(LoDi::API::Command::DeviceConfigGet, payload,
 		[this](const Payload payload) -> const winston::Result
 		{
-			if (payload.size() == 16)
+			if (payload.size() == 17)
 			{
 				this->initializedComponents |= (unsigned int)Initialized::DeviceConfig;
 				winston::logger.info("LoDi S88 Commander Device Config Bus0: ", payload[0], ", Bus1: ", payload[1]);

@@ -31,7 +31,11 @@ Z21::Z21(winston::hal::Socket::Shared& socket, winston::DigitalCentralStation::T
         winston::logger.info("Z21: Status");
         winston::logger.info("     emergency stop: ", (status & Z21_Status::EMERGENCY_STOP) ? "true" : "false");
         winston::logger.info("     track voltage: ", (status & Z21_Status::TRACK_VOLTAGE_OFF) ? "off" : "enabled");
-        winston::logger.warn("     short circuit: ", (status & Z21_Status::SHORT_CIRCUIT) ? "detected" : "false");
+        if(status& Z21_Status::SHORT_CIRCUIT)
+            winston::logger.warn("     short circuit: ", (status & Z21_Status::SHORT_CIRCUIT) ? "detected" : "false");
+        else
+            winston::logger.info("     short circuit: ", (status & Z21_Status::SHORT_CIRCUIT) ? "detected" : "false");
+
         winston::logger.info("     programming mode: ", (status & Z21_Status::PROGRAMMING_MODE_ACTIVE) ? "active" : "off");
     };
     this->onSystemStateDataChanged = [this](uint16_t mainCurrent,              // mA

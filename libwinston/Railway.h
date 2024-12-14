@@ -73,18 +73,21 @@ namespace winston
 
 		const Result init()
 		{
+			logger.info("System: Railway Init: Tracks");
 			auto result = this->initTracks();
 			if (result != winston::Result::OK)
 			{
 				winston::logger.err("Railway::initTracks failed with ", result);
 				return result;
 			}
+			logger.info("System: Railway Init: Routes");
 			result = this->initRoutes();
 			if (result != winston::Result::OK)
 			{
 				winston::logger.err("Railway::initRoutes failed with ", result);
 				return result;
 			}
+			logger.info("System: Railway Init: Secetions");
 			result = this->initSections();
 			if (result != winston::Result::OK)
 			{
@@ -92,6 +95,7 @@ namespace winston
 				return result;
 			}
 #ifdef WINSTON_ENABLE_TURNOUT_GROUPS
+			logger.info("System: Railway Init: Turnout Groups");
 			result = this->initTurnoutGroups();
 			if (result != winston::Result::OK)
 			{
@@ -99,6 +103,7 @@ namespace winston
 				return result;
 			}
 #endif
+			logger.info("System: Railway Init: Segments");
 			result = this->initSegments();
 			if (result != winston::Result::OK)
 			{
@@ -106,6 +111,7 @@ namespace winston
 				return result;
 			}
 
+			logger.info("System: Railway Init: Done");
 			return winston::Result::OK;
 		}
 

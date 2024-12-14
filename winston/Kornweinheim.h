@@ -76,7 +76,7 @@ private:
     std::vector<winston::SignalDevice::Shared> signalDevices;
 
     /* Detectors using lokstore digital hardware */
-    const std::string loDiIP = { "192.168.188.101" };
+    const std::string loDiIP = { "192.168.188.44" };// 101" };
     const unsigned short loDiPort = 11092;
     winston::hal::Socket::Shared loDiSocket;
     LoDi::Shared loDi;

@@ -87,8 +87,17 @@ private:
 
 		closesocket(this->socket);
 		this->socket = ::socket(AF_INET, SocketType == winston::hal::Socket::Type::UDP ? SOCK_DGRAM : SOCK_STREAM, 0);
-		this->state = State::Connecting;
-		return winston::Result::OK;
+
+		if (SocketType == winston::hal::Socket::Type::TCP)
+		{
+			auto result = ::connect(this->socket, (SOCKADDR*)&this->addr, (int)sizeof(SOCKADDR_IN));
+			return result == 0 ? winston::Result::OK : winston::Result::NotInitialized;
+		}
+		else
+		{
+			this->state = State::Connecting;
+			return winston::Result::OK;
+		}
 	}
 
 	SOCKET socket;

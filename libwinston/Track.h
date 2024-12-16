@@ -24,7 +24,7 @@ namespace winston
 	{
 	public:
 
-		Track(std::string name, Length tracklength);
+		Track(const std::string name, const Id index, const Length tracklength);
 
 		enum class Connection : unsigned int
 		{
@@ -159,6 +159,8 @@ namespace winston
 		virtual const Length length() const;
 		const std::string name() const;
 
+		const Id index;
+
 	protected:
 		virtual Track::Shared connectTo(const Connection local, SignalFactory guardingLocalSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa = true) = 0;
 		Result validateSingle(const Track::Shared track);
@@ -181,8 +183,7 @@ namespace winston
 	class Bumper : public Track, public Shared_Ptr<Bumper>
 	{
 	public:
-		Bumper(const std::string name = "", Length tracklength = 0);
-		//static Track::Shared make();
+		Bumper(const std::string name = "", const Id index = 0xBADF00D, const Length tracklength = 0);
 
 		bool has(const Connection connection) const;
 		Track::Shared on(const Connection connection) const;
@@ -216,7 +217,7 @@ namespace winston
 	class Rail : public Track, public Shared_Ptr<Rail>
 	{
 	public:
-		Rail(const std::string name = "", Length tracklength = 0);
+		Rail(const std::string name = "", const Id index = 0xBADF00D, const Length tracklength = 0);
 
 		bool has(const Connection connection) const;
 		Track::Shared on(const Connection connection) const;
@@ -264,8 +265,8 @@ namespace winston
 
 		using TrackLengthCalculator = const std::function<const Length(const Direction)>;
 
-		Turnout(const std::string name, const Callback callback, const bool leftTurnout = false);
-		Turnout(const std::string name, const Callback callback, const TrackLengthCalculator trackLengthCalculator, const bool leftTurnout = false);
+		Turnout(const std::string name, const Id index, const Callback callback, const bool leftTurnout = false);
+		Turnout(const std::string name, const Id index, const Callback callback, const TrackLengthCalculator trackLengthCalculator, const bool leftTurnout = false);
 
 		bool has(const Connection connection) const;
 		Track::Shared on(const Connection connection) const;
@@ -336,7 +337,7 @@ namespace winston
 	    \ /
 	     X
 	    / \
-	   C   B */
+	   B   C */
 	class DoubleSlipTurnout : public Track, public Shared_Ptr<DoubleSlipTurnout>
 	{
 	public:
@@ -355,8 +356,8 @@ namespace winston
 
 		using TrackLengthCalculator = const std::function<const Length(const Direction)>;
 
-		DoubleSlipTurnout(const std::string name, const Callback callback);
-		DoubleSlipTurnout(const std::string name, const Callback callback, const TrackLengthCalculator trackLengthCalculator);
+		DoubleSlipTurnout(const std::string name, const Id index, const Callback callback);
+		DoubleSlipTurnout(const std::string name, const Id index, const Callback callback, const TrackLengthCalculator trackLengthCalculator);
 
 		bool has(const Connection connection) const;
 		Track::Shared on(const Connection connection) const;

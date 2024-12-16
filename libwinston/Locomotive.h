@@ -5,6 +5,7 @@
 #include "Position.h"
 #include "Track.h"
 #include "Log.h"
+#include "Segment.h"
 
 namespace winston
 {
@@ -61,16 +62,22 @@ namespace winston
 	public:
 		struct Callbacks
 		{
-			using DriveCallback = std::function<void(const Address address, const unsigned char speed, const bool forward)>;
-			DriveCallback drive = [](const Address address, const unsigned char speed, const bool forward) {
+			using DriveCallback = std::function<const Result(const Address address, const unsigned char speed, const bool forward)>;
+			DriveCallback drive = [](const Address address, const unsigned char speed, const bool forward) -> const Result {
 				logger.warn("Locomotive::DriveCallback used but not implemented");
-				return winston::State::Finished;
+				return Result::NotImplemented;
 			};
 
-			using FunctionsCallback = std::function<void(const Address address, const uint32_t functions)>;
-			FunctionsCallback functions = [](const Address address, const uint32_t functions) {
+			using FunctionsCallback = std::function<const Result(const Address address, const uint32_t functions)>;
+			FunctionsCallback functions = [](const Address address, const uint32_t functions) -> const Result {
 				logger.warn("Locomotive::FunctionsCallback used but not implemented");
-				return winston::State::Finished;
+				return Result::NotImplemented;
+			};
+
+			using SignalPassedCallback = std::function<const Result(Signal::Shared signal, const bool guarding)>;
+			SignalPassedCallback signalPassed = [](Signal::Shared signal, const bool facingLoco) -> const Result {
+				logger.warn("Locomotive::SignalPassedCallback used but not implemented");
+				return Result::NotImplemented;
 			};
 		};
 
@@ -120,8 +127,11 @@ namespace winston
 		const std::string& name();
 
 		const bool isRailed() const;
-		void railOnto(const Position p);
+		void railOnto(const Position p, const TimePoint when = hal::now());
 		void railOff();
+
+		void entered(winston::Segment::Shared segment, const TimePoint when);
+		void left(winston::Segment::Shared segment, const TimePoint when);
 
 		const bool isType(const Type type) const;
 		const Types types() const;
@@ -132,6 +142,8 @@ namespace winston
 
 		const Position& moved(Duration& timeOnTour);
 		static const float acceleration(const Throttle throttle);
+
+		void updateExpected(const bool fullUpdate = true);
 
 		class SpeedMap
 		{
@@ -163,6 +175,13 @@ namespace winston
 			uint32_t functions = { 0 };
 			Types types = { (unsigned char)Type::Single };
 		} details;
+
+		struct Expected
+		{
+			Position position;
+			TimePoint when;
+			bool precise;
+		} expected;
 
 		SpeedMap speedMap;
 		TimePoint speedTrapStart;

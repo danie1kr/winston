@@ -45,12 +45,19 @@ namespace winstontests
         static winston::Locomotive::Callbacks locoCallbacks()
         {
             winston::Locomotive::Callbacks callbacks;
-            callbacks.drive = [=](const winston::Address address, const unsigned char speed, const bool forward)
+            callbacks.drive = [=](const winston::Address address, const unsigned char speed, const bool forward) -> const winston::Result
                 {
+                    return winston::Result::OK;
                 };
 
-            callbacks.functions = [=](const winston::Address address, const uint32_t functions)
+            callbacks.functions = [=](const winston::Address address, const uint32_t functions) -> const winston::Result
                 {
+                    return winston::Result::OK;
+                };
+
+            callbacks.signalPassed = [](winston::Signal::Shared signal, const bool facingLoco) -> const winston::Result
+                {
+                    return winston::Result::OK;
                 };
 
             return callbacks;
@@ -80,6 +87,10 @@ namespace winstontests
             callbacks.change =
                 [](const std::string detectorName, const winston::Locomotive::Shared loco, const bool forward, winston::Segment::Shared segment, const winston::Detector::Change change, const winston::TimePoint when) -> const winston::Result
                 {
+                    if (change == winston::Detector::Change::Entered)
+                        loco->entered(segment, when);
+                    else
+                        loco->left(segment, when);
                     return winston::Result::NotImplemented;
                 };
             callbacks.occupied =
@@ -111,9 +122,8 @@ namespace winstontests
 
         void createLocos()
         {
-            winston::Position pos(this->railway->track(Y2024RailwayTracks::B1), winston::Track::Connection::A, 100);
             winston::Locomotive::Functions standardFunctions = { {0, "Light"} };
-            locoShed.push_back(winston::Locomotive::make(locoCallbacks(), 3, standardFunctions, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 114", 164, (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods | (unsigned char)winston::Locomotive::Type::Shunting));
+            locoShed.push_back(winston::Locomotive::make(locoCallbacks(), 3, standardFunctions, winston::Position::nullPosition(), winston::Locomotive::defaultThrottleSpeedMap, "BR 114", 164, (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods | (unsigned char)winston::Locomotive::Type::Shunting));
         }
 
         void injectLoco(uint8_t detector, winston::Locomotive::Shared loco, const bool enter)
@@ -125,7 +135,7 @@ namespace winstontests
             packet.push_back((unsigned char)LoDi::API::Event::S88LokAddrEvent);  // S88LokAddrEvent
             packet.push_back(1);  // Packet number
             packet.push_back(1);  // count
-            packet.push_back(detector / 8); // address
+            packet.push_back(detector / 8 + 1); // address
             packet.push_back(detector % 8); // channel
             packet.push_back(loco->address() >> 8); // railcom address high
             packet.push_back(loco->address() & 0xFF); // railcom address low
@@ -158,8 +168,13 @@ namespace winstontests
             Assert::IsTrue(loDiCommander->isReady());
             createLocos();
 
-            injectLoco(13, locoShed[0], true);
+            auto loco = locoShed[0];
+            auto PBF1a = railway->track(Y2024RailwayTracks::PBF1a);
+
+            injectLoco(12, loco, true);
             detectorLoops();
+
+            Assert::IsTrue(loco->position().trackIndex() == PBF1a->index);
         }
 
         TEST_METHOD(LocoDisappear)

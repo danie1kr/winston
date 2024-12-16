@@ -6,8 +6,12 @@
 namespace winston
 {
 	const Locomotive::ThrottleSpeedMap Locomotive::defaultThrottleSpeedMap = { {0, 0},{255, 50} };
-	Locomotive::Locomotive(const Callbacks callbacks, const Address address, const Functions functionTable, const Position start, const ThrottleSpeedMap throttleSpeedMap, const std::string name, const unsigned int length, const Types types) :
-		callbacks(callbacks), details{ address, functionTable, start, hal::now(), hal::now(), name, length, false, true, false, 0, 0.f, 0, types }, speedMap(throttleSpeedMap), speedTrapStart(hal::now())
+	Locomotive::Locomotive(const Callbacks callbacks, const Address address, const Functions functionTable, const Position start, const ThrottleSpeedMap throttleSpeedMap, const std::string name, const unsigned int length, const Types types) 
+		: callbacks(callbacks)
+		, details{ address, functionTable, start, hal::now(), hal::now(), name, length, false, true, false, 0, 0.f, 0, types }
+		, expected { Position::nullPosition(), hal::now(), false }
+		, speedMap(throttleSpeedMap)
+		, speedTrapStart(hal::now())
 	{
 	}
 
@@ -77,9 +81,9 @@ namespace winston
 		return this->details.railed;
 	}
 
-	void Locomotive::railOnto(const Position p)
+	void Locomotive::railOnto(const Position p, const TimePoint when)
 	{
-		this->details.lastPositionUpdate = hal::now();
+		this->details.lastPositionUpdate = when;
 		this->details.position = p;
 		this->details.railed = true;
 	}
@@ -87,6 +91,115 @@ namespace winston
 	void Locomotive::railOff()
 	{
 		this->details.railed = false;
+	}
+
+	void Locomotive::entered(Segment::Shared segment, const TimePoint when)
+	{
+		if (this->position().valid())
+		{
+			auto currentTrack = this->position().track();
+			if (segment->contains(*currentTrack))
+			{
+				;// we appeared on our current position?
+			}
+			else
+			{
+				// known for long
+				auto expectedTrack = this->expected.position.track();
+				if (this->expected.precise && expectedTrack)
+				{
+					if (segment->contains(*expectedTrack))
+					{
+						auto driveDuration = when - this->details.lastPositionUpdate;
+						auto speed = this->speedMap.speed(this->details.throttle);
+						auto remainingDistance = speed * inMilliseconds(driveDuration);
+
+						remainingDistance -= (this->details.position.track()->length() - this->details.position.distance());
+
+						auto newPos = Position(expectedTrack, this->expected.position.connection(), remainingDistance);
+
+						auto leavingConnection = currentTrack->otherConnection(this->position().connection());
+						if (auto signal = currentTrack->signalGuarding(leavingConnection))
+						{
+							if (this->details.position.track()->length() - this->details.position.distance() > signal->distance())
+							{
+								// we passed signal
+								this->callbacks.signalPassed(signal, true);
+							}
+						}
+
+						if (auto signal = expectedTrack->signalGuarding(this->expected.position.connection()))
+						{
+							if (signal->distance() < remainingDistance)
+							{
+								// we passed signal
+								this->callbacks.signalPassed(signal, false);
+							}
+						}
+
+						this->details.position = newPos;
+						this->details.lastPositionUpdate = when;
+
+						this->updateExpected();
+					}
+					else
+					{
+						; // we are not expected here!
+					}
+				}
+				else // second step after initial appearance
+				{
+					this->updateExpected();
+				}
+			}
+		}
+		else // initial appearance
+		{
+			this->railOnto(Position(*segment->tracks().begin(), Track::Connection::A, 0), when);
+			this->expected.position = Position(nullptr, Track::Connection::A, 0);
+			this->expected.precise = false;
+		}
+	}
+
+	void Locomotive::left(Segment::Shared segment, const TimePoint when)
+	{
+		// ok, cu soon
+	}
+
+	void Locomotive::updateExpected(const bool fullUpdate)
+	{
+
+		auto track = this->position().track();
+		if (fullUpdate)
+		{
+			Track::Shared onto;
+			if (track->traverse(this->position().connection(), onto, false))
+			{
+				this->expected.position = Position(onto, onto->whereConnects(track), 0);
+				this->expected.precise = true;
+			}
+			else
+			{
+				// seems we hit a deadend/derail situation
+				this->expected.position = Position(track, Track::Connection::DeadEnd, 0);
+				this->expected.precise = false;
+			}
+		}
+		if (this->expected.precise)
+		{
+			auto speed = this->speedMap.speed(this->details.throttle);
+			auto remainingDistance = this->details.position.track()->length() - this->details.position.distance();
+			if (speed > 0)
+			{
+				auto travelTime = toMilliseconds(remainingDistance / speed);
+				this->expected.when = hal::now() + travelTime;
+			}
+			else
+			{
+				this->expected.when = hal::now() + toSeconds(60 * 60 * 24);
+			}
+
+		}
 	}
 
 	void Locomotive::update(const bool busy, const bool forward, const Throttle throttle, const uint32_t functions)

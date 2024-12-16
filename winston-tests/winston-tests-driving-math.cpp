@@ -39,12 +39,19 @@ namespace winstontests
         static winston::Locomotive::Callbacks locoCallbacks()
         {
             winston::Locomotive::Callbacks callbacks;
-            callbacks.drive = [=](const winston::Address address, const unsigned char speed, const bool forward)
+            callbacks.drive = [=](const winston::Address address, const unsigned char speed, const bool forward) -> const winston::Result
             {
+                return winston::Result::OK;
             };
 
-            callbacks.functions = [=](const winston::Address address, const uint32_t functions)
+            callbacks.functions = [=](const winston::Address address, const uint32_t functions) -> const winston::Result
             {
+                return winston::Result::OK;
+            };
+
+            callbacks.signalPassed = [](winston::Signal::Shared signal, const bool facingLoco) -> const winston::Result
+            {
+                return winston::Result::OK;
             };
 
             return callbacks;

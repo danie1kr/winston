@@ -115,20 +115,28 @@ winston::Locomotive::Callbacks Kornweinheim::locoCallbacks()
 {
     winston::Locomotive::Callbacks callbacks;
 
-    callbacks.drive = [=](const winston::Address address, const unsigned char speed, const bool forward) {
+    callbacks.drive = [=](const winston::Address address, const unsigned char speed, const bool forward) -> const winston::Result {
         this->signalTower->order(winston::Command::make([this, address, speed, forward](const winston::TimePoint &created) -> const winston::State
             {
                 this->digitalCentralStation->triggerLocoDrive(address, speed, forward);
                 return winston::State::Finished;
             }, __PRETTY_FUNCTION__));
+        return winston::Result::OK;
     };
 
-    callbacks.functions = [=](const winston::Address address, const uint32_t functions) {
+    callbacks.functions = [=](const winston::Address address, const uint32_t functions) -> const winston::Result  {
         this->signalTower->order(winston::Command::make([this, address, functions](const winston::TimePoint &created) -> const winston::State
             {
                 this->digitalCentralStation->triggerLocoFunction(address, functions);
                 return winston::State::Finished;
             }, __PRETTY_FUNCTION__));
+        return winston::Result::OK;
+    };
+
+    callbacks.signalPassed = [=](winston::Signal::Shared signal, const bool facingLoco) -> const winston::Result
+    {
+        winston::logger.err("fill out callback for signal passed");
+        return winston::Result::OK;
     };
 
     return callbacks;

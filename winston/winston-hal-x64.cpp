@@ -13,6 +13,8 @@
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")
+#else
+#include <windows.h>
 #endif
 
 const char* operator "" _s(const char* in, size_t len)

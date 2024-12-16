@@ -113,6 +113,7 @@ private:
 
 		const winston::Result send(const API::Command command, const Payload payload, PacketCallback callback);
 		void setDetectorDevice(winston::DetectorDevice::Shared detectorDevice);
+		const bool connected() const;
 	protected:
 	private:
 		const winston::Result sendAgain(PacketAndCallback& packetAndCallback);
@@ -127,6 +128,7 @@ private:
 		std::deque<uint8_t> buffer;
 
 		winston::DetectorDevice::Shared detectorDevice;
+		bool _connected;
 	};
 
 	public:
@@ -148,6 +150,7 @@ private:
 		const winston::Result init(PortSegmentMap ports, Callbacks callbacks);
 		const State state();
 		virtual const bool isReady();
+		virtual const bool connected() const;
 
 		const winston::Result getVersion();
 		const winston::Result deviceConfigGet();

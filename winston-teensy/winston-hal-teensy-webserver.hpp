@@ -243,9 +243,11 @@ void WebServerTeensy::step()
         bool currentLineIsBlank = true;
         bool firstLine = true;
         std::string line(""), resource(""), method("");
+       
 
         while (httpClient.connected()) {
             if (httpClient.available()) {
+                winston::logger.info("WebServerTeensy: step: HTTP client available");
                 char c = httpClient.read();
 
                 if (firstLine)
@@ -257,6 +259,7 @@ void WebServerTeensy::step()
                     // If we've gotten to the end of the line (received a newline
                     // character) and the line is blank, the http request has ended,
                     // so we can send a reply.
+                    winston::logger.info(resource);
                     HTTPConnectionTeensy connection(httpClient);
                     this->onHTTP(connection, winston::HTTPMethod::_from_string_nothrow(method.c_str()).value(), resource);
                     httpClient.close();
@@ -299,6 +302,7 @@ void WebServerTeensy::step()
         Client connection = server.accept();
         if (connection.available())
         {
+            winston::logger.info("WebServerTeensy: step: websocket client available");
             //auto client = this->getClient(id);
             connection.onMessage([=](WebsocketsClient& client, WebsocketsMessage message)
                 {

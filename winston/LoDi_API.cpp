@@ -23,9 +23,14 @@ const winston::Result LoDi::loop()
 }
 
 LoDi::PacketParser::PacketParser(winston::hal::Socket::Shared socket)
-	: Looper(), packetNumber(0), socket(socket), buffer()
+	: Looper(), packetNumber(0), socket(socket), buffer(), _connected(false)
 {
 
+}
+
+const bool LoDi::PacketParser::connected() const
+{
+	return this->_connected;
 }
 
 const winston::Result LoDi::PacketParser::loop()
@@ -36,6 +41,14 @@ const winston::Result LoDi::PacketParser::loop()
 		this->buffer.insert(this->buffer.end(), data.begin(), data.end());
 
 	this->processBuffer();
+
+	// did we loose connection?
+	const auto connected = this->socket->isConnected();
+
+	if (!connected && this->_connected != connected)
+		winston::logger.err("Connection to LoDi Commander lost");
+	
+	this->_connected = connected;
 
 	return winston::Result::OK;
 }
@@ -151,7 +164,7 @@ const winston::Result LoDi::PacketParser::processEvent(const API::Event event, c
 			uint8_t low = payload[idx++];
 			uint8_t status = payload[idx++];
 
-			this->detectorDevice->change(address * 8 + channel, (high << 8) + low, high & 0x80, status == 1 ? winston::Detector::Change::Entered : winston::Detector::Change::Left);
+			this->detectorDevice->change((address-1) * 8 + channel, (high << 8) + low, high & 0x80, status == 1 ? winston::Detector::Change::Entered : winston::Detector::Change::Left);
 		}
 		break;
 	}
@@ -164,7 +177,7 @@ const winston::Result LoDi::PacketParser::processEvent(const API::Event event, c
 			uint8_t address = payload[idx++];
 			uint8_t channel = payload[idx++];
 			bool empty = (payload[idx++] == 0) ? true : false;
-			this->detectorDevice->occupied(address * 8 + channel, empty ? winston::Detector::Change::Left : winston::Detector::Change::Entered);
+			this->detectorDevice->occupied((address - 1) * 8 + channel, empty ? winston::Detector::Change::Left : winston::Detector::Change::Entered);
 		}
 		break;
 	}
@@ -247,9 +260,13 @@ const winston::Result LoDi::S88Commander::init(PortSegmentMap portSegmentMap, Ca
 	for (auto& portSegment : portSegmentMap)
 		this->ports.insert(std::make_pair(portSegment.first, winston::Detector::make(winston::build(this->name, " ", portSegment.first), portSegment.second, callbacks.change, callbacks.occupied)));
 
+	winston::hal::delay(100);
 	this->getVersion();
+	winston::hal::delay(100);
 	this->deviceConfigGet();
+	winston::hal::delay(100);
 	this->s88EventsActivate(true);
+	winston::hal::delay(100);
 	
 	return winston::Result::OK;
 }
@@ -264,6 +281,11 @@ const LoDi::S88Commander::State LoDi::S88Commander::state()
 const bool LoDi::S88Commander::isReady()
 {
 	return this->state() == State::Ready;
+}
+
+const bool LoDi::S88Commander::connected() const
+{
+	return this->packetParser.connected();
 }
 
 const winston::Result LoDi::S88Commander::getVersion()

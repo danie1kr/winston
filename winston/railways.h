@@ -372,6 +372,7 @@ private:
     void connect();
 };
 
+constexpr unsigned int Y2024RailwaySegments = 16;
 BETTER_ENUM(Y2024RailwayTracks, unsigned int,
     Turnout1,
     Turnout2,
@@ -408,7 +409,7 @@ BETTER_ENUM(Y2024RailwaySections, unsigned int,
 );
 
 class Y2024Railway :
-    public winston::RailwayWithRails<Y2024RailwayTracks, Y2024RailwayRoutes, Y2024RailwaySections, 14>,
+    public winston::RailwayWithRails<Y2024RailwayTracks, Y2024RailwayRoutes, Y2024RailwaySections, Y2024RailwaySegments>,
     public winston::Shared_Ptr<Y2024Railway>
 {
     /*

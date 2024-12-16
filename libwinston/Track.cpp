@@ -926,20 +926,26 @@ namespace winston
 		return (this->accessoryStates[0] == 0 || this->accessoryStates[0] == 1) &&
 			(this->accessoryStates[1] == 0 || this->accessoryStates[1] == 1);
 	}
+
 	/*
-	const void DoubleSlipTurnout::toAccessoryStates(unsigned char& a, unsigned char& b) const
-	{
-		this->toAccessoryStates(a, b, this->direction());
-	}
+	*          Z1=D
+	*           \\   
+	* Z2=A ==== Turnout8_9 ==== Z3=C
+	*             \\
+	*              Z4=B
+	* Z1 -> Z3: CD
+	* Z1 -> Z4: BD
+	* Z4 -> Z2: AB
+	* Z2 -> A3: AC
 	*/
 	const void DoubleSlipTurnout::toAccessoryStates(unsigned char& a, unsigned char& b, const Direction direction) const
 	{
 		switch (direction)
 		{
-		case Direction::A_B: a = 1; b = 1; break;
-		case Direction::A_C: a = 0; b = 1; break;
-		case Direction::B_D: a = 1; b = 0; break;
-		case Direction::C_D: a = 0; b = 0; break;
+		case Direction::A_B: a = 0; b = 1; break;
+		case Direction::A_C: a = 1; b = 1; break;
+		case Direction::B_D: a = 0; b = 0; break;
+		case Direction::C_D: a = 1; b = 0; break;
 		default:
 		case Direction::Changing:
 			break;
@@ -951,13 +957,13 @@ namespace winston
 		if (!this->isKnownAccessoryState())
 			return Direction::Changing;
 		else if (this->accessoryStates[0] && this->accessoryStates[1])
-			return Direction::A_B;
-		else if (!this->accessoryStates[0] && this->accessoryStates[1])
 			return Direction::A_C;
+		else if (!this->accessoryStates[0] && this->accessoryStates[1])
+			return Direction::A_B;
 		else if (this->accessoryStates[0] && !this->accessoryStates[1])
-			return Direction::B_D;
-		else if (!this->accessoryStates[0] && !this->accessoryStates[1])
 			return Direction::C_D;
+		else if (!this->accessoryStates[0] && !this->accessoryStates[1])
+			return Direction::B_D;
 		return Direction::Changing;
 	}
 	/*

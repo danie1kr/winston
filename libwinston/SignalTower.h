@@ -30,9 +30,7 @@ namespace winston
 		void setSignalsFor(Track& turnout);
 
 		static void setSignalOn(Track& track, const Track::Connection signalGuardedConnection, const Signal::Aspect aspect, const Signal::Aspect preAspect = Signal::Aspect::Off);
-		
-		//void order(Command::Shared command);
-		//bool work();
+
 		using Shared_Ptr<SignalTower>::Shared;
 		using Shared_Ptr<SignalTower>::make;
 	private:

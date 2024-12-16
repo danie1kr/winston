@@ -720,6 +720,7 @@
     <ClInclude Include="external\lvgl\src\widgets\win\lv_win.h" />
     <ClInclude Include="external\lv_conf.h" />
     <ClInclude Include="winston-display.h" />
+    <ClInclude Include="winston-secrets.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\libwinston\libwinston.vcxproj">

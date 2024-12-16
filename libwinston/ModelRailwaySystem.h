@@ -31,6 +31,7 @@ namespace winston
 	public:
 		ModelRailwaySystem()
 			: _status{ Status::Initializing }
+			, lastStatusReport { hal::now() }
 #ifdef WINSTON_STATISTICS
 			, stopWatchJournal("MRS")
 #endif
@@ -182,6 +183,7 @@ namespace winston
 		{
 			this->railway->turnouts([=](const Tracks track, winston::Turnout& turnout) {
 
+				checkedTurnoutsDuringInit.emplace(turnout.shared_from_this(), false);
 				this->signalTower->order(winston::Command::make([this, &turnout](const TimePoint& created) -> const winston::State
 					{
 						this->digitalCentralStation->requestTurnoutInfo(turnout);
@@ -189,30 +191,19 @@ namespace winston
 						this->signalTower->setSignalsFor(turnout);
 						winston::hal::delay(100);
 
-						this->signalTower->order(winston::Command::make([this, &turnout](const TimePoint& created) -> const winston::State
-							{
-								this->turnoutChangeTo(turnout, turnout.direction());
-								return winston::State::Finished;
-							}, __PRETTY_FUNCTION__));
-
 						return winston::State::Finished;
 					}, __PRETTY_FUNCTION__));
 				});
 
 			this->railway->doubleSlipTurnouts([=](const Tracks track, winston::DoubleSlipTurnout& turnout) {
 
+				checkedTurnoutsDuringInit.emplace(turnout.shared_from_this(), false);
 				this->signalTower->order(winston::Command::make([this, &turnout](const TimePoint& created) -> const winston::State
 					{
 						this->digitalCentralStation->requestDoubleSlipTurnoutInfo(turnout);
 						winston::hal::delay(50);
 						this->signalTower->setSignalsFor(turnout);
 						winston::hal::delay(100);
-
-						this->signalTower->order(winston::Command::make([this, &turnout](const TimePoint& created) -> const winston::State
-							{
-								this->doubleSlipChangeTo(turnout, turnout.direction());
-								return winston::State::Finished;
-							}, __PRETTY_FUNCTION__));
 
 						return winston::State::Finished;
 					}, __PRETTY_FUNCTION__));
@@ -336,6 +327,7 @@ namespace winston
 			const std::string path_confirmation_maybe("/confirm_maybe");
 			const std::string path_confirmation_no("/confirm_no");
 
+#ifndef WINSTON_PLATFORM_TEENSY
 			if (resource.compare(path_signals) == 0)
 			{
 				connection.status(200);
@@ -360,6 +352,7 @@ namespace winston
 					}
 				}
 				body += "</table></body></html>\r\n";
+
 				connection.body(body);
 			}
 			/*
@@ -436,6 +429,12 @@ namespace winston
 			}*/
 			else
 				return Result::NotFound;
+#else
+			connection.status(200);
+			connection.header("content-type"_s, "text/html; charset=UTF-8"_s);
+			connection.header("Connection"_s, "close"_s);
+			std::string body = "<html><head>winston</head><body>no content</body></html>";
+#endif
 			return Result::OK;
 		}
 
@@ -448,7 +447,8 @@ namespace winston
 				size_t cnt = signal->lights().size();
 				for (const auto& light : signal->lights())
 				{
-					std::string icon = "", color = "black";
+					std::string icon = "", color = "black", aspect = winston::build(light.aspect);
+					
 					switch (light.aspect)
 					{
 					default:
@@ -487,12 +487,14 @@ namespace winston
 					else
 						body += winston::build("<tr><td>");
 					++l;
-					body += winston::build(l, "<span style=\"color:" + color + ";\">" + icon + "</span>", "</td><td>", light.port, "</td><td>", signal->deviceId, " @ ", light.port < 10 ? "0" : "", light.port, "</td></tr>");
+					body += winston::build(l, "<span style=\"color:" + color + ";\">" + icon + " " + aspect + "</span>", "</td><td>", light.port, "</td><td>", signal->deviceId, " @ ", light.port < 10 ? "0" : "", light.port, "</td></tr>");
 				}
 			}
 		}
 #endif
 
+		const std::chrono::seconds statusReportTimeout = std::chrono::seconds(24);
+		TimePoint lastStatusReport;
 		const Result loop()
 		{
 			{
@@ -530,6 +532,22 @@ namespace winston
 				winston::StopwatchJournal::Event tracer(this->stopWatchJournal, "local loop");
 #endif
 				this->systemLoop();
+			}
+			{
+#ifdef WINSTON_STATISTICS
+				winston::StopwatchJournal::Event tracer(this->stopWatchJournal, "local status report");
+#endif
+				const auto now = hal::now();
+				if (now > this->lastStatusReport + statusReportTimeout)
+				{
+					const bool detectorConnected = this->detectorDevice->connected();
+					const bool dcsConnected = this->digitalCentralStation->connected();
+					if (!detectorConnected)
+						logger.err("Detector Device not connected");
+					if (!dcsConnected)
+						logger.err("Digital Central Station not connected");
+					this->lastStatusReport = now;
+				}
 			}
 			{
 #ifdef WINSTON_STATISTICS
@@ -640,6 +658,8 @@ namespace winston
 		TimePoint lastTurnoutToggleRequest{ winston::hal::now() };
 
 		Looper::Shared detectorDevice;
+
+		std::map<Track::Shared, bool> checkedTurnoutsDuringInit;
 	};
 }
 

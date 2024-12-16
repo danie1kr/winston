@@ -16,7 +16,6 @@ namespace winston
 		const Result loop();
 		using Shared_Ptr<EventLooper>::Shared;
 		using Shared_Ptr<EventLooper>::make;
-
 	private:		
 		std::queue<Command::Shared> commands;
 

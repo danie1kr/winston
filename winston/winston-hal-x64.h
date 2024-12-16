@@ -91,7 +91,13 @@ private:
 		if (SocketType == winston::hal::Socket::Type::TCP)
 		{
 			auto result = ::connect(this->socket, (SOCKADDR*)&this->addr, (int)sizeof(SOCKADDR_IN));
-			return result == 0 ? winston::Result::OK : winston::Result::NotInitialized;
+			if(result == 0)
+			{
+				this->state = State::Connected;
+				return winston::Result::OK;
+			}
+			else
+				return winston::Result::NotInitialized;
 		}
 		else
 		{

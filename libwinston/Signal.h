@@ -312,4 +312,5 @@ namespace winston
 
 		friend class SignalController;
 	};
+	const std::string build(const Signal::Aspect first);
 }

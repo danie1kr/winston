@@ -148,6 +148,7 @@ namespace winston
 		Looper();
 		virtual ~Looper() = default;
 		virtual const Result loop() = 0;
+		virtual const bool connected() const;
 		using Shared_Ptr<Looper>::Shared;
 		using Shared_Ptr<Looper>::make;
 	};

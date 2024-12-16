@@ -138,7 +138,7 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
 {
     winston::Railway::Callbacks callbacks;
 
-    callbacks.turnoutUpdateCallback = [=](winston::Turnout&  turnout, const winston::Turnout::Direction direction) -> const winston::State
+    callbacks.turnoutUpdateCallback = [=](winston::Turnout& turnout, const winston::Turnout::Direction direction) -> const winston::State
     {    
         // tell the signal box to update the signals
         this->signalTower->setSignalsFor(turnout);
@@ -146,6 +146,14 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
         // stop here if we are still initializing and learn the initial states of the turnouts
         if (!this->isReady())
             return winston::State::Finished;
+
+        // once only: set physical turnout to this location to align it with what the dcs thinks it is
+        auto track = turnout.shared_from_this();
+        if (direction != winston::Turnout::Direction::Changing && !checkedTurnoutsDuringInit[track])
+        {
+            this->orderTurnoutToggle(turnout, direction);
+            checkedTurnoutsDuringInit[track] = true;
+        }
 
 #ifdef WINSTON_WITH_WEBSOCKET
         // tell the ui what happens
@@ -213,6 +221,14 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
         // stop here if we are still initializing and learn the initial states of the turnouts
         if (!this->isReady())
             return winston::State::Finished;
+        
+        // once only: set physical turnout to this location to align it with what the dcs thinks it is
+        auto track = turnout.shared_from_this();
+        if (direction != winston::DoubleSlipTurnout::Direction::Changing && !checkedTurnoutsDuringInit[track])
+        {
+            this->orderDoubleSlipTurnoutToggle(turnout, direction);
+            checkedTurnoutsDuringInit[track] = true;
+        }
 
 #ifdef WINSTON_WITH_WEBSOCKET
         // tell the ui what happens
@@ -606,19 +622,19 @@ const winston::Result Kornweinheim::setupDetectors()
     callbacks.change = 
         [](const std::string detectorName, const winston::Locomotive::Shared loco, const bool forward, winston::Segment::Shared segment, const winston::Detector::Change change, const winston::TimePoint when) -> const winston::Result
         { 
-            winston::logger.info(loco->name(), change == winston::Detector::Change::Entered ? "entered" : "left", segment->id);
+            winston::logger.info(loco->name(), change == winston::Detector::Change::Entered ? " entered " : " left ", segment->id);
             return winston::Result::OK; 
         };
     callbacks.occupied = 
         [](const std::string detectorName, winston::Segment::Shared segment, const winston::Detector::Change change, const winston::TimePoint when) -> const winston::Result
         { 
-            winston::logger.info("something ", change == winston::Detector::Change::Entered ? "entered" : "left", segment->id);
+            winston::logger.info("something ", change == winston::Detector::Change::Entered ? " entered " : " left ", segment->id);
             return winston::Result::OK;
         };
     callbacks.locoFromAddress = 
-        [](const winston::Address address) -> winston::Locomotive::Shared 
-        { 
-            return nullptr; 
+        [&](const winston::Address address) -> winston::Locomotive::Shared 
+        {
+            return this->locoFromAddress(address);
         };
 
     this->loDiCommander->init(portSegmentMap, callbacks);

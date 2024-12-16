@@ -35,6 +35,11 @@ namespace winston
 
 	}
 
+	const bool Looper::connected() const
+	{
+		return true;
+	}
+
 	void logRuntimeStatus()
 	{
 #define RHS_Print(what) logger.info(#what ": o", runtime##what() ? "n" : "ff");

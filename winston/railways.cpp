@@ -925,7 +925,7 @@ const winston::Result Y2021Railway::validateFinal()
 }
 
 
-Y2024Railway::Y2024Railway(const Callbacks callbacks) : winston::RailwayWithRails<Y2024RailwayTracks, Y2024RailwayRoutes, Y2024RailwaySections, 14>(callbacks) {};
+Y2024Railway::Y2024Railway(const Callbacks callbacks) : winston::RailwayWithRails<Y2024RailwayTracks, Y2024RailwayRoutes, Y2024RailwaySections, Y2024RailwaySegments>(callbacks) {};
 const std::string Y2024Railway::name()
 {
     return std::string("Y2024Railway");

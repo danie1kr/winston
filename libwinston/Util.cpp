@@ -4,7 +4,7 @@
 
 #include "Util.h"
 #include "HAL.h"
-//#include "Signal.h"
+#include "Signal.h"
 
 namespace winston
 {
@@ -126,6 +126,20 @@ namespace winston
 	const std::string build(const char* first)
 	{
 		return std::string(first);
+	}
+
+	const std::string build(const Signal::Aspect first)
+	{
+		switch (first)
+		{
+		case Signal::Aspect::Off: return "off";
+		case Signal::Aspect::ExpectGo: return "expect go";
+		case Signal::Aspect::ExpectHalt: return "expect halt";
+		case Signal::Aspect::Go: return "go";
+		case Signal::Aspect::Halt: return "halt";
+		}
+
+		return "unkown Aspect: " + build((int)first);
 	}
 
 #ifndef WINSTON_PLATFORM_ESP32

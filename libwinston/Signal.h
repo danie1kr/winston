@@ -77,7 +77,20 @@ namespace winston
 	class Signal : public Shared_Ptr<Signal>
 	{
 	public:
-		enum class Aspect
+		enum class Pass : unsigned char
+		{
+			Facing = 0,
+			Back = 1
+		};
+
+		enum class Authority : unsigned char
+		{
+			Turnout = 0,
+			Occupancy = 1,
+			EnumCount = 2
+		};
+
+		enum class Aspect : unsigned char
 		{
 			Off =			0b00001,
 			Go =			0b00010,
@@ -172,7 +185,7 @@ namespace winston
 		static Callback defaultCallback();
 		Signal(const Id deviceId, const Callback callback = defaultCallback(), const Length distance = 0);
 
-		const State aspect(const Aspect aspect);
+		const State aspect(const Aspect aspect, const Authority authority = Authority::Turnout);
 		const Aspects aspect() const;
 		const bool shows(Aspect aspect) const;
 		virtual const bool supports(const Aspect aspect, const bool any) const = 0;
@@ -180,8 +193,6 @@ namespace winston
 		virtual const bool mainSignal() const = 0;
 
 		const Length distance() const;
-
-		void overwrite(const Aspects aspect);
 		
 		virtual const std::span<const Light> lights() const = 0;
 		static const std::string buildAspects(const Aspects first);
@@ -195,7 +206,8 @@ namespace winston
 		const Callback callback;
 		const Length _distance;
 		Aspects _aspect;
-		Aspects _forced;
+
+		std::array<bool, (size_t)Authority::EnumCount> authorityHalt;
 	};
 
 	inline const bool operator&(const Signal::Aspect a, const Signal::Aspect b)

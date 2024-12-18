@@ -6,7 +6,13 @@
 
 namespace winston
 {
-	Track::Track(const std::string name, const Id index, const Length trackLength) : Shared_Ptr<Track>(), index(index), _name(name), _section(0), trackLength(trackLength)
+	Track::Track(const std::string name, const Id index, const Length trackLength) 
+		: Shared_Ptr<Track>()
+		, index(index)
+		, _name(name)
+		, _section(0)
+		, trackLength(trackLength)
+		, _segment(0)
 	{
 	}
 
@@ -57,12 +63,12 @@ namespace winston
 		hal::fatal("Cannot attach signal");
 	}
 
-	Signal::Shared Track::signalFacing(const Connection facing)
+	Signal::Shared Track::signalFacing(const Connection facing) const
 	{
 		return nullptr;
 	}
 
-	Signal::Shared Track::signalGuarding(const Connection guarding)
+	Signal::Shared Track::signalGuarding(const Connection guarding) const
 	{
 		return nullptr;
 	}
@@ -94,6 +100,33 @@ namespace winston
 	const std::string Track::name() const
 	{
 		return this->_name;
+	}
+
+	const Id Track::segment() const
+	{
+		return this->_segment;
+	}
+
+	void Track::segment(const Id segment)
+	{
+		this->_segment = segment;
+	}
+	const bool Track::traverseToNextSegment(const Track::Connection connection, Track::Shared& onto, bool leavingOnConnection) const
+	{
+		auto con = leavingOnConnection ? connection : this->otherConnection(connection);
+
+		auto current = this->const_from_this();
+		while (current->traverse(con, onto, true))
+		{
+			if (onto->segment() != current->segment())
+				return true;
+
+			con = onto->whereConnects(current);
+			con = onto->otherConnection(con);
+			current = onto;
+		}
+
+		return false;
 	}
 
 	Bumper::Bumper(const std::string name, const Id index, const Length tracklength)
@@ -136,8 +169,16 @@ namespace winston
 	{
 		tracks.insert(a);
 	}
-
+	/*
 	const Track::Connection Bumper::whereConnects(const Track::Shared& other) const
+	{
+		if (other == a)
+			return Connection::A;
+		else
+			return Connection::DeadEnd;
+	}*/
+
+	const Track::Connection Bumper::whereConnects(const Track::Const& other) const
 	{
 		if (other == a)
 			return Connection::A;
@@ -206,12 +247,12 @@ namespace winston
 
 	}
 
-	Signal::Shared Bumper::signalGuarding(const Connection guarding)
+	Signal::Shared Bumper::signalGuarding(const Connection guarding) const
 	{
 		return signals[guarding == Connection::A ? 0 : 1];
 	}
 
-	Signal::Shared Bumper::signalFacing(const Connection facing)
+	Signal::Shared Bumper::signalFacing(const Connection facing) const
 	{
 		return signals[facing == Connection::A ? 1 : 0];
 	}
@@ -260,8 +301,18 @@ namespace winston
 		tracks.insert(a);
 		tracks.insert(b);
 	}
-
+	/*
 	const Track::Connection Rail::whereConnects(const Track::Shared& other) const
+	{
+		if (a == other)
+			return Track::Connection::A;
+		else if (b == other)
+			return Track::Connection::B;
+		else
+			return Track::Connection::DeadEnd;
+	}*/
+
+	const Track::Connection Rail::whereConnects(const Track::Const& other) const
 	{
 		if (a == other)
 			return Track::Connection::A;
@@ -332,12 +383,12 @@ namespace winston
 
 	}
 
-	Signal::Shared Rail::signalGuarding(const Connection guarding)
+	Signal::Shared Rail::signalGuarding(const Connection guarding) const
 	{
 		return this->signals[guarding == Connection::A ? 0 : 1];
 	}
 
-	Signal::Shared Rail::signalFacing(const Connection facing)
+	Signal::Shared Rail::signalFacing(const Connection facing) const
 	{
 		return signals[facing == Connection::A ? 1 : 0];
 	}
@@ -359,7 +410,7 @@ namespace winston
 		}
 	}
 
-	Turnout::Turnout(const std::string name, const Id index, const const Callback callback, const bool leftTurnout)
+	Turnout::Turnout(const std::string name, const Id index, const Callback callback, const bool leftTurnout)
 		: Track(name, index, 0), Shared_Ptr<Turnout>(), callback(callback), trackLengthCalculator(nullptr), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c(), lockingRoutes()
 #ifdef WINSTON_ENABLE_TURNOUT_GROUPS
 		, _groups()
@@ -368,7 +419,7 @@ namespace winston
 
 	}
 
-	Turnout::Turnout(const std::string name, const Id index, const const Callback callback, const TrackLengthCalculator trackLengthCalculator, const bool leftTurnout)
+	Turnout::Turnout(const std::string name, const Id index, const Callback callback, const TrackLengthCalculator trackLengthCalculator, const bool leftTurnout)
 		: Track(name, index, 0), Shared_Ptr<Turnout>(), callback(callback), trackLengthCalculator(trackLengthCalculator), leftTurnout(leftTurnout), dir(Direction::A_B), a(), b(), c(), lockingRoutes()
 #ifdef WINSTON_ENABLE_TURNOUT_GROUPS
 		, _groups()
@@ -447,8 +498,20 @@ namespace winston
 		tracks.insert(b);
 		tracks.insert(c);
 	}
-
+	/*
 	const Track::Connection Turnout::whereConnects(const Track::Shared& other) const
+	{
+		if (a == other)
+			return Track::Connection::A;
+		else if (b == other)
+			return Track::Connection::B;
+		else if (c == other)
+			return Track::Connection::C;
+		else
+			return Track::Connection::DeadEnd;
+	}*/
+
+	const Track::Connection Turnout::whereConnects(const Track::Const& other) const
 	{
 		if (a == other)
 			return Track::Connection::A;
@@ -643,13 +706,13 @@ namespace winston
 		}
 	}
 
-	DoubleSlipTurnout::DoubleSlipTurnout(const std::string name, const Id index, const const Callback callback)
+	DoubleSlipTurnout::DoubleSlipTurnout(const std::string name, const Id index, const Callback callback)
 		: Track(name, index, 0), Shared_Ptr<DoubleSlipTurnout>(), callback(callback), trackLengthCalculator(nullptr), dir(Direction::A_B), accessoryStates{0xF0, 0x0D}, a(), b(), c(), d(), lockingRoutes()
 	{
 
 	}
 
-	DoubleSlipTurnout::DoubleSlipTurnout(const std::string name, const Id index, const const Callback callback, const TrackLengthCalculator trackLengthCalculator)
+	DoubleSlipTurnout::DoubleSlipTurnout(const std::string name, const Id index, const Callback callback, const TrackLengthCalculator trackLengthCalculator)
 		: Track(name, index, 0), Shared_Ptr<DoubleSlipTurnout>(), callback(callback), trackLengthCalculator(trackLengthCalculator), dir(Direction::A_B), accessoryStates{0xF0, 0x0D}, a(), b(), c(), d(), lockingRoutes()
 	{
 
@@ -743,8 +806,22 @@ namespace winston
 		tracks.insert(c);
 		tracks.insert(d);
 	}
-
+	/*
 	const Track::Connection DoubleSlipTurnout::whereConnects(const Track::Shared& other) const
+	{
+		if (a == other)
+			return Track::Connection::A;
+		else if (b == other)
+			return Track::Connection::B;
+		else if (c == other)
+			return Track::Connection::C;
+		else if (d == other)
+			return Track::Connection::D;
+		else
+			return Track::Connection::DeadEnd;
+	}*/
+
+	const Track::Connection DoubleSlipTurnout::whereConnects(const Track::Const& other) const
 	{
 		if (a == other)
 			return Track::Connection::A;

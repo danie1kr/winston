@@ -133,7 +133,7 @@ winston::Locomotive::Callbacks Kornweinheim::locoCallbacks()
         return winston::Result::OK;
     };
 
-    callbacks.signalPassed = [=](winston::Signal::Shared signal, const bool facingLoco) -> const winston::Result
+    callbacks.signalPassed = [=](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result
     {
         winston::logger.err("fill out callback for signal passed");
         return winston::Result::OK;

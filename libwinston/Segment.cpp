@@ -5,6 +5,8 @@ namespace winston {
 	Segment::Segment(const Segment::BaseSegment::IdentifyerType name, const TrackSet tracks) :
 		BaseSegment<Id>(name, tracks), Shared_Ptr<Segment>()
 	{
+		for (auto it = tracks.begin(); it != tracks.end(); ++it)
+			(*it)->segment(name);
 	}
 }
 

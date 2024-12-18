@@ -116,15 +116,15 @@ namespace winston
 
 						remainingDistance -= (this->details.position.track()->length() - this->details.position.distance());
 
-						auto newPos = Position(expectedTrack, this->expected.position.connection(), remainingDistance);
+						auto newPos = Position(expectedTrack, this->expected.position.connection(), (int)remainingDistance);
 
 						auto leavingConnection = currentTrack->otherConnection(this->position().connection());
 						if (auto signal = currentTrack->signalGuarding(leavingConnection))
 						{
 							if (this->details.position.track()->length() - this->details.position.distance() > signal->distance())
 							{
-								// we passed signal
-								this->callbacks.signalPassed(signal, true);
+								// we passed signal, it was facing us and we entered its protectorate
+								this->callbacks.signalPassed(currentTrack, leavingConnection, Signal::Pass::Facing);
 							}
 						}
 
@@ -132,8 +132,8 @@ namespace winston
 						{
 							if (signal->distance() < remainingDistance)
 							{
-								// we passed signal
-								this->callbacks.signalPassed(signal, false);
+								// we passed signal, we saw the back side and we left its protectorate
+								this->callbacks.signalPassed(expectedTrack, this->expected.position.connection(), Signal::Pass::Back);
 							}
 						}
 
@@ -155,6 +155,7 @@ namespace winston
 		}
 		else // initial appearance
 		{
+			// put onto any rail of the segment for now
 			this->railOnto(Position(*segment->tracks().begin(), Track::Connection::A, 0), when);
 			this->expected.position = Position(nullptr, Track::Connection::A, 0);
 			this->expected.precise = false;
@@ -173,7 +174,7 @@ namespace winston
 		if (fullUpdate)
 		{
 			Track::Shared onto;
-			if (track->traverse(this->position().connection(), onto, false))
+			if (track->traverseToNextSegment(this->position().connection(), onto, false))
 			{
 				this->expected.position = Position(onto, onto->whereConnects(track), 0);
 				this->expected.precise = true;

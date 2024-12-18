@@ -19,7 +19,8 @@ namespace winston
 	}
 
 	Signal::Signal(const Id deviceId, Callback callback, const Length distance)
-		: deviceId(deviceId), callback(callback), _distance(distance), _aspect((unsigned int)Aspect::Go), _forced(0)
+		: deviceId(deviceId), callback(callback), _distance(distance), _aspect((unsigned int)Aspect::Go), authorityHalt{ { false, false } }
+
 	{
 
 	}
@@ -31,28 +32,12 @@ namespace winston
 
 	void Signal::init() { }
 
-	const State Signal::aspect(const Aspect aspect)
+	const State Signal::aspect(const Aspect aspect, const Authority authority)
 	{
-		// pre-signal off if main signal shows Halt
-		/*if ((unsigned int)aspect & Signal::MaskPreSignalAspect)
-		{
-			if(this->_aspect & (unsigned int)Signal::Aspect::Halt)
-		//		this->_aspect = this->_aspect & (unsigned int)Signal::MaskMainSignalAspect; // & pre-signal Off
-		//	else
-				this->_aspect = (this->_aspect & (unsigned int)Signal::MaskMainSignalAspect) | (unsigned int)aspect; // & pre-signal Off
-		}
-		else
-		{
-			// Go: keep pre signal
-			// Halt: pre signal off
-			//if ((unsigned int)aspect & (unsigned int)Signal::Aspect::Go)
-				this->_aspect = (this->_aspect & (unsigned int)Signal::MaskPreSignalAspect) | (unsigned int)aspect;
-			//else
-			//	this->_aspect = (unsigned int)aspect;
-		}*/
+		this->authorityHalt[(size_t)authority] = aspect & Signal::Aspect::Halt;
 
 		if ((unsigned int)aspect & Signal::MaskPreSignalAspect)
-			this->_aspect = (this->_aspect & (unsigned int)Signal::MaskMainSignalAspect) | (unsigned int)aspect;
+			this->_aspect = (this->_aspect & (unsigned int)Signal::MaskMainSignalAspect) | aspect;
 		if (aspect & Signal::Aspect::Go)
 			this->_aspect = (this->_aspect & (unsigned int)Signal::MaskPreSignalAspect) | aspect;
 		if (aspect & Signal::Aspect::Halt)
@@ -66,8 +51,9 @@ namespace winston
 
 	const Signal::Aspects Signal::aspect() const
 	{
-		if (this->_forced)
-			return this->_forced;
+		if (this->authorityHalt[(size_t)Authority::Turnout] || this->authorityHalt[(size_t)Authority::Occupancy])
+			//                           unset ::Go             and set ::Halt
+			return (this->_aspect & ~((unsigned int)Aspect::Go)) | Aspect::Halt;
 		else
 			return this->_aspect;
 	}
@@ -82,31 +68,9 @@ namespace winston
 		return this->_distance;
 	}
 
-	void Signal::overwrite(const Aspects aspect)
-	{
-		this->_forced = aspect;
-		this->updateLights();
-	}
-
 	template<> void SignalKS::init() { }
 	template<> void SignalKS::updateLights()
 	{
-		/*if (this->_forced)
-		{
-			if ((const unsigned int)this->_forced & (const unsigned int)Aspect::Off)
-			{
-				this->_lights[0].value = 0;
-				this->_lights[1].value = 0;
-				this->_lights[2].value = 0;
-			}
-			else
-			{
-				this->_lights[0].value = ((const unsigned int)this->_forced & (const unsigned int)Aspect::Go) ? Light::maximum(Aspect::Go) : 0;
-				this->_lights[1].value = ((const unsigned int)this->_forced & (const unsigned int)Aspect::Halt) ? Light::maximum(Aspect::Halt) : 0;
-				this->_lights[2].value = ((const unsigned int)this->_forced & (const unsigned int)Aspect::ExpectHalt) ? Light::maximum(Aspect::ExpectHalt) : 0;
-			}
-			return;
-		}*/
 		// Go, Halt, ExpectHalt
 		this->_lights[0].value = this->shows(Aspect::Go) ? Light::maximum(Aspect::Go) : 0;
 		this->_lights[1].value = this->shows(Aspect::Halt) ? Light::maximum(Aspect::Halt) : 0;
@@ -115,20 +79,6 @@ namespace winston
 	template<> void SignalH::init() { }
 	template<> void SignalH::updateLights()
 	{
-		/*if (this->_forced)
-		{
-			if ((const unsigned int)this->_forced & (const unsigned int)Aspect::Off)
-			{
-				this->_lights[0].value = 0;
-				this->_lights[1].value = 0;
-			}
-			else
-			{
-				this->_lights[0].value = ((const unsigned int)this->_forced & (const unsigned int)Aspect::Go) ? Light::maximum(Aspect::Go) : 0;
-				this->_lights[1].value = ((const unsigned int)this->_forced & (const unsigned int)Aspect::Halt) ? Light::maximum(Aspect::Halt) : 0;
-			}
-			return;
-		}*/
 		// Go, Halt
 		this->_lights[0].value = this->shows(Aspect::Go) ? Light::maximum(Aspect::Go) : 0;
 		this->_lights[1].value = this->shows(Aspect::Halt) ? Light::maximum(Aspect::Halt) : 0;
@@ -136,20 +86,6 @@ namespace winston
 	template<> void SignalV::init() { }
 	template<> void SignalV::updateLights()
 	{
-		/*if (this->_forced)
-		{
-			if ((const unsigned int)this->_forced & (const unsigned int)Aspect::Off)
-			{
-				this->_lights[0].value = 0;
-				this->_lights[1].value = 0;
-			}
-			else
-			{
-				this->_lights[0].value = ((const unsigned int)this->_forced & (const unsigned int)Aspect::ExpectHalt) ? Light::maximum(Aspect::ExpectHalt) : 0;
-				this->_lights[1].value = ((const unsigned int)this->_forced & (const unsigned int)Aspect::Go) ? Light::maximum(Aspect::Go) : 0;
-			}
-			return;
-		}*/
 		// ExpectHalt, ExpectGo
 		this->_lights[0].value = this->shows(Aspect::ExpectHalt) ? Light::maximum(Aspect::ExpectHalt) : 0;
 		this->_lights[1].value = this->shows(Aspect::ExpectGo) ? Light::maximum(Aspect::Go) : 0;
@@ -157,24 +93,6 @@ namespace winston
 	template<> void SignalHV::init() { }
 	template<> void SignalHV::updateLights()
 	{
-		/*if (this->_forced)
-		{
-			if ((const unsigned int)this->_forced & (const unsigned int)Aspect::Off)
-			{
-				this->_lights[0].value = 0;
-				this->_lights[1].value = 0;
-				this->_lights[2].value = 0;
-				this->_lights[3].value = 0;
-			}
-			else
-			{
-				this->_lights[0].value = ((const unsigned int)this->_forced & (const unsigned int)Aspect::Go) ? Light::maximum(Aspect::Go) : 0;
-				this->_lights[1].value = ((const unsigned int)this->_forced & (const unsigned int)Aspect::Halt) ? Light::maximum(Aspect::Halt) : 0;
-				this->_lights[2].value = ((const unsigned int)this->_forced & (const unsigned int)Aspect::ExpectHalt) ? Light::maximum(Aspect::ExpectHalt) : 0;
-				this->_lights[3].value = ((const unsigned int)this->_forced & (const unsigned int)Aspect::ExpectGo) ? Light::maximum(Aspect::ExpectGo) : 0;
-			}
-			return;
-		}*/
 		// Go, Halt, ExpectHalt, ExpectGo
 		this->_lights[0].value = this->shows(Aspect::Go) ? Light::maximum(Aspect::Go) : 0;
 		this->_lights[1].value = this->shows(Aspect::Halt) ? Light::maximum(Aspect::Halt) : 0;

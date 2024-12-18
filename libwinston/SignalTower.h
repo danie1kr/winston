@@ -29,6 +29,8 @@ namespace winston
 		void setSignalsFor(Track& turnout, const Track::Connection connectionStartFrom);
 		void setSignalsFor(Track& turnout);
 
+		void setSignalsForLocoPassing(Track::Const track, const Track::Connection connection, const Signal::Pass pass) const;
+
 		static void setSignalOn(Track& track, const Track::Connection signalGuardedConnection, const Signal::Aspect aspect, const Signal::Aspect preAspect = Signal::Aspect::Off);
 
 		using Shared_Ptr<SignalTower>::Shared;

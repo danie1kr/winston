@@ -19,7 +19,7 @@ namespace winston
 			if (state == State::Finished)
 				this->setSignalsFor(turnout);
 			return state;
-		};
+			};
 	}
 
 	void SignalTower::initSignalsForTurnouts(std::set<Turnout::Shared> turnouts, std::set<DoubleSlipTurnout::Shared> doubleSlipTurnouts)
@@ -27,9 +27,7 @@ namespace winston
 		for (auto& turnout : turnouts)
 			this->setSignalsFor(*turnout);
 		for (auto& doubleSlipTurnout : doubleSlipTurnouts)
-		{
 			this->setSignalsFor(*doubleSlipTurnout);
-		}
 	}
 
 	void SignalTower::setSignalOn(Track& track, const Track::Connection signalGuardedConnection, const Signal::Aspect aspect, const Signal::Aspect preAspect)
@@ -75,7 +73,7 @@ namespace winston
 			break;
 		case Track::TraversalResult::Signal:
 			aspect = Signal::Aspect::Go;
-			if(signal->shows(Signal::Aspect::Halt))
+			if (signal->shows(Signal::Aspect::Halt))
 				preAspect = Signal::Aspect::ExpectHalt;
 			break;
 		default:
@@ -89,11 +87,11 @@ namespace winston
 		track.eachConnection([this](Track& track, const Track::Connection connection) {
 			this->order(Command::make([this, &track, connection](const TimePoint& created) -> const winston::State {
 				this->setSignalsFor(track, connection);
-		return State::Finished;
+				return State::Finished;
 				}, __PRETTY_FUNCTION__));
 			});
 	}
-	
+
 	Signal::Shared SignalTower::nextSignal(Track::Shared& track, const bool guarding, Track::Connection& leaving, const bool main, const bool includingFirst)
 	{
 		Track::Connection connection = leaving;
@@ -106,7 +104,7 @@ namespace winston
 
 		if (!includingFirst)
 		{
-			if(!track->traverse(connection, onto, true))
+			if (!track->traverse(connection, onto, true))
 				return nullptr;
 			connection = onto->otherConnection(onto->whereConnects(track));
 		}
@@ -115,7 +113,7 @@ namespace winston
 		{
 			result = Track::traverse<Track::TraversalSignalHandling::OppositeDirection, true>(onto, connection, signal);
 		}
-		else 
+		else
 		{
 			result = Track::traverse<Track::TraversalSignalHandling::ForwardDirection, true>(onto, connection, signal);
 		}
@@ -125,7 +123,7 @@ namespace winston
 		case Track::TraversalResult::Bumper:
 		case Track::TraversalResult::Looped:
 		case Track::TraversalResult::OpenTurnout: return nullptr;
-		case Track::TraversalResult::Signal: 
+		case Track::TraversalResult::Signal:
 			if (signal)
 			{
 				if ((signal->mainSignal() && main) || (signal->preSignal() && !main))
@@ -141,5 +139,10 @@ namespace winston
 		}
 
 		return nullptr;
+	}
+
+	void SignalTower::setSignalsForLocoPassing(Track::Const track, const Track::Connection connection, const Signal::Pass pass) const
+	{
+
 	}
 }

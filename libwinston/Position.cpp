@@ -120,7 +120,7 @@ namespace winston
 					current = onto;
 
 					// we travelled all the way to a new track which might have a signal we just passed
-					if (auto signal = current->signalFacing(connection))
+					if (auto signal = current->signalGuarding(connection))
 					{
 						auto signalDistanceFromPositionView = std::abs((signed)this->_track->length() - (signed)signal->distance());
 						if (distOnThisTrack < signalDistanceFromPositionView && this->dist >= signalDistanceFromPositionView)

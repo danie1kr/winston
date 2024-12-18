@@ -74,8 +74,8 @@ namespace winston
 				return Result::NotImplemented;
 			};
 
-			using SignalPassedCallback = std::function<const Result(Signal::Shared signal, const bool guarding)>;
-			SignalPassedCallback signalPassed = [](Signal::Shared signal, const bool facingLoco) -> const Result {
+			using SignalPassedCallback = std::function<const Result(const winston::Track::Const track, const winston::Track::Connection connection, const Signal::Pass pass)>;
+			SignalPassedCallback signalPassed = [](const winston::Track::Const track, const winston::Track::Connection connection, const Signal::Pass pass) -> const Result {
 				logger.warn("Locomotive::SignalPassedCallback used but not implemented");
 				return Result::NotImplemented;
 			};

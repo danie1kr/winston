@@ -98,45 +98,16 @@ namespace winston
 		auto section = this->_track->section();
 		if (this->dist >= 0 && this->dist <= (int)this->_track->length())
 		{
-			/*
-			// only signal and we do not jump tracks
-			if (auto signal = this->_track->signalFacing(this->reference))
-			{
-				auto signalDistanceFromPositionView = std::abs((signed)this->_track->length() - (signed)signal->distance());
-				if (distOnThisTrack < signalDistanceFromPositionView && this->dist >= signalDistanceFromPositionView)
-				{
-					signalPassed(this->_track, this->reference, Signal::Pass::Backside);
-				}
-			}
-			if (auto signal = this->_track->signalGuarding(this->reference))
-			{
-				auto signalDistanceFromPositionView = std::abs((signed)this->_track->length() - (signed)signal->distance());
-				if (distOnThisTrack < signalDistanceFromPositionView && this->dist >= signalDistanceFromPositionView)
-				{
-					signalPassed(this->_track, this->reference, Signal::Pass::Facing);
-				}
-			}
-			*/
-
 			this->collectSignalsInRange(distOnThisTrack, this->dist, this->_track, this->reference, signalPassed);
-
 			return Transit::Stay;
 		}
 		else
 		{
-			// negative = leave at reference, else other direction connection
-			//auto connection = this->dist < 0 ? this->reference : this->_track->otherConnection(this->reference);
-			auto connection = this->reference;// this->_track->otherConnection(this->reference);
-			// travel the remaining track to the other side - for -distance, it is already done
-			//if (distance > 0)
-			//	this->dist -= this->_track->length();
-
-			//this->dist = this->dist < 0 ? -this->dist : this->dist;
+			auto connection = this->reference;
 			auto current = this->_track;
 			while (true)
 			{
 				auto onThisTrack = std::min(this->dist, (int)current->length());
-				//auto distanceReference = current->otherConnection(connection);
 				this->collectSignalsInRange(distOnThisTrack, onThisTrack, current, connection, signalPassed);
 
 				if (this->dist < current->length())
@@ -155,79 +126,10 @@ namespace winston
 				connection = onto->whereConnects(current);
 				if (!onto->canTraverse(connection))
 					return Transit::TraversalError;
-				//connection = onto->otherConnection(connection);
 				current = onto;
-
-				/*
-				// track guarding the exit of the track we are about to leave
-				if (auto signal = current->signalGuarding(connection))
-				{
-					auto signalDistanceFromPositionView = current->length() - signal->distance();
-					if (distOnThisTrack < signalDistanceFromPositionView)// && this->dist >= signalDistanceFromPositionView)
-					{
-						signalPassed(current, connection, Signal::Pass::Facing);
-					}
-				}
-				Track::Const onto;
-
-				if (!current->traverse(connection, onto, true))
-				{
-					logger.err(build("cannot traverse during Position::drive: ", current->name(), " leaving on ", Track::ConnectionToString(connection)));
-					return Transit::TraversalError;
-				}
-
-				if (this->dist < (int)onto->length())
-				{
-					distOnThisTrack = this->dist;
-					connection = onto->whereConnects(current);
-					current = onto;
-
-					// we travelled all the way to a new track which might have a signal we just passed
-					if (auto signal = current->signalGuarding(connection))
-					{
-						auto signalDistanceFromPositionView = signal->distance();
-						if (distOnThisTrack >= signalDistanceFromPositionView)// && this->dist >= signalDistanceFromPositionView)
-						{
-							signalPassed(current, connection, Signal::Pass::Backside);
-						}
-					}
-					auto otherConnection = onto->otherConnection(connection);
-					// we travelled all the way to a new track which might have a signal we just passed
-					if (auto signal = current->signalGuarding(otherConnection))
-					{
-						auto signalDistanceFromPositionView = current->length() - signal->distance();
-						if (distOnThisTrack >= signalDistanceFromPositionView)// && this->dist >= signalDistanceFromPositionView)
-						{
-							signalPassed(current, otherConnection, Signal::Pass::Facing);
-						}
-					}
-
-					break;
-				}
-				else
-				{
-					this->dist -= onto->length();
-
-					// we travelled all the way to a new track which might have a signal we just passed
-					if (auto signal = onto->signalGuarding(connection))
-						signalPassed(onto, connection, Signal::Pass::Backside);
-
-					auto otherConnection = onto->otherConnection(connection);
-					if (auto signal = onto->signalGuarding(otherConnection))
-						signalPassed(onto, otherConnection, Signal::Pass::Facing);
-
-					distOnThisTrack = 0;
-				}
-
-				connection = onto->whereConnects(current);
-				if(!onto->canTraverse(connection))
-					return Transit::TraversalError;
-				connection = onto->otherConnection(connection);
-				current = onto;
-				*/
 			}
 			this->_track = current;
-			this->reference = connection; // this->_track->otherConnection(connection);
+			this->reference = connection;
 			return this->_track->section() == section ? Transit::CrossTrack : Transit::CrossSection;
 		}
 	}

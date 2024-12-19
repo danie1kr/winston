@@ -16,7 +16,7 @@ namespace winston
 			virtual ~SignalOfDevice();
 			SignalDevice::Shared device;
 		};
-
+	protected:
 		template<typename _Signal>
 		class Signal : public _Signal, public SignalOfDevice, public Shared_Ptr<Signal<_Signal>>
 		{

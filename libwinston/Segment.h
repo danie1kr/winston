@@ -6,7 +6,7 @@
 
 namespace winston {
 
-	using SegmentEntry = std::pair<Track::Shared, Track::Connection>;
+	using SegmentEntry = std::pair<Track::Const, Track::Connection>;
 	using SegmentEntrySet = std::set<SegmentEntry>;
 
 	template<class _Identifier>
@@ -58,7 +58,7 @@ namespace winston {
 			return std::is_permutation(tracks.begin(), tracks.end(), this->_tracks.begin());
 		}
 
-		const bool contains(Track& track) const
+		const bool contains(const Track& track) const
 		{
 			return std::find_if(this->_tracks.begin(), this->_tracks.end(), [&track](const Track::Shared& t) { return &track == t.get(); }) != this->_tracks.end();
 		}

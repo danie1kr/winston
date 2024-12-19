@@ -15,15 +15,17 @@ namespace winston
 			CrossSection = 2,
 			TraversalError = 3
 		};
+		
+		using SignalPassedCallback = std::function<const Result(const winston::Track::Const track, const winston::Track::Connection connection, const Signal::Pass pass)>;
 
 		struct PositionedSignal
 		{
-			const Track::Shared track;
+			const Track::Const track;
 			const Track::Connection connection;
 			const Signal::Shared signal;
 			const Distance distance;
 
-			PositionedSignal(const Track::Shared track,
+			PositionedSignal(const Track::Const track,
 				const Track::Connection connection,
 				const Signal::Shared signal,
 				const Distance distance);
@@ -31,24 +33,27 @@ namespace winston
 		};
 		using PassedSignals = std::list<PositionedSignal>;
 
-		Position(Track::Shared track, const Track::Connection reference, const Distance distance);
+		Position(Track::Const track, const Track::Connection reference, const Distance distance);
 		~Position() = default;
 		const std::string trackName() const;
 		const unsigned int trackIndex() const;
 		const Track::Connection connection() const;
 		const Distance distance() const;
 		const Distance minus(const Position& other) const;
-		Transit drive(const Distance distance, PassedSignals &passedSignals);
+		Transit drive(const Distance distance, SignalPassedCallback signalPassed);
 		const bool nextSignal(PositionedSignal &positionedSignal) const;
+		static void collectSignalsInRange(const Distance start, const Distance end, const Track::Const track, const Track::Connection reference, SignalPassedCallback signalPassed);
 
 		static Position nullPosition();
 		const bool valid() const;
 
-		Track::Shared track() const;
+		Track::Const track() const;
+		void useOtherRef();
 
 	private:
+
 		// the track we are on
-		Track::Shared _track;
+		Track::Const _track;
 
 		// the connection we use as reference for the distance
 		Track::Connection reference;

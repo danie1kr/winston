@@ -774,7 +774,8 @@ namespace winston
 						const auto connection = next->whereConnects(turnout.shared_from_this());
 						const auto otherConnection = next->otherConnection(connection);
 						connector = next;
-						next->traverse(otherConnection, next, true);
+						Track::Const out;
+						next->traverse(otherConnection, out, true);
 					}
 					if (next->type() == Track::Type::Turnout)
 					{

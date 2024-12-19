@@ -590,6 +590,7 @@ namespace winston
 		virtual void populateSheds() = 0;
 
 		virtual void setupSignals() = 0;
+
 		virtual const winston::Result setupDetectors() = 0;
 
 		void addLocomotive(const winston::Locomotive::Callbacks callbacks, const Address address, const winston::Locomotive::Functions functions, const Position start, const Locomotive::ThrottleSpeedMap speedMap, const std::string name, const unsigned int length, const Locomotive::Types types)

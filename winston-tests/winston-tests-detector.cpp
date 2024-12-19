@@ -1,9 +1,9 @@
 #include "CppUnitTest.h"
 
 #include "..\libwinston\Winston.h"
+#include "..\libwinston\Signal.h"
 #include "..\winston\railways.h"
 #include "..\winston\LoDi_API.h"
-
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace winstontests
@@ -17,6 +17,82 @@ namespace winstontests
         winston::DetectorDevice::Shared loDiCommander;
 
         std::vector<winston::Locomotive::Shared> locoShed;
+
+        class TestSignalController : public winston::SignalController
+        {
+        public:
+            TestSignalController()
+                : SignalController(0, {})
+            {
+            };
+
+            virtual ~TestSignalController() = default;
+
+            template<class _Signal>
+            const winston::Result attach(winston::Track::Shared track, const winston::Track::Connection connection, winston::Distance distance, const winston::Railway::Callbacks::SignalUpdateCallback& signalUpdateCallback)
+            {
+                auto s = _Signal::make(0, [track, connection, signalUpdateCallback](const winston::Signal::Aspects aspect)->const winston::State {
+                    return signalUpdateCallback(*track, connection, aspect);
+                    }
+                , distance);
+                track->attachSignal(s, connection);
+                return winston::Result::OK;
+            }
+        };
+
+        void createSignals(TestSignalController& signalController, Y2024Railway::Shared railway, winston::Railway::Callbacks::SignalUpdateCallback signalUpdateCallback)
+        {
+            auto signalUpdateAlwaysHalt = [=](winston::Track& track, winston::Track::Connection connection, const winston::Signal::Aspects aspects) -> const winston::State
+                {
+                    return winston::State::Finished;
+                };
+
+            // Pbf
+            signalController.attach<winston::SignalKS>(railway->track(Y2024Railway::Tracks::PBF1), winston::Track::Connection::A, 5U, signalUpdateCallback);
+            signalController.attach<winston::SignalKS>(railway->track(Y2024Railway::Tracks::PBF1), winston::Track::Connection::B, 5U, signalUpdateCallback);
+
+            signalController.attach<winston::SignalKS>(railway->track(Y2024Railway::Tracks::PBF2), winston::Track::Connection::A, 5U, signalUpdateCallback);
+            signalController.attach<winston::SignalKS>(railway->track(Y2024Railway::Tracks::PBF2), winston::Track::Connection::B, 5U, signalUpdateCallback);
+
+            signalController.attach<winston::SignalH>(railway->track(Y2024Railway::Tracks::PBF1a), winston::Track::Connection::A, 5U, signalUpdateCallback);
+
+            // N + LS
+            signalController.attach<winston::SignalH>(railway->track(Y2024Railway::Tracks::N1), winston::Track::Connection::A, 5U, signalUpdateCallback);
+            signalController.attach<winston::SignalH>(railway->track(Y2024Railway::Tracks::N2), winston::Track::Connection::A, 5U, signalUpdateCallback);
+            signalController.attach<winston::SignalH>(railway->track(Y2024Railway::Tracks::N3), winston::Track::Connection::A, 5U, signalUpdateCallback);
+            signalController.attach<winston::SignalH>(railway->track(Y2024Railway::Tracks::N4), winston::Track::Connection::A, 5U, signalUpdateCallback);
+            signalController.attach<winston::SignalH>(railway->track(Y2024Railway::Tracks::N5), winston::Track::Connection::A, 5U, signalUpdateCallback);
+            signalController.attach<winston::SignalH>(railway->track(Y2024Railway::Tracks::LS1), winston::Track::Connection::A, 5U, signalUpdateCallback);
+            signalController.attach<winston::SignalH>(railway->track(Y2024Railway::Tracks::LS2), winston::Track::Connection::A, 5U, signalUpdateCallback);
+
+            // Track
+            signalController.attach<winston::SignalH>(railway->track(Y2024Railway::Tracks::B1), winston::Track::Connection::A, 5U, signalUpdateCallback);
+            signalController.attach<winston::SignalKS>(railway->track(Y2024Railway::Tracks::B1), winston::Track::Connection::B, 5U, signalUpdateCallback);
+            signalController.attach<winston::SignalKS>(railway->track(Y2024Railway::Tracks::B2), winston::Track::Connection::A, 5U, signalUpdateCallback);
+            signalController.attach<winston::SignalKS>(railway->track(Y2024Railway::Tracks::B2), winston::Track::Connection::B, 5U, signalUpdateCallback);
+            signalController.attach<winston::SignalKS>(railway->track(Y2024Railway::Tracks::B3), winston::Track::Connection::A, 5U, signalUpdateCallback);
+            signalController.attach<winston::SignalKS>(railway->track(Y2024Railway::Tracks::B3), winston::Track::Connection::B, 5U, signalUpdateCallback);
+            signalController.attach<winston::SignalKS>(railway->track(Y2024Railway::Tracks::B4), winston::Track::Connection::A, 5U, signalUpdateCallback);
+            signalController.attach<winston::SignalKS>(railway->track(Y2024Railway::Tracks::B4), winston::Track::Connection::B, 5U, signalUpdateCallback);
+            signalController.attach<winston::SignalKS>(railway->track(Y2024Railway::Tracks::B6), winston::Track::Connection::A, 5U, signalUpdateCallback);
+            signalController.attach<winston::SignalKS>(railway->track(Y2024Railway::Tracks::B6), winston::Track::Connection::B, 5U, signalUpdateCallback);
+            signalController.attach<winston::SignalKS>(railway->track(Y2024Railway::Tracks::B7), winston::Track::Connection::A, 5U, signalUpdateCallback);
+            signalController.attach<winston::SignalH>(railway->track(Y2024Railway::Tracks::B7), winston::Track::Connection::B, 5U, signalUpdateCallback);
+
+            // leaving inner tracks
+            signalController.attach<winston::SignalKS>(railway->track(Y2024Railway::Tracks::Z1), winston::Track::Connection::A, 5U, signalUpdateCallback);
+            signalController.attach<winston::SignalH>(railway->track(Y2024Railway::Tracks::Z3), winston::Track::Connection::A, 5U, signalUpdateCallback);
+
+            // track end bumper signals
+            signalController.attach<winston::SignalAlwaysHalt>(railway->track(Y2024Railway::Tracks::N1), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+            signalController.attach<winston::SignalAlwaysHalt>(railway->track(Y2024Railway::Tracks::N2), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+            signalController.attach<winston::SignalAlwaysHalt>(railway->track(Y2024Railway::Tracks::N3), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+            signalController.attach<winston::SignalAlwaysHalt>(railway->track(Y2024Railway::Tracks::N4), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+            signalController.attach<winston::SignalAlwaysHalt>(railway->track(Y2024Railway::Tracks::N5), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+            signalController.attach<winston::SignalAlwaysHalt>(railway->track(Y2024Railway::Tracks::LS1), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+            signalController.attach<winston::SignalAlwaysHalt>(railway->track(Y2024Railway::Tracks::LS2), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+            signalController.attach<winston::SignalAlwaysHalt>(railway->track(Y2024Railway::Tracks::PBF1a), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+        };
 
         static winston::Railway::Callbacks railwayCallbacks()
         {
@@ -179,9 +255,14 @@ namespace winstontests
         }
         TEST_METHOD(LocoAppearTraverseOverMultipleTracksToNextSegmentAndCollectSignals)
         {
+            TestSignalController testSignalController;
             auto signalTower = winston::SignalTower::make();
             railway = Y2024Railway::make(railwayCallbacksWithSignals(signalTower));
             Assert::IsTrue(railway->init() == winston::Result::OK);
+			createSignals(testSignalController, railway, [](winston::Track& track, winston::Track::Connection connection, const winston::Signal::Aspects aspects) -> const winston::State
+				{
+					return winston::State::Finished;
+				});
             setupDetectors();
             Assert::IsTrue(loDiCommander->isReady());
 

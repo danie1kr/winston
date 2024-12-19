@@ -80,7 +80,7 @@ namespace winston
 		enum class Pass : unsigned char
 		{
 			Facing = 0,
-			Back = 1
+			Backside = 1
 		};
 
 		enum class Authority : unsigned char

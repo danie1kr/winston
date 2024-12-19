@@ -38,6 +38,9 @@ constexpr auto FRAME_SLEEP = 5;
 
 class Kornweinheim : public winston::ModelRailwaySystem<RAILWAY_CLASS, RAILWAY_CLASS::AddressTranslator, Z21, WebServer>
 {
+public:
+    static void createSignals(winston::SignalController &signalController, RAILWAY_CLASS::Shared railway, winston::Railway::Callbacks::SignalUpdateCallback signalUpdateCallback);
+
 private:
     void setupSignals();
     const winston::Result setupDetectors();

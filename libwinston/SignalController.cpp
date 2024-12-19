@@ -13,7 +13,7 @@ namespace winston
 	SignalController::SignalOfDevice::~SignalOfDevice() { }
 
 	SignalController::SignalController(const Id id, const std::vector<typename SignalDevice::Shared> devices)
-		: SignalDevice(id, this->countPorts(devices)), devices(devices), currentDev{ 0 }, currentPort{ 0 }
+		: SignalDevice(id, this->countPorts(devices)), devices(devices), currentDev{ 0 }, currentPort{ 0 }, Shared_Ptr<SignalController>()
 	{
 
 	}

@@ -30,11 +30,11 @@ namespace winston
 			this->setSignalsFor(*doubleSlipTurnout);
 	}
 
-	void SignalTower::setSignalOn(Track& track, const Track::Connection signalGuardedConnection, const Signal::Aspect aspect, const Signal::Aspect preAspect)
+	void SignalTower::setSignalOn(const Track& track, const Track::Connection signalGuardedConnection, const Signal::Aspect aspect, const Signal::Aspect preAspect)
 	{
 		const auto preSignalAspect = aspect & Signal::Aspect::Go ? Signal::Aspect::ExpectGo : Signal::Aspect::ExpectHalt;
 
-		auto current = track.shared_from_this();
+		auto current = track.const_from_this();
 		auto connection = signalGuardedConnection;
 		// current and from are now the position of mainSignal
 		if (Signal::Shared mainSignal = track.signalGuarding(connection))
@@ -54,11 +54,11 @@ namespace winston
 
 	void SignalTower::setSignalsFor(Track& turnout, const Track::Connection connectionStartFrom)
 	{
-		Track::Shared signalCurrent = turnout.shared_from_this();
+		Track::Const signalCurrent = turnout.const_from_this();
 		auto signalConnection = connectionStartFrom;
 		auto signalToSet = this->nextSignal(signalCurrent, true, signalConnection, true, true);
 
-		Track::Shared current = signalCurrent;
+		Track::Const current = signalCurrent;
 		auto connection = signalConnection;
 		Signal::Shared signal;
 		auto result = Track::traverse<Track::TraversalSignalHandling::ForwardDirection, false>(current, connection, signal);
@@ -92,10 +92,10 @@ namespace winston
 			});
 	}
 
-	Signal::Shared SignalTower::nextSignal(Track::Shared& track, const bool guarding, Track::Connection& leaving, const bool main, const bool includingFirst)
+	Signal::Shared SignalTower::nextSignal(Track::Const& track, const bool guarding, Track::Connection& leaving, const bool main, const bool includingFirst)
 	{
 		Track::Connection connection = leaving;
-		Track::Shared onto = track;
+		Track::Const onto = track;
 		Signal::Shared signal;
 		Track::TraversalResult result;
 
@@ -143,6 +143,15 @@ namespace winston
 
 	void SignalTower::setSignalsForLocoPassing(Track::Const track, const Track::Connection connection, const Signal::Pass pass) const
 	{
+		if (pass == Signal::Pass::Facing)
+		{
+			auto signalTrack = track;
+			auto signalConnection = connection;
+			auto nextSignal = this->nextSignal(signalTrack, true, signalConnection, true, false);
+		}
+		else
+		{
 
+		}
 	}
 }

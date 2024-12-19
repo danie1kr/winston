@@ -31,13 +31,13 @@ namespace winston
 
 		void setSignalsForLocoPassing(Track::Const track, const Track::Connection connection, const Signal::Pass pass) const;
 
-		static void setSignalOn(Track& track, const Track::Connection signalGuardedConnection, const Signal::Aspect aspect, const Signal::Aspect preAspect = Signal::Aspect::Off);
+		static void setSignalOn(const Track& track, const Track::Connection signalGuardedConnection, const Signal::Aspect aspect, const Signal::Aspect preAspect = Signal::Aspect::Off);
 
 		using Shared_Ptr<SignalTower>::Shared;
 		using Shared_Ptr<SignalTower>::make;
 	private:
 
-		static Signal::Shared nextSignal(Track::Shared& track, const bool guarding, Track::Connection& leaving, const bool main, const bool includingFirst);
+		static Signal::Shared nextSignal(Track::Const& track, const bool guarding, Track::Connection& leaving, const bool main, const bool includingFirst);
 		/*std::queue<Command::Shared> commands;
 
 #if defined(WINSTON_STATISTICS) && defined(WINSTON_STATISTICS_DETAILLED)

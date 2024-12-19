@@ -111,7 +111,7 @@ namespace winston
 	{
 		this->_segment = segment;
 	}
-	const bool Track::traverseToNextSegment(const Track::Connection connection, Track::Shared& onto, bool leavingOnConnection) const
+	const bool Track::traverseToNextSegment(const Track::Connection connection, Track::Const& onto, bool leavingOnConnection) const
 	{
 		auto con = leavingOnConnection ? connection : this->otherConnection(connection);
 
@@ -146,7 +146,7 @@ namespace winston
 		return nullptr;
 	}
 
-	const bool Bumper::traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const
+	const bool Bumper::traverse(const Connection connection, Track::Const& onto, bool leavingOnConnection) const
 	{
 		if(this->has(connection) && 
 			((leavingOnConnection && connection == Connection::A) ||
@@ -162,7 +162,7 @@ namespace winston
 
 	const bool Bumper::canTraverse(const Connection entering) const
 	{
-		return entering == Connection::DeadEnd;
+		return entering == Connection::A;
 	}
 
 	void Bumper::collectAllConnections(std::set<Track::Shared>& tracks) const
@@ -277,7 +277,7 @@ namespace winston
 		return nullptr;
 	}
 
-	const bool Rail::traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const
+	const bool Rail::traverse(const Connection connection, Track::Const& onto, bool leavingOnConnection) const
 	{
 		if (!this->has(connection))
 		{
@@ -444,7 +444,7 @@ namespace winston
 		return nullptr;
 	}
 
-	const bool Turnout::traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const
+	const bool Turnout::traverse(const Connection connection, Track::Const& onto, bool leavingOnConnection) const
 	{
 		if (!this->has(connection) || this->dir == Direction::Changing)
 		{
@@ -736,7 +736,7 @@ namespace winston
 		return nullptr;
 	}
 
-	const bool DoubleSlipTurnout::traverse(const Connection connection, Track::Shared& onto, bool leavingOnConnection) const
+	const bool DoubleSlipTurnout::traverse(const Connection connection, Track::Const& onto, bool leavingOnConnection) const
 	{
 		if (!this->has(connection) || this->dir == Direction::Changing)
 		{

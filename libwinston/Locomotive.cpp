@@ -133,7 +133,7 @@ namespace winston
 							if (signal->distance() < remainingDistance)
 							{
 								// we passed signal, we saw the back side and we left its protectorate
-								this->callbacks.signalPassed(expectedTrack, this->expected.position.connection(), Signal::Pass::Back);
+								this->callbacks.signalPassed(expectedTrack, this->expected.position.connection(), Signal::Pass::Backside);
 							}
 						}
 
@@ -173,7 +173,7 @@ namespace winston
 		auto track = this->position().track();
 		if (fullUpdate)
 		{
-			Track::Shared onto;
+			Track::Const onto;
 			if (track->traverseToNextSegment(this->position().connection(), onto, false))
 			{
 				this->expected.position = Position(onto, onto->whereConnects(track), 0);
@@ -218,9 +218,8 @@ namespace winston
 		timeOnTour = now - this->details.lastPositionUpdate;
 		if (inMilliseconds(timeOnTour) > WINSTON_LOCO_POSITION_TRACK_RATE)
 		{
-			Position::PassedSignals passedSignals;
 			if(this->details.throttle != 0)
-				this->details.position.drive((Distance)((this->details.forward ? 1 : -1) * this->speedMap.speed(this->details.throttle) * inMilliseconds(timeOnTour)) / 1000, passedSignals);
+				this->details.position.drive((Distance)((this->details.forward ? 1 : -1) * this->speedMap.speed(this->details.throttle) * inMilliseconds(timeOnTour)) / 1000, this->callbacks.signalPassed);
 			this->details.lastPositionUpdate = now;
 		}
 		return this->position();

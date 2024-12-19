@@ -52,7 +52,7 @@ namespace winstontests
             auto c = testRailway->track(MiniRailway::Tracks::C);
             auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->track(MiniRailway::Tracks::Turnout1));
             
-            winston::Track::Shared onto, onto2;
+            winston::Track::Const onto, onto2;
 
             Assert::IsTrue(a->traverse(winston::Track::Connection::DeadEnd, onto, false));
             Assert::IsTrue(onto.get() == t1.get());
@@ -80,7 +80,7 @@ namespace winstontests
             auto c = testRailway->track(MiniRailway::Tracks::C);
             auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->track(MiniRailway::Tracks::Turnout1));
 
-            winston::Track::Shared onto, onto2;
+            winston::Track::Const onto, onto2;
             auto signalTower = winston::SignalTower::make();
 
             auto direction = winston::Turnout::Direction::A_C;
@@ -100,7 +100,7 @@ namespace winstontests
             auto c = testRailway->track(MiniRailway::Tracks::C);
             auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->track(MiniRailway::Tracks::Turnout1));
 
-            winston::Track::Shared onto, onto2;
+            winston::Track::Const onto, onto2;
             auto signalTower = winston::SignalTower::make();
 
             auto direction = winston::Turnout::Direction::A_C;
@@ -122,7 +122,7 @@ namespace winstontests
             auto c = testRailway->track(MiniRailway::Tracks::C);
             auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->track(MiniRailway::Tracks::Turnout1));
 
-            winston::Track::Shared onto, onto2;
+            winston::Track::Const onto, onto2;
             auto signalTower = winston::SignalTower::make();
 
             auto direction = winston::Turnout::Direction::A_B;

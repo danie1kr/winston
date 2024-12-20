@@ -270,16 +270,13 @@ private:
 using WebSocketClient = WebSocketClientWin;
 #endif
 
-/*
-#include "../libwinston/Storyline.h"
-class DisplayWin : public winston::TaskConfirm::Display, public winston::Shared_Ptr<DisplayWin>
+#ifdef WINSTON_TEST
+namespace winston::hal 
 {
-public:
-	DisplayWin();
-	virtual ~DisplayWin() = default;
-	virtual const winston::Result send(const std::vector<DataType> data);
-	using winston::Shared_Ptr<DisplayWin>::Shared;
-	using winston::Shared_Ptr<DisplayWin>::make;
-};
-using Display = DisplayWin;
-*/
+	extern unsigned int sleepyTime;
+	static void resetSleepyTime()
+	{
+		sleepyTime = 0;
+	}
+}
+#endif

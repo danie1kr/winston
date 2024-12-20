@@ -53,6 +53,18 @@ namespace winston
             exit(-1);
         }
 
+#ifdef WINSTON_TEST
+        unsigned int sleepyTime = 0;
+        void delay(const unsigned int ms)
+        {
+            sleepyTime += ms;
+        }
+
+        TimePoint now()
+        {
+            return std::chrono::system_clock::now() + std::chrono::milliseconds(sleepyTime);
+        }
+#else
         void delay(const unsigned int ms)
         {
             Sleep(ms);
@@ -62,6 +74,7 @@ namespace winston
         {
             return std::chrono::system_clock::now();
         }
+#endif
     }
 }
 

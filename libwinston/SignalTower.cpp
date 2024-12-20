@@ -141,13 +141,34 @@ namespace winston
 		return nullptr;
 	}
 
+	Signal::Shared SignalTower::otherBlockSignal(const Track::Const &track, const Track::Connection &connection)
+	{
+		return nullptr;
+	}
+
 	void SignalTower::setSignalsForLocoPassing(Track::Const track, const Track::Connection connection, const Signal::Pass pass) const
 	{
 		if (pass == Signal::Pass::Facing)
 		{
-			auto signalTrack = track;
-			auto signalConnection = connection;
-			auto nextSignal = this->nextSignal(signalTrack, true, signalConnection, true, false);
+			// we entered a protected track:
+			// - set this signal to red, set pre-signal to red if exists
+			// - set other signal into this track to red, update its pre-signal
+			// - set signal of the left track to green, update its pre-signal
+
+			this->setSignalOn(*track, connection, Signal::Aspect::Halt, Signal::Aspect::Off);
+
+			auto otherBlockSignalTrack = track;
+			auto otherBlockSignalConnection = connection;
+			if (auto otherBlockSignal = this->otherBlockSignal(otherBlockSignalTrack, otherBlockSignalConnection))
+				this->setSignalOn(*otherBlockSignalTrack, otherBlockSignalConnection, Signal::Aspect::Halt, Signal::Aspect::Off);
+
+			auto thisSignal = track->signalGuarding(connection);
+
+			auto signalOfLeftBlockTrack = track;
+			auto signalOfLeftBlockConnection = connection;
+			if (auto signalOfLeftBlock = this->nextSignal(signalOfLeftBlockTrack, false, signalOfLeftBlockConnection, true, false))
+				this->setSignalOn(*signalOfLeftBlockTrack, signalOfLeftBlockConnection, Signal::Aspect::Go, Signal::Aspect::Off);
+
 		}
 		else
 		{

@@ -300,6 +300,9 @@ namespace winstontests
             // PBF1_A should be red as loco is on B7 or turnout1
             // PBF1a_A should be green as turnout is set correctly and track is empty
             // PBF1_B should be green as the track is empty
+            Assert::IsTrue(PBF1_A->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(PBF1a_A->shows(winston::Signal::Aspect::Go));
+            Assert::IsTrue(PBF1_B->shows(winston::Signal::Aspect::Go));
 
             loco->railOnto(winston::Position(B7, winston::Track::Connection::A, B7->length()));
             winston::hal::delay(distanceB7_T1);
@@ -307,25 +310,31 @@ namespace winstontests
             injectLoco(B7->segment(), loco, false);
             detectorLoops();
             loco->update();
+            Assert::IsTrue(loco->position().trackIndex() == PBF1->index);
             Assert::IsTrue(passedSignals.size() == 1);
             auto sig = passedSignals.front(); passedSignals.pop(); Assert::IsTrue(sig == PBF1_A);
             // loco passed PBF1_A, it should be green now (track is free, turnout is set correctly)
             // PBF1a_A should be green as turnout is set correctly and track is empty
             // PBF1_B should be red as the track is now occupied by loco
-            Assert::IsTrue(loco->position().trackIndex() == PBF1->index);
+            Assert::IsTrue(PBF1_A->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(PBF1a_A->shows(winston::Signal::Aspect::Go));
+            Assert::IsTrue(PBF1_B->shows(winston::Signal::Aspect::Go));
 
             winston::hal::delay(distanceT1_PBF1a);
             injectLoco(PBF1a->segment(), loco, true);
             injectLoco(PBF1->segment(), loco, false);
             detectorLoops();
             loco->update();
+            Assert::IsTrue(loco->position().trackIndex() == PBF1a->index);
             Assert::IsTrue(passedSignals.size() == 2);
             sig = passedSignals.front(); passedSignals.pop(); Assert::IsTrue(sig == PBF1_B);
             sig = passedSignals.front(); passedSignals.pop(); Assert::IsTrue(sig == PBF1a_A);
             // loco passed PBF1_A, it should be green now (track is free, turnout is set correctly)
             // PBF1a_A should be red as turnout is set correctly but track is occupied by loco
             // PBF1_B should be green as the track is now free again
-            Assert::IsTrue(loco->position().trackIndex() == PBF1a->index);
+            Assert::IsTrue(PBF1_A->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(PBF1a_A->shows(winston::Signal::Aspect::Go));
+            Assert::IsTrue(PBF1_B->shows(winston::Signal::Aspect::Go));
         }
 
         TEST_METHOD(LocoDisappearCompletely)

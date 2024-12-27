@@ -1119,14 +1119,14 @@ void Y2024Railway::connect()
     Turnout10->connect(C, N2, A);
 
     DoubleSlipTurnout8_9->connect(B, Z4, A)
-        ->connect(B, Turnout11, B)
+        ->connect(B, Turnout11, C)
         ->connect(A, Z6, A)
         ->connect(B, N4, A);
 
     DoubleSlipTurnout8_9->connect(A, Z2, A)
         ->connect(B, N1, A);
 
-    Turnout11->connect(C, Z5, A)
+    Turnout11->connect(B, Z5, A)
         ->connect(B, Turnout12, A)
         ->connect(B, LS2, A);
     Turnout12->connect(C, LS1, A);

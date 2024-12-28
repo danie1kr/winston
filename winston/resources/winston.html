@@ -1251,7 +1251,12 @@
                         style: {
                             "width": 1
                         }
-
+                    },
+                    {
+                        selector: ".signalConnector.disabled",
+                        style: {
+                            "width": 1
+                        }
                     },
                     {
                         selector: ".signal",
@@ -1853,6 +1858,15 @@
             }
         }
 
+        function updateVisual(editing) {
+            if (editing) {
+                cy.$(".signalConnector").show();
+            }
+            else {
+                cy.$(".signalConnector").hide();
+            }
+        }
+
         function addTrackToLayout(edges, nodes, tracks, track, xPos) {
             function connect(that, otherTrackName, connectionName) {
                 let other = _.find(tracks, t => t.name === otherTrackName);
@@ -1992,6 +2006,7 @@
                         $resetLayout.removeClass("disabled");
                     }
                 }
+                updateVisual(uiEditLayout);
                 putStateIntoURL();
             });
             $("#sectionView").on('change', function (event) {

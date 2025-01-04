@@ -8,7 +8,7 @@
 
 namespace winston
 {
-	SignalTower::SignalTower() : EventLooper()
+	SignalTower::SignalTower(const LocomotiveShed& locomotiveShed) : EventLooper(), locomotiveShed(locomotiveShed)
 	{
 	}
 
@@ -30,7 +30,7 @@ namespace winston
 			this->setSignalsFor(*doubleSlipTurnout);
 	}
 
-	void SignalTower::setSignalOn(const Track& track, const Track::Connection signalGuardedConnection, const Signal::Aspect aspect, const Signal::Aspect preAspect)
+	void SignalTower::setSignalOn(const Track& track, const Track::Connection signalGuardedConnection, const Signal::Aspect aspect, const Signal::Aspect preAspect, const Signal::Authority authority)
 	{
 		const auto preSignalAspect = aspect & Signal::Aspect::Go ? Signal::Aspect::ExpectGo : Signal::Aspect::ExpectHalt;
 
@@ -40,10 +40,10 @@ namespace winston
 		if (Signal::Shared mainSignal = track.signalGuarding(connection))
 		{
 			if (preAspect == Signal::Aspect::Off)
-				mainSignal->aspect(preAspect);
+				mainSignal->aspect(preAspect, authority);
 			mainSignal->aspect(aspect);
 			if (preAspect != Signal::Aspect::Off)
-				mainSignal->aspect(preAspect);
+				mainSignal->aspect(preAspect, authority);
 			auto otherConnection = current->otherConnection(connection);
 			Signal::Shared preSignal;
 			Track::traverse<Track::TraversalSignalHandling::OppositeDirection, true>(current, otherConnection, preSignal);
@@ -52,20 +52,30 @@ namespace winston
 		}
 	}
 
-	void SignalTower::setSignalsFor(Track& turnout, const Track::Connection connectionStartFrom)
+	const Track::TraversalResult SignalTower::findSignalsFor(Track::Const& current, Track::Connection &connection, Signal::Shared& signal) const
 	{
-		Track::Const signalCurrent = turnout.const_from_this();
-		auto signalConnection = connectionStartFrom;
+		Track::Const signalCurrent = current;
+		auto signalConnection = connection;
 		auto signalToSet = this->nextSignal(signalCurrent, true, signalConnection, true, true);
 
-		Track::Const current = signalCurrent;
-		auto connection = signalConnection;
-		Signal::Shared signal;
-		auto result = Track::traverse<Track::TraversalSignalHandling::ForwardDirection, false>(current, connection, signal);
+		Track::Const currentTrack = signalCurrent;
+		auto currentConnection = signalConnection;
+		auto result = Track::traverse<Track::TraversalSignalHandling::ForwardDirection, false>(currentTrack, currentConnection, signal);
 
+		if (!signal)
+			signal = signalToSet;
+
+		current = signalCurrent;
+		connection = signalConnection;
+
+		return result;
+	}
+
+	void SignalTower::setSignalsFor(const Track::TraversalResult traversalResult, Track::Const current, Track::Connection connection, Signal::Shared signal) const
+	{
 		auto aspect = Signal::Aspect::Halt;
 		auto preAspect = Signal::Aspect::Off;
-		switch (result)
+		switch (traversalResult)
 		{
 		case Track::TraversalResult::Bumper:
 		case Track::TraversalResult::Looped:
@@ -79,17 +89,113 @@ namespace winston
 		default:
 		case Track::TraversalResult::OpenTurnout: aspect = Signal::Aspect::Halt; break;
 		}
-		this->setSignalOn(*signalCurrent, signalConnection, aspect, preAspect);
+		this->setSignalOn(*current, connection, aspect, preAspect);
+	}
+
+	void SignalTower::setSignalsFor(Track& turnout, const Track::Connection connectionStartFrom)
+	{
+		Track::Const signalCurrent = turnout.const_from_this();
+		auto signalConnection = connectionStartFrom;
+		Signal::Shared signal;
+		auto result = findSignalsFor(signalCurrent, signalConnection, signal);
+		this->setSignalsFor(result, signalCurrent, signalConnection, signal);
+		
+#ifdef WINSTON_DETECTOR_SIGNALING
+		// is there a loco behind this signal?
+		// loco behind signal == loco.nextSignals.contains(signal)
+		for (auto loco : this->locomotiveShed)
+		{
+			loco->updateNextSignals();
+			if (loco->isNextSignal(signal))
+				this->setSignalsForLocoPassing(signalCurrent, signalConnection, Signal::Pass::Backside);
+		}
+#endif
+		/*
+		// align signal with what is set on the other block entry (if there is a loco, take over it's occupied authority)
+		{
+			if (signal)
+			{
+				// 
+				auto otherBlockSignal = this->nextSignal(signalCurrent, true, signalConnection, true, false);
+				if (auto otherBlockSignal = this->nextSignal(signalCurrent, true, signalConnection, true, false))
+				{
+					signal->grabAuthorities(otherBlockSignal);
+					if (otherBlockSignal->shows(Signal::Aspect::Halt))
+						signal->aspect(Signal::Aspect::Halt, Signal::Authority::Occupancy);
+				}
+			}
+		}
+		*/
 	}
 
 	void SignalTower::setSignalsFor(Track& track)
 	{
-		track.eachConnection([this](Track& track, const Track::Connection connection) {
-			this->order(Command::make([this, &track, connection](const TimePoint& created) -> const winston::State {
-				this->setSignalsFor(track, connection);
-				return State::Finished;
-				}, __PRETTY_FUNCTION__));
-			});
+		/* wrong :(
+		if (track.type() == Track::Type::Turnout)
+		{
+			Signal::Shared signalA, signalB, signalC;
+			Track::Const trackA = track.const_from_this(), trackB = track.const_from_this(), trackC = track.const_from_this();
+			Track::Connection connectionA = Track::Connection::A, connectionB = Track::Connection::B, connectionC = Track::Connection::C;
+			auto resultA = this->findSignalsFor(trackA, connectionA, signalA);
+			auto resultB = this->findSignalsFor(trackB, connectionB, signalB);
+			auto resultC = this->findSignalsFor(trackC, connectionC, signalC);
+			
+			if(signalB && signalC)
+				signalB->swapAuthorities(signalC);
+			else
+			{
+				if (signalB)
+					signalB->clearAuthorities();
+				if (signalC)
+					signalC->clearAuthorities();
+			}
+			/*
+			this->setSignalsFor(resultA, trackA, connectionA, signalA);
+			this->setSignalsFor(resultB, trackB, connectionB, signalB);
+			this->setSignalsFor(resultC, trackC, connectionC, signalC);
+		}
+		else if (track.type() == Track::Type::DoubleSlipTurnout)
+		{
+			Signal::Shared signalA, signalB, signalC, signalD;
+			Track::Const trackA = track.const_from_this(), trackB = track.const_from_this(), trackC = track.const_from_this(), trackD = track.const_from_this();
+			Track::Connection connectionA = Track::Connection::A, connectionB = Track::Connection::B, connectionC = Track::Connection::C, connectionD = Track::Connection::D;
+			auto resultA = this->findSignalsFor(trackA, connectionA, signalA);
+			auto resultB = this->findSignalsFor(trackB, connectionB, signalB);
+			auto resultC = this->findSignalsFor(trackC, connectionC, signalC);
+			auto resultD = this->findSignalsFor(trackD, connectionD, signalD);
+
+			if (signalA && signalD)
+				signalA->swapAuthorities(signalD);
+			else
+			{
+				if (signalA)
+					signalA->clearAuthorities();
+				if (signalD)
+					signalD->clearAuthorities();
+			}
+			if (signalB && signalC)
+				signalB->swapAuthorities(signalC);
+			else
+			{
+				if (signalB)
+					signalB->clearAuthorities();
+				if (signalC)
+					signalC->clearAuthorities();
+			}
+			/*
+			this->setSignalsFor(resultA, trackA, connectionA, signalA);
+			this->setSignalsFor(resultB, trackB, connectionB, signalB);
+			this->setSignalsFor(resultC, trackC, connectionC, signalC);
+			this->setSignalsFor(resultD, trackD, connectionD, signalD);
+		}
+		//else*/
+			track.eachConnection([this](Track& track, const Track::Connection connection) {
+				this->order(Command::make([this, &track, connection](const TimePoint& created) -> const winston::State {
+
+					this->setSignalsFor(track, connection);
+					return State::Finished;
+					}, __PRETTY_FUNCTION__));
+				});	
 	}
 
 	Signal::Shared SignalTower::nextSignal(Track::Const& track, const bool guarding, Track::Connection& leaving, const bool main, const bool includingFirst)
@@ -120,6 +226,7 @@ namespace winston
 
 		switch (result)
 		{
+		case Track::TraversalResult::CancelledByCallback:
 		case Track::TraversalResult::Bumper:
 		case Track::TraversalResult::Looped:
 		case Track::TraversalResult::OpenTurnout: return nullptr;
@@ -148,6 +255,51 @@ namespace winston
 
 	void SignalTower::setSignalsForLocoPassing(Track::Const track, const Track::Connection connection, const Signal::Pass pass) const
 	{
+		/*
+		daniel, [22.12.2024 17:41]
+traverseUpTo(Position, trainLength), ouput Blocks to occupy/signals to set to halt
+
+daniel, [22.12.2024 17:46]
+signalPassed:
+- facing: green current block (nach hinten bis zum nächsten facing, als wenn wir rückwärts führen), halt next block (passed signal)
+- backside: green current block (passed signal ), halt entering block (vorwärts bis zum nächsten backside)
+
+daniel, [22.12.2024 18:01]
+turnout toggling on occupied block? AB-AC: 
+	Signal guarding B stays red, but now by turnout. 
+	Remove occupation authority, add halt to C because of this. 
+	Re-eval block or just move authority over?
+
+daniel, [22.12.2024 18:02]
+Future: Signals for Position, Signals for Train (Position, length, direction)
+
+Pre-Calculate signals for turnout
+*/
+//
+		if (pass == Signal::Pass::Facing)
+		{
+			// green current block we are leaving (nach hinten bis zum nächsten facing, als wenn wir rückwärts führen)
+			auto signalOfLeftBlockTrack = track;
+			auto signalOfLeftBlockConnection = connection;
+			if (auto signalOfLeftBlock = this->nextSignal(signalOfLeftBlockTrack, false, signalOfLeftBlockConnection, true, false))
+				this->setSignalOn(*signalOfLeftBlockTrack, signalOfLeftBlockConnection, Signal::Aspect::Go, Signal::Aspect::Off, Signal::Authority::Occupancy);
+
+			// halt next block (passed signal)
+			this->setSignalOn(*track, connection, Signal::Aspect::Halt, Signal::Aspect::Off);
+		}
+		else
+		{
+			// green current block(passed signal)
+			this->setSignalOn(*track, connection, Signal::Aspect::Go, Signal::Aspect::Off, Signal::Authority::Occupancy);
+
+			// halt entering block(vorwärts bis zum nächsten backside)
+			auto signalOfEnteredTrack = track;
+			auto signalOfEnteredBlockConnection = track->otherConnection(connection);
+			if (auto signalOfEnteredBlock = this->nextSignal(signalOfEnteredTrack, true, signalOfEnteredBlockConnection, true, false))
+				this->setSignalOn(*signalOfEnteredTrack, signalOfEnteredBlockConnection, Signal::Aspect::Halt, Signal::Aspect::Off);
+		}
+
+		/*
 		if (pass == Signal::Pass::Facing)
 		{
 			// we entered a protected track:
@@ -174,5 +326,83 @@ namespace winston
 		{
 
 		}
+		*/
+	}
+
+	const bool SignalTower::findNextSignal(Track::Const track, Track::Connection leaving, Distance& traveled, const Signal::Pass pass, Signal::Shared& signal)
+	{
+		auto current = track;
+		auto connection = leaving;
+		auto onto = current;
+		std::unordered_set<Track::Const> visited;
+		bool successful = true;
+		while (true)
+		{
+			visited.insert(current);
+			// step onto next track
+			successful = current->traverse(connection, onto, true);
+			if (!successful)
+				return false;
+
+			// we looped
+			if (visited.find(onto) != visited.end())
+				return false;
+
+			connection = onto->whereConnects(current);
+			// if pass == backside, check entering connection
+			if (pass == Signal::Pass::Backside)
+			{
+				signal = onto->signalGuarding(connection);
+				if (signal)
+				{
+					traveled += signal->distance();
+					return true;
+				}
+			}
+
+			// if pass == facing, check leaving connection
+			connection = onto->otherConnection(connection);
+			if (pass == Signal::Pass::Backside)
+			{
+				signal = onto->signalGuarding(connection);
+				if (signal)
+				{
+					traveled += onto->length() - signal->distance();
+					return true;
+				}
+			}
+
+			current = onto;
+		}
+		return false;
+	}
+	
+	const NextSignals SignalTower::nextSignals(const Position position, const Signal::Pass pass)
+	{
+		NextSignals signals;
+		Track::Const current = position.track();
+		auto connection = current->otherConnection(position.connection());
+		auto signal = current->signalGuarding(connection);
+		if (signal)
+		{
+			// signal on the current track
+			const auto signalDistanceFromReference = current->length() - signal->distance();
+			if (signalDistanceFromReference <= position.distance())
+			{
+				auto next = NextSignal::make(signal, position.distance() - signalDistanceFromReference, pass);
+				signals.put(next, true, pass);
+			}
+		}
+		else
+		{
+			// signal on the following track
+			Distance distance = current->length() - position.distance();
+			if (SignalTower::findNextSignal(current, connection, distance, pass, signal))
+			{
+				auto next = NextSignal::make(signal, distance, pass);
+				signals.put(next, false, pass);
+			}
+		}
+		return signals;
 	}
 }

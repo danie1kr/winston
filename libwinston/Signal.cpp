@@ -58,6 +58,34 @@ namespace winston
 			return this->_aspect;
 	}
 
+	void Signal::grabAuthorities(Signal::Shared other)
+	{
+		auto authorities = other->authorities();
+		this->authorityHalt = authorities;
+		/*auto thisAuthorities = this->authorities();
+		this->authorities(other->authorities());
+		other->authorities(thisAuthorities);
+		
+		auto hasHalt = this->shows(Aspect::Halt);
+		this->aspect(other->shows(Aspect::Halt) ? Aspect::Halt : Aspect::Go);
+		other->aspect(hasHalt ? Aspect::Halt : Aspect::Go);*/
+	}
+	void Signal::clearAuthorities()
+	{
+		this->authorityHalt[(size_t)Authority::Turnout] = false;
+		this->authorityHalt[(size_t)Authority::Occupancy] = false;
+	}
+
+	void Signal::authorities(const Authorities authorities)
+	{
+		this->authorityHalt = authorities;
+	}
+
+	const Signal::Authorities Signal::authorities() const
+	{
+		return this->authorityHalt;
+	}
+
 	const bool Signal::shows(Aspect aspect) const
 	{
 		return (const unsigned int)this->aspect() & (const unsigned int)aspect;
@@ -147,4 +175,38 @@ namespace winston
 					return State::Delay;
 			}, __PRETTY_FUNCTION__);
 	}
+
+	NextSignal::NextSignal(const Signal::Shared signal, const Distance distance, const Signal::Pass pass)
+		: signal(signal), distance(distance), pass(pass)
+	{
+	}
+
+	NextSignals::NextSignals()
+		: nextSignals{ }
+	{
+
+	}
+
+	void NextSignals::put(NextSignal::Const next, const bool forward, const Signal::Pass pass)
+	{
+		this->nextSignals[NextSignals::index(forward, pass)] = next;
+	}
+	
+	const NextSignal::Const NextSignals::get(const bool forward, const Signal::Pass pass) const
+	{
+		return this->nextSignals[NextSignals::index(forward, pass)];
+	}
+
+	const bool NextSignals::contains(const Signal::Const signal) const
+	{
+		return this->nextSignals[index(true, Signal::Pass::Facing)]->signal == signal
+			|| this->nextSignals[index(false, Signal::Pass::Facing)]->signal == signal
+			|| this->nextSignals[index(false, Signal::Pass::Backside)]->signal == signal
+			|| this->nextSignals[index(false, Signal::Pass::Backside)]->signal == signal;
+	}
+		
+	size_t constexpr NextSignals::index(const bool forward, const Signal::Pass pass)
+	{
+		return (size_t)pass + (size_t)forward * 2;
+	};
 }

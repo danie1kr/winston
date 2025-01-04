@@ -19,6 +19,7 @@ namespace winstontests
 
 		TEST_METHOD_INITIALIZE(init)
 		{
+			winston::hal::delayReset();
 			this->signalInterfaceDevice = SignalInterfaceDevice::make(3, 5000000);
 			auto TLC5947Off = this->signalInterfaceDevice->getOutputPinDevice(4);
 			this->signalInterfaceDevice->init();

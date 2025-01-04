@@ -131,6 +131,7 @@
     <ClCompile Include="winston-tests-detector.cpp" />
     <ClCompile Include="winston-tests-driving-math.cpp" />
     <ClCompile Include="winston-tests-mini.cpp" />
+    <ClCompile Include="winston-tests-nextsignals.cpp" />
     <ClCompile Include="winston-tests-signal.cpp" />
     <ClCompile Include="winston-tests-signaldevice.cpp" />
     <ClCompile Include="winston-tests-spi-tlc5947-signal.cpp" />

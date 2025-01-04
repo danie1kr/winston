@@ -138,6 +138,9 @@ namespace winston
 
 		static const ThrottleSpeedMap defaultThrottleSpeedMap;
 		void update(const bool busy, const bool forward, const Throttle throttle, const uint32_t functions);
+
+		const bool isNextSignal(Signal::Const signal) const;
+		void updateNextSignals();
 	private:
 
 		const Position& moved(Duration& timeOnTour);
@@ -174,6 +177,7 @@ namespace winston
 			float modelThrottle = { 0.f };
 			uint32_t functions = { 0 };
 			Types types = { (unsigned char)Type::Single };
+			NextSignals nextSignals;
 		} details;
 
 		struct Expected

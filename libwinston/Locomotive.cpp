@@ -2,6 +2,7 @@
 #include "Locomotive.h"
 #include "Log.h"
 #include "HAL.h"
+#include "SignalTower.h"
 
 namespace winston
 {
@@ -86,11 +87,18 @@ namespace winston
 		this->details.lastPositionUpdate = when;
 		this->details.position = p;
 		this->details.railed = true;
+
+		this->updateNextSignals();
 	}
 
 	void Locomotive::railOff()
 	{
 		this->details.railed = false;
+	}
+
+	const bool Locomotive::isNextSignal(Signal::Const signal) const
+	{
+		return this->details.nextSignals.contains(signal);
 	}
 
 	void Locomotive::entered(Segment::Shared segment, const TimePoint when)
@@ -201,6 +209,51 @@ namespace winston
 			}
 
 		}
+	}
+
+	void Locomotive::updateNextSignals()
+	{/*
+		{
+			// forwards
+			this->details.nextSignals[0] = SignalTower::nextSignals(this->position(), Signal::Pass::Facing);
+		}
+		{
+			// backwards
+			auto pos = this->position();
+			pos.useOtherRef();
+			this->details.nextSignals[1] = SignalTower::nextSignals(pos, Signal::Pass::Facing);
+		}
+		
+		{
+			// forwards
+			auto current = this->position().track();
+			auto connection = current->otherConnection(this->position().connection());
+
+			if (auto signal = current->signalGuarding(connection))
+			{
+				this->details.nextSignals[0] = signal;
+			}
+			else
+			{
+				this->details.nextSignals[0] = SignalTower::nextSignal(current, true, connection, true, true);
+			}
+		}
+
+		{
+			//backwards
+			auto current = this->position().track();
+			auto connection = this->position().connection();
+
+			if (auto signal = current->signalGuarding(connection))
+			{
+				this->details.nextSignals[1] = signal;
+			}
+			else
+			{
+				this->details.nextSignals[1] = SignalTower::nextSignal(current, true, connection, true, true);
+			}
+		}
+		*/
 	}
 
 	void Locomotive::update(const bool busy, const bool forward, const Throttle throttle, const uint32_t functions)

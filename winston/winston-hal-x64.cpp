@@ -60,6 +60,11 @@ namespace winston
             sleepyTime += ms;
         }
 
+        void delayReset()
+        {
+            sleepyTime = 0;
+        }
+
         TimePoint now()
         {
             return std::chrono::system_clock::now() + std::chrono::milliseconds(sleepyTime);

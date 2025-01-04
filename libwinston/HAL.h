@@ -24,6 +24,10 @@ namespace winston
 		extern void error(const std::string& error);
 		extern void fatal(const std::string reason);
 
+
+#ifdef WINSTON_TEST
+		extern void delayReset();
+#endif
 		extern void delay(const unsigned int ms);
 
 		extern void init();
@@ -55,7 +59,7 @@ namespace winston
 		protected:
 			State state;
 		};
-
+#ifdef WINSTON_PLATFORM_WIN_x64
 		class DebugSocket : public Socket, public Shared_Ptr<DebugSocket>
 		{
 		public:
@@ -76,7 +80,7 @@ namespace winston
 			std::queue<Packet> buffer;
 			const Listener listener;
 		};
-
+#endif
 		template<typename T>
 		class SPIDevice : public Device, public SendDevice<T>, public Shared_Ptr<SPIDevice<T>>
 		{

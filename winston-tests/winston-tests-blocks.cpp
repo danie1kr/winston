@@ -9,6 +9,11 @@ namespace winstontests
 {
     TEST_CLASS(SectionsTest)
     {
+        TEST_METHOD_INITIALIZE(resetDelay)
+        {
+            winston::hal::delayReset();
+        }
+
         std::shared_ptr<RailwayWithSiding> testRailway;
 
         static winston::Railway::Callbacks railwayCallbacks()

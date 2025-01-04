@@ -9,6 +9,11 @@ namespace winstontests
 {
     TEST_CLASS(DrivingMathTests)
     {
+        TEST_METHOD_INITIALIZE(resetDelay)
+        {
+            winston::hal::delayReset();
+        }
+
         std::shared_ptr<Y2021Railway> railway;
         std::shared_ptr<SignalTestRailway> signalTestRailway;
 
@@ -336,7 +341,8 @@ namespace winstontests
 
         TEST_METHOD(DriveCollectSignals)
         {
-            auto signalTower = winston::SignalTower::make();
+            winston::LocomotiveShed shed;
+            auto signalTower = winston::SignalTower::make(shed);
 
             signalTestRailway = SignalTestRailway::make(railwayCallbacksWithSignals(signalTower));
             Assert::IsTrue(signalTestRailway->init() == winston::Result::OK);

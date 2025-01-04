@@ -9,6 +9,11 @@ namespace winstontests
 {
 	TEST_CLASS(MiniRailwayTest)
 	{
+        TEST_METHOD_INITIALIZE(resetDelay)
+        {
+            winston::hal::delayReset();
+        }
+
         std::shared_ptr<MiniRailway> testRailway;
 
         static winston::Railway::Callbacks railwayCallbacks()
@@ -81,7 +86,8 @@ namespace winstontests
             auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->track(MiniRailway::Tracks::Turnout1));
 
             winston::Track::Const onto, onto2;
-            auto signalTower = winston::SignalTower::make();
+            winston::LocomotiveShed shed;
+            auto signalTower = winston::SignalTower::make(shed);
 
             auto direction = winston::Turnout::Direction::A_C;
             t1->finalizeChangeTo(direction);
@@ -101,7 +107,8 @@ namespace winstontests
             auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->track(MiniRailway::Tracks::Turnout1));
 
             winston::Track::Const onto, onto2;
-            auto signalTower = winston::SignalTower::make();
+            winston::LocomotiveShed shed;
+            auto signalTower = winston::SignalTower::make(shed);
 
             auto direction = winston::Turnout::Direction::A_C;
             signalTower->order(winston::Command::make([t1, direction](const winston::TimePoint &created) -> const winston::State { return t1->finalizeChangeTo(direction);  }));
@@ -123,7 +130,8 @@ namespace winstontests
             auto t1 = std::dynamic_pointer_cast<winston::Turnout>(testRailway->track(MiniRailway::Tracks::Turnout1));
 
             winston::Track::Const onto, onto2;
-            auto signalTower = winston::SignalTower::make();
+            winston::LocomotiveShed shed;
+            auto signalTower = winston::SignalTower::make(shed);
 
             auto direction = winston::Turnout::Direction::A_B;
             signalTower->order(winston::Command::make([t1](const winston::TimePoint &created) -> const winston::State { return t1->startToggle(); }));
@@ -146,7 +154,8 @@ namespace winstontests
         }
 
         TEST_METHOD(Signals_forTurnouts) {
-            auto signalTower = winston::SignalTower::make();
+            winston::LocomotiveShed shed;
+            auto signalTower = winston::SignalTower::make(shed);
 
             testRailway = MiniRailway::make(railwayCallbacksWithSignals(signalTower));
             Assert::IsTrue(testRailway->init() == winston::Result::OK);

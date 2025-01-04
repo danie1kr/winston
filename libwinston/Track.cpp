@@ -11,8 +11,8 @@ namespace winston
 		, index(index)
 		, _name(name)
 		, _section(0)
-		, trackLength(trackLength)
 		, _segment(0)
+		, trackLength(trackLength)
 	{
 	}
 

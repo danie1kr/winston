@@ -8,6 +8,7 @@
 #include "WinstonTypes.h"
 #include "Railway.h"
 #include "EventLooper.h"
+#include "Locomotive.h"
 
 namespace winston
 {
@@ -21,25 +22,32 @@ namespace winston
 			Count
 		};
 
-		SignalTower();
+		SignalTower(const LocomotiveShed &locomotiveShed);
 
 		Railway::Callbacks::TurnoutUpdateCallback injectTurnoutSignalHandling(Railway::Callbacks::TurnoutUpdateCallback callback);
 
 		void initSignalsForTurnouts(std::set<Turnout::Shared> turnouts, std::set<DoubleSlipTurnout::Shared> doubleSlipTurnouts);
+		const Track::TraversalResult findSignalsFor(Track::Const& current, Track::Connection& connection, Signal::Shared& signal) const;
+		void setSignalsFor(const Track::TraversalResult traversalResult, Track::Const current, Track::Connection connection, Signal::Shared signal) const;
 		void setSignalsFor(Track& turnout, const Track::Connection connectionStartFrom);
 		void setSignalsFor(Track& turnout);
 
 		void setSignalsForLocoPassing(Track::Const track, const Track::Connection connection, const Signal::Pass pass) const;
 
-		static void setSignalOn(const Track& track, const Track::Connection signalGuardedConnection, const Signal::Aspect aspect, const Signal::Aspect preAspect = Signal::Aspect::Off);
+		static void setSignalOn(const Track& track, const Track::Connection signalGuardedConnection, const Signal::Aspect aspect, const Signal::Aspect preAspect = Signal::Aspect::Off, const Signal::Authority = Signal::Authority::Turnout);
 		
 		static Signal::Shared otherBlockSignal(const Track::Const &track, const Track::Connection &connection);
 
 		using Shared_Ptr<SignalTower>::Shared;
 		using Shared_Ptr<SignalTower>::make;
-	private:
 
 		static Signal::Shared nextSignal(Track::Const& track, const bool guarding, Track::Connection& leaving, const bool main, const bool includingFirst);
+
+		static const bool findNextSignal(Track::Const track, Track::Connection entering, Distance& traveled, const Signal::Pass pass, Signal::Shared &signal);
+		static const NextSignals nextSignals(const Position position, const Signal::Pass pass);
+
+	private:
+		const LocomotiveShed& locomotiveShed;
 		/*std::queue<Command::Shared> commands;
 
 #if defined(WINSTON_STATISTICS) && defined(WINSTON_STATISTICS_DETAILLED)

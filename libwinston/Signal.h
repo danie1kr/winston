@@ -2,6 +2,7 @@
 #pragma once
 
 #include <functional>
+#include <vector>
 
 #include "WinstonTypes.h"
 #include "HAL.h"
@@ -92,11 +93,11 @@ namespace winston
 
 		enum class Aspect : unsigned char
 		{
-			Off =			0b00001,
-			Go =			0b00010,
-			Halt =			0b00100,
-			ExpectHalt =	0b01000,
-			ExpectGo =		0b10000
+			Off = 0b00001,
+			Go = 0b00010,
+			Halt = 0b00100,
+			ExpectHalt = 0b01000,
+			ExpectGo = 0b10000
 		};
 		using Aspects = unsigned int;
 
@@ -124,11 +125,11 @@ namespace winston
 		};
 
 		/*
-		
-		
+
+
 		==== S1 ==== S2 ==== S3 ====
-		    Halt
-		
+			Halt
+
 		==== S1 ==== S2 ==== S3 ====
 			 H       H       H
 
@@ -143,7 +144,7 @@ namespace winston
 
 		==== S1 ==== S2 ==== S3 ====
 			KS		KS		KS
-			= S2 == Halt ? 
+			= S2 == Halt ?
 
 		==== S1 ====B1==== S2 ====B2==== S3 ====
 			KS
@@ -193,9 +194,12 @@ namespace winston
 		virtual const bool mainSignal() const = 0;
 
 		const Length distance() const;
-		
+
 		virtual const std::span<const Light> lights() const = 0;
 		static const std::string buildAspects(const Aspects first);
+
+		void grabAuthorities(Signal::Shared other);
+		void clearAuthorities();
 
 		const Id deviceId;
 	protected:
@@ -207,14 +211,19 @@ namespace winston
 		const Length _distance;
 		Aspects _aspect;
 
-		std::array<bool, (size_t)Authority::EnumCount> authorityHalt;
+		using Authorities = std::array<bool, (size_t)Authority::EnumCount>;
+		Authorities authorityHalt;
+
+	private:
+		void authorities(const Authorities authorities);
+		const Authorities authorities() const;
 	};
 
 	inline const bool operator&(const Signal::Aspect a, const Signal::Aspect b)
 	{
 		return static_cast<const bool>(static_cast<const unsigned int>(a) & static_cast<const unsigned int>(b));
 	}
-	
+
 	template<size_t _Aspects>
 	class SignalInstance : public Signal, public Shared_Ptr<SignalInstance<_Aspects>>
 	{
@@ -261,8 +270,8 @@ namespace winston
 	private:
 		typedef std::array<Light, BitCounter<_Aspects>::count()> LightsArray;
 		template<int... i> static constexpr LightsArray makeLightInSequence(const Signal::Aspects aspects, const unsigned int startPort)
-		{ 
-			return LightsArray{ { Signal::Light::make(startPort + i, (Signal::Aspect)nThSetBit<BitCounter<_Aspects>::count()-1 - i+1, sizeof(Signal::Aspect) * 8 - 1>::extract(aspects))...}};
+		{
+			return LightsArray{ { Signal::Light::make(startPort + i, (Signal::Aspect)nThSetBit<BitCounter<_Aspects>::count() - 1 - i + 1, sizeof(Signal::Aspect) * 8 - 1>::extract(aspects))...} };
 		}
 		template<int...> class Sequence;
 		template<int... i> class Sequence<0, i...>
@@ -281,7 +290,7 @@ namespace winston
 		LightsArray _lights;
 	};
 
-	constexpr Signal::Aspects operator |(const Signal::Aspect a, const Signal::Aspect b) 
+	constexpr Signal::Aspects operator |(const Signal::Aspect a, const Signal::Aspect b)
 	{
 		return (unsigned int)a | (unsigned int)b;
 	}
@@ -307,7 +316,7 @@ namespace winston
 		SignalDevice(const Id id, const size_t ports);
 		virtual ~SignalDevice();
 
-		const Result update(const winston::Signal &signal);
+		const Result update(const winston::Signal& signal);
 		const Result flush();
 		Command::Shared flushCommand(const Duration waitPeriod = toMilliseconds(40));
 
@@ -325,4 +334,30 @@ namespace winston
 		friend class SignalController;
 	};
 	const std::string build(const Signal::Aspect first);
-}
+
+	struct NextSignal : public Shared_Ptr<NextSignal>
+	{
+		const Signal::Shared signal;
+		const Distance distance;
+		const Signal::Pass pass;
+
+		using Shared_Ptr<NextSignal>::Shared;
+		using Shared_Ptr<NextSignal>::Const;
+		using Shared_Ptr<NextSignal>::make;
+
+		NextSignal(const Signal::Shared signal, const Distance distance, const Signal::Pass pass);
+		~NextSignal() = default;
+	};
+
+	struct NextSignals
+	{
+		NextSignals();
+		~NextSignals() = default;
+		void put(NextSignal::Const next, const bool forward, const Signal::Pass pass);
+		const NextSignal::Const get(const bool forward, const Signal::Pass pass) const;
+		const bool contains(const Signal::Const signal) const;
+	private:
+		static constexpr size_t index(const bool forward, const Signal::Pass pass);
+		std::array<NextSignal::Const, 4> nextSignals;
+	};
+};

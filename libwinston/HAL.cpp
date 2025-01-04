@@ -12,9 +12,9 @@ namespace winston
 		{
 			return this->state == State::Connected;
 		}
-
+#ifdef WINSTON_PLATFORM_WIN_x64
 		DebugSocket::DebugSocket(const Listener listener)
-			: Socket(), Shared_Ptr<DebugSocket>(), listener(listener), buffer()
+			: Socket(), Shared_Ptr<DebugSocket>(), buffer(), listener(listener)
 		{
 
 		}
@@ -39,7 +39,7 @@ namespace winston
 		{
 			this->buffer.push(data);
 		}
-
+#endif
 		StorageInterface::StorageInterface(const size_t maxSize)
 			: Shared_Ptr<StorageInterface>(), maxSize(maxSize)
 		{

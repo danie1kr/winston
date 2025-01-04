@@ -9,6 +9,11 @@ namespace winstontests
 {
     TEST_CLASS(SignalRailwayTest)
     {
+        TEST_METHOD_INITIALIZE(resetDelay)
+        {
+            winston::hal::delayReset();
+        }
+
         std::shared_ptr<SignalTestRailway> testRailway;
 
         static winston::Railway::Callbacks railwayCallbacks()
@@ -36,7 +41,8 @@ namespace winstontests
         }
     public:
         TEST_METHOD(Signals_forTurnouts) {
-            auto signalTower = winston::SignalTower::make();
+            winston::LocomotiveShed shed;
+            auto signalTower = winston::SignalTower::make(shed);
 
             testRailway = SignalTestRailway::make(railwayCallbacksWithSignals(signalTower));
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
@@ -70,7 +76,8 @@ namespace winstontests
         }
 
         TEST_METHOD(Signals_longTrackInBetween) {
-            auto signalTower = winston::SignalTower::make();
+            winston::LocomotiveShed shed;
+            auto signalTower = winston::SignalTower::make(shed);
 
             testRailway = SignalTestRailway::make(railwayCallbacksWithSignals(signalTower));
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
@@ -126,7 +133,8 @@ namespace winstontests
         }
 
         TEST_METHOD(Signals_fullTurnoutsSignalization) {
-            auto signalTower = winston::SignalTower::make();
+            winston::LocomotiveShed shed;
+            auto signalTower = winston::SignalTower::make(shed);
 
             testRailway = SignalTestRailway::make(railwayCallbacksWithSignals(signalTower));
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
@@ -195,7 +203,8 @@ namespace winstontests
         }
         
         TEST_METHOD(Signals_PreSignal) {
-            auto signalTower = winston::SignalTower::make();
+            winston::LocomotiveShed shed;
+            auto signalTower = winston::SignalTower::make(shed);
 
             testRailway = SignalTestRailway::make(railwayCallbacksWithSignals(signalTower));
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
@@ -222,7 +231,8 @@ namespace winstontests
         }
 
         TEST_METHOD(Signals_ThreeTrackWithPreSignals) {
-            auto signalTower = winston::SignalTower::make();
+            winston::LocomotiveShed shed;
+            auto signalTower = winston::SignalTower::make(shed);
 
             testRailway = SignalTestRailway::make(railwayCallbacksWithSignals(signalTower));
             Assert::IsTrue(testRailway->init() == winston::Result::OK);
@@ -266,7 +276,8 @@ namespace winstontests
         }
         
         TEST_METHOD(Signals_loopAbort) {
-            auto signalTower = winston::SignalTower::make();
+            winston::LocomotiveShed shed;
+            auto signalTower = winston::SignalTower::make(shed);
 
             testRailway = SignalTestRailway::make(railwayCallbacksWithSignals(signalTower));
             Assert::IsTrue(testRailway->init() == winston::Result::OK);

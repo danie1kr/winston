@@ -256,7 +256,7 @@ void TimeSaver::systemSetup() {
     this->addressTranslator = TimeSaverRailway::AddressTranslator::make(railway);
 
     // the internal signal box
-    this->signalTower = winston::SignalTower::make();
+    this->signalTower = winston::SignalTower::make(this->locomotiveShed);
 
     // the system specific digital central station
     auto at = std::static_pointer_cast<winston::DigitalCentralStation::TurnoutAddressTranslator>(addressTranslator);

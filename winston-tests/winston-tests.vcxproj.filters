@@ -51,6 +51,9 @@
     <ClCompile Include="..\winston\LoDi_API.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="winston-tests-nextsignals.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\winston\winston-hal-x64.h">

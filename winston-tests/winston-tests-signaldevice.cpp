@@ -35,6 +35,11 @@ namespace winstontests
 	
 	TEST_CLASS(TLC5947_SignalDevice_Tests)
     {
+		TEST_METHOD_INITIALIZE(resetDelay)
+		{
+			winston::hal::delayReset();
+		}
+
     public:
         TEST_METHOD(DevInit)
         {

@@ -8,17 +8,13 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 namespace winstontests
 {
-    TEST_CLASS(DetectorTests)
+    TEST_CLASS(NextSignalTests)
     {
         TEST_METHOD_INITIALIZE(resetDelay)
         {
             winston::hal::delayReset();
         }
         std::shared_ptr<Y2024Railway> railway;
-
-        winston::hal::DebugSocket::Shared loDiSocket;
-        LoDi::Shared loDi;
-        winston::DetectorDevice::Shared loDiCommander;
 
         std::vector<winston::Locomotive::Shared> locoShed;
 
@@ -140,63 +136,6 @@ namespace winstontests
             return callbacks;
         }
 
-        void setupDetectors()
-        {
-            loDiSocket = LoDi::createLoDiDebugSocket();
-            this->loDi = LoDi::make(this->loDiSocket);
-
-            this->loDi->discover();
-
-            unsigned int count = 0;
-            while (count++ < 24)
-            {
-                this->loDi->loop();
-                winston::hal::delay(50);
-            }
-
-            this->loDiCommander = this->loDi->createS88Commander();
-
-            winston::DetectorDevice::PortSegmentMap portSegmentMap;
-            for (auto const& [id, segment] : this->railway->segments())
-                portSegmentMap.insert({ id, segment });
-
-            winston::DetectorDevice::Callbacks callbacks;
-            callbacks.change =
-                [](const std::string detectorName, const winston::Locomotive::Shared loco, const bool forward, winston::Segment::Shared segment, const winston::Detector::Change change, const winston::TimePoint when) -> const winston::Result
-                {
-                    if (change == winston::Detector::Change::Entered)
-                        loco->entered(segment, when);
-                    else
-                        loco->left(segment, when);
-                    return winston::Result::OK;
-                };
-            callbacks.occupied =
-                [](const std::string detectorName, winston::Segment::Shared segment, const winston::Detector::Change change, const winston::TimePoint when) -> const winston::Result
-                {
-                    return winston::Result::NotImplemented;
-                };
-            callbacks.locoFromAddress =
-                [&](const winston::Address address) -> winston::Locomotive::Shared
-                {
-                    if (auto it = std::find_if(locoShed.begin(), locoShed.end(), [address](winston::Locomotive::Shared& loco) -> bool
-                        {
-                            return loco->address() == address;
-                        }); it != std::end(locoShed))
-                            return *it;
-                    else
-                        return nullptr;
-                };
-
-            this->loDiCommander->init(portSegmentMap, callbacks);
-
-            count = 0;
-            while (!loDiCommander->isReady() && count++ < 24)
-            {
-                this->loDi->loop();
-                winston::hal::delay(50);
-            }
-        }
-
         void createLocos(winston::Locomotive::Callbacks::SignalPassedCallback signalPassed)
         {
             winston::Locomotive::Functions standardFunctions = { {0, "Light"} };
@@ -204,71 +143,17 @@ namespace winstontests
             locoShed.push_back(winston::Locomotive::make(locoCallbacks(signalPassed), 3, standardFunctions, winston::Position::nullPosition(), speedMap, "BR 114", 100, (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods | (unsigned char)winston::Locomotive::Type::Shunting));
         }
 
-        void injectLoco(uint8_t detector, winston::Locomotive::Shared loco, const bool enter)
-        {
-            winston::hal::DebugSocket::Packet packet;
-            packet.push_back(0);     // size
-            packet.push_back(9);     // size
-            packet.push_back((unsigned char)LoDi::API::PacketType::EVT);  // ACK
-            packet.push_back((unsigned char)LoDi::API::Event::S88LokAddrEvent);  // S88LokAddrEvent
-            packet.push_back(1);  // Packet number
-            packet.push_back(1);  // count
-            packet.push_back(detector / 8 + 1); // address
-            packet.push_back(detector % 8); // channel
-            packet.push_back(loco->address() >> 8); // railcom address high
-            packet.push_back(loco->address() & 0xFF); // railcom address low
-            packet.push_back(enter ? 1 : 0); // status
-            packet[1] = (unsigned char)(packet.size() - 2);// update size
-            loDiSocket->addRecvPacket(packet);
-        }
-
-        void detectorLoops(const size_t count = 8)
-        {
-            for(size_t i = 0; i < count; ++i)
-            {
-                this->loDi->loop();
-                winston::hal::delay(50);
-            }
-        }
     public:
-        TEST_METHOD(DetectorSetup)
-        {
-            railway = Y2024Railway::make(railwayCallbacks());
-            Assert::IsTrue(railway->init() == winston::Result::OK);
-            setupDetectors();
-            Assert::IsTrue(loDiCommander->isReady());
-        }
-        TEST_METHOD(LocoAppear)
-        {
-            railway = Y2024Railway::make(railwayCallbacks());
-            Assert::IsTrue(railway->init() == winston::Result::OK);
-            setupDetectors();
-            Assert::IsTrue(loDiCommander->isReady());
-            createLocos([](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result
-                {
-                    return winston::Result::OK;
-                });
-
-            auto loco = locoShed[0];
-            auto PBF1a = railway->track(Y2024RailwayTracks::PBF1a);
-
-            injectLoco(PBF1a->segment(), loco, true);
-            detectorLoops();
-
-            Assert::IsTrue(loco->position().trackIndex() == PBF1a->index);
-        }
-        TEST_METHOD(LocoAppearTraverseOverMultipleTracksToNextSegmentAndCollectSignals)
+        TEST_METHOD(LocoNextSignals)
         {
             TestSignalController testSignalController;
             auto signalTower = winston::SignalTower::make(locoShed);
             railway = Y2024Railway::make(railwayCallbacksWithSignals(signalTower));
             Assert::IsTrue(railway->init() == winston::Result::OK);
-			createSignals(testSignalController, railway, [](winston::Track& track, winston::Track::Connection connection, const winston::Signal::Aspects aspects) -> const winston::State
-				{
-					return winston::State::Finished;
-				});
-            setupDetectors();
-            Assert::IsTrue(loDiCommander->isReady());
+            createSignals(testSignalController, railway, [](winston::Track& track, winston::Track::Connection connection, const winston::Signal::Aspects aspects) -> const winston::State
+                {
+                    return winston::State::Finished;
+                });
 
             std::queue<winston::Signal::Shared> passedSignals;
             createLocos([&passedSignals, &signalTower](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result
@@ -283,102 +168,36 @@ namespace winstontests
             auto PBF1a = railway->track(Y2024RailwayTracks::PBF1a);
             auto Turnout1 = std::dynamic_pointer_cast<winston::Turnout>(railway->track(Y2024RailwayTracks::Turnout1));
             auto Turnout2 = std::dynamic_pointer_cast<winston::Turnout>(railway->track(Y2024RailwayTracks::Turnout2));
-            auto Turnout3 = std::dynamic_pointer_cast<winston::Turnout>(railway->track(Y2024RailwayTracks::Turnout3));
             auto B1 = railway->track(Y2024RailwayTracks::B1);
             auto B7 = railway->track(Y2024RailwayTracks::B7);
             auto PBF1 = railway->track(Y2024RailwayTracks::PBF1);
 
             auto B1_A = B1->signalGuarding(winston::Track::Connection::A);
+            auto B1_B = B1->signalGuarding(winston::Track::Connection::B);
+            auto B7_A = B7->signalGuarding(winston::Track::Connection::A);
+            auto B7_B = B7->signalGuarding(winston::Track::Connection::B);
             auto PBF1_A = PBF1->signalGuarding(winston::Track::Connection::A);
             auto PBF1_B = PBF1->signalGuarding(winston::Track::Connection::B);
             auto PBF1a_A = PBF1a->signalGuarding(winston::Track::Connection::A);
 
-            Turnout1->finalizeChangeTo(winston::Turnout::Direction::A_C);
+            Turnout1->finalizeChangeTo(winston::Turnout::Direction::A_B);
             Turnout2->finalizeChangeTo(winston::Turnout::Direction::A_B);
-            auto distanceB7_T1 = Turnout1->length() + 10;
-            auto distanceT1_PBF1a = PBF1->length() + Turnout2->length() + 10;
 
-            auto throttle = 100;
-            loco->drive<true>(true, throttle);
+            /*
+            
+			==== A 5U |8 ==== B7 ==== 8| 5U B ==== A ==== Turnout1 ==== C ==== A |8 5U ==== PBF1 ==== 8| 5U B ==== A ==== Turnout2 ==== B ==== A |8 5U ==== PBF1a ==== 8| 5U Deadend
 
-            injectLoco(B7->segment(), loco, true);
-            detectorLoops();
-            Assert::IsTrue(loco->position().trackIndex() == (*railway->segment(B7->segment())->tracks().begin())->index);
-            // we don't know yet, as the loco just appeared. Do not set signals yet:
-            // PBF1_A should be red as loco is on B7 or turnout1
-            // PBF1a_A should be green as turnout is set correctly and track is empty
-            // PBF1_B should be green as the track is empty
-        /*    
-            Assert::IsTrue(B7_B->shows(winston::Signal::Aspect::Halt));
-            Assert::IsTrue(PBF1_A->shows(winston::Signal::Aspect::Halt));
-            Assert::IsTrue(PBF1a_A->shows(winston::Signal::Aspect::Go));
-            Assert::IsTrue(PBF1_B->shows(winston::Signal::Aspect::Go));
             */
-            loco->railOnto(winston::Position(B7, winston::Track::Connection::A, B7->length()));
-            winston::hal::delay(distanceB7_T1);
-            injectLoco(PBF1->segment(), loco, true);
-            injectLoco(B7->segment(), loco, false);
-            detectorLoops();
-            loco->update();
-            Assert::IsTrue(loco->position().trackIndex() == PBF1->index);
-            Assert::IsTrue(passedSignals.size() == 1);
-            auto sig = passedSignals.front(); passedSignals.pop(); Assert::IsTrue(sig == PBF1_A);
-            // loco passed PBF1_A, it should be green now (track is free, turnout is set correctly, loco left the block)
-            // PBF1a_A should be red as turnout is set correctly but track is not empty
-            // PBF1_B should be green as the block behind is free
-            Assert::IsTrue(PBF1_A->shows(winston::Signal::Aspect::Go));
-            Assert::IsTrue(PBF1a_A->shows(winston::Signal::Aspect::Halt));
-            Assert::IsTrue(PBF1_B->shows(winston::Signal::Aspect::Go));
-            Assert::IsTrue(B1_A->shows(winston::Signal::Aspect::Go));
 
-            // toogle turnout 2 and 3 so B1 now enters PBF1. B1_a now should show red as it leads to the occupied section
-            Turnout2->finalizeChangeTo(winston::Turnout::Direction::A_C);
-            Turnout3->finalizeChangeTo(winston::Turnout::Direction::A_C);
-            signalTower->setSignalsFor(*Turnout2);
-            for (int i = 0; i < 10; ++i)
-                signalTower->loop();
-            Assert::IsTrue(B1_A->shows(winston::Signal::Aspect::Halt));
+            auto pos = winston::Position(PBF1, winston::Track::Connection::A, PBF1->length() / 2);
+            loco->railOnto(pos);
+            Assert::IsTrue(loco->isNextSignal(PBF1_A));
+            Assert::IsTrue(loco->isNextSignal(PBF1_B));
 
-            // toogle turnout 2 and 3 so PBF1 now leads to PBF1a again. B1_a now should show green again as it leads to the occupied section
-            Turnout2->finalizeChangeTo(winston::Turnout::Direction::A_B);
-            Turnout3->finalizeChangeTo(winston::Turnout::Direction::A_B);
-            signalTower->setSignalsFor(*Turnout2);
-            for (int i = 0; i < 10; ++i)
-                signalTower->loop();
-            Assert::IsTrue(B1_A->shows(winston::Signal::Aspect::Go));
-
-            winston::hal::delay(distanceT1_PBF1a);
-            injectLoco(PBF1a->segment(), loco, true);
-            injectLoco(PBF1->segment(), loco, false);
-            detectorLoops();
-            loco->update();
-            Assert::IsTrue(loco->position().trackIndex() == PBF1a->index);
-            Assert::IsTrue(passedSignals.size() == 2);
-            sig = passedSignals.front(); passedSignals.pop(); Assert::IsTrue(sig == PBF1_B);
-            sig = passedSignals.front(); passedSignals.pop(); Assert::IsTrue(sig == PBF1a_A);
-            // loco passed PBF1_B and PBF1a_A
-            // PBF1a_A should be green as turnout is set correctly and track empty
-            // PBF1_B should be red as the track is occupied by loco
-            Assert::IsTrue(PBF1_A->shows(winston::Signal::Aspect::Go));
-            Assert::IsTrue(PBF1a_A->shows(winston::Signal::Aspect::Go));
-            Assert::IsTrue(PBF1_B->shows(winston::Signal::Aspect::Halt));
-
-            // toggle Turnout 2 away from PBF1a, so it should be green again
-            Turnout2->finalizeChangeTo(winston::Turnout::Direction::A_C);
-            Turnout3->finalizeChangeTo(winston::Turnout::Direction::A_C);
-            signalTower->setSignalsFor(*Turnout2);
-            for (int i = 0; i < 10; ++i)
-                signalTower->loop();
-            Assert::IsTrue(PBF1_B->shows(winston::Signal::Aspect::Go));
-            Assert::IsTrue(B1_A->shows(winston::Signal::Aspect::Go));
-        }
-
-        TEST_METHOD(LocoDisappearCompletely)
-        {
-        }
-
-        TEST_METHOD(LocoStopBeforeHaltSignal)
-        {
+            pos = winston::Position(PBF1, winston::Track::Connection::A, 2);
+            loco->railOnto(pos);
+            Assert::IsTrue(loco->isNextSignal(B7_A));
+            Assert::IsTrue(loco->isNextSignal(PBF1_B));
         }
     };
 }

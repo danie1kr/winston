@@ -199,10 +199,15 @@ namespace winston
 
 	const bool NextSignals::contains(const Signal::Const signal) const
 	{
-		return this->nextSignals[index(true, Signal::Pass::Facing)]->signal == signal
-			|| this->nextSignals[index(false, Signal::Pass::Facing)]->signal == signal
-			|| this->nextSignals[index(false, Signal::Pass::Backside)]->signal == signal
-			|| this->nextSignals[index(false, Signal::Pass::Backside)]->signal == signal;
+		if (this->nextSignals[index(true, Signal::Pass::Facing)] && this->nextSignals[index(true, Signal::Pass::Facing)]->signal == signal)
+			return true;
+		if (this->nextSignals[index(false, Signal::Pass::Facing)] && this->nextSignals[index(false, Signal::Pass::Facing)]->signal == signal)
+			return true;
+		if (this->nextSignals[index(true, Signal::Pass::Backside)] && this->nextSignals[index(true, Signal::Pass::Backside)]->signal == signal)
+			return true;
+		if (this->nextSignals[index(false, Signal::Pass::Backside)] && this->nextSignals[index(false, Signal::Pass::Backside)]->signal == signal)
+			return true;
+		return false;
 	}
 		
 	size_t constexpr NextSignals::index(const bool forward, const Signal::Pass pass)

@@ -168,6 +168,7 @@ namespace winstontests
             auto PBF1a = railway->track(Y2024RailwayTracks::PBF1a);
             auto Turnout1 = std::dynamic_pointer_cast<winston::Turnout>(railway->track(Y2024RailwayTracks::Turnout1));
             auto Turnout2 = std::dynamic_pointer_cast<winston::Turnout>(railway->track(Y2024RailwayTracks::Turnout2));
+            auto Turnout3 = std::dynamic_pointer_cast<winston::Turnout>(railway->track(Y2024RailwayTracks::Turnout3));
             auto B1 = railway->track(Y2024RailwayTracks::B1);
             auto B7 = railway->track(Y2024RailwayTracks::B7);
             auto PBF1 = railway->track(Y2024RailwayTracks::PBF1);
@@ -180,7 +181,7 @@ namespace winstontests
             auto PBF1_B = PBF1->signalGuarding(winston::Track::Connection::B);
             auto PBF1a_A = PBF1a->signalGuarding(winston::Track::Connection::A);
 
-            Turnout1->finalizeChangeTo(winston::Turnout::Direction::A_B);
+            Turnout1->finalizeChangeTo(winston::Turnout::Direction::A_C);
             Turnout2->finalizeChangeTo(winston::Turnout::Direction::A_B);
 
             /*

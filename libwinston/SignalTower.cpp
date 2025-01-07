@@ -362,7 +362,7 @@ Pre-Calculate signals for turnout
 
 			// if pass == facing, check leaving connection
 			connection = onto->otherConnection(connection);
-			if (pass == Signal::Pass::Backside)
+			if (pass == Signal::Pass::Facing)
 			{
 				signal = onto->signalGuarding(connection);
 				if (signal)
@@ -377,7 +377,7 @@ Pre-Calculate signals for turnout
 		return false;
 	}
 	
-	const NextSignals SignalTower::nextSignals(const Position position, const Signal::Pass pass)
+	NextSignal::Const SignalTower::nextSignal(const Position position, const Signal::Pass pass)
 	{
 		NextSignals signals;
 		Track::Const current = position.track();
@@ -387,22 +387,16 @@ Pre-Calculate signals for turnout
 		{
 			// signal on the current track
 			const auto signalDistanceFromReference = current->length() - signal->distance();
-			if (signalDistanceFromReference <= position.distance())
-			{
-				auto next = NextSignal::make(signal, position.distance() - signalDistanceFromReference, pass);
-				signals.put(next, true, pass);
-			}
+			if (signalDistanceFromReference >= position.distance())
+				return NextSignal::make(signal, position.distance() - signalDistanceFromReference, pass);
 		}
-		else
+		//else
 		{
 			// signal on the following track
 			Distance distance = current->length() - position.distance();
 			if (SignalTower::findNextSignal(current, connection, distance, pass, signal))
-			{
-				auto next = NextSignal::make(signal, distance, pass);
-				signals.put(next, false, pass);
-			}
+				return NextSignal::make(signal, distance, pass);
 		}
-		return signals;
+		return nullptr;
 	}
 }

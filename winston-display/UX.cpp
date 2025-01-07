@@ -102,7 +102,7 @@ void uxUpdateRailwayLayout(winston::RailwayMicroLayout& rml, ValueCallbackUX<std
         for (const auto& connection : turnout.connections)
         {
             auto line = lv_line_create(lvglScreenRailway);
-            lv_line_set_points(line, (lv_point_precise_t*)&connection.p.front(), connection.p.size());
+            lv_line_set_points(line, (lv_point_precise_t*)&connection.p.front(), (uint32_t)connection.p.size());
             lv_obj_add_style(line, &lvglStyleTurnout, 0);
             lv_obj_add_flag(line, LV_OBJ_FLAG_HIDDEN);
 

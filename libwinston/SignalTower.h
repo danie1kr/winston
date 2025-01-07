@@ -44,7 +44,7 @@ namespace winston
 		static Signal::Shared nextSignal(Track::Const& track, const bool guarding, Track::Connection& leaving, const bool main, const bool includingFirst);
 
 		static const bool findNextSignal(Track::Const track, Track::Connection entering, Distance& traveled, const Signal::Pass pass, Signal::Shared &signal);
-		static const NextSignals nextSignals(const Position position, const Signal::Pass pass);
+		static NextSignal::Const nextSignal(const Position position, const Signal::Pass pass);
 
 	private:
 		const LocomotiveShed& locomotiveShed;

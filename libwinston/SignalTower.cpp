@@ -116,86 +116,10 @@ namespace winston
 			}
 		}
 #endif
-		/*
-		// align signal with what is set on the other block entry (if there is a loco, take over it's occupied authority)
-		{
-			if (signal)
-			{
-				// 
-				auto otherBlockSignal = this->nextSignal(signalCurrent, true, signalConnection, true, false);
-				if (auto otherBlockSignal = this->nextSignal(signalCurrent, true, signalConnection, true, false))
-				{
-					signal->grabAuthorities(otherBlockSignal);
-					if (otherBlockSignal->shows(Signal::Aspect::Halt))
-						signal->aspect(Signal::Aspect::Halt, Signal::Authority::Occupancy);
-				}
-			}
-		}
-		*/
 	}
 
 	void SignalTower::setSignalsFor(Track& track)
 	{
-		/* wrong :(
-		if (track.type() == Track::Type::Turnout)
-		{
-			Signal::Shared signalA, signalB, signalC;
-			Track::Const trackA = track.const_from_this(), trackB = track.const_from_this(), trackC = track.const_from_this();
-			Track::Connection connectionA = Track::Connection::A, connectionB = Track::Connection::B, connectionC = Track::Connection::C;
-			auto resultA = this->findSignalsFor(trackA, connectionA, signalA);
-			auto resultB = this->findSignalsFor(trackB, connectionB, signalB);
-			auto resultC = this->findSignalsFor(trackC, connectionC, signalC);
-			
-			if(signalB && signalC)
-				signalB->swapAuthorities(signalC);
-			else
-			{
-				if (signalB)
-					signalB->clearAuthorities();
-				if (signalC)
-					signalC->clearAuthorities();
-			}
-			/*
-			this->setSignalsFor(resultA, trackA, connectionA, signalA);
-			this->setSignalsFor(resultB, trackB, connectionB, signalB);
-			this->setSignalsFor(resultC, trackC, connectionC, signalC);
-		}
-		else if (track.type() == Track::Type::DoubleSlipTurnout)
-		{
-			Signal::Shared signalA, signalB, signalC, signalD;
-			Track::Const trackA = track.const_from_this(), trackB = track.const_from_this(), trackC = track.const_from_this(), trackD = track.const_from_this();
-			Track::Connection connectionA = Track::Connection::A, connectionB = Track::Connection::B, connectionC = Track::Connection::C, connectionD = Track::Connection::D;
-			auto resultA = this->findSignalsFor(trackA, connectionA, signalA);
-			auto resultB = this->findSignalsFor(trackB, connectionB, signalB);
-			auto resultC = this->findSignalsFor(trackC, connectionC, signalC);
-			auto resultD = this->findSignalsFor(trackD, connectionD, signalD);
-
-			if (signalA && signalD)
-				signalA->swapAuthorities(signalD);
-			else
-			{
-				if (signalA)
-					signalA->clearAuthorities();
-				if (signalD)
-					signalD->clearAuthorities();
-			}
-			if (signalB && signalC)
-				signalB->swapAuthorities(signalC);
-			else
-			{
-				if (signalB)
-					signalB->clearAuthorities();
-				if (signalC)
-					signalC->clearAuthorities();
-			}
-			/*
-			this->setSignalsFor(resultA, trackA, connectionA, signalA);
-			this->setSignalsFor(resultB, trackB, connectionB, signalB);
-			this->setSignalsFor(resultC, trackC, connectionC, signalC);
-			this->setSignalsFor(resultD, trackD, connectionD, signalD);
-		}
-		//else*/
-
 #ifdef WINSTON_DETECTOR_SIGNALING
 		// update loco next signals once
 		this->order(Command::make([this](const TimePoint& created) -> const winston::State {
@@ -262,11 +186,6 @@ namespace winston
 		return nullptr;
 	}
 
-	Signal::Shared SignalTower::otherBlockSignal(const Track::Const &track, const Track::Connection &connection)
-	{
-		return nullptr;
-	}
-
 	void SignalTower::setSignalsForLocoPassing(Track::Const track, const Track::Connection connection, const Signal::Pass pass) const
 	{
 		/*
@@ -312,35 +231,6 @@ Pre-Calculate signals for turnout
 			if (auto signalOfEnteredBlock = this->nextSignal(signalOfEnteredTrack, true, signalOfEnteredBlockConnection, true, false))
 				this->setSignalOn(*signalOfEnteredTrack, signalOfEnteredBlockConnection, Signal::Aspect::Halt, Signal::Aspect::Off);
 		}
-
-		/*
-		if (pass == Signal::Pass::Facing)
-		{
-			// we entered a protected track:
-			// - set this signal to red, set pre-signal to red if exists
-			// - set other signal into this track to red, update its pre-signal
-			// - set signal of the left track to green, update its pre-signal
-
-			this->setSignalOn(*track, connection, Signal::Aspect::Halt, Signal::Aspect::Off);
-
-			auto otherBlockSignalTrack = track;
-			auto otherBlockSignalConnection = connection;
-			if (auto otherBlockSignal = this->otherBlockSignal(otherBlockSignalTrack, otherBlockSignalConnection))
-				this->setSignalOn(*otherBlockSignalTrack, otherBlockSignalConnection, Signal::Aspect::Halt, Signal::Aspect::Off);
-
-			auto thisSignal = track->signalGuarding(connection);
-
-			auto signalOfLeftBlockTrack = track;
-			auto signalOfLeftBlockConnection = connection;
-			if (auto signalOfLeftBlock = this->nextSignal(signalOfLeftBlockTrack, false, signalOfLeftBlockConnection, true, false))
-				this->setSignalOn(*signalOfLeftBlockTrack, signalOfLeftBlockConnection, Signal::Aspect::Go, Signal::Aspect::Off);
-
-		}
-		else
-		{
-
-		}
-		*/
 	}
 
 	const bool SignalTower::findNextSignal(Track::Const track, const Track::Connection leaving, Distance& traveled, const Signal::Pass pass, Signal::Shared& signal)
@@ -412,7 +302,7 @@ Pre-Calculate signals for turnout
 		{
 			// signal on the current track
 			const auto signalDistanceFromReference = current->length() - signal->distance();
-			if (signalDistanceFromReference >= position.distance())
+			if (signalDistanceFromReference >= (unsigned)position.distance())
 				return NextSignal::make(signal, position.distance() - signalDistanceFromReference, pass);
 		}
 		//else

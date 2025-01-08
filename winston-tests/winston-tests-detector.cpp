@@ -96,6 +96,16 @@ namespace winstontests
             signalController.attach<winston::SignalAlwaysHalt>(railway->track(Y2024Railway::Tracks::LS1), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
             signalController.attach<winston::SignalAlwaysHalt>(railway->track(Y2024Railway::Tracks::LS2), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
             signalController.attach<winston::SignalAlwaysHalt>(railway->track(Y2024Railway::Tracks::PBF1a), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+        
+            railway->eachTrack([this](const Y2024Railway::Tracks tracksId, winston::Track::Shared track) {
+                track->eachConnection([this, track](winston::Track& unused, const winston::Track::Connection connection) {
+                    if (connection != winston::Track::Connection::DeadEnd)
+                    {
+                        winston::SignalTower::setupNextSignal(track, connection, winston::Signal::Pass::Facing);
+                        winston::SignalTower::setupNextSignal(track, connection, winston::Signal::Pass::Backside);
+                    }
+                    });
+                });
         };
 
         static winston::Railway::Callbacks railwayCallbacks()
@@ -331,18 +341,20 @@ namespace winstontests
             Assert::IsTrue(PBF1_B->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(B1_A->shows(winston::Signal::Aspect::Go));
 
-            // toogle turnout 2 and 3 so B1 now enters PBF1. B1_a now should show red as it leads to the occupied section
+            // toggle turnout 2 and 3 so B1 now enters PBF1. B1_a now should show red as it leads to the occupied section
             Turnout2->finalizeChangeTo(winston::Turnout::Direction::A_C);
             Turnout3->finalizeChangeTo(winston::Turnout::Direction::A_C);
             signalTower->setSignalsFor(*Turnout2);
+            signalTower->setSignalsFor(*Turnout3);
             for (int i = 0; i < 10; ++i)
                 signalTower->loop();
             Assert::IsTrue(B1_A->shows(winston::Signal::Aspect::Halt));
 
-            // toogle turnout 2 and 3 so PBF1 now leads to PBF1a again. B1_a now should show green again as it leads to the occupied section
+            // toggle turnout 2 and 3 so PBF1 now leads to PBF1a again. B1_a now should show green again as it leads to the occupied section
             Turnout2->finalizeChangeTo(winston::Turnout::Direction::A_B);
             Turnout3->finalizeChangeTo(winston::Turnout::Direction::A_B);
             signalTower->setSignalsFor(*Turnout2);
+            signalTower->setSignalsFor(*Turnout3);
             for (int i = 0; i < 10; ++i)
                 signalTower->loop();
             Assert::IsTrue(B1_A->shows(winston::Signal::Aspect::Go));

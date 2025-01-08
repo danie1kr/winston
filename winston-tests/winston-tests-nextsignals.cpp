@@ -92,6 +92,16 @@ namespace winstontests
             signalController.attach<winston::SignalAlwaysHalt>(railway->track(Y2024Railway::Tracks::LS1), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
             signalController.attach<winston::SignalAlwaysHalt>(railway->track(Y2024Railway::Tracks::LS2), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
             signalController.attach<winston::SignalAlwaysHalt>(railway->track(Y2024Railway::Tracks::PBF1a), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
+
+            railway->eachTrack([this](const Y2024Railway::Tracks tracksId, winston::Track::Shared track) {
+                track->eachConnection([this, track](winston::Track& unused, const winston::Track::Connection connection) {
+					if (connection != winston::Track::Connection::DeadEnd)
+					{
+                        winston::SignalTower::setupNextSignal(track, connection, winston::Signal::Pass::Facing);
+                        winston::SignalTower::setupNextSignal(track, connection, winston::Signal::Pass::Backside);
+					}
+                    });
+                });
         };
 
         static winston::Railway::Callbacks railwayCallbacks()
@@ -144,6 +154,64 @@ namespace winstontests
         }
 
     public:
+        TEST_METHOD(SetupNextSignals)
+        {
+            TestSignalController testSignalController;
+            auto signalTower = winston::SignalTower::make(locoShed);
+            railway = Y2024Railway::make(railwayCallbacksWithSignals(signalTower));
+            Assert::IsTrue(railway->init() == winston::Result::OK);
+            createSignals(testSignalController, railway, [](winston::Track& track, winston::Track::Connection connection, const winston::Signal::Aspects aspects) -> const winston::State
+                {
+                    return winston::State::Finished;
+                });
+
+            auto PBF1a = railway->track(Y2024RailwayTracks::PBF1a);
+            auto Turnout1 = railway->track(Y2024RailwayTracks::Turnout1);
+            auto Turnout2 = railway->track(Y2024RailwayTracks::Turnout2);
+            auto Turnout3 = railway->track(Y2024RailwayTracks::Turnout3);
+            auto B1 = railway->track(Y2024RailwayTracks::B1);
+            auto B7 = railway->track(Y2024RailwayTracks::B7);
+            auto PBF1 = railway->track(Y2024RailwayTracks::PBF1);
+
+            auto B1_A = B1->signalGuarding(winston::Track::Connection::A);
+            auto B1_B = B1->signalGuarding(winston::Track::Connection::B);
+            auto B7_A = B7->signalGuarding(winston::Track::Connection::A);
+            auto B7_B = B7->signalGuarding(winston::Track::Connection::B);
+            auto PBF1_A = PBF1->signalGuarding(winston::Track::Connection::A);
+            auto PBF1_B = PBF1->signalGuarding(winston::Track::Connection::B);
+            auto PBF1a_A = PBF1a->signalGuarding(winston::Track::Connection::A);
+
+            /*
+            ==== A 5U |8 ==== B7 ==== 8| 5U B ==== A ==== Turnout1 ==== C ==== A |8 5U ==== PBF1 ==== 8| 5U B ==== A ==== Turnout2 ==== B ==== A |8 5U ==== PBF1a ==== 8| 5U Deadend
+            */
+            auto PBF1_Provider_A_Facing = PBF1->getNextSignalProvider(winston::Track::Connection::A, winston::Signal::Pass::Facing);
+            auto PBF1_Provider_A_Backside = PBF1->getNextSignalProvider(winston::Track::Connection::A, winston::Signal::Pass::Backside);
+            auto PBF1_Provider_B_Facing = PBF1->getNextSignalProvider(winston::Track::Connection::B, winston::Signal::Pass::Facing);
+            auto PBF1_Provider_B_Backside = PBF1->getNextSignalProvider(winston::Track::Connection::B, winston::Signal::Pass::Backside);
+
+            Assert::IsTrue(PBF1_Provider_A_Facing->nextTurnout->turnout == Turnout1);
+            Assert::IsTrue(PBF1_Provider_A_Facing->distance == 0);
+            Assert::IsTrue(PBF1_Provider_B_Facing->nextTurnout->turnout == Turnout2);
+            Assert::IsTrue(PBF1_Provider_B_Facing->distance == 0);
+            Assert::IsTrue(PBF1_Provider_A_Backside->nextTurnout->turnout == Turnout1);
+            Assert::IsTrue(PBF1_Provider_A_Backside->distance == 0);
+            Assert::IsTrue(PBF1_Provider_B_Backside->nextTurnout->turnout == Turnout2);
+            Assert::IsTrue(PBF1_Provider_B_Backside->distance == 0);
+
+            auto Turnout1_Provider_A_Facing = Turnout1->getNextSignalProvider(winston::Track::Connection::A, winston::Signal::Pass::Facing);
+            auto Turnout1_Provider_A_Backside = Turnout1->getNextSignalProvider(winston::Track::Connection::A, winston::Signal::Pass::Backside);
+            auto Turnout1_Provider_C_Facing = Turnout1->getNextSignalProvider(winston::Track::Connection::C, winston::Signal::Pass::Facing);
+            auto Turnout1_Provider_C_Backside = Turnout1->getNextSignalProvider(winston::Track::Connection::C, winston::Signal::Pass::Backside);
+
+            Assert::IsTrue(Turnout1_Provider_A_Facing->signal == B7_A);
+            Assert::IsTrue(Turnout1_Provider_A_Facing->distance == B7->length() - B7_A->distance());
+            Assert::IsTrue(Turnout1_Provider_A_Backside->signal == B7_B);
+            Assert::IsTrue(Turnout1_Provider_A_Backside->distance == B7_B->distance());
+            Assert::IsTrue(Turnout1_Provider_C_Facing->signal == PBF1_B);
+            Assert::IsTrue(Turnout1_Provider_C_Facing->distance == PBF1->length() - PBF1_B->distance());
+            Assert::IsTrue(Turnout1_Provider_C_Backside->signal == PBF1_A);
+            Assert::IsTrue(Turnout1_Provider_C_Backside->distance == PBF1_A->distance());
+        }
         TEST_METHOD(LocoNextSignals)
         {
             TestSignalController testSignalController;

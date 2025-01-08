@@ -29,7 +29,7 @@ namespace winston
 		void initSignalsForTurnouts(std::set<Turnout::Shared> turnouts, std::set<DoubleSlipTurnout::Shared> doubleSlipTurnouts);
 		const Track::TraversalResult findSignalsFor(Track::Const& current, Track::Connection& connection, Signal::Shared& signal) const;
 		void setSignalsFor(const Track::TraversalResult traversalResult, Track::Const current, Track::Connection connection, Signal::Shared signal) const;
-		void setSignalsFor(Track& turnout, const Track::Connection connectionStartFrom);
+		void setSignalsFor(Track& turnout, const Track::Connection connectionStartFrom, const bool requireLocoNextSignalUpdate = true);
 		void setSignalsFor(Track& turnout);
 
 		void setSignalsForLocoPassing(Track::Const track, const Track::Connection connection, const Signal::Pass pass) const;
@@ -43,8 +43,10 @@ namespace winston
 
 		static Signal::Shared nextSignal(Track::Const& track, const bool guarding, Track::Connection& leaving, const bool main, const bool includingFirst);
 
-		static const bool findNextSignal(Track::Const track, Track::Connection entering, Distance& traveled, const Signal::Pass pass, Signal::Shared &signal);
+		static const bool findNextSignal(Track::Const track, const Track::Connection entering, Distance& traveled, const Signal::Pass pass, Signal::Shared &signal);
 		static NextSignal::Const nextSignal(const Position position, const Signal::Pass pass);
+
+		static const bool setupNextSignal(Track::Shared track, const Track::Connection leaving, const Signal::Pass pass);
 
 	private:
 		const LocomotiveShed& locomotiveShed;

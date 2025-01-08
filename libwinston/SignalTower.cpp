@@ -92,22 +92,28 @@ namespace winston
 		this->setSignalOn(*current, connection, aspect, preAspect);
 	}
 
-	void SignalTower::setSignalsFor(Track& turnout, const Track::Connection connectionStartFrom)
+	void SignalTower::setSignalsFor(Track& turnout, const Track::Connection connectionStartFrom, const bool requireLocoNextSignalUpdate)
 	{
 		Track::Const signalCurrent = turnout.const_from_this();
 		auto signalConnection = connectionStartFrom;
 		Signal::Shared signal;
 		auto result = findSignalsFor(signalCurrent, signalConnection, signal);
 		this->setSignalsFor(result, signalCurrent, signalConnection, signal);
-		
+
 #ifdef WINSTON_DETECTOR_SIGNALING
-		// is there a loco behind this signal?
-		// loco behind signal == loco.nextSignals.contains(signal)
-		for (auto loco : this->locomotiveShed)
+		if (signal)
 		{
-			loco->updateNextSignals();
-			if (loco->isNextSignal(signal))
-				this->setSignalsForLocoPassing(signalCurrent, signalConnection, Signal::Pass::Backside);
+			// is there a loco behind this signal?
+			// loco behind signal == loco.nextSignals.contains(signal)
+			for (auto loco : this->locomotiveShed)
+			{
+				if (requireLocoNextSignalUpdate)
+					loco->updateNextSignals();
+				if (loco->isNextSignal(signal))
+					this->setSignalOn(*signalCurrent, signalConnection, Signal::Aspect::Halt, Signal::Aspect::Off, Signal::Authority::Occupancy);
+				else
+					signal->clearAuthorities();
+			}
 		}
 #endif
 		/*
@@ -189,13 +195,21 @@ namespace winston
 			this->setSignalsFor(resultD, trackD, connectionD, signalD);
 		}
 		//else*/
-			track.eachConnection([this](Track& track, const Track::Connection connection) {
-				this->order(Command::make([this, &track, connection](const TimePoint& created) -> const winston::State {
 
-					this->setSignalsFor(track, connection);
-					return State::Finished;
-					}, __PRETTY_FUNCTION__));
-				});	
+#ifdef WINSTON_DETECTOR_SIGNALING
+		// update loco next signals once
+		this->order(Command::make([this](const TimePoint& created) -> const winston::State {
+			for (auto loco : this->locomotiveShed)
+				loco->updateNextSignals();
+			return State::Finished;
+			}, __PRETTY_FUNCTION__));
+#endif
+		track.eachConnection([this](Track& track, const Track::Connection connection) {
+			this->order(Command::make([this, &track, connection](const TimePoint& created) -> const winston::State {
+				this->setSignalsFor(track, connection, false);
+				return State::Finished;
+				}, __PRETTY_FUNCTION__));
+			});	
 	}
 
 	Signal::Shared SignalTower::nextSignal(Track::Const& track, const bool guarding, Track::Connection& leaving, const bool main, const bool includingFirst)
@@ -329,8 +343,18 @@ Pre-Calculate signals for turnout
 		*/
 	}
 
-	const bool SignalTower::findNextSignal(Track::Const track, Track::Connection leaving, Distance& traveled, const Signal::Pass pass, Signal::Shared& signal)
+	const bool SignalTower::findNextSignal(Track::Const track, const Track::Connection leaving, Distance& traveled, const Signal::Pass pass, Signal::Shared& signal)
 	{
+		if (auto nextSignal = track->nextSignal(leaving, pass))
+		{
+			traveled += nextSignal->distance;
+			signal = nextSignal->signal;
+
+			return true;
+		}
+
+		return false;
+		/*
 		auto current = track;
 		auto connection = leaving;
 		auto onto = current;
@@ -375,6 +399,7 @@ Pre-Calculate signals for turnout
 			current = onto;
 		}
 		return false;
+		*/
 	}
 	
 	NextSignal::Const SignalTower::nextSignal(const Position position, const Signal::Pass pass)
@@ -398,5 +423,67 @@ Pre-Calculate signals for turnout
 				return NextSignal::make(signal, distance, pass);
 		}
 		return nullptr;
+	}
+
+	const bool SignalTower::setupNextSignal(Track::Shared track, const Track::Connection leaving, const Signal::Pass pass)
+	{
+		Distance distance = 0;
+
+		Track::Const current = track;
+		auto connection = leaving;
+		winston::Track::Const onto = current;
+		std::unordered_set<Track::Const> visited;
+		bool successful = true;
+		while (true)
+		{
+			visited.insert(current);
+			// step onto next track
+			successful = current->traverse(connection, onto, true);
+
+			// should always be true!
+			if (!successful)
+				return false;
+
+			// we looped
+			if (visited.find(onto) != visited.end())
+				return false;
+
+			connection = onto->whereConnects(current);
+			if (onto->type() == Track::Type::Turnout || onto->type() == Track::Type::DoubleSlipTurnout)
+			{
+				auto nextTurnout = Track::NextSignalProvider::NextTurnout::make(onto, connection);
+				auto provider = Track::NextSignalProvider::make(distance, nextTurnout);
+				track->setupNextSignal(leaving, pass, provider);
+				return true;
+			}
+
+			// if pass == backside, check entering connection
+			if (pass == Signal::Pass::Backside)
+			{
+				if (auto signal = onto->signalGuarding(connection))
+				{
+					distance += signal->distance();
+					auto provider = Track::NextSignalProvider::make(distance, signal);
+					track->setupNextSignal(leaving, pass, provider);
+					return true;
+				}
+			}
+
+			// if pass == facing, check leaving connection
+			connection = onto->otherConnection(connection);
+			if (pass == Signal::Pass::Facing)
+			{
+				if (auto signal = onto->signalGuarding(connection))
+				{
+					distance += onto->length() - signal->distance();
+					auto provider = Track::NextSignalProvider::make(distance, signal);
+					track->setupNextSignal(leaving, pass, provider);
+					return true;
+				}
+			}
+			distance += onto->length();
+			current = onto;
+		}
+		return false;
 	}
 }

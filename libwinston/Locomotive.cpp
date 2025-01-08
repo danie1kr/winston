@@ -214,14 +214,16 @@ namespace winston
 	void Locomotive::updateNextSignals()
 	{
 		{
-			// forwards(
+			// forwards
 			this->details.nextSignals.put(SignalTower::nextSignal(this->position(), Signal::Pass::Facing), true, Signal::Pass::Facing);
+			this->details.nextSignals.put(SignalTower::nextSignal(this->position(), Signal::Pass::Backside), true, Signal::Pass::Backside);
 		}
 		{
 			// backwards
 			auto pos = this->position();
 			pos.useOtherRef();
 			this->details.nextSignals.put(SignalTower::nextSignal(pos, Signal::Pass::Facing), false, Signal::Pass::Facing);
+			this->details.nextSignals.put(SignalTower::nextSignal(pos, Signal::Pass::Backside), false, Signal::Pass::Backside);
 		}
 		/*
 		{

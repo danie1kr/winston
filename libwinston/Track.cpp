@@ -6,6 +6,24 @@
 
 namespace winston
 {
+	Track::NextSignalProvider::NextSignalProvider(const Distance distance, const Signal::Shared signal)
+		: Shared_Ptr<NextSignalProvider>(), distance(distance), signal(signal), nextTurnout()
+	{
+
+	}
+
+	Track::NextSignalProvider::NextSignalProvider(const Distance distance, const NextTurnout::Const nextTurnout)
+		: Shared_Ptr<NextSignalProvider>(), distance(distance), signal(), nextTurnout(nextTurnout)
+	{
+
+	}
+
+	Track::NextSignalProvider::NextTurnout::NextTurnout(const Track::Const turnout, const Track::Connection entered)
+	: Shared_Ptr<NextTurnout>(), turnout(turnout), entered(entered)
+	{
+	}
+
+
 	Track::Track(const std::string name, const Id index, const Length trackLength) 
 		: Shared_Ptr<Track>()
 		, index(index)
@@ -73,7 +91,7 @@ namespace winston
 		return nullptr;
 	}
 
-	Result Track::validateSingle(Track::Shared track)
+	const Result Track::validateSingle(Track::Shared track) const
 	{
 		if(!track)
 			return Result::ValidationFailed;
@@ -111,7 +129,7 @@ namespace winston
 	{
 		this->_segment = segment;
 	}
-	const bool Track::traverseToNextSegment(const Track::Connection connection, Track::Const& onto, bool leavingOnConnection) const
+	const bool Track::traverseToNextSegment(const Track::Connection connection, Track::Const& onto, const bool leavingOnConnection) const
 	{
 		auto con = leavingOnConnection ? connection : this->otherConnection(connection);
 
@@ -127,6 +145,50 @@ namespace winston
 		}
 
 		return false;
+	}
+
+	const NextSignal::Shared Track::nextSignal(const Connection leaving, const Signal::Pass pass) const
+	{
+		auto current = this->const_from_this();
+		auto connection = leaving;
+		while (true)
+		{
+			if (const auto provider = current->getNextSignalProvider(connection, pass))
+			{
+				if (const auto signal = provider->signal)
+				{
+					// we found a next signal, so return this
+					return NextSignal::make(signal, provider->distance, pass);
+				}
+				else if (const auto nextTurnout = provider->nextTurnout)
+				{
+					// we found a turnout, so we need to see where it leads to and continue there
+					connection = current->whereConnects(nextTurnout->turnout);
+					current = nextTurnout->turnout;
+				}
+				else
+				{
+					return nullptr;
+				}
+			}
+			else
+			{
+				return nullptr;
+			}
+		}
+
+		/*
+		if (const auto signal = std::get_if<Signal::Shared>(&provider->signalOrTurnout))
+		{
+			return *signal;
+		}
+		else if (const auto track = std::get_if<Track::Const>(&provider->signalOrTurnout))
+		{
+			return std::get<Signal::Shared>(provider->signalOrTurnout);
+		}
+		else
+		*/
+		return nullptr;
 	}
 
 	Bumper::Bumper(const std::string name, const Id index, const Length tracklength)
@@ -146,7 +208,7 @@ namespace winston
 		return nullptr;
 	}
 
-	const bool Bumper::traverse(const Connection connection, Track::Const& onto, bool leavingOnConnection) const
+	const bool Bumper::traverse(const Connection connection, Track::Const& onto, const bool leavingOnConnection) const
 	{
 		if(this->has(connection) && 
 			((leavingOnConnection && connection == Connection::A) ||
@@ -257,6 +319,37 @@ namespace winston
 		return signals[facing == Connection::A ? 1 : 0];
 	}
 
+	const size_t Bumper::nextSignalsIndex(const Connection connection, const Signal::Pass pass) const
+	{
+		switch (connection)
+		{
+		case Connection::A:
+			return pass == Signal::Pass::Facing ? 0 : 1;
+		case Connection::DeadEnd:
+			return 2;
+		default:
+			return 0;
+		}
+	}
+
+	void Bumper::setupNextSignal(const Connection connection, const Signal::Pass pass, const NextSignalProvider::Shared nextSignalProvider)
+	{
+		const auto idx = this->nextSignalsIndex(connection, pass);
+		if (idx < this->nextSignals.size())
+			this->nextSignals[idx] = nextSignalProvider;
+	}
+
+#ifdef WINSTON_TEST
+	Track::NextSignalProvider::Shared Bumper::getNextSignalProvider(const Connection connection, const Signal::Pass pass) const
+	{
+		const auto idx = this->nextSignalsIndex(connection, pass);
+		if (idx < this->nextSignals.size())
+			return this->nextSignals[idx];
+
+		return nullptr;
+	}
+#endif
+
 	Rail::Rail(const std::string name, const Id index, const Length tracklength)
 		: Track(name, index, tracklength), Shared_Ptr<Rail>(), a(), b()
 	{
@@ -277,7 +370,7 @@ namespace winston
 		return nullptr;
 	}
 
-	const bool Rail::traverse(const Connection connection, Track::Const& onto, bool leavingOnConnection) const
+	const bool Rail::traverse(const Connection connection, Track::Const& onto, const bool leavingOnConnection) const
 	{
 		if (!this->has(connection))
 		{
@@ -399,6 +492,36 @@ namespace winston
 		onB = this->b;
 	}
 
+	const size_t Rail::nextSignalsIndex(const Connection connection, const Signal::Pass pass) const
+	{
+		switch (connection)
+		{
+		case Connection::A:
+			return pass == Signal::Pass::Facing ? 0 : 1;
+		case Connection::B:
+			return pass == Signal::Pass::Facing ? 2 : 3;
+		default:
+			return 0;
+		}
+	}
+
+	void Rail::setupNextSignal(const Connection connection, const Signal::Pass pass, const NextSignalProvider::Shared nextSignalProvider)
+	{
+		const auto idx = this->nextSignalsIndex(connection, pass);
+		if (idx < this->nextSignals.size())
+			this->nextSignals[idx] = nextSignalProvider;
+	}
+#ifdef WINSTON_TEST
+	Track::NextSignalProvider::Shared Rail::getNextSignalProvider(const Connection connection, const Signal::Pass pass) const
+	{
+		const auto idx = this->nextSignalsIndex(connection, pass);
+		if (idx < this->nextSignals.size())
+			return this->nextSignals[idx];
+
+		return nullptr;
+	}
+#endif
+
 	const std::string Turnout::DirectionToString(const Direction direction)
 	{
 		switch (direction)
@@ -444,7 +567,7 @@ namespace winston
 		return nullptr;
 	}
 
-	const bool Turnout::traverse(const Connection connection, Track::Const& onto, bool leavingOnConnection) const
+	const bool Turnout::traverse(const Connection connection, Track::Const& onto, const bool leavingOnConnection) const
 	{
 		if (!this->has(connection) || this->dir == Direction::Changing)
 		{
@@ -693,6 +816,39 @@ namespace winston
 		return this->_groups;
 	}
 #endif 
+
+	const size_t Turnout::nextSignalsIndex(const Connection connection, const Signal::Pass pass) const
+	{
+		switch (connection)
+		{
+		case Connection::A:
+			return pass == Signal::Pass::Facing ? 0 : 1;
+		case Connection::B:
+			return pass == Signal::Pass::Facing ? 2 : 3;
+		case Connection::C:
+			return pass == Signal::Pass::Facing ? 4 : 5;
+		default:
+			return 0;
+		}
+	}
+
+	void Turnout::setupNextSignal(const Connection connection, const Signal::Pass pass, const NextSignalProvider::Shared nextSignalProvider)
+	{
+		const auto idx = this->nextSignalsIndex(connection, pass);
+		if (idx < this->nextSignals.size())
+			this->nextSignals[idx] = nextSignalProvider;
+	}
+#ifdef WINSTON_TEST
+	Track::NextSignalProvider::Shared Turnout::getNextSignalProvider(const Connection connection, const Signal::Pass pass) const
+	{
+		const auto idx = this->nextSignalsIndex(connection, pass);
+		if (idx < this->nextSignals.size())
+			return this->nextSignals[idx];
+
+		return nullptr;
+	}
+#endif
+
 	const std::string DoubleSlipTurnout::DirectionToString(const Direction direction)
 	{
 		switch (direction)
@@ -736,7 +892,7 @@ namespace winston
 		return nullptr;
 	}
 
-	const bool DoubleSlipTurnout::traverse(const Connection connection, Track::Const& onto, bool leavingOnConnection) const
+	const bool DoubleSlipTurnout::traverse(const Connection connection, Track::Const& onto, const bool leavingOnConnection) const
 	{
 		if (!this->has(connection) || this->dir == Direction::Changing)
 		{
@@ -1116,4 +1272,40 @@ namespace winston
 	{
 		return this->trackLengthCalculator ? this->trackLengthCalculator(dir) : 0;
 	}
+
+	const size_t DoubleSlipTurnout::nextSignalsIndex(const Connection connection, const Signal::Pass pass) const 
+	{
+		switch (connection)
+		{
+		case Connection::A:
+			return pass == Signal::Pass::Facing ? 0 : 1;
+		case Connection::B:
+			return pass == Signal::Pass::Facing ? 2 : 3;
+		case Connection::C:
+			return pass == Signal::Pass::Facing ? 4 : 5;
+		case Connection::D:
+			return pass == Signal::Pass::Facing ? 6 : 7;
+		default:
+			return 0;
+		}
+
+	}
+
+	void DoubleSlipTurnout::setupNextSignal(const Connection connection, const Signal::Pass pass, const NextSignalProvider::Shared nextSignalProvider)
+	{
+		const auto idx = this->nextSignalsIndex(connection, pass);
+		if (idx < this->nextSignals.size())
+			this->nextSignals[idx] = nextSignalProvider;
+	}
+#ifdef WINSTON_TEST
+	Track::NextSignalProvider::Shared DoubleSlipTurnout::getNextSignalProvider(const Connection connection, const Signal::Pass pass) const
+	{
+		const auto idx = this->nextSignalsIndex(connection, pass);
+		if (idx < this->nextSignals.size())
+			return this->nextSignals[idx];
+
+		return nullptr;
+	}
+#endif
+
 }

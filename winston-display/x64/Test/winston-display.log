@@ -1,0 +1,388 @@
+﻿  winston-hal-x64.cpp
+  Cinema.cpp
+  lv_tft_espi.cpp
+  tvgAnimation.cpp
+  tvgBezier.cpp
+  tvgCanvas.cpp
+  tvgCapi.cpp
+  tvgCompressor.cpp
+  tvgFill.cpp
+  tvgInitializer.cpp
+  tvgLoader.cpp
+  tvgMath.cpp
+  tvgPaint.cpp
+  tvgPicture.cpp
+  tvgRawLoader.cpp
+  tvgRender.cpp
+  tvgSaver.cpp
+  tvgScene.cpp
+  tvgShape.cpp
+  tvgStr.cpp
+  tvgSvgCssStyle.cpp
+  tvgSvgLoader.cpp
+  tvgSvgPath.cpp
+  tvgSvgSceneBuilder.cpp
+  tvgSvgUtil.cpp
+  tvgSwCanvas.cpp
+  tvgSwFill.cpp
+  tvgSwImage.cpp
+  tvgSwMath.cpp
+  tvgSwMemPool.cpp
+  tvgSwRenderer.cpp
+  tvgSwRaster.cpp
+  tvgSwRle.cpp
+  tvgSwShape.cpp
+  tvgSwStroke.cpp
+  tvgTaskScheduler.cpp
+  tvgXmlParser.cpp
+  vg_lite_tvg.cpp
+  UX.cpp
+  winston-display.cpp
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\widgets\table\lv_table.h(55,10): warning C4200: nonstandard extension used: zero-sized array in struct/union
+  (compiling source file 'UX.cpp')
+      D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\widgets\table\lv_table.h(55,10):
+      This member will be ignored by a defaulted constructor or copy/move assignment operator
+  
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\widgets\table\lv_table.h(55,10): warning C4200: nonstandard extension used: zero-sized array in struct/union
+  (compiling source file '../winston/winston-hal-x64.cpp')
+      D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\widgets\table\lv_table.h(55,10):
+      This member will be ignored by a defaulted constructor or copy/move assignment operator
+  
+  lv_group.c
+  lv_obj.c
+  lv_obj_class.c
+  lv_obj_draw.c
+  lv_obj_event.c
+  lv_obj_id_builtin.c
+  lv_obj_pos.c
+  lv_obj_property.c
+  lv_obj_scroll.c
+  lv_obj_style.c
+  lv_obj_style_gen.c
+  lv_obj_tree.c
+  lv_refr.c
+  lv_display.c
+  lv_draw.c
+  lv_draw_arc.c
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\core\lv_obj_style.c(757,32): warning C4244: 'initializing': conversion from 'const uint16_t' to 'const bool', possible loss of data
+  lv_draw_buf.c
+  lv_draw_image.c
+  lv_draw_label.c
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\core\lv_obj_scroll.c(94,45): warning C4244: 'return': conversion from 'uint16_t' to 'lv_scrollbar_mode_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\core\lv_obj_scroll.c(100,45): warning C4244: 'return': conversion from 'uint16_t' to 'lv_dir_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\core\lv_obj_scroll.c(106,45): warning C4244: 'return': conversion from 'uint16_t' to 'lv_scroll_snap_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\core\lv_obj_scroll.c(112,45): warning C4244: 'return': conversion from 'uint16_t' to 'lv_scroll_snap_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\display\lv_display.c(409,5): warning C4002: too many arguments for function-like macro invocation 'LV_ASSERT_MSG'
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\display\lv_display.c(410,5): warning C4002: too many arguments for function-like macro invocation 'LV_ASSERT_MSG'
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\display\lv_display.c(420,1): warning C4002: too many arguments for function-like macro invocation 'LV_ASSERT_MSG'
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\core\lv_refr.c(956,40): warning C4267: 'initializing': conversion from 'size_t' to 'uint8_t', possible loss of data
+  lv_draw_line.c
+  lv_draw_mask.c
+  lv_draw_rect.c
+  lv_draw_triangle.c
+  lv_draw_vector.c
+  lv_image_buf.c
+  lv_image_decoder.c
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\draw\lv_draw_buf.c(301,26): warning C4018: '<': signed/unsigned mismatch
+  lv_draw_buf_pxp.c
+  lv_draw_pxp.c
+  lv_draw_pxp_fill.c
+  lv_draw_pxp_img.c
+  lv_draw_pxp_layer.c
+  lv_pxp_cfg.c
+  lv_pxp_osa.c
+  lv_pxp_utils.c
+  lv_draw_buf_vglite.c
+  lv_draw_vglite.c
+  lv_draw_vglite_arc.c
+  lv_draw_vglite_border.c
+  lv_draw_vglite_fill.c
+  lv_draw_vglite_img.c
+  lv_draw_vglite_label.c
+  lv_draw_vglite_layer.c
+  lv_draw_vglite_line.c
+  lv_draw_vglite_triangle.c
+  lv_vglite_buf.c
+  lv_vglite_matrix.c
+  lv_vglite_path.c
+  lv_vglite_utils.c
+  lv_draw_dave2d.c
+  lv_draw_dave2d_arc.c
+  lv_draw_dave2d_border.c
+  lv_draw_dave2d_fill.c
+  lv_draw_dave2d_image.c
+  lv_draw_dave2d_label.c
+  lv_draw_dave2d_line.c
+  lv_draw_dave2d_mask_rectangle.c
+  lv_draw_dave2d_triangle.c
+  lv_draw_dave2d_utils.c
+  lv_draw_sdl.c
+  lv_draw_sw_blend.c
+  lv_draw_sw_blend_to_argb8888.c
+  lv_draw_sw_blend_to_rgb565.c
+  lv_draw_sw_blend_to_rgb888.c
+  lv_draw_sw.c
+  lv_draw_sw_arc.c
+  lv_draw_sw_border.c
+  lv_draw_sw_box_shadow.c
+  lv_draw_sw_fill.c
+  lv_draw_sw_gradient.c
+  lv_draw_sw_img.c
+  lv_draw_sw_letter.c
+  lv_draw_sw_line.c
+  lv_draw_sw_mask.c
+  lv_draw_sw_mask_rect.c
+  lv_draw_sw_transform.c
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\draw\sw\lv_draw_sw_box_shadow.c(651,28): warning C4244: '=': conversion from 'uint16_t' to 'lv_opa_t', possible loss of data
+  lv_draw_sw_triangle.c
+  lv_draw_sw_vector.c
+  lv_draw_buf_vg_lite.c
+  lv_draw_vg_lite.c
+  lv_draw_vg_lite_arc.c
+  lv_draw_vg_lite_border.c
+  lv_draw_vg_lite_box_shadow.c
+  lv_draw_vg_lite_fill.c
+  lv_draw_vg_lite_img.c
+  lv_draw_vg_lite_label.c
+  lv_draw_vg_lite_layer.c
+  lv_draw_vg_lite_line.c
+  lv_draw_vg_lite_mask_rect.c
+  lv_draw_vg_lite_triangle.c
+  lv_draw_vg_lite_vector.c
+  lv_vg_lite_decoder.c
+  lv_vg_lite_math.c
+  lv_vg_lite_path.c
+  lv_vg_lite_utils.c
+  lv_linux_drm.c
+  lv_linux_fbdev.c
+  lv_ili9341.c
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\draw\sw\lv_draw_sw_transform.c(136,23): warning C4244: 'initializing': conversion from 'const uint16_t' to 'bool', possible loss of data
+  lv_lcd_generic_mipi.c
+  lv_st7735.c
+  lv_st7789.c
+  lv_st7796.c
+  lv_evdev.c
+  lv_nuttx_cache.c
+  lv_nuttx_entry.c
+  lv_nuttx_fbdev.c
+  lv_nuttx_lcd.c
+  lv_nuttx_libuv.c
+  lv_nuttx_profiler.c
+  lv_nuttx_touchscreen.c
+  lv_sdl_keyboard.c
+  lv_sdl_mouse.c
+  lv_sdl_mousewheel.c
+  lv_sdl_window.c
+  lv_windows_context.c
+  lv_windows_display.c
+  lv_windows_input.c
+  lv_x11_display.c
+  lv_x11_input.c
+  lv_binfont_loader.c
+  lv_font.c
+  lv_font_dejavu_16_persian_hebrew.c
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\drivers\windows\lv_windows_context.c(248,24): warning C4267: 'function': conversion from 'size_t' to 'uint32_t', possible loss of data
+  lv_font_fmt_txt.c
+  lv_font_montserrat_10.c
+  lv_font_montserrat_12.c
+  lv_font_montserrat_14.c
+  lv_font_montserrat_16.c
+  lv_font_montserrat_18.c
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\font\lv_binfont_loader.c(241,56): warning C4267: 'initializing': conversion from 'size_t' to 'uint8_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\font\lv_binfont_loader.c(485,43): warning C4244: '=': conversion from 'int16_t' to 'int8_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\font\lv_binfont_loader.c(486,44): warning C4244: '=': conversion from 'uint16_t' to 'int8_t', possible loss of data
+  lv_font_montserrat_20.c
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\font\lv_font_fmt_txt.c(242,58): warning C4244: '=': conversion from 'lv_uintptr_t' to 'uint32_t', possible loss of data
+  lv_font_montserrat_22.c
+  lv_font_montserrat_24.c
+  lv_font_montserrat_26.c
+  lv_font_montserrat_28.c
+  lv_font_montserrat_28_compressed.c
+  lv_font_montserrat_30.c
+  lv_font_montserrat_32.c
+  lv_font_montserrat_34.c
+  lv_font_montserrat_36.c
+  lv_font_montserrat_38.c
+  lv_font_montserrat_40.c
+  lv_font_montserrat_42.c
+  lv_font_montserrat_44.c
+  lv_font_montserrat_46.c
+  lv_font_montserrat_48.c
+  lv_font_montserrat_8.c
+  lv_font_simsun_16_cjk.c
+  lv_font_unscii_16.c
+  lv_font_unscii_8.c
+  lv_indev.c
+  lv_indev_scroll.c
+  lv_flex.c
+  lv_grid.c
+  lv_layout.c
+  code128.c
+  lv_barcode.c
+  lv_bin_decoder.c
+  lv_bmp.c
+  lv_ffmpeg.c
+  lv_freetype.c
+  lv_freetype_glyph.c
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\layouts\lv_layout.c(71,35): warning C4018: '<=': signed/unsigned mismatch
+  lv_freetype_image.c
+  lv_freetype_outline.c
+  lv_ftsystem.c
+  lv_fs_cbfs.c
+  lv_fs_fatfs.c
+  lv_fs_memfs.c
+  lv_fs_posix.c
+  lv_fs_stdio.c
+  lv_fs_win32.c
+  gifdec.c
+  lv_gif.c
+  lv_libjpeg_turbo.c
+  lv_libpng.c
+  lodepng.c
+  lv_lodepng.c
+  lz4.c
+  lv_qrcode.c
+  qrcodegen.c
+  lv_rle.c
+  lv_rlottie.c
+  lv_tiny_ttf.c
+  lv_tjpgd.c
+  tjpgd.c
+  lv_init.c
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\libs\tjpgd\tjpgd.c(980,18): warning C4267: '+=': conversion from 'size_t' to 'unsigned int', possible loss of data
+  lv_cache.c
+  lv_cache_entry.c
+  lv_image_cache.c
+  _lv_cache_lru_rb.c
+  lv_anim.c
+  lv_anim_timeline.c
+  lv_area.c
+  lv_array.c
+  lv_async.c
+  lv_bidi.c
+  lv_color.c
+  lv_color_op.c
+  lv_event.c
+  lv_fs.c
+  lv_ll.c
+  lv_log.c
+  lv_lru.c
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\misc\lv_lru.c(144,51): warning C4267: 'function': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\misc\lv_lru.c(149,46): warning C4267: 'function': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\misc\lv_lru.c(194,51): warning C4267: 'function': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\misc\lv_lru.c(197,46): warning C4267: 'function': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\misc\lv_lru.c(218,51): warning C4267: 'function': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\misc\lv_lru.c(221,46): warning C4267: 'function': conversion from 'size_t' to 'uint32_t', possible loss of data
+  lv_math.c
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\misc\cache\_lv_cache_lru_rb.c(111,73): warning C4267: 'function': conversion from 'size_t' to 'const uint32_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\misc\cache\_lv_cache_lru_rb.c(121,55): warning C4267: 'function': conversion from 'size_t' to 'const uint32_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\misc\cache\_lv_cache_lru_rb.c(163,91): warning C4267: 'function': conversion from 'size_t' to 'const uint32_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\misc\cache\_lv_cache_lru_rb.c(164,9): warning C4047: 'return': 'bool' differs in levels of indirection from 'void *'
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\misc\cache\_lv_cache_lru_rb.c(187,91): warning C4267: 'function': conversion from 'size_t' to 'const uint32_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\misc\cache\_lv_cache_lru_rb.c(188,9): warning C4047: 'return': 'bool' differs in levels of indirection from 'void *'
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\misc\cache\_lv_cache_lru_rb.c(230,72): warning C4267: 'function': conversion from 'size_t' to 'const uint32_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\misc\cache\_lv_cache_lru_rb.c(243,78): warning C4267: 'function': conversion from 'size_t' to 'const uint32_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\misc\cache\_lv_cache_lru_rb.c(279,78): warning C4267: 'function': conversion from 'size_t' to 'const uint32_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\misc\cache\_lv_cache_lru_rb.c(295,78): warning C4267: 'function': conversion from 'size_t' to 'const uint32_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\misc\cache\_lv_cache_lru_rb.c(350,68): warning C4267: 'function': conversion from 'size_t' to 'const uint32_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\misc\cache\_lv_cache_lru_rb.c(375,78): warning C4267: 'function': conversion from 'size_t' to 'const uint32_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\misc\cache\_lv_cache_lru_rb.c(403,16): warning C4267: 'return': conversion from 'size_t' to 'uint32_t', possible loss of data
+  lv_palette.c
+  lv_profiler_builtin.c
+  lv_rb.c
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\misc\lv_rb.c(246,9): warning C4047: 'return': 'bool' differs in levels of indirection from 'void *'
+  lv_style.c
+  lv_style_gen.c
+  lv_templ.c
+  lv_text.c
+  lv_text_ap.c
+  lv_timer.c
+  lv_utils.c
+  lv_cmsis_rtos2.c
+  lv_freertos.c
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\misc\lv_style.c(227,56): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+  lv_os_none.c
+  lv_pthread.c
+  lv_rtthread.c
+  lv_windows.c
+  lv_file_explorer.c
+  lv_fragment.c
+  lv_fragment_manager.c
+  lv_gridnav.c
+  lv_ime_pinyin.c
+  lv_imgfont.c
+  lv_monkey.c
+  lv_observer.c
+  lv_snapshot.c
+  lv_sysmon.c
+  vg_lite_matrix.c
+  lv_mem_core_builtin.c
+  lv_sprintf_builtin.c
+  lv_string_builtin.c
+  lv_tlsf.c
+  lv_mem_core_clib.c
+  lv_sprintf_clib.c
+  lv_string_clib.c
+  lv_mem.c
+  lv_mem_core_micropython.c
+  lv_mem_core_rtthread.c
+  lv_sprintf_rtthread.c
+  lv_string_rtthread.c
+  lv_theme_default.c
+  lv_theme.c
+  lv_theme_mono.c
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\others\observer\lv_observer.c(126,21): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\others\observer\lv_observer.c(275,14): warning C4018: '>=': signed/unsigned mismatch
+  lv_theme_simple.c
+  lv_tick.c
+  lv_animimage.c
+  lv_arc.c
+  lv_bar.c
+  lv_buttonmatrix.c
+  lv_button.c
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\widgets\animimage\lv_animimage.c(74,26): warning C4267: '=': conversion from 'size_t' to 'int8_t', possible loss of data
+  lv_calendar.c
+  lv_calendar_header_arrow.c
+  lv_calendar_header_dropdown.c
+  lv_canvas.c
+  lv_chart.c
+  lv_checkbox.c
+  lv_dropdown.c
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\widgets\calendar\lv_calendar.c(136,33): warning C4018: '<': signed/unsigned mismatch
+  lv_imagebutton.c
+  lv_image.c
+  lv_keyboard.c
+  lv_label.c
+  lv_led.c
+  lv_line.c
+  lv_list.c
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\widgets\dropdown\lv_dropdown.c(225,27): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
+  lv_menu.c
+  lv_msgbox.c
+  lv_objx_templ.c
+  lv_roller.c
+  lv_scale.c
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\widgets\imagebutton\lv_imagebutton.c(174,20): warning C4018: '>': signed/unsigned mismatch
+  lv_slider.c
+  lv_span.c
+  lv_spinbox.c
+  lv_spinner.c
+  lv_switch.c
+  lv_table.c
+  lv_tabview.c
+  lv_textarea.c
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\widgets\span\lv_span.c(926,43): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+  lv_tileview.c
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\widgets\spinbox\lv_spinbox.c(99,75): warning C4244: '=': conversion from 'const int64_t' to 'int32_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\widgets\spinbox\lv_spinbox.c(100,79): warning C4244: '=': conversion from 'const int64_t' to 'int32_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\widgets\spinbox\lv_spinbox.c(138,30): warning C4244: 'initializing': conversion from 'int64_t' to 'const int32_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\widgets\spinbox\lv_spinbox.c(319,41): warning C4244: '=': conversion from 'int64_t' to 'int32_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\widgets\spinbox\lv_spinbox.c(348,57): warning C4267: 'function': conversion from 'size_t' to 'int32_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\widgets\spinbox\lv_spinbox.c(360,32): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\widgets\spinbox\lv_spinbox.c(447,28): warning C4018: '<': signed/unsigned mismatch
+D:\proj\dev\uc\winston\winston\winston-display\external\lvgl\src\widgets\spinbox\lv_spinbox.c(424,56): warning C4267: 'initializing': conversion from 'size_t' to 'const int', possible loss of data
+  lv_win.c
+  lvgl_graphics.c
+  winston-display.vcxproj -> D:\proj\dev\uc\winston\winston\x64\Test\winston-display.exe
+  winston-display.vcxproj -> D:\proj\dev\uc\winston\winston\x64\Test\winston-display.pdb (Partial -> Full PDB)
+D:\proj\dev\uc\winston\winston\x64\Test\winston-display.pdb : fatal error CMF1107: input PDB file is not generated by /DEBUG:fastlink

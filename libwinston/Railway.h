@@ -168,6 +168,12 @@ namespace winston
 					callback(this->trackEnum(i), *(std::static_pointer_cast<DoubleSlipTurnout>(this->tracks[i])));
 		}
 
+		void eachTrack(std::function<void(const Tracks tracksId, Track::Shared track)> callback)
+		{
+			for (size_t i = 0; i < tracksCount(); ++i)
+				callback(this->trackEnum(i), this->tracks[i]);
+		}
+
 		inline constexpr Tracks trackEnum(const size_t index) const
 		{
 			return Tracks::_from_integral_unchecked((unsigned int)index);

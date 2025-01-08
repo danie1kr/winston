@@ -9,6 +9,7 @@
 #include <unordered_set>
 #include <memory>
 #include <functional>
+#include <variant>
 #include "Signal.h"
 #include "WinstonTypes.h"
 
@@ -25,6 +26,7 @@ namespace winston
 	public:
 
 		Track(const std::string name, const Id index, const Length tracklength);
+		~Track() = default;
 
 		enum class Connection : unsigned int
 		{
@@ -51,7 +53,7 @@ namespace winston
 		void section(const Address address);
 		const Address section() const;
 
-		virtual const bool traverse(const Connection connection, Track::Const& onto, bool leavingOnConnection) const = 0;
+		virtual const bool traverse(const Connection connection, Track::Const& onto, const bool leavingOnConnection) const = 0;
 		virtual const bool canTraverse(const Connection entering) const = 0;
 
 		using TraversalCallback = std::function<const Result(Track::Const track, const Track::Connection connection)>;
@@ -166,10 +168,47 @@ namespace winston
 
 		const Id segment() const;
 		void segment(const Id segment);
+		
+		using Shared_Ptr<Track>::make;
+		using Shared_Ptr<Track>::Const;
+		using Shared_Ptr<Track>::Shared;
+
+		struct NextSignalProvider : public Shared_Ptr<NextSignalProvider>
+		{
+			struct NextTurnout : public Shared_Ptr<NextTurnout>
+			{
+				NextTurnout(const Track::Const turnout, const Track::Connection entered);
+				~NextTurnout() = default;
+
+				const Track::Const turnout;
+				const Track::Connection entered;
+			};
+
+			NextSignalProvider(const Distance distance, const Signal::Shared signal);
+			NextSignalProvider(const Distance distance, const NextTurnout::Const nextTurnout);
+			~NextSignalProvider() = default;
+
+			const Distance distance;
+
+			//using SignalOrTurnout = std::variant<const winston::Signal::Shared, const NextTurnout::Const>;
+			//const SignalOrTurnout signalOrTurnout;
+			const Signal::Shared signal;
+			const NextTurnout::Const nextTurnout;
+		};
+		virtual void setupNextSignal(const Connection connection, const Signal::Pass pass, const NextSignalProvider::Shared nextSignalProvider) = 0;
+		const NextSignal::Shared nextSignal(const Connection leaving, const Signal::Pass pass) const;
+		virtual const size_t nextSignalsIndex(const Connection connection, const Signal::Pass pass) const = 0;
+
+#ifdef WINSTON_TEST
+		public:
+#else
+		private:
+#endif
+			virtual NextSignalProvider::Shared getNextSignalProvider(const Connection connection, const Signal::Pass pass) const = 0;
 
 	protected:
 		virtual Track::Shared connectTo(const Connection local, SignalFactory guardingLocalSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa = true) = 0;
-		Result validateSingle(const Track::Shared track);
+		const Result validateSingle(const Track::Shared track) const;
 
 		friend class Bumper; 
 		friend class Rail;
@@ -190,11 +229,16 @@ namespace winston
 	class Bumper : public Track, public Shared_Ptr<Bumper>
 	{
 	public:
+		using Shared_Ptr<Bumper>::Shared;
+		using Shared_Ptr<Bumper>::make;
+		using Shared_Ptr<Bumper>::enable_shared_from_this_virtual::shared_from_this;
+
 		Bumper(const std::string name = "", const Id index = 0xBADF00D, const Length tracklength = 0);
+		~Bumper() = default;
 
 		bool has(const Connection connection) const;
 		Track::Shared on(const Connection connection) const;
-		const bool traverse(const Connection connection, Track::Const& onto, bool leavingOnConnection) const;
+		const bool traverse(const Connection connection, Track::Const& onto, const bool leavingOnConnection) const;
 		const bool canTraverse(const Connection entering) const;
 		void collectAllConnections(std::set<Track::Shared>& tracks) const;
 		//const Connection whereConnects(const Track::Shared& other) const;
@@ -211,25 +255,37 @@ namespace winston
 
 		void connections(Track::Shared& onA);
 
-		using Shared_Ptr<Bumper>::Shared;
-		using Shared_Ptr<Bumper>::make;
-		using Shared_Ptr<Bumper>::enable_shared_from_this_virtual::shared_from_this;
+		void setupNextSignal(const Connection connection, const Signal::Pass pass, const NextSignalProvider::Shared nextSignalProvider);
+#ifdef WINSTON_TEST
+	public:
+#else
+	private:
+#endif
+		NextSignalProvider::Shared getNextSignalProvider(const Connection connection, const Signal::Pass pass) const;
 	private:
 		Track::Shared connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa = true);
 		
 		Track::Shared a;
 		std::array<Signal::Shared, 2> signals;
+
+		const size_t nextSignalsIndex(const Connection connection, const Signal::Pass pass) const;
+		std::array<NextSignalProvider::Shared, 3> nextSignals;
 	};
 
 	// a====b
 	class Rail : public Track, public Shared_Ptr<Rail>
 	{
 	public:
+		using Shared_Ptr<Rail>::Shared;
+		using Shared_Ptr<Rail>::make;
+		using Shared_Ptr<Rail>::enable_shared_from_this_virtual::shared_from_this;
+
 		Rail(const std::string name = "", const Id index = 0xBADF00D, const Length tracklength = 0);
+		~Rail() = default;
 
 		bool has(const Connection connection) const;
 		Track::Shared on(const Connection connection) const;
-		const bool traverse(const Connection connection, Track::Const& onto, bool leavingOnConnection) const;
+		const bool traverse(const Connection connection, Track::Const& onto, const bool leavingOnConnection) const;
 		const bool canTraverse(const Connection entering) const;
 
 		void collectAllConnections(std::set<Track::Shared>& tracks) const;
@@ -247,14 +303,21 @@ namespace winston
 
 		void connections(Track::Shared& onA, Track::Shared& onB);
 
-		using Shared_Ptr<Rail>::Shared;
-		using Shared_Ptr<Rail>::make;
-		using Shared_Ptr<Rail>::enable_shared_from_this_virtual::shared_from_this;
+		void setupNextSignal(const Connection connection, const Signal::Pass pass, const NextSignalProvider::Shared nextSignalProvider);
+#ifdef WINSTON_TEST
+	public:
+#else
+	private:
+#endif
+		NextSignalProvider::Shared getNextSignalProvider(const Connection connection, const Signal::Pass pass) const;
 	private:
 		Track::Shared connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa = true);
 		
 		Track::Shared a, b;
 		std::array<Signal::Shared, 2> signals;
+
+		const size_t nextSignalsIndex(const Connection connection, const Signal::Pass pass) const;
+		std::array<NextSignalProvider::Shared, 4> nextSignals;
 	};
 
 	// a====b
@@ -262,6 +325,10 @@ namespace winston
 	class Turnout : public Track, public Shared_Ptr<Turnout>
 	{
 	public:
+		using Shared_Ptr<Turnout>::Shared;
+		using Shared_Ptr<Turnout>::make;
+		using Shared_Ptr<Turnout>::enable_shared_from_this_virtual::shared_from_this;
+
 		enum class Direction : unsigned int
 		{
 			A_B = 0,
@@ -276,11 +343,12 @@ namespace winston
 
 		Turnout(const std::string name, const Id index, const Callback callback, const bool leftTurnout = false);
 		Turnout(const std::string name, const Id index, const Callback callback, const TrackLengthCalculator trackLengthCalculator, const bool leftTurnout = false);
+		~Turnout() = default;
 
 		bool has(const Connection connection) const;
 		Track::Shared on(const Connection connection) const;
 
-		const bool traverse(const Connection connection, Track::Const& onto, bool leavingOnConnection) const;
+		const bool traverse(const Connection connection, Track::Const& onto, const bool leavingOnConnection) const;
 		const bool canTraverse(const Connection entering) const;
 		void collectAllConnections(std::set<Track::Shared>& tracks) const;
 		//const Connection whereConnects(const Track::Shared& other) const;
@@ -294,6 +362,14 @@ namespace winston
 
 		void connections(Track::Shared& onA, Track::Shared& onB, Track::Shared& onC);
 
+		void setupNextSignal(const Connection connection, const Signal::Pass pass, const NextSignalProvider::Shared nextSignalProvider);
+#ifdef WINSTON_TEST
+	public:
+#else
+	private:
+#endif
+		NextSignalProvider::Shared getNextSignalProvider(const Connection connection, const Signal::Pass pass) const;
+	public:
 		const State startChangeTo(const Direction direction);
 		const State startToggle();
 		const State finalizeChangeTo(const Direction direction);
@@ -321,10 +397,6 @@ namespace winston
 
 		virtual const Length length() const;
 		const Length lengthOnDirection(const Direction dir) const;
-
-		using Shared_Ptr<Turnout>::Shared;
-		using Shared_Ptr<Turnout>::make;
-		using Shared_Ptr<Turnout>::enable_shared_from_this_virtual::shared_from_this;
 	private:
 		Track::Shared connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa = true);
 		
@@ -340,6 +412,9 @@ namespace winston
 #ifdef WINSTON_ENABLE_TURNOUT_GROUPS
 		std::map<Id, GroupDirection> _groups;
 #endif 
+
+		const size_t nextSignalsIndex(const Connection connection, const Signal::Pass pass) const;
+		std::array<NextSignalProvider::Shared, 6> nextSignals;
 	};
 	using TurnoutSet = std::unordered_set<Turnout::Shared>;
 
@@ -351,6 +426,10 @@ namespace winston
 	class DoubleSlipTurnout : public Track, public Shared_Ptr<DoubleSlipTurnout>
 	{
 	public:
+		using Shared_Ptr<DoubleSlipTurnout>::Shared;
+		using Shared_Ptr<DoubleSlipTurnout>::make;
+		using Shared_Ptr<DoubleSlipTurnout>::enable_shared_from_this_virtual::shared_from_this;
+
 		enum class Direction : unsigned int
 		{
 			A_B = 2,
@@ -368,11 +447,12 @@ namespace winston
 
 		DoubleSlipTurnout(const std::string name, const Id index, const Callback callback);
 		DoubleSlipTurnout(const std::string name, const Id index, const Callback callback, const TrackLengthCalculator trackLengthCalculator);
+		~DoubleSlipTurnout() = default;
 
 		bool has(const Connection connection) const;
 		Track::Shared on(const Connection connection) const;
 
-		const bool traverse(const Connection connection, Track::Const& onto, bool leavingOnConnection) const;
+		const bool traverse(const Connection connection, Track::Const& onto, const bool leavingOnConnection) const;
 		const bool canTraverse(const Connection entering) const;
 		void collectAllConnections(std::set<Track::Shared>& tracks) const;
 		//const Connection whereConnects(const Track::Shared& other) const;
@@ -385,6 +465,15 @@ namespace winston
 		const Type type() const;
 
 		void connections(Track::Shared& onA, Track::Shared& onB, Track::Shared& onC, Track::Shared& onD);
+
+		void setupNextSignal(const Connection connection, const Signal::Pass pass, const NextSignalProvider::Shared nextSignalProvider);
+#ifdef WINSTON_TEST
+	public:
+#else
+	private:
+#endif
+		NextSignalProvider::Shared getNextSignalProvider(const Connection connection, const Signal::Pass pass) const;
+	public:
 
 		const State startChangeTo(const Direction direction);
 		const State startToggle();
@@ -405,10 +494,6 @@ namespace winston
 
 		virtual const Length length() const;
 		const Length lengthOnDirection(const Direction dir) const;
-
-		using Shared_Ptr<DoubleSlipTurnout>::Shared;
-		using Shared_Ptr<DoubleSlipTurnout>::make;
-		using Shared_Ptr<DoubleSlipTurnout>::enable_shared_from_this_virtual::shared_from_this;
 	private:
 		Track::Shared connectTo(const Connection local, SignalFactory guardingSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa = true);
 
@@ -421,6 +506,9 @@ namespace winston
 		Track::Shared a, b, c, d;
 
 		std::unordered_set<unsigned int> lockingRoutes;
+
+		const size_t nextSignalsIndex(const Connection connection, const Signal::Pass pass) const;
+		std::array<NextSignalProvider::Shared, 8> nextSignals;
 	};
 
 	std::string build(const Track::Connection first);

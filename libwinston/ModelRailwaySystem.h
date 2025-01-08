@@ -61,6 +61,7 @@ namespace winston
 
 			logger.info("System: Signal Setup");
 			this->setupSignals();
+			this->setupNextSignals();
 
 			logger.info("System: Detector Setup");
 			if(this->setupDetectors() != Result::OK)
@@ -570,6 +571,20 @@ namespace winston
 		{
 			return this->status() == Status::Ready;
 		}
+	private:
+		void setupNextSignals() const
+		{
+			this->railway->eachTrack([this](const Tracks tracksId, winston::Track::Shared track) {
+				track->eachConnection([this, track](Track& unused, const Track::Connection connection) {
+					if (connection != winston::Track::Connection::DeadEnd)
+					{
+						SignalTower::setupNextSignal(track, connection, Signal::Pass::Facing);
+						SignalTower::setupNextSignal(track, connection, Signal::Pass::Backside);
+					}
+				});
+			});
+		}
+
 	protected:
 
 		enum class Status : uint8_t

@@ -51,11 +51,11 @@ namespace winston
 
 	const Signal::Aspects Signal::aspect() const
 	{
-		if (this->authorityHalt[(size_t)Authority::Turnout] || this->authorityHalt[(size_t)Authority::Occupancy])
+	/*	if (this->authorityHalt[(size_t)Authority::Turnout] || this->authorityHalt[(size_t)Authority::Occupancy])
 			//                           unset ::Go             and set ::Halt
 			return (this->_aspect & ~((unsigned int)Aspect::Go)) | Aspect::Halt;
 		else
-			return this->_aspect;
+	*/		return this->_aspect;
 	}
 
 	void Signal::grabAuthorities(Signal::Shared other)

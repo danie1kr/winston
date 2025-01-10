@@ -184,19 +184,19 @@ namespace winston
 				const Track::Connection entered;
 			};
 
-			NextSignalProvider(const Distance distance, const Signal::Shared signal);
+			NextSignalProvider(const Distance distance, const Signal::Shared signal, const Track::Const track, const Track::Connection connection);
 			NextSignalProvider(const Distance distance, const NextTurnout::Const nextTurnout);
 			~NextSignalProvider() = default;
 
 			const Distance distance;
-
-			//using SignalOrTurnout = std::variant<const winston::Signal::Shared, const NextTurnout::Const>;
-			//const SignalOrTurnout signalOrTurnout;
 			const Signal::Shared signal;
+			const Track::Const track;
+			const Track::Connection connection;
 			const NextTurnout::Const nextTurnout;
 		};
 		virtual void setupNextSignal(const Connection connection, const Signal::Pass pass, const NextSignalProvider::Shared nextSignalProvider) = 0;
-		const NextSignal::Shared nextSignal(const Connection leaving, const Signal::Pass pass) const;
+		//const NextSignal::Shared nextSignal(const Connection leaving, const Signal::Pass pass) const;
+		const bool nextSignal(const Connection leaving, const Signal::Pass pass, Signal::Shared& signal, Track::Const& track, Track::Connection& guarding, Distance &distance) const;
 		virtual const size_t nextSignalsIndex(const Connection connection, const Signal::Pass pass) const = 0;
 
 #ifdef WINSTON_TEST

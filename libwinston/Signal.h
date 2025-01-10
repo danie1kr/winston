@@ -334,30 +334,4 @@ namespace winston
 		friend class SignalController;
 	};
 	const std::string build(const Signal::Aspect first);
-
-	struct NextSignal : public Shared_Ptr<NextSignal>
-	{
-		const Signal::Shared signal;
-		const Distance distance;
-		const Signal::Pass pass;
-
-		using Shared_Ptr<NextSignal>::Shared;
-		using Shared_Ptr<NextSignal>::Const;
-		using Shared_Ptr<NextSignal>::make;
-
-		NextSignal(const Signal::Shared signal, const Distance distance, const Signal::Pass pass);
-		~NextSignal() = default;
-	};
-
-	struct NextSignals
-	{
-		NextSignals();
-		~NextSignals() = default;
-		void put(NextSignal::Const next, const bool forward, const Signal::Pass pass);
-		const NextSignal::Const get(const bool forward, const Signal::Pass pass) const;
-		const bool contains(const Signal::Const signal) const;
-	private:
-		static constexpr size_t index(const bool forward, const Signal::Pass pass);
-		std::array<NextSignal::Const, 4> nextSignals;
-	};
 };

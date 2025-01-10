@@ -33,6 +33,7 @@ namespace winston
 		void setSignalsFor(Track& turnout);
 
 		void setSignalsForLocoPassing(Track::Const track, const Track::Connection connection, const Signal::Pass pass) const;
+		static void setSignalsForLoco(const Locomotive::Const loco);
 
 		static void setSignalOn(const Track& track, const Track::Connection signalGuardedConnection, const Signal::Aspect aspect, const Signal::Aspect preAspect = Signal::Aspect::Off, const Signal::Authority = Signal::Authority::Turnout);
 
@@ -41,7 +42,7 @@ namespace winston
 
 		static Signal::Shared nextSignal(Track::Const& track, const bool guarding, Track::Connection& leaving, const bool main, const bool includingFirst);
 
-		static const bool findNextSignal(Track::Const track, const Track::Connection entering, Distance& traveled, const Signal::Pass pass, Signal::Shared &signal);
+		static const bool findNextSignal(Track::Const& track, Track::Connection& leaving, Distance& traveled, const Signal::Pass pass, Signal::Shared& signal);
 		static NextSignal::Const nextSignal(const Position position, const Signal::Pass pass);
 
 		static const bool setupNextSignal(Track::Shared track, const Track::Connection leaving, const Signal::Pass pass);

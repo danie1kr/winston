@@ -233,15 +233,27 @@ Pre-Calculate signals for turnout
 		}
 	}
 
-	const bool SignalTower::findNextSignal(Track::Const track, const Track::Connection leaving, Distance& traveled, const Signal::Pass pass, Signal::Shared& signal)
+	void SignalTower::setSignalsForLoco(const Locomotive::Const loco)
 	{
-		if (auto nextSignal = track->nextSignal(leaving, pass))
+		auto next = loco->nextSignal(Signal::Pass::Facing, true);
+		if (next && next->signal && next->track)
+			SignalTower::setSignalOn(*next->track, next->connection, Signal::Aspect::Halt, Signal::Aspect::Off);
+		auto prev = loco->nextSignal(Signal::Pass::Facing, false);
+		if (prev && prev->signal && prev->track)
+			SignalTower::setSignalOn(*prev->track, prev->connection, Signal::Aspect::Halt, Signal::Aspect::Off);
+	}
+
+	const bool SignalTower::findNextSignal(Track::Const &track, Track::Connection &leaving, Distance& traveled, const Signal::Pass pass, Signal::Shared& signal)
+	{
+		return track->nextSignal(leaving, pass, signal, track, leaving, traveled);
+		/*
+		if (track->nextSignal(leaving, pass, signal, track, leaving, traveled))
 		{
 			traveled += nextSignal->distance;
 			signal = nextSignal->signal;
 
 			return true;
-		}
+		}*/
 
 		return false;
 		/*
@@ -302,15 +314,15 @@ Pre-Calculate signals for turnout
 		{
 			// signal on the current track
 			const auto signalDistanceFromReference = current->length() - signal->distance();
-			if (signalDistanceFromReference >= (unsigned)position.distance())
-				return NextSignal::make(signal, position.distance() - signalDistanceFromReference, pass);
+			if (signalDistanceFromReference > (unsigned)position.distance())
+				return NextSignal::make(signal, current, connection, position.distance() - signalDistanceFromReference, pass);
 		}
 		//else
 		{
 			// signal on the following track
 			Distance distance = current->length() - position.distance();
 			if (SignalTower::findNextSignal(current, connection, distance, pass, signal))
-				return NextSignal::make(signal, distance, pass);
+				return NextSignal::make(signal, current, connection, distance, pass);
 		}
 		return nullptr;
 	}
@@ -353,7 +365,7 @@ Pre-Calculate signals for turnout
 				if (auto signal = onto->signalGuarding(connection))
 				{
 					distance += signal->distance();
-					auto provider = Track::NextSignalProvider::make(distance, signal);
+					auto provider = Track::NextSignalProvider::make(distance, signal, onto, connection);
 					track->setupNextSignal(leaving, pass, provider);
 					return true;
 				}
@@ -366,7 +378,7 @@ Pre-Calculate signals for turnout
 				if (auto signal = onto->signalGuarding(connection))
 				{
 					distance += onto->length() - signal->distance();
-					auto provider = Track::NextSignalProvider::make(distance, signal);
+					auto provider = Track::NextSignalProvider::make(distance, signal, onto, connection);
 					track->setupNextSignal(leaving, pass, provider);
 					return true;
 				}

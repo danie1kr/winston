@@ -262,6 +262,8 @@ namespace winstontests
             loco->railOnto(pos);
             Assert::IsTrue(loco->isNextSignal(PBF1_A));
             Assert::IsTrue(loco->isNextSignal(PBF1_B));
+            Assert::IsTrue(loco->isNextSignal(PBF1a_A));
+            Assert::IsTrue(loco->isNextSignal(B7_B));
 
             pos = winston::Position(PBF1, winston::Track::Connection::A, 2);
             loco->railOnto(pos);

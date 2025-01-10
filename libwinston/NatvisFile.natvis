@@ -18,4 +18,8 @@
     <DisplayString>{(winston::Signal::Aspect)_aspect}</DisplayString>
   </Type>
 
+  <Type Name="winston::NextSignal">
+    <DisplayString>{track->_name} {connection} {(winston::Signal::Aspect)signal->_aspect}</DisplayString>
+  </Type>
+
 </AutoVisualizer>

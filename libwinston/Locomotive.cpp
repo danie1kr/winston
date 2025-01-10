@@ -89,6 +89,7 @@ namespace winston
 		this->details.railed = true;
 
 		this->updateNextSignals();
+		SignalTower::setSignalsForLoco(this->const_from_this());
 	}
 
 	void Locomotive::railOff()
@@ -96,7 +97,12 @@ namespace winston
 		this->details.railed = false;
 	}
 
-	const bool Locomotive::isNextSignal(Signal::Const signal) const
+	const NextSignal::Const Locomotive::nextSignal(const Signal::Pass pass, const bool forward) const
+	{
+		return this->details.nextSignals.get(forward, pass);
+	}
+
+	const bool Locomotive::isNextSignal(const Signal::Const signal) const
 	{
 		return this->details.nextSignals.contains(signal);
 	}
@@ -213,49 +219,19 @@ namespace winston
 
 	void Locomotive::updateNextSignals()
 	{
+		if(this->position().track())
 		{
+			//second railOnto overwrites with wrong nextSignals?
 			// forwards
 			this->details.nextSignals.put(SignalTower::nextSignal(this->position(), Signal::Pass::Facing), true, Signal::Pass::Facing);
 			this->details.nextSignals.put(SignalTower::nextSignal(this->position(), Signal::Pass::Backside), true, Signal::Pass::Backside);
-		}
-		{
+
 			// backwards
 			auto pos = this->position();
 			pos.useOtherRef();
 			this->details.nextSignals.put(SignalTower::nextSignal(pos, Signal::Pass::Facing), false, Signal::Pass::Facing);
 			this->details.nextSignals.put(SignalTower::nextSignal(pos, Signal::Pass::Backside), false, Signal::Pass::Backside);
 		}
-		/*
-		{
-			// forwards
-			auto current = this->position().track();
-			auto connection = current->otherConnection(this->position().connection());
-
-			if (auto signal = current->signalGuarding(connection))
-			{
-				this->details.nextSignals[0] = signal;
-			}
-			else
-			{
-				this->details.nextSignals[0] = SignalTower::nextSignal(current, true, connection, true, true);
-			}
-		}
-
-		{
-			//backwards
-			auto current = this->position().track();
-			auto connection = this->position().connection();
-
-			if (auto signal = current->signalGuarding(connection))
-			{
-				this->details.nextSignals[1] = signal;
-			}
-			else
-			{
-				this->details.nextSignals[1] = SignalTower::nextSignal(current, true, connection, true, true);
-			}
-		}
-		*/
 	}
 
 	void Locomotive::update(const bool busy, const bool forward, const Throttle throttle, const uint32_t functions)
@@ -267,20 +243,27 @@ namespace winston
 		this->details.functions = functions;
 	}
 
-	const Position& Locomotive::moved(Duration& timeOnTour)
+	const Position& Locomotive::moved(Duration& timeOnTour, Position::Transit &transit)
 	{
 		auto now = hal::now();
 		timeOnTour = now - this->details.lastPositionUpdate;
+		transit = Position::Transit::Stay;
 		if (inMilliseconds(timeOnTour) > WINSTON_LOCO_POSITION_TRACK_RATE)
 		{
 			if(this->details.throttle != 0)
-				this->details.position.drive((Distance)((this->details.forward ? 1 : -1) * this->speedMap.speed(this->details.throttle) * inMilliseconds(timeOnTour)) / 1000, this->callbacks.signalPassed);
+				transit = this->details.position.drive((Distance)((this->details.forward ? 1 : -1) * this->speedMap.speed(this->details.throttle) * inMilliseconds(timeOnTour)) / 1000, this->callbacks.signalPassed);
 			this->details.lastPositionUpdate = now;
 		}
 		return this->position();
 	}
 
 	const Result Locomotive::update()
+	{
+		Position::Transit transit;
+		return this->update(transit);
+	}
+
+	const Result Locomotive::update(Position::Transit& transit)
 	{
 		if (!this->isRailed())
 			return Result::NotFound;
@@ -298,17 +281,29 @@ namespace winston
 			this->callbacks.drive(this->address(), (unsigned char)this->details.modelThrottle, this->details.forward);
 			this->details.lastSpeedUpdate = now;
 		}
-		// dont care about the updated duration
-		this->moved(speedUpdateRate);
+		// don't care about the updated duration
+		this->moved(speedUpdateRate, transit);
+		this->updateNextSignals();
+
+		// distance to next signal, forward, facing us
+		if (auto nextSignal = this->details.nextSignals.get(true, Signal::Pass::Facing))
+		{
+			if (auto signal = nextSignal->signal)
+				if(signal->shows(Signal::Aspect::Halt))
+				{
+					const auto maxBreakingDeceleration = -0.1f;
+					const auto breakingDistance = this->speed() * this->speed() / (2.f * (0.9f * maxBreakingDeceleration));
+					const auto decelerationToNextSignal = (float)(this->speed() * this->speed()) / (2.f * signal->distance());
+					const auto targetSpeedToHalt = this->speed() - decelerationToNextSignal;
+
+					this->details.throttle = this->details.modelThrottle = this->speedMap.throttle(targetSpeedToHalt);
+					this->callbacks.drive(this->address(), (unsigned char)this->details.modelThrottle, this->details.forward);
+					this->details.lastSpeedUpdate = now;
+				}
+		}
 
 		return Result::OK;
 	}
-	/*
-	void Locomotive::position(const Position p)
-	{
-		this->details.lastPositionUpdate = hal::now();
-		this->details.position = p;
-	}*/
 
 	const Position& Locomotive::position() const
 	{
@@ -369,6 +364,7 @@ namespace winston
 		else
 			this->map[throttle] = speed;
 	}
+
 	const Locomotive::Speed Locomotive::SpeedMap::speed(const Throttle throttle) const
 	{
 		auto lookup = this->map.find(throttle);
@@ -380,22 +376,33 @@ namespace winston
 			// throttle == lower => 0 ==> lower
 			// throttle == upper => 1 ==> upper
 			float frac = (float)(throttle - lower->first) / (float)(upper->first - lower->first);
-			
+
 			// linear
 			return lerp<Speed>(lower->second, upper->second, frac);
 		}
 		else
 			return lookup->second;
 	}
-	/*
-	const Locomotive::Speed Locomotive::SpeedMap::lerp(Locomotive::Speed lower, Locomotive::Speed upper, const float frac)
+
+	const Locomotive::Throttle Locomotive::SpeedMap::throttle(const Speed speed) const
 	{
-		if (frac <= 0.0f)
-			return lower;
-		else if (frac >= 1.0f)
-			return upper;
-		return (Speed)(frac * upper + (1.0f - frac) * lower);
-	}*/
+		for (auto it = this->map.begin(); it != this->map.end();) //const auto& [th, sp]: this->map)
+		{
+			const auto current = *it;
+			if (++it == this->map.end())
+				break;
+
+			const auto next = *it;
+
+			if(current.second >= speed && next.second <= speed)
+			{
+				float frac = (float)(speed - current.second) / (float)(next.second - current.second);
+				return lerp<Throttle>(current.second, next.second, frac);
+			}
+		}
+
+		return 0;
+	}
 
 	RailCar::Groups::Group RailCar::Groups::groupCounter = RailCar::Groups::_NextGroupCounterValue;
 	/*constexpr RailCar::Groups::Group RailCar::Groups::create()

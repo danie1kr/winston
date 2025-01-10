@@ -659,6 +659,9 @@ a	8	         0,64	  1,53	  2,04	  3,07	  4,09
 y	16	         1,28	  3,07	  4,09	  6,13	  8,17
 ms	32	         2,55	  6,13	  8,17	 12,26	 16,35
     speed in mm/s * delay in ms / 1000 = overshoot
+
+    breaking distance = v * v / 2 * a
+
     */
     auto now = winston::hal::now(); // - offset (=2 ms Card->IC, +1ms IC->Teensy, +5ms Teensy->Teensy == 8ms <=> 2.04mm @ scaled 0.255 m/s @ 22.2m/s = 80 km/h
     // actual work as we do not want to section the receiver

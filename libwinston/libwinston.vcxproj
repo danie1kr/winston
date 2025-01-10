@@ -145,6 +145,7 @@
   <ItemGroup>
     <ClInclude Include="EventLooper.h" />
     <ClInclude Include="external\ArduinoJson-v7.0.1.h" />
+    <ClInclude Include="NextSignals.h" />
     <ClInclude Include="RailwayMicroLayout.h" />
     <ClInclude Include="Section.h" />
     <ClInclude Include="Command.h" />

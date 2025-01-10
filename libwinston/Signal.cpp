@@ -1,4 +1,5 @@
 #include "Signal.h"
+#include "NextSignals.h"
 
 namespace winston
 {
@@ -176,8 +177,8 @@ namespace winston
 			}, __PRETTY_FUNCTION__);
 	}
 
-	NextSignal::NextSignal(const Signal::Shared signal, const Distance distance, const Signal::Pass pass)
-		: signal(signal), distance(distance), pass(pass)
+	NextSignal::NextSignal(const Signal::Shared signal, const Track::Const track, const Track::Connection connection, const Distance distance, const Signal::Pass pass)
+		: signal(signal), track(track), connection(connection), distance(distance), pass(pass)
 	{
 	}
 

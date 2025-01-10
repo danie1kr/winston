@@ -3,17 +3,18 @@
 #include "HAL.h"
 #include "Util.h"
 #include "Track.h"
+#include "NextSignals.h"
 
 namespace winston
 {
-	Track::NextSignalProvider::NextSignalProvider(const Distance distance, const Signal::Shared signal)
-		: Shared_Ptr<NextSignalProvider>(), distance(distance), signal(signal), nextTurnout()
+	Track::NextSignalProvider::NextSignalProvider(const Distance distance, const Signal::Shared signal, const Track::Const track, const Track::Connection connection)
+		: Shared_Ptr<NextSignalProvider>(), distance(distance), signal(signal), track(track), connection(connection), nextTurnout()
 	{
 
 	}
 
 	Track::NextSignalProvider::NextSignalProvider(const Distance distance, const NextTurnout::Const nextTurnout)
-		: Shared_Ptr<NextSignalProvider>(), distance(distance), signal(), nextTurnout(nextTurnout)
+		: Shared_Ptr<NextSignalProvider>(), distance(distance), signal(), track(), connection(Connection::DeadEnd), nextTurnout(nextTurnout)
 	{
 
 	}
@@ -147,7 +148,7 @@ namespace winston
 		return false;
 	}
 
-	const NextSignal::Shared Track::nextSignal(const Connection leaving, const Signal::Pass pass) const
+	const bool Track::nextSignal(const Connection leaving, const Signal::Pass pass, Signal::Shared &signal, Track::Const &track, Track::Connection &guarding, Distance& distance) const
 	{
 		auto current = this->const_from_this();
 		auto connection = leaving;
@@ -155,10 +156,15 @@ namespace winston
 		{
 			if (const auto provider = current->getNextSignalProvider(connection, pass))
 			{
-				if (const auto signal = provider->signal)
+				if (provider->signal)
 				{
 					// we found a next signal, so return this
-					return NextSignal::make(signal, provider->distance, pass);
+					signal = provider->signal;
+					track = provider->track;
+					guarding = provider->connection;
+					distance += provider->distance;
+					return true;
+					//return NextSignal::make(signal, current, connection, provider->distance, pass);
 				}
 				else if (const auto nextTurnout = provider->nextTurnout)
 				{
@@ -168,12 +174,12 @@ namespace winston
 				}
 				else
 				{
-					return nullptr;
+					return false;
 				}
 			}
 			else
 			{
-				return nullptr;
+				return false;
 			}
 		}
 
@@ -188,7 +194,7 @@ namespace winston
 		}
 		else
 		*/
-		return nullptr;
+		return false;
 	}
 
 	Bumper::Bumper(const std::string name, const Id index, const Length tracklength)

@@ -4,6 +4,7 @@
 #include "WinstonTypes.h"
 #include "Position.h"
 #include "Track.h"
+#include "NextSignals.h"
 #include "Log.h"
 #include "Segment.h"
 
@@ -122,6 +123,7 @@ namespace winston
 		//void position(const Position p);
 		const Position& position() const;
 		void stop();
+		const Result update(Position::Transit& transit);
 		const Result update();
 		const Address& address() const;
 		const std::string& name();
@@ -139,11 +141,12 @@ namespace winston
 		static const ThrottleSpeedMap defaultThrottleSpeedMap;
 		void update(const bool busy, const bool forward, const Throttle throttle, const uint32_t functions);
 
-		const bool isNextSignal(Signal::Const signal) const;
+		const NextSignal::Const nextSignal(const Signal::Pass pass, const bool forward) const;
+		const bool isNextSignal(const Signal::Const signal) const;
 		void updateNextSignals();
 	private:
 
-		const Position& moved(Duration& timeOnTour);
+		const Position& moved(Duration& timeOnTour, Position::Transit& transit);
 		static const float acceleration(const Throttle throttle);
 
 		void updateExpected(const bool fullUpdate = true);
@@ -155,6 +158,7 @@ namespace winston
 			SpeedMap(ThrottleSpeedMap map);
 			~SpeedMap() = default;
 			const Speed speed(const Throttle throttle) const;
+			const Throttle throttle(const Speed speed) const;
 			void learn(const Throttle throttle, const Speed speed);
 		private:
 			//static const Speed lerp(const Speed lower, const Speed upper, const float frac);

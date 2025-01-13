@@ -144,13 +144,17 @@ namespace winston
 		const NextSignal::Const nextSignal(const Signal::Pass pass, const bool forward) const;
 		const bool isNextSignal(const Signal::Const signal) const;
 		void updateNextSignals();
+
+		void autodrive(const bool halt, const bool drive);
 	private:
 
 		const Position& moved(Duration& timeOnTour, Position::Transit& transit);
 		static const float acceleration(const Throttle throttle);
 
 		void updateExpected(const bool fullUpdate = true);
-
+#ifdef WINSTON_TEST
+	public:
+#endif
 		class SpeedMap
 		{
 		public:
@@ -182,6 +186,11 @@ namespace winston
 			uint32_t functions = { 0 };
 			Types types = { (unsigned char)Type::Single };
 			NextSignals nextSignals;
+			struct Autodrive
+			{
+				bool halt;
+				bool drive;
+			} autodrive;
 		} details;
 
 		struct Expected

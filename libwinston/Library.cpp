@@ -20,27 +20,27 @@ namespace winston
 			R9 Bogen 15 ̊, r = 826, 4 mm
 			R10   Bogen 15 ̊, r = 888 mm
 			R20   Bogen 5, 06 ̊, r = 1962 mm*/
-			const Length Roco::G1 = 2300;
+			const Length Roco::G1 = 230;
 			const Length Roco::G12 = G1 / 2;
 			const Length Roco::G14 = G1 / 4;
 			const Length Roco::G4 = G1 * 4;
 
-			const Length Roco::DG1 = 1190;
-			const Length Roco::D5 = 50;
-			const Length Roco::D8 = 80;
-			const Length Roco::D12 = 120;
+			const Length Roco::DG1 = 119;
+			const Length Roco::D5 = 5;
+			const Length Roco::D8 = 8;
+			const Length Roco::D12 = 12;
 
-			const Length Roco::R2_14 = curve(3580.0 / 4.0, 30.0 / 4.0);
-			const Length Roco::R3_14 = curve(4196.0 / 4.0, 30.0 / 4.0);
+			const Length Roco::R2_14 = curve(358.0 / 4.0, 30.0 / 4.0);
+			const Length Roco::R3_14 = curve(419.6 / 4.0, 30.0 / 4.0);
 
-			const Length Roco::R2 = curve(3580.0, 30.0);
-			const Length Roco::R3 = curve(4196.0, 30.0);
-			const Length Roco::R4 = curve(4812.0, 30.0);
-			const Length Roco::R5 = curve(5428.0, 30.0);
-			const Length Roco::R6 = curve(6044.0, 30.0);
-			const Length Roco::R9 = curve(8264.0, 15.0);
-			const Length Roco::R10 = curve(8880.0, 15.0);
-			const Length Roco::R20 = curve(19620.0, 5.0);
+			const Length Roco::R2 = curve(358.0, 30.0);
+			const Length Roco::R3 = curve(419.6, 30.0);
+			const Length Roco::R4 = curve(481.2, 30.0);
+			const Length Roco::R5 = curve(542.8, 30.0);
+			const Length Roco::R6 = curve(604.4, 30.0);
+			const Length Roco::R9 = curve(826.4, 15.0);
+			const Length Roco::R10 = curve(888.0, 15.0);
+			const Length Roco::R20 = curve(1962.0, 5.0);
 			/*
 			constexpr Length Roco::W15(const winston::Turnout::Direction direction)
 			constexpr Length Roco::W10(const winston::Turnout::Direction direction)

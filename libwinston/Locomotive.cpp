@@ -9,7 +9,7 @@ namespace winston
 	const Locomotive::ThrottleSpeedMap Locomotive::defaultThrottleSpeedMap = { {0, 0},{255, 50} };
 	Locomotive::Locomotive(const Callbacks callbacks, const Address address, const Functions functionTable, const Position start, const ThrottleSpeedMap throttleSpeedMap, const std::string name, const unsigned int length, const Types types) 
 		: callbacks(callbacks)
-		, details{ address, functionTable, start, hal::now(), hal::now(), name, length, false, true, false, 0, 0.f, 0, types }
+		, details{ address, functionTable, start, hal::now(), hal::now(), name, length, false, true, false, 0, 0.f, 0, types, {}, { false, false } }
 		, expected { Position::nullPosition(), hal::now(), false }
 		, speedMap(throttleSpeedMap)
 		, speedTrapStart(hal::now())
@@ -257,6 +257,12 @@ namespace winston
 		return this->position();
 	}
 
+	void Locomotive::autodrive(const bool halt, const bool drive)
+	{
+		this->details.autodrive.halt = halt;
+		this->details.autodrive.drive = drive;
+	}
+
 	const Result Locomotive::update()
 	{
 		Position::Transit transit;
@@ -270,13 +276,18 @@ namespace winston
 
 		auto now = hal::now();
 		Duration speedUpdateRate = now - this->details.lastSpeedUpdate;
-		if (inMilliseconds(speedUpdateRate) > WINSTON_LOCO_SPEED_TRACK_RATE)
+		const auto timeDiff = inMilliseconds(speedUpdateRate);
+		if (timeDiff > WINSTON_LOCO_SPEED_TRACK_RATE)
 		{
 			auto diff = (float)this->details.throttle - this->details.modelThrottle;
 
 			// 0..255 in 4s <=> on linear curve
+			// 255..0 in 2s <=> on linear curve
 
-			this->details.modelThrottle += (diff / 255.f) * inMilliseconds(speedUpdateRate) / 4000.f;
+			if(diff > 0)
+				this->details.modelThrottle += (diff / 255.f) * timeDiff / 4000.f;
+			else
+				this->details.modelThrottle += (diff / 255.f) * timeDiff / 2000.f;
 			this->details.modelThrottle = clamp<float>(0.f, 255.f, this->details.modelThrottle);
 			this->callbacks.drive(this->address(), (unsigned char)this->details.modelThrottle, this->details.forward);
 			this->details.lastSpeedUpdate = now;
@@ -285,21 +296,35 @@ namespace winston
 		this->moved(speedUpdateRate, transit);
 		this->updateNextSignals();
 
-		// distance to next signal, forward, facing us
-		if (auto nextSignal = this->details.nextSignals.get(true, Signal::Pass::Facing))
+		if (this->details.autodrive.halt)
 		{
-			if (auto signal = nextSignal->signal)
-				if(signal->shows(Signal::Aspect::Halt))
-				{
-					const auto maxBreakingDeceleration = -0.1f;
-					const auto breakingDistance = this->speed() * this->speed() / (2.f * (0.9f * maxBreakingDeceleration));
-					const auto decelerationToNextSignal = (float)(this->speed() * this->speed()) / (2.f * signal->distance());
-					const auto targetSpeedToHalt = this->speed() - decelerationToNextSignal;
+			// distance to next signal, forward, facing us
+			if (auto nextSignal = this->details.nextSignals.get(true, Signal::Pass::Facing))
+			{
+				if (auto signal = nextSignal->signal)
+					if (signal->shows(Signal::Aspect::Halt))
+					{
+						const auto minBreaking = 0.03f;
+						const auto maxBreakingDeceleration = 0.3f;
+						const auto breakingDistance = this->speed() * this->speed() / (2.f * (0.9f * maxBreakingDeceleration));
+						const auto decelerationToNextSignal = (float)(this->speed() * this->speed()) / (2.f * nextSignal->distance);
 
-					this->details.throttle = this->details.modelThrottle = this->speedMap.throttle(targetSpeedToHalt);
-					this->callbacks.drive(this->address(), (unsigned char)this->details.modelThrottle, this->details.forward);
-					this->details.lastSpeedUpdate = now;
-				}
+						if (nextSignal->distance < 10)
+						{
+							// fullstop
+							this->details.throttle = this->details.modelThrottle = 0;
+							this->callbacks.drive(this->address(), (unsigned char)this->details.modelThrottle, this->details.forward);
+							this->details.lastSpeedUpdate = now;
+						}
+						else if (decelerationToNextSignal > minBreaking)
+						{
+							const auto targetSpeedToHalt = this->speed() - (decelerationToNextSignal * timeDiff / 1000.f);
+							this->details.throttle = this->details.modelThrottle = this->speedMap.throttle(targetSpeedToHalt);
+							this->callbacks.drive(this->address(), (unsigned char)this->details.modelThrottle, this->details.forward);
+							this->details.lastSpeedUpdate = now;
+						}
+					}
+			}
 		}
 
 		return Result::OK;
@@ -373,6 +398,8 @@ namespace winston
 			auto lower = this->map.lower_bound(throttle);
 			auto upper = this->map.upper_bound(throttle);
 
+			lower--;
+
 			// throttle == lower => 0 ==> lower
 			// throttle == upper => 1 ==> upper
 			float frac = (float)(throttle - lower->first) / (float)(upper->first - lower->first);
@@ -386,18 +413,18 @@ namespace winston
 
 	const Locomotive::Throttle Locomotive::SpeedMap::throttle(const Speed speed) const
 	{
-		for (auto it = this->map.begin(); it != this->map.end();) //const auto& [th, sp]: this->map)
+		for (auto it = this->map.begin(); it != this->map.end();)
 		{
 			const auto current = *it;
 			if (++it == this->map.end())
-				break;
+				return current.first;
 
 			const auto next = *it;
 
-			if(current.second >= speed && next.second <= speed)
+			if (current.second <= speed && speed <= next.second)
 			{
 				float frac = (float)(speed - current.second) / (float)(next.second - current.second);
-				return lerp<Throttle>(current.second, next.second, frac);
+				return lerp<Throttle>(current.first, next.first, frac);
 			}
 		}
 

@@ -169,8 +169,13 @@ namespace winston
 				else if (const auto nextTurnout = provider->nextTurnout)
 				{
 					// we found a turnout, so we need to see where it leads to and continue there
-					connection = current->whereConnects(nextTurnout->turnout);
+					//connection = current->whereConnects(nextTurnout->turnout);
+					//current = nextTurnout->turnout;
+					connection = nextTurnout->entered;
 					current = nextTurnout->turnout;
+
+					// traverse the current turnout to the other side
+					connection = current->otherConnection(connection);
 				}
 				else
 				{

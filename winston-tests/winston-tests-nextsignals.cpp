@@ -238,11 +238,13 @@ namespace winstontests
             auto Turnout2 = std::dynamic_pointer_cast<winston::Turnout>(railway->track(Y2024RailwayTracks::Turnout2));
             auto Turnout3 = std::dynamic_pointer_cast<winston::Turnout>(railway->track(Y2024RailwayTracks::Turnout3));
             auto B1 = railway->track(Y2024RailwayTracks::B1);
+            auto B6 = railway->track(Y2024RailwayTracks::B6);
             auto B7 = railway->track(Y2024RailwayTracks::B7);
             auto PBF1 = railway->track(Y2024RailwayTracks::PBF1);
 
             auto B1_A = B1->signalGuarding(winston::Track::Connection::A);
             auto B1_B = B1->signalGuarding(winston::Track::Connection::B);
+            auto B6_B = B6->signalGuarding(winston::Track::Connection::B);
             auto B7_A = B7->signalGuarding(winston::Track::Connection::A);
             auto B7_B = B7->signalGuarding(winston::Track::Connection::B);
             auto PBF1_A = PBF1->signalGuarding(winston::Track::Connection::A);
@@ -267,7 +269,9 @@ namespace winstontests
 
             pos = winston::Position(PBF1, winston::Track::Connection::A, 2);
             loco->railOnto(pos);
+            Assert::IsTrue(loco->isNextSignal(B7_B));
             Assert::IsTrue(loco->isNextSignal(B7_A));
+            Assert::IsTrue(loco->isNextSignal(PBF1_A));
             Assert::IsTrue(loco->isNextSignal(PBF1_B));
         }
     };

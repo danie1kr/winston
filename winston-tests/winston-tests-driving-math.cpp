@@ -336,9 +336,24 @@ namespace winstontests
             Assert::IsTrue(newPos.connection() == expect.connection());
             //Assert::IsTrue(newPos.distance() - (travelledDistance - distance) < 50);
         }
+        
+        TEST_METHOD(ThrottleMapMath)
+        {
+            winston::Locomotive::SpeedMap map{{{0, 0}, {100, 10}, {255, 25}}};
+            // fixed
+            Assert::IsTrue(map.speed(100) == 10);
+            Assert::IsTrue(map.speed(255) == 25);
+            Assert::IsTrue(map.throttle(10) == 100);
+            Assert::IsTrue(map.throttle(25) == 255);
+            // lerps
+            Assert::IsTrue(map.speed(50) == 5);
+            Assert::IsTrue(map.speed(20) == 2);
+            Assert::IsTrue(map.throttle(5) == 50);
+            Assert::IsTrue(map.throttle(20) == 203);
 
-
-
+            // outliers
+            Assert::IsTrue(map.throttle(55) == 255);
+        }
         TEST_METHOD(DriveCollectSignals)
         {
             winston::LocomotiveShed shed;

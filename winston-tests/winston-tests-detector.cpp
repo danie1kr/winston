@@ -299,7 +299,9 @@ namespace winstontests
             auto PBF1 = railway->track(Y2024RailwayTracks::PBF1);
 
             auto B1_A = B1->signalGuarding(winston::Track::Connection::A);
+            auto B6_A = B6->signalGuarding(winston::Track::Connection::A);
             auto B6_B = B6->signalGuarding(winston::Track::Connection::B);
+            auto B7_A = B7->signalGuarding(winston::Track::Connection::A);
             auto B7_B = B7->signalGuarding(winston::Track::Connection::B);
             auto PBF1_A = PBF1->signalGuarding(winston::Track::Connection::A);
             auto PBF1_B = PBF1->signalGuarding(winston::Track::Connection::B);
@@ -307,25 +309,42 @@ namespace winstontests
 
             Turnout1->finalizeChangeTo(winston::Turnout::Direction::A_C);
             Turnout2->finalizeChangeTo(winston::Turnout::Direction::A_B);
-            auto distanceB7_T1 = Turnout1->length() + 10;
-            auto distanceT1_PBF1a = PBF1->length() + Turnout2->length() + 10;
+            signalTower->setSignalsFor(*Turnout1);
+            signalTower->setSignalsFor(*Turnout2);
+            signalTower->setSignalsFor(*Turnout3);
+            for (int i = 0; i < 10; ++i)
+                signalTower->loop();
+            auto distanceB7_T1 = (Turnout1->length() + 1) * 10;
+            auto distanceT1_PBF1a = (PBF1->length() + Turnout2->length() + 1) * 10;
 
-            auto throttle = 100;
+            auto throttle = 10;
             loco->drive<true>(true, throttle);
 
             injectLoco(B7->segment(), loco, true);
+            for (int i = 0; i < 10; ++i)
+                signalTower->loop();
             detectorLoops();
+            Assert::IsTrue(loco->isNextSignal(PBF1_A));
+            Assert::IsTrue(loco->isNextSignal(PBF1_B));
+            Assert::IsTrue(loco->isNextSignal(B7_A));
+            Assert::IsTrue(loco->isNextSignal(B7_B));
             Assert::IsTrue(loco->position().trackIndex() == (*railway->segment(B7->segment())->tracks().begin())->index);
             // we don't know yet, as the loco just appeared. Do not set signals yet
         
             loco->railOnto(winston::Position(B7, winston::Track::Connection::A, B7->length()));
+            for (int i = 0; i < 10; ++i)
+                signalTower->loop();
             // and now we know:
             // PBF1_A should be red as loco is on B7
-            // B6_B should be red as loco is on B7
+            // B7_B should be red as loco is on B7 but behind B7_B
             // PBF1a_A should be green as turnout is set correctly and track PBF1 is empty
             // PBF1_B should be green as the track PBF1a_A is empty
+            Assert::IsTrue(loco->isNextSignal(PBF1_A));
+            Assert::IsTrue(loco->isNextSignal(PBF1_B));
+            Assert::IsTrue(loco->isNextSignal(B7_A));
+            Assert::IsTrue(loco->isNextSignal(B7_B));
 
-            Assert::IsTrue(B6_B->shows(winston::Signal::Aspect::Halt));
+            Assert::IsTrue(B7_B->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(PBF1_A->shows(winston::Signal::Aspect::Halt));
             Assert::IsTrue(PBF1a_A->shows(winston::Signal::Aspect::Go));
             Assert::IsTrue(PBF1_B->shows(winston::Signal::Aspect::Go));
@@ -417,6 +436,7 @@ namespace winstontests
 
             auto loco = locoShed[0];
             auto PBF1a = railway->track(Y2024RailwayTracks::PBF1a);
+            auto B7 = railway->track(Y2024RailwayTracks::B7);
             auto Turnout1 = std::dynamic_pointer_cast<winston::Turnout>(railway->track(Y2024RailwayTracks::Turnout1));
             auto Turnout2 = std::dynamic_pointer_cast<winston::Turnout>(railway->track(Y2024RailwayTracks::Turnout2));
             auto Turnout3 = std::dynamic_pointer_cast<winston::Turnout>(railway->track(Y2024RailwayTracks::Turnout3));
@@ -509,9 +529,10 @@ namespace winstontests
                     signalTower->setSignalsForLocoPassing(track, connection, pass);
                     return winston::Result::OK;
                 },
-                { {0, 0}, {100, 10}, {255, 25} });
+                { {0, 0}, {100, 100}, {255, 255} });
 
             auto loco = locoShed[0];
+            loco->autodrive(true, false);
             auto B3 = railway->track(Y2024RailwayTracks::B3);
             auto Turnout1 = std::dynamic_pointer_cast<winston::Turnout>(railway->track(Y2024RailwayTracks::Turnout1));
             auto Turnout2 = std::dynamic_pointer_cast<winston::Turnout>(railway->track(Y2024RailwayTracks::Turnout2));
@@ -558,25 +579,37 @@ namespace winstontests
             };
 
             bool done = false;
+            bool completed = false;
             while (!done)
             {
                 auto oldLocoTrack = loco->position().track();
                 winston::Position::Transit transit = winston::Position::Transit::Stay;
-                while (transit == winston::Position::Transit::Stay)
+                while (transit == winston::Position::Transit::Stay && loco->speed() != 0)
                 {
                     loco->update(transit);
                     winston::hal::delay(100);
                 }
                 Assert::IsTrue(transit != winston::Position::Transit::TraversalError);
                 auto locoTrack = loco->position().track();
-                Assert::IsTrue(expectedTrackListIndex < expectedTrackList.size());
-                Assert::IsTrue(locoTrack == expectedTrackList[expectedTrackListIndex++]);
-                injectLoco(locoTrack->segment(), loco, true);
-                injectLoco(oldLocoTrack->segment(), loco, false);
-                detectorLoops();
-
+                Assert::IsTrue(expectedTrackListIndex <= expectedTrackList.size());
+                if(expectedTrackListIndex < expectedTrackList.size())
+                { 
+                    Assert::IsTrue(locoTrack == expectedTrackList[expectedTrackListIndex++]);
+                    injectLoco(locoTrack->segment(), loco, true);
+                    injectLoco(oldLocoTrack->segment(), loco, false);
+                    detectorLoops();
+                }
+                else if (expectedTrackListIndex == expectedTrackList.size())
+                {
+                    Assert::IsTrue(locoTrack == expectedTrackList[expectedTrackListIndex - 1]);
+                    Assert::IsTrue(loco->speed() == 0);
+                    auto nextSignal = loco->details.nextSignals.get(true, winston::Signal::Pass::Facing);
+                    Assert::IsTrue(nextSignal->distance > 10 && nextSignal->distance < 20);
+                    completed = true;
+                }
                 done = loco->speed() == 0;
             }
+            Assert::IsTrue(completed);
         }
     };
 }

@@ -92,7 +92,8 @@ namespace winston
 			return lower;
 		else if (frac >= 1.0f)
 			return upper;
-		return (T)(frac * upper + (1.0f - frac) * lower);
+		//return (T)(frac * upper + (1.0f - frac) * lower);
+		return (T)(lower + frac * (upper-lower));
 	}
 
 	template<typename T>

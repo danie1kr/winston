@@ -213,6 +213,38 @@ Pre-Calculate signals for turnout
 		{
 			// green current block we are leaving (nach hinten bis zum nächsten facing, als wenn wir rückwärts führen)
 			auto signalOfLeftBlockTrack = track;
+			auto signalOfLeftBlockConnection = track->otherConnection(connection);
+			Signal::Shared signal;
+			Track::Const signalTrack;
+			Track::Connection signalConnection;
+			Distance distance;
+			// we walk backwards, we see the backside of the signal of the block we left 
+			if(signalOfLeftBlockTrack->nextSignal(signalOfLeftBlockConnection, Signal::Pass::Backside, signal, signalTrack, signalConnection, distance))
+				this->setSignalOn(*signalTrack, signalConnection, Signal::Aspect::Go, Signal::Aspect::Off, Signal::Authority::Occupancy);
+
+			// halt next block (passed signal)
+			this->setSignalOn(*track, connection, Signal::Aspect::Halt, Signal::Aspect::Off);
+		}
+		else
+		{
+			// green current block(passed signal)
+			this->setSignalOn(*track, connection, Signal::Aspect::Go, Signal::Aspect::Off, Signal::Authority::Occupancy);
+
+			// halt entering block(vorwärts bis zum nächsten backside)
+			auto signalOfEnteredBlockTrack = track;
+			auto signalOfEnteredBlockConnection = track->otherConnection(connection);
+			Signal::Shared signal;
+			Track::Const signalTrack;
+			Track::Connection signalConnection;
+			Distance distance;
+			if (signalOfEnteredBlockTrack->nextSignal(signalOfEnteredBlockConnection, pass, signal, signalTrack, signalConnection, distance))
+				this->setSignalOn(*signalTrack, signalConnection, Signal::Aspect::Halt, Signal::Aspect::Off, Signal::Authority::Occupancy);
+		}
+		/*
+		if (pass == Signal::Pass::Facing)
+		{
+			// green current block we are leaving (nach hinten bis zum nächsten facing, als wenn wir rückwärts führen)
+			auto signalOfLeftBlockTrack = track;
 			auto signalOfLeftBlockConnection = connection;
 			if (auto signalOfLeftBlock = this->nextSignal(signalOfLeftBlockTrack, false, signalOfLeftBlockConnection, true, false))
 				this->setSignalOn(*signalOfLeftBlockTrack, signalOfLeftBlockConnection, Signal::Aspect::Go, Signal::Aspect::Off, Signal::Authority::Occupancy);
@@ -231,14 +263,15 @@ Pre-Calculate signals for turnout
 			if (auto signalOfEnteredBlock = this->nextSignal(signalOfEnteredTrack, true, signalOfEnteredBlockConnection, true, false))
 				this->setSignalOn(*signalOfEnteredTrack, signalOfEnteredBlockConnection, Signal::Aspect::Halt, Signal::Aspect::Off);
 		}
+		*/
 	}
 
 	void SignalTower::setSignalsForLoco(const Locomotive::Const loco)
 	{
-		auto next = loco->nextSignal(Signal::Pass::Facing, true);
+		auto next = loco->nextSignal(Signal::Pass::Backside, true);
 		if (next && next->signal && next->track)
 			SignalTower::setSignalOn(*next->track, next->connection, Signal::Aspect::Halt, Signal::Aspect::Off);
-		auto prev = loco->nextSignal(Signal::Pass::Facing, false);
+		auto prev = loco->nextSignal(Signal::Pass::Backside, false);
 		if (prev && prev->signal && prev->track)
 			SignalTower::setSignalOn(*prev->track, prev->connection, Signal::Aspect::Halt, Signal::Aspect::Off);
 	}
@@ -308,22 +341,44 @@ Pre-Calculate signals for turnout
 	{
 		NextSignals signals;
 		Track::Const current = position.track();
-		auto connection = current->otherConnection(position.connection());
-		auto signal = current->signalGuarding(connection);
-		if (signal)
+		if (pass == Signal::Pass::Facing)
 		{
-			// signal on the current track
-			const auto signalDistanceFromReference = current->length() - signal->distance();
-			if (signalDistanceFromReference > (unsigned)position.distance())
-				return NextSignal::make(signal, current, connection, position.distance() - signalDistanceFromReference, pass);
-		}
-		//else
-		{
+			// the signal facing us is guarding the other connection
+			auto connection = current->otherConnection(position.connection());
+			auto signal = current->signalGuarding(connection);
+			if (signal)
+			{
+				// signal on the current track
+				const auto signalDistanceFromReference = current->length() - signal->distance();
+				if (signalDistanceFromReference > (unsigned)position.distance())
+					return NextSignal::make(signal, current, connection, signalDistanceFromReference - position.distance(), pass);
+			}
+
 			// signal on the following track
 			Distance distance = current->length() - position.distance();
 			if (SignalTower::findNextSignal(current, connection, distance, pass, signal))
 				return NextSignal::make(signal, current, connection, distance, pass);
 		}
+		else
+		{
+			// the signal backside is guarding our reference connection
+			auto connection = position.connection();
+			auto signal = current->signalGuarding(connection);
+			if (signal)
+			{
+				// signal on the current track
+				const auto signalDistanceFromReference = signal->distance();
+				if (signalDistanceFromReference > (unsigned)position.distance())
+					return NextSignal::make(signal, current, connection, signalDistanceFromReference - position.distance(), pass);
+			}
+
+			// signal on the following track, leave on otherConnection than our reference
+			Distance distance = current->length() - position.distance();
+			connection = current->otherConnection(connection);
+			if (SignalTower::findNextSignal(current, connection, distance, pass, signal))
+				return NextSignal::make(signal, current, connection, distance, pass);
+		}
+
 		return nullptr;
 	}
 

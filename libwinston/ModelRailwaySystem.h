@@ -323,6 +323,7 @@ namespace winston
 		virtual const Result on_http(typename _WebServer::HTTPConnection& connection, const HTTPMethod method, const std::string& resource) = 0;
 		const Result on_http_internal(typename _WebServer::HTTPConnection& connection, const HTTPMethod method, const std::string& resource) {
 			const std::string path_signals("/signals");
+			const std::string path_locos("/locos");
 			const std::string path_signalstest("/signals-test");
 			const std::string path_confirmation_yes("/confirm_yes");
 			const std::string path_confirmation_maybe("/confirm_maybe");
@@ -335,26 +336,51 @@ namespace winston
 				connection.header("content-type"_s, "text/html; charset=UTF-8"_s);
 				connection.header("Connection"_s, "close"_s);
 				std::string body = "<html><head>winston signal list</head><body><table border=1><tr><th>track</th><th>connection</th><th>light</th><th>port</th><th>device @ port</th></tr>";
+				connection.body(body); body = "";
 				for (unsigned int i = 0; i < railway->tracksCount(); ++i)
 				{
 					auto track = railway->track(i);
 					switch (track->type())
 					{
 					case winston::Track::Type::Bumper:
-						this->writeSignalHTMLList(body, track, winston::Track::Connection::DeadEnd);
-						this->writeSignalHTMLList(body, track, winston::Track::Connection::A);
+						body = this->writeSignalHTMLList(track, winston::Track::Connection::DeadEnd); connection.body(body);
+						body = this->writeSignalHTMLList(track, winston::Track::Connection::A); connection.body(body);
 						break;
 					case winston::Track::Type::Rail:
-						this->writeSignalHTMLList(body, track, winston::Track::Connection::A);
-						this->writeSignalHTMLList(body, track, winston::Track::Connection::B);
+						body = this->writeSignalHTMLList(track, winston::Track::Connection::A); connection.body(body);
+						body = this->writeSignalHTMLList(track, winston::Track::Connection::B); connection.body(body);
 						break;
 					default:
 						break;
 					}
 				}
-				body += "</table></body></html>\r\n";
-
+				body = "</table></body></html>\r\n";
 				connection.body(body);
+				connection.submit();
+			}
+			else if (resource.compare(path_locos) == 0)
+			{
+				connection.status(200);
+				connection.header("content-type"_s, "text/html; charset=UTF-8"_s);
+				connection.header("Connection"_s, "close"_s);
+				std::string body = "<html><head>winston loco list</head><body><table border=1><tr><th>loco</th><th>speed map</th></tr>";
+				connection.body(body);
+				for (unsigned int i = 0; i < locomotiveShed.size(); ++i)
+				{
+					auto loco = locomotiveShed.at(i);
+					connection.body(build("<tr><td>", loco->name(), "<br> DCC: ", loco->address(), "</td><td>"));
+
+					connection.body("<table><tr><th>Throttle</th><th>Speed</th></tr>");
+					loco->eachSpeedMap([&connection](const Throttle throttle, const Speed speed)
+						{
+							connection.body(build("<tr><td>", throttle, "</td><td>", speed, " mm/s</td></tr>"));
+						});
+					connection.body("</table></td></tr>");
+					
+					connection.body("</td></tr>");
+				}
+				connection.body("</table></body></html>\r\n");
+				connection.submit();
 			}
 			/*
 			else if (resource.compare(path_signalstest) == 0)
@@ -440,8 +466,9 @@ namespace winston
 		}
 
 		// add a signal to the /signal output
-		void writeSignalHTMLList(std::string &body, const Track::Shared track, const Track::Connection trackCon)
+		const std::string writeSignalHTMLList(const Track::Shared track, const Track::Connection trackCon)
 		{
+			std::string body;
 			if (auto signal = track->signalGuarding(trackCon))
 			{
 				unsigned int l = 0;
@@ -491,6 +518,7 @@ namespace winston
 					body += winston::build(l, "<span style=\"color:" + color + ";\">" + icon + " " + aspect + "</span>", "</td><td>", light.port, "</td><td>", signal->deviceId, " @ ", light.port < 10 ? "0" : "", light.port, "</td></tr>");
 				}
 			}
+			return body;
 		}
 #endif
 
@@ -608,7 +636,7 @@ namespace winston
 
 		virtual const winston::Result setupDetectors() = 0;
 
-		void addLocomotive(const winston::Locomotive::Callbacks callbacks, const Address address, const winston::Locomotive::Functions functions, const Position start, const Locomotive::ThrottleSpeedMap speedMap, const std::string name, const unsigned int length, const Locomotive::Types types)
+		void addLocomotive(const winston::Locomotive::Callbacks callbacks, const Address address, const winston::Locomotive::Functions functions, const Position start, const ThrottleSpeedMap speedMap, const std::string name, const unsigned int length, const Locomotive::Types types)
 		{
 			this->locomotiveShed.push_back(Locomotive::make(callbacks, address, functions, start, speedMap, name, length, types));
 		}

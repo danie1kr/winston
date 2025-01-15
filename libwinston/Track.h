@@ -146,7 +146,7 @@ namespace winston
 			return traverse<TraversalSignalHandling::Ignore>(start, connection, signal);
 		}
 
-		const bool traverseToNextSegment(const Connection connection, Track::Const& onto, bool leavingOnConnection) const;
+		const bool traverseToNextSegment(const Track::Connection connection, const bool leavingOnConnection, Track::Const& onto, Track::Connection& ontoConnection) const;
 
 		virtual void collectAllConnections(std::set<Track::Shared>& tracks) const = 0;
 		//virtual const Connection whereConnects(const Track::Shared& other) const = 0;
@@ -199,12 +199,7 @@ namespace winston
 		const bool nextSignal(const Connection leaving, const Signal::Pass pass, Signal::Shared& signal, Track::Const& track, Track::Connection& guarding, Distance &distance) const;
 		virtual const size_t nextSignalsIndex(const Connection connection, const Signal::Pass pass) const = 0;
 
-#ifdef WINSTON_TEST
-		public:
-#else
-		private:
-#endif
-			virtual NextSignalProvider::Shared getNextSignalProvider(const Connection connection, const Signal::Pass pass) const = 0;
+		virtual NextSignalProvider::Shared getNextSignalProvider(const Connection connection, const Signal::Pass pass) const = 0;
 
 	protected:
 		virtual Track::Shared connectTo(const Connection local, SignalFactory guardingLocalSignalFactory, Track::Shared& to, const Connection remote, SignalFactory guardingRemoteSignalFactory, bool viceVersa = true) = 0;

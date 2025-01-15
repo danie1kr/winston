@@ -228,7 +228,7 @@ namespace winston
 	class SignalInstance : public Signal, public Shared_Ptr<SignalInstance<_Aspects>>
 	{
 	public:
-		SignalInstance(const Id deviceId = 0, const Callback callback = Signal::defaultCallback(), const Length distance = 0, const Port port = 0)
+		SignalInstance(const Id deviceId = 0, const Callback callback = Signal::defaultCallback(), const Length distance = 0.f, const Port port = 0)
 			: Signal(deviceId, callback, distance)
 			, _lights(Sequence<BitCounter<_Aspects>::count() - 1>::generate(_Aspects, port)) {
 			this->init();

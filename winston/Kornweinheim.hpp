@@ -741,6 +741,10 @@ const winston::Result Kornweinheim::setupDetectors()
         [](const std::string detectorName, const winston::Locomotive::Shared loco, const bool forward, winston::Segment::Shared segment, const winston::Detector::Change change, const winston::TimePoint when) -> const winston::Result
         { 
             winston::logger.info(loco->name(), change == winston::Detector::Change::Entered ? " entered " : " left ", segment->id);
+            if (change == winston::Detector::Change::Entered)
+                loco->entered(segment, when);
+            else
+                loco->left(segment, when);
             return winston::Result::OK; 
         };
     callbacks.occupied = 

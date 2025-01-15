@@ -22,4 +22,8 @@
     <DisplayString>{track->_name} {connection} {(winston::Signal::Aspect)signal->_aspect}</DisplayString>
   </Type>
 
+  <Type Name="winston::Position">
+    <DisplayString>{_track->_name} {reference} {dist}</DisplayString>
+  </Type>
+
 </AutoVisualizer>

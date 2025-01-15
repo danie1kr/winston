@@ -96,7 +96,7 @@ namespace winston
 		auto distOnThisTrack = this->dist;
 		this->dist += std::abs(distance);
 		auto section = this->_track->section();
-		if (this->dist >= 0 && this->dist <= (int)this->_track->length())
+		if (this->dist >= 0 && this->dist <= this->_track->length())
 		{
 			this->collectSignalsInRange(distOnThisTrack, this->dist, this->_track, this->reference, signalPassed);
 			return Transit::Stay;
@@ -107,7 +107,7 @@ namespace winston
 			auto current = this->_track;
 			while (true)
 			{
-				auto onThisTrack = std::min(this->dist, (int)current->length());
+				auto onThisTrack = std::min(this->dist, current->length());
 				this->collectSignalsInRange(distOnThisTrack, onThisTrack, current, connection, signalPassed);
 
 				if (this->dist < current->length())

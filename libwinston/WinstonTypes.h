@@ -11,6 +11,7 @@
 #include <array>
 #include <vector>
 #include <list>
+#include <map>
 #include "../libwinston/external/better_enum.hpp"
 #ifdef __GNUC__ 
 #pragma GCC pop_options
@@ -337,15 +338,19 @@ namespace winston
 	class Command;
 	class Payload;
 
-	using Length = unsigned int;
-	using Distance = int;
+	using Length = float;
+	using Distance = float;
+
+	using Throttle = unsigned char;
+	using Speed = float; // mm/s
+	using ThrottleSpeedMap = std::map<Throttle, Speed>;
 
 #ifndef WINSTON_PLATFORM_ESP32
 	using TimePoint = std::chrono::system_clock::time_point;
 	using Duration = TimePoint::duration;
 #define toSeconds(x) (std::chrono::seconds(x))
-#define toMilliseconds(x) (std::chrono::milliseconds(x))
-#define toMicroseconds(x) (std::chrono::microseconds(x))
+#define toMilliseconds(x) (std::chrono::milliseconds((uint64_t)(x)))
+#define toMicroseconds(x) (std::chrono::microseconds((uint64_t)(x)))
 #define inSeconds(x) ((x) / toSeconds(1))
 #define inMilliseconds(x) ((x) / toMilliseconds(1))
 #define inMicroseconds(x) ((x) / toMicroseconds(1))

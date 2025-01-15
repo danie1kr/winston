@@ -114,7 +114,7 @@ namespace winstontests
 			}
 
 			auto port1{ 0 };
-			auto signal1 = winston::SignalKS::make(0, winston::Signal::defaultCallback(), 0, port1);
+			auto signal1 = winston::SignalKS::make(0, winston::Signal::defaultCallback(), 0.f, port1);
 
 			signal1->aspect(winston::Signal::Aspect::Halt);
 			this->signalDevice->update(*signal1);

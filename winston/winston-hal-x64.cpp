@@ -55,6 +55,7 @@ namespace winston
 
 #ifdef WINSTON_TEST
         unsigned int sleepyTime = 0;
+        TimePoint initialNow = winston::hal::now();
         void delay(const unsigned int ms)
         {
             sleepyTime += ms;
@@ -67,7 +68,8 @@ namespace winston
 
         TimePoint now()
         {
-            return std::chrono::system_clock::now() + std::chrono::milliseconds(sleepyTime);
+            //return std::chrono::system_clock::now() + std::chrono::milliseconds(sleepyTime);
+            return initialNow + std::chrono::milliseconds(sleepyTime);
         }
 #else
         void delay(const unsigned int ms)
@@ -104,13 +106,19 @@ bool WebServerWSPP::HTTPConnectionWSPP::header(const std::string& key, const std
 }
 bool WebServerWSPP::HTTPConnectionWSPP::body(const std::string& content)
 {
-    this->connection->set_body(content);
+    this->fullBody += content;
     return true;
 }
 bool WebServerWSPP::HTTPConnectionWSPP::body(const unsigned char* content, size_t length, size_t chunked)
 {
-    this->connection->set_body((const char*)content);
+    std::string string(reinterpret_cast<const char*>(content));
+    this->fullBody += string;
     return true;
+}
+
+void WebServerWSPP::HTTPConnectionWSPP::submit()
+{
+    this->connection->set_body(this->fullBody);
 }
 
 WebServerWSPP::WebServerWSPP() : winston::WebServer<ConnectionWSPP>()

@@ -149,8 +149,8 @@ namespace winstontests
         void createLocos(winston::Locomotive::Callbacks::SignalPassedCallback signalPassed)
         {
             winston::Locomotive::Functions standardFunctions = { {0, "Light"} };
-            winston::Locomotive::ThrottleSpeedMap speedMap{ {0, 0}, {100, 1000}, {255, 2550} };
-            locoShed.push_back(winston::Locomotive::make(locoCallbacks(signalPassed), 3, standardFunctions, winston::Position::nullPosition(), speedMap, "BR 114", 100, (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods | (unsigned char)winston::Locomotive::Type::Shunting));
+            winston::ThrottleSpeedMap speedMap{ {0, 0.f}, {100, 1000.f}, {255, 2550.f} };
+            locoShed.push_back(winston::Locomotive::make(locoCallbacks(signalPassed), 3, standardFunctions, winston::Position::nullPosition(), speedMap, "BR 114", 100.f, (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods | (unsigned char)winston::Locomotive::Type::Shunting));
         }
 
     public:

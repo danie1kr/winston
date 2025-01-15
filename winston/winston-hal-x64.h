@@ -190,6 +190,7 @@ public:
 		bool header(const std::string& key, const std::string& value);
 		bool body(const std::string& content);
 		bool body(const unsigned char* content, size_t length, size_t chunked);
+		void submit();
 	private:
 		HTTPClient& connection;
 		std::string fullBody;
@@ -274,8 +275,10 @@ using WebSocketClient = WebSocketClientWin;
 namespace winston::hal 
 {
 	extern unsigned int sleepyTime;
+	extern TimePoint initialNow;
 	static void resetSleepyTime()
 	{
+		initialNow = winston::hal::now();
 		sleepyTime = 0;
 	}
 }

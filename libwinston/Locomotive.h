@@ -91,9 +91,6 @@ namespace winston
 		};
 
 		using Types = unsigned char;
-		using Throttle = unsigned char;
-		using Speed = unsigned int;
-		using ThrottleSpeedMap = std::map<Throttle, Speed>;
 
 		struct Function
 		{
@@ -102,7 +99,7 @@ namespace winston
 		};
 		using Functions = std::vector<Function>;
 		
-		Locomotive(const Callbacks callbacks, const Address address, const Functions functions, const Position start, const ThrottleSpeedMap speedMap, const std::string name, const unsigned int length, const Types types);
+		Locomotive(const Callbacks callbacks, const Address address, const Functions functions, const Position start, const ThrottleSpeedMap speedMap, const std::string name, const Length length, const Types types);
 		inline void light(bool on);
 		const bool light();
 		inline void function(const unsigned int id, const bool value);
@@ -120,6 +117,8 @@ namespace winston
 				this->details.throttle = throttle;
 		}
 		void speedTrap(const Distance distance = 0);
+		using EachSpeedMapCallback = std::function<void(const Throttle, const Speed)>;
+	 	void eachSpeedMap(EachSpeedMapCallback callback) const;
 		//void position(const Position p);
 		const Position& position() const;
 		void stop();
@@ -145,11 +144,13 @@ namespace winston
 		const bool isNextSignal(const Signal::Const signal) const;
 		void updateNextSignals();
 
-		void autodrive(const bool halt, const bool drive);
+		void autodrive(const bool halt, const bool drive, const bool updateSpeedMap);
 	private:
 
 		const Position& moved(Duration& timeOnTour, Position::Transit& transit);
 		static const float acceleration(const Throttle throttle);
+
+		void updateSpeed(const Throttle throttle);
 
 		void updateExpected(const bool fullUpdate = true);
 #ifdef WINSTON_TEST
@@ -164,33 +165,39 @@ namespace winston
 			const Speed speed(const Throttle throttle) const;
 			const Throttle throttle(const Speed speed) const;
 			void learn(const Throttle throttle, const Speed speed);
+			void each(EachSpeedMapCallback callback) const;
 		private:
-			//static const Speed lerp(const Speed lower, const Speed upper, const float frac);
+			// unsigned char throttle <-> float speed mm/s
 			ThrottleSpeedMap map;
 		};
 
 		const Callbacks callbacks;
 		struct Details
 		{
-			Address address = { 0 };
+			Address address{ 0 };
 			const Functions functionTable;
 			Position position;
 			TimePoint lastPositionUpdate, lastSpeedUpdate;
-			std::string name = { "" };
-			const Length length;
-			bool busy = { false };
-			bool forward = { true };
-			bool railed = { false };
-			Throttle throttle = { 0 };
-			float modelThrottle = { 0.f };
-			uint32_t functions = { 0 };
-			Types types = { (unsigned char)Type::Single };
+			std::string name{ "" };
+			const Length length{ 0 };
+			bool busy{ false };
+			bool forward{ true };
+			bool railed{ false };
+			Throttle throttle{ 0 };
+			Throttle modelThrottle{ 0 };
+			uint32_t functions{ 0 };
+			Types types{ (unsigned char)Type::Single };
 			NextSignals nextSignals;
-			struct Autodrive
+			struct
 			{
 				bool halt;
 				bool drive;
+				bool updateSpeedMap;
 			} autodrive;
+			bool speedTrapping{ false };
+			Distance distanceSinceSpeedTrapped{ 0 };
+			Segment::Shared lastEnteredSegment{ nullptr };
+			bool positionUpdateRequired{ false };
 		} details;
 
 		struct Expected

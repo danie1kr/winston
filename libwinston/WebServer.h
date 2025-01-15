@@ -36,6 +36,7 @@ namespace winston
 			virtual bool header(const std::string& key, const std::string& value) = 0;
 			virtual bool body(const std::string& content) = 0;
             virtual bool body(const unsigned char* content, size_t length, size_t chunked) = 0;
+            virtual void submit() = 0;
 		};
 
 		using OnHTTP = std::function<Result(HTTPConnection &client, const HTTPMethod method, const std::string &resource)>;

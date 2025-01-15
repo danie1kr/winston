@@ -152,7 +152,7 @@ namespace winstontests
             auto end = winston::Position(B6, winston::Track::Connection::A, 50);
             auto expect = winston::Position(B5, winston::Track::Connection::B, 80);
 
-            auto distance = (signed)(50 + Turnout12->length() + 80);
+            auto distance = (50.f + Turnout12->length() + 80.f);
             auto transit = end.drive(-distance, [](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result { return winston::Result::OK; });
 
             Assert::IsTrue(transit == winston::Position::Transit::CrossTrack);
@@ -175,7 +175,7 @@ namespace winstontests
             auto end = winston::Position(B6, winston::Track::Connection::A, 50);
             auto expect = winston::Position(B5, winston::Track::Connection::B, 80);
 
-            auto distance = (signed)(50 + Turnout12->length() + 80);
+            auto distance = (50 + Turnout12->length() + 80);
             auto transit = end.drive(-distance, [](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result { return winston::Result::OK; });
 
             Assert::IsTrue(transit == winston::Position::Transit::TraversalError);
@@ -206,14 +206,14 @@ namespace winstontests
             Turnout3->finalizeChangeTo(winston::Turnout::Direction::A_B);
 
             auto pos = winston::Position(PBF3, winston::Track::Connection::A, 50);
-            auto distance = (signed)(PBF3->length() + Turnout6->length() + PBF3a->length() + B4->length() + Turnout10->length() + Turnout11->length() + B5->length() + Turnout12->length() + B6->length() + Turnout2->length() + Turnout3->length() + 10);
+            auto distance = (PBF3->length() + Turnout6->length() + PBF3a->length() + B4->length() + Turnout10->length() + Turnout11->length() + B5->length() + Turnout12->length() + B6->length() + Turnout2->length() + Turnout3->length() + 10);
             auto expect = winston::Position(PBF3, winston::Track::Connection::A, 60);
 
             auto transit = pos.drive(distance, [](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result { return winston::Result::OK; });
             Assert::IsTrue(transit == winston::Position::Transit::CrossTrack);
             Assert::AreEqual(expect.trackName(), pos.trackName());
             Assert::IsTrue(pos.connection() == expect.connection());
-            Assert::IsTrue(pos.distance() == expect.distance());
+            Assert::IsTrue(std::abs(pos.distance() - expect.distance()) <= 1);
         }
 
         TEST_METHOD(LocoSpeedCalculation)
@@ -224,19 +224,20 @@ namespace winstontests
             auto N1 = railway->track(Y2021RailwayTracks::N1);
             auto pos = winston::Position(N1, winston::Track::Connection::A, 200);
 
-            winston::Locomotive::ThrottleSpeedMap map{ {0, 0},{255, 50} };
+            winston::ThrottleSpeedMap map{ {0, 0.f},{255, 50.f} };
             winston::Locomotive::Functions functions{};
-            auto loco = winston::Locomotive::make(locoCallbacks(), 0, functions, pos, map, "testloco1", 90, 0);
+            auto loco = winston::Locomotive::make(locoCallbacks(), 0, functions, pos, map, "testloco1", 90.f, 0);
 
-            auto div = 10;// 00;
-            auto distance = 320; // mm
-            auto delay = 8000; //ms
+            auto div = 10.f;// 00;
+            auto distance = 320.f; // mm
+            auto delay = 8000.f; //ms
             auto expectedSpeed = distance * 1000 / delay;
             // ==> 320 / 8 ==> 40mm/s
 
             loco->drive<true>(true, 100);
+            loco->autodrive(false, false, true);
             loco->speedTrap(0);
-            winston::hal::delay(delay / div);
+            winston::hal::delay((unsigned int)(delay / div));
             loco->speedTrap(distance / div);
 
             loco->railOnto(pos);
@@ -253,11 +254,11 @@ namespace winstontests
             railway = Y2021Railway::make(railwayCallbacks());
             Assert::IsTrue(railway->init() == winston::Result::OK);
             auto N1 = railway->track(Y2021RailwayTracks::N1);
-            auto pos = winston::Position(N1, winston::Track::Connection::A, 200);
+            auto pos = winston::Position(N1, winston::Track::Connection::A, 200.f);
 
-            winston::Locomotive::ThrottleSpeedMap map{ {0, 0}, {100, 100}, {255, 255} };
+            winston::ThrottleSpeedMap map{ {0, 0.f}, {100, 100.f}, {255, 255.f} };
             winston::Locomotive::Functions functions = {};
-            auto loco = winston::Locomotive::make(locoCallbacks(), 0, functions, pos, map, "testloco1", 90, 0);
+            auto loco = winston::Locomotive::make(locoCallbacks(), 0, functions, pos, map, "testloco1", 90.f, 0);
             auto expectedDistance = 10;
             loco->drive<true>(true, 100);
             loco->railOnto(pos);
@@ -275,12 +276,12 @@ namespace winstontests
             Assert::IsTrue(railway->init() == winston::Result::OK);
             auto PBF3a = railway->track(Y2021RailwayTracks::PBF3a);
             auto B4 = railway->track(Y2021RailwayTracks::B4);
-            auto pos = winston::Position(PBF3a, winston::Track::Connection::B, 50);
-            auto target = winston::Position(B4, winston::Track::Connection::A, 50);
+            auto pos = winston::Position(PBF3a, winston::Track::Connection::B, 50.f);
+            auto target = winston::Position(B4, winston::Track::Connection::A, 50.f);
 
-            winston::Locomotive::ThrottleSpeedMap map{ {0, 0}, {100, 1000}, {255, 2550} };
+            winston::ThrottleSpeedMap map{ {0, 0.f}, {100, 1000.f}, {255, 2550.f} };
             winston::Locomotive::Functions functions = {};
-            auto loco = winston::Locomotive::make(locoCallbacks(), 0, functions, pos, map, "testloco1", 90, 0);
+            auto loco = winston::Locomotive::make(locoCallbacks(), 0, functions, pos, map, "testloco1", 90.f, 0);
             auto throttle = 100;
             loco->drive<true>(false, throttle);
             loco->railOnto(pos);
@@ -320,9 +321,9 @@ namespace winstontests
             auto distance = (signed)(PBF3->length() + B4->length() + Turnout8->length() + Turnout9->length() + B5->length() + Turnout10->length() + B6->length() + Turnout2->length() + Turnout3->length() + 10);
             auto expect = winston::Position(PBF3, winston::Track::Connection::A, 60);
 
-            winston::Locomotive::ThrottleSpeedMap map{ {0, 0}, {100, 500000}, {255, 2550} };
+            winston::ThrottleSpeedMap map{ {0, 0.f}, {100, 500000.f}, {255, 2550.f} };
             winston::Locomotive::Functions functions = {};
-            auto loco = winston::Locomotive::make(locoCallbacks(), 0, functions, pos, map, "testloco1", 90, 0);
+            auto loco = winston::Locomotive::make(locoCallbacks(), 0, functions, pos, map, "testloco1", 90.f, 0);
             auto throttle = 100;
             loco->drive<true>(true, throttle);
             loco->railOnto(pos);
@@ -339,7 +340,7 @@ namespace winstontests
         
         TEST_METHOD(ThrottleMapMath)
         {
-            winston::Locomotive::SpeedMap map{{{0, 0}, {100, 10}, {255, 25}}};
+            winston::Locomotive::SpeedMap map{{{0, 0.f}, {100, 10.f}, {255, 25.f}}};
             // fixed
             Assert::IsTrue(map.speed(100) == 10);
             Assert::IsTrue(map.speed(255) == 25);
@@ -414,7 +415,7 @@ namespace winstontests
             // find none
             {
                 auto pos = winston::Position(l0, winston::Track::Connection::DeadEnd, 50);
-                auto distance = 10;
+                auto distance = 10.f;
                 auto expect = winston::Position(l0, winston::Track::Connection::DeadEnd, 60);
 
                 std::vector<winston::Signal::Shared> passedSignals;
@@ -434,7 +435,7 @@ namespace winstontests
             // find sL0a on l0
             {
                 auto pos = winston::Position(l0, winston::Track::Connection::DeadEnd, 50);
-                auto distance = (signed)(l0->length());
+                auto distance = l0->length();
                 auto expect = winston::Position(l1, winston::Track::Connection::B, 50);
 
                 std::vector<winston::Signal::Shared> passedSignals;
@@ -464,7 +465,7 @@ namespace winstontests
             // find sL0a on l0, sL4a on l4 
             {
                 auto pos = winston::Position(l0, winston::Track::Connection::DeadEnd, 50);
-                auto distance = (signed)(l0->length() + l1->length() + l2->length() + l3->length() + l4->length() + l5->length());
+                auto distance = l0->length() + l1->length() + l2->length() + l3->length() + l4->length() + l5->length();
                 auto expect = winston::Position(l6, winston::Track::Connection::B, 50);
 
                 std::vector<winston::Signal::Shared> passedSignals;

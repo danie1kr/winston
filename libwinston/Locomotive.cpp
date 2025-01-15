@@ -6,10 +6,10 @@
 
 namespace winston
 {
-	const Locomotive::ThrottleSpeedMap Locomotive::defaultThrottleSpeedMap = { {0, 0},{255, 50} };
-	Locomotive::Locomotive(const Callbacks callbacks, const Address address, const Functions functionTable, const Position start, const ThrottleSpeedMap throttleSpeedMap, const std::string name, const unsigned int length, const Types types) 
+	const ThrottleSpeedMap Locomotive::defaultThrottleSpeedMap = { {0, 0.f},{255, 50.f} };
+	Locomotive::Locomotive(const Callbacks callbacks, const Address address, const Functions functionTable, const Position start, const ThrottleSpeedMap throttleSpeedMap, const std::string name, const Length length, const Types types) 
 		: callbacks(callbacks)
-		, details{ address, functionTable, start, hal::now(), hal::now(), name, length, false, true, false, 0, 0.f, 0, types, {}, { false, false } }
+		, details{ address, functionTable, start, hal::now(), hal::now(), name, length, false, true, false, 0, 0, 0, types, {}, { false, false, false }, false, 0, nullptr, false }
 		, expected { Position::nullPosition(), hal::now(), false }
 		, speedMap(throttleSpeedMap)
 		, speedTrapStart(hal::now())
@@ -49,12 +49,12 @@ namespace winston
 		return this->details.forward;
 	}
 
-	const Locomotive::Speed Locomotive::speed()
+	const Speed Locomotive::speed()
 	{
 		return this->speedMap.speed(this->details.throttle);
 	}
 
-	const Locomotive::Throttle Locomotive::throttle()
+	const Throttle Locomotive::throttle()
 	{
 		return this->details.throttle;
 	}
@@ -64,12 +64,20 @@ namespace winston
 		if (distance == 0)
 		{
 			this->speedTrapStart = hal::now();
+			this->details.speedTrapping = true;
+			this->details.distanceSinceSpeedTrapped = 0;
 		}
-		else
+		else if(this->details.autodrive.updateSpeedMap)
 		{
 			auto time = inMilliseconds(hal::now() - this->speedTrapStart);
-			this->speedMap.learn(this->throttle(), (const Locomotive::Speed)((1000*std::abs(distance)) / time));
+			// x mm in y us = x/y mm/us <=> 1000x/y mm/s
+			this->speedMap.learn(this->throttle(), (const Speed)((1000.f * std::abs(distance)) / time));
 		}
+	}
+
+	void Locomotive::eachSpeedMap(EachSpeedMapCallback callback) const
+	{
+		this->speedMap.each(callback);
 	}
 
 	void Locomotive::stop()
@@ -112,7 +120,7 @@ namespace winston
 		if (this->position().valid())
 		{
 			auto currentTrack = this->position().track();
-			if (segment->contains(*currentTrack))
+			if (segment == this->details.lastEnteredSegment)
 			{
 				;// we appeared on our current position?
 			}
@@ -126,16 +134,29 @@ namespace winston
 					{
 						auto driveDuration = when - this->details.lastPositionUpdate;
 						auto speed = this->speedMap.speed(this->details.throttle);
-						auto remainingDistance = speed * inMilliseconds(driveDuration);
 
-						remainingDistance -= (this->details.position.track()->length() - this->details.position.distance());
+						// distance we drove since the last check (mm/s * us / 1000)
+						auto distanceTraveled = (speed * inMilliseconds(driveDuration)) / 1000.f;
 
-						auto newPos = Position(expectedTrack, this->expected.position.connection(), (int)remainingDistance);
+						// minus the distance on the old track
+						auto remainingDistanceOnNewTrack = distanceTraveled;
+						
+						// our position is already on the new track
+						if (this->details.position.track() == expectedTrack)
+							remainingDistanceOnNewTrack = this->position().distance();
+						else // if not, substract the remaining of the old track
+							remainingDistanceOnNewTrack -= (this->details.position.track()->length() - this->details.position.distance());
+						// but never negative distance
+						if (remainingDistanceOnNewTrack < 0)
+							remainingDistanceOnNewTrack = 0;
+
+						// so the new position is on the expected track/connection on the remainingDistance
+						auto newPos = Position(expectedTrack, this->expected.position.connection(), remainingDistanceOnNewTrack);
 
 						auto leavingConnection = currentTrack->otherConnection(this->position().connection());
 						if (auto signal = currentTrack->signalGuarding(leavingConnection))
 						{
-							if (this->details.position.track()->length() - this->details.position.distance() > signal->distance())
+							if (this->details.position.track()->length() - this->details.position.distance() < signal->distance())
 							{
 								// we passed signal, it was facing us and we entered its protectorate
 								this->callbacks.signalPassed(currentTrack, leavingConnection, Signal::Pass::Facing);
@@ -144,7 +165,7 @@ namespace winston
 
 						if (auto signal = expectedTrack->signalGuarding(this->expected.position.connection()))
 						{
-							if (signal->distance() < remainingDistance)
+							if (signal->distance() < remainingDistanceOnNewTrack)
 							{
 								// we passed signal, we saw the back side and we left its protectorate
 								this->callbacks.signalPassed(expectedTrack, this->expected.position.connection(), Signal::Pass::Backside);
@@ -155,6 +176,9 @@ namespace winston
 						this->details.lastPositionUpdate = when;
 
 						this->updateExpected();
+
+						// initialize speed trap
+						this->speedTrap();
 					}
 					else
 					{
@@ -164,6 +188,9 @@ namespace winston
 				else // second step after initial appearance
 				{
 					this->updateExpected();
+
+					// initialize speed trap
+					this->speedTrap();
 				}
 			}
 		}
@@ -174,11 +201,16 @@ namespace winston
 			this->expected.position = Position(nullptr, Track::Connection::A, 0);
 			this->expected.precise = false;
 		}
+		this->details.lastEnteredSegment = segment;
 	}
 
 	void Locomotive::left(Segment::Shared segment, const TimePoint when)
 	{
 		// ok, cu soon
+		if (this->details.speedTrapping)
+		{
+			this->speedTrap(this->details.distanceSinceSpeedTrapped);
+		}
 	}
 
 	void Locomotive::updateExpected(const bool fullUpdate)
@@ -188,9 +220,10 @@ namespace winston
 		if (fullUpdate)
 		{
 			Track::Const onto;
-			if (track->traverseToNextSegment(this->position().connection(), onto, false))
+			Track::Connection ontoConnection;
+			if (track->traverseToNextSegment(this->position().connection(), false, onto, ontoConnection))
 			{
-				this->expected.position = Position(onto, onto->whereConnects(track), 0);
+				this->expected.position = Position(onto, ontoConnection, 0);
 				this->expected.precise = true;
 			}
 			else
@@ -215,6 +248,17 @@ namespace winston
 			}
 
 		}
+	}
+
+	void Locomotive::updateSpeed(const Throttle throttle)
+	{
+		Duration timeOnTour;
+		Position::Transit transit;
+		this->details.positionUpdateRequired = true;
+		this->moved(timeOnTour, transit);
+		this->details.throttle = this->details.modelThrottle = throttle;
+		this->callbacks.drive(this->address(), (unsigned char)this->details.modelThrottle, this->details.forward);
+		this->details.lastSpeedUpdate = hal::now();
 	}
 
 	void Locomotive::updateNextSignals()
@@ -248,19 +292,25 @@ namespace winston
 		auto now = hal::now();
 		timeOnTour = now - this->details.lastPositionUpdate;
 		transit = Position::Transit::Stay;
-		if (inMilliseconds(timeOnTour) > WINSTON_LOCO_POSITION_TRACK_RATE)
+		if (inMilliseconds(timeOnTour) > WINSTON_LOCO_POSITION_TRACK_RATE || this->details.positionUpdateRequired)
 		{
-			if(this->details.throttle != 0)
-				transit = this->details.position.drive((Distance)((this->details.forward ? 1 : -1) * this->speedMap.speed(this->details.throttle) * inMilliseconds(timeOnTour)) / 1000, this->callbacks.signalPassed);
+			if (this->details.throttle != 0)
+			{
+				const auto distance = (Distance)((this->details.forward ? 1 : -1) * this->speedMap.speed(this->details.throttle) * inMilliseconds(timeOnTour)) / 1000;
+				this->details.distanceSinceSpeedTrapped += distance;
+				transit = this->details.position.drive(distance, this->callbacks.signalPassed);
+			}
 			this->details.lastPositionUpdate = now;
+			this->details.positionUpdateRequired = false;
 		}
 		return this->position();
 	}
 
-	void Locomotive::autodrive(const bool halt, const bool drive)
+	void Locomotive::autodrive(const bool halt, const bool drive, const bool updateSpeedMap)
 	{
 		this->details.autodrive.halt = halt;
 		this->details.autodrive.drive = drive;
+		this->details.autodrive.updateSpeedMap = updateSpeedMap;
 	}
 
 	const Result Locomotive::update()
@@ -281,15 +331,19 @@ namespace winston
 		{
 			auto diff = (float)this->details.throttle - this->details.modelThrottle;
 
-			// 0..255 in 4s <=> on linear curve
-			// 255..0 in 2s <=> on linear curve
+			if (diff != 0)
+			{
+				this->details.speedTrapping = false;
+				// 0..255 in 4s <=> on linear curve
+				// 255..0 in 2s <=> on linear curve
 
-			if(diff > 0)
-				this->details.modelThrottle += (diff / 255.f) * timeDiff / 4000.f;
-			else
-				this->details.modelThrottle += (diff / 255.f) * timeDiff / 2000.f;
-			this->details.modelThrottle = clamp<float>(0.f, 255.f, this->details.modelThrottle);
-			this->callbacks.drive(this->address(), (unsigned char)this->details.modelThrottle, this->details.forward);
+				if (diff > 0)
+					this->details.modelThrottle += (diff / 255.f) * timeDiff / 4000.f;
+				else
+					this->details.modelThrottle += (diff / 255.f) * timeDiff / 2000.f;
+				this->details.modelThrottle = clamp<float>(0.f, 255.f, this->details.modelThrottle);
+				this->callbacks.drive(this->address(), (unsigned char)this->details.modelThrottle, this->details.forward);
+			}
 			this->details.lastSpeedUpdate = now;
 		}
 		// don't care about the updated duration
@@ -304,24 +358,21 @@ namespace winston
 				if (auto signal = nextSignal->signal)
 					if (signal->shows(Signal::Aspect::Halt))
 					{
-						const auto minBreaking = 0.03f;
-						const auto maxBreakingDeceleration = 0.3f;
-						const auto breakingDistance = this->speed() * this->speed() / (2.f * (0.9f * maxBreakingDeceleration));
-						const auto decelerationToNextSignal = (float)(this->speed() * this->speed()) / (2.f * nextSignal->distance);
-
+						const auto speed = this->speed();
+						const auto minBreaking = 0.5f;
+						const auto maxBreakingDeceleration = 17.24f; // realworld: 1.5m/s <-> 17mm/s in 1:87
+						const auto breakingDistance = speed * speed / (2.f * (0.9f * maxBreakingDeceleration));
+						const auto decelerationToNextSignal = (float)(speed * speed) / (2.f * nextSignal->distance);
+						/*
 						if (nextSignal->distance < 10)
 						{
 							// fullstop
-							this->details.throttle = this->details.modelThrottle = 0;
-							this->callbacks.drive(this->address(), (unsigned char)this->details.modelThrottle, this->details.forward);
-							this->details.lastSpeedUpdate = now;
+							this->updateSpeed(0);
 						}
-						else if (decelerationToNextSignal > minBreaking)
+						else*/ if (decelerationToNextSignal > minBreaking)
 						{
 							const auto targetSpeedToHalt = this->speed() - (decelerationToNextSignal * timeDiff / 1000.f);
-							this->details.throttle = this->details.modelThrottle = this->speedMap.throttle(targetSpeedToHalt);
-							this->callbacks.drive(this->address(), (unsigned char)this->details.modelThrottle, this->details.forward);
-							this->details.lastSpeedUpdate = now;
+							this->updateSpeed(this->speedMap.throttle(targetSpeedToHalt));
 						}
 					}
 			}
@@ -390,7 +441,8 @@ namespace winston
 			this->map[throttle] = speed;
 	}
 
-	const Locomotive::Speed Locomotive::SpeedMap::speed(const Throttle throttle) const
+	// mm/s
+	const Speed Locomotive::SpeedMap::speed(const Throttle throttle) const
 	{
 		auto lookup = this->map.find(throttle);
 		if (lookup == this->map.end())
@@ -411,7 +463,7 @@ namespace winston
 			return lookup->second;
 	}
 
-	const Locomotive::Throttle Locomotive::SpeedMap::throttle(const Speed speed) const
+	const Throttle Locomotive::SpeedMap::throttle(const Speed speed) const
 	{
 		for (auto it = this->map.begin(); it != this->map.end();)
 		{
@@ -429,6 +481,13 @@ namespace winston
 		}
 
 		return 0;
+	}
+
+	void Locomotive::SpeedMap::each(EachSpeedMapCallback callback) const
+	{
+		for (auto const& [throttle, speed] : this->map) {
+			callback(throttle, speed);
+		}
 	}
 
 	RailCar::Groups::Group RailCar::Groups::groupCounter = RailCar::Groups::_NextGroupCounterValue;

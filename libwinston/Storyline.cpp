@@ -243,7 +243,7 @@ namespace winston
 
 	const State TaskRandomLoco::execute(const Storyline::Shared storyline, const Task::List& context)
 	{
-		LocomotiveShed locos(this->locoShed);
+		auto locos = this->locoShed.shed();
 		if (!context.empty())
 		{
 			// remove all cars which are not compatible with the chosen locomotive
@@ -254,7 +254,7 @@ namespace winston
 				// Only Shunting may do Assemble or Stable
 				if (action == TaskRandomAction::Action::Assemble || action == TaskRandomAction::Action::Stable)
 				{
-					locos = filter(locos, [](const Locomotive::Shared& loco) -> const bool {
+					locos = filter(locos, [](const auto& loco) -> const bool {
 						return loco->isType(Locomotive::Type::Shunting);
 						});
 				}
@@ -273,7 +273,7 @@ namespace winston
 			return "Locomotive ???";
 	}
 
-	const Locomotive::Shared TaskRandomLoco::locomotive() const
+	const Locomotive::Const TaskRandomLoco::locomotive() const
 	{
 		return this->_locomotive;
 	}

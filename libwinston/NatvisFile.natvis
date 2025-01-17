@@ -26,4 +26,8 @@
     <DisplayString>{_track->_name} {reference} {dist}</DisplayString>
   </Type>
 
+  <Type Name="winston::Locomotive">
+    <DisplayString>{details.name} ({details.address})</DisplayString>
+  </Type>
+
 </AutoVisualizer>

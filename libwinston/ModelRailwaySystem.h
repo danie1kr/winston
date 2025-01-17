@@ -144,8 +144,9 @@ namespace winston
 
 		Locomotive::Shared locoFromAddress(const Address address)
 		{
-			auto it = std::find_if(this->locomotiveShed.begin(), this->locomotiveShed.end(), [address](const auto& loco) { return loco->address() == address; });
-			if (it == this->locomotiveShed.end())
+			auto locos = this->locomotiveShed.shed();
+			auto it = std::find_if(locos.begin(), locos.end(), [address](const auto& loco) { return loco->address() == address; });
+			if (it == locos.end())
 				return nullptr;
 			else
 				return *it;
@@ -210,7 +211,7 @@ namespace winston
 					}, __PRETTY_FUNCTION__));
 				});
 
-			for (const auto& loco : this->locomotiveShed) {
+			for (const auto& loco : this->locomotiveShed.shed()) {
 
 				this->signalTower->order(winston::Command::make([this, &loco](const TimePoint& created) -> const winston::State
 					{
@@ -365,9 +366,10 @@ namespace winston
 				connection.header("Connection"_s, "close"_s);
 				std::string body = "<html><head>winston loco list</head><body><table border=1><tr><th>loco</th><th>speed map</th></tr>";
 				connection.body(body);
-				for (unsigned int i = 0; i < locomotiveShed.size(); ++i)
+				auto shed = locomotiveShed.shed();
+				for (unsigned int i = 0; i < shed.size(); ++i)
 				{
-					auto loco = locomotiveShed.at(i);
+					auto loco = shed.at(i);
 					connection.body(build("<tr><td>", loco->name(), "<br> DCC: ", loco->address(), "</td><td>"));
 
 					connection.body("<table><tr><th>Throttle</th><th>Speed</th></tr>");
@@ -636,9 +638,13 @@ namespace winston
 
 		virtual const winston::Result setupDetectors() = 0;
 
-		void addLocomotive(const winston::Locomotive::Callbacks callbacks, const Address address, const winston::Locomotive::Functions functions, const Position start, const ThrottleSpeedMap speedMap, const std::string name, const unsigned int length, const Locomotive::Types types)
+		void addLocomotive(const winston::Locomotive::Callbacks callbacks, const Address address, const winston::Locomotive::Functions functions, const Position start, const ThrottleSpeedMap speedMap, const std::string name, const Length length, const Locomotive::Types types)
 		{
-			this->locomotiveShed.push_back(Locomotive::make(callbacks, address, functions, start, speedMap, name, length, types));
+			auto loco = Locomotive::make(callbacks, address, functions, start, speedMap, name, length, types);
+			this->locomotiveShed.add(loco);
+			this->locomotiveShed.load(loco, [&](unsigned int trackIndex) {
+				return this->railway->track(trackIndex);
+				});
 		}
 
 		Result loadLocomotives()

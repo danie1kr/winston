@@ -317,7 +317,6 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
 void Kornweinheim::systemSetup() {
     // the user defined railway and its address translator
     this->railway = RAILWAY_CLASS::make(railwayCallbacks());
-    this->populateSheds();
 
     // z21
     this->z21Socket = UDPSocket::make(z21IP, z21Port);
@@ -381,6 +380,11 @@ void Kornweinheim::systemSetup() {
     this->storageMicroLayout = Storage::make(std::string(this->name()).append(".").append("winston.micro.storage"), 256 * 1024);
     if (this->storageMicroLayout->init() != winston::Result::OK)
         winston::logger.err("Kornweinheim.init: Storage Micro Layout Init failed");
+    this->storageLocoShed = Storage::make("winston.locoshed.storage", 32 * 1024); // 1.5k per loco
+    if (this->storageLocoShed->init() != winston::Result::OK)
+        winston::logger.err("Kornweinheim.init: Storage LocoShed failed");
+
+    this->populateSheds();
 
     // detectors
 #ifdef WINSTON_PLATFORM_TEENSY
@@ -799,6 +803,8 @@ void Kornweinheim::systemSetupComplete()
 
 void Kornweinheim::populateSheds()
 {
+    this->locomotiveShed.init(this->storageLocoShed);
+
     auto callbacks = locoCallbacks();
     winston::Position pos(this->railway->track(Tracks::N1), winston::Track::Connection::A, 100);
 
@@ -832,34 +838,34 @@ void Kornweinheim::populateSheds()
     };
     functionsGravita.insert(functionsGravita.begin(), standardFunctions.begin(), standardFunctions.end());
 
-    this->addLocomotive(callbacks, 3, functionsBR114, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 114", 164, (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods | (unsigned char)winston::Locomotive::Type::Shunting);
+    this->addLocomotive(callbacks, 3, functionsBR114, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 114", 164.f, (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods | (unsigned char)winston::Locomotive::Type::Shunting);
     //this->addLocomotive(callbacks, 4, standardFunctions, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 106", 150, (unsigned char)winston::Locomotive::Type::Shunting | (unsigned char)winston::Locomotive::Type::Goods);
     //this->addLocomotive(callbacks, 5, standardFunctions, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 64", 150, (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods);
-    this->addLocomotive(callbacks, 6, standardFunctions, pos, winston::Locomotive::defaultThrottleSpeedMap, "E 11", 150, (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods);
-    this->addLocomotive(callbacks, 8, standardFunctions, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 218", 180, (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods);
-    this->addLocomotive(callbacks, 7, functionsGravita, pos, winston::Locomotive::defaultThrottleSpeedMap, "Gravita", 195, (unsigned char)winston::Locomotive::Type::Shunting | (unsigned char)winston::Locomotive::Type::Goods);
-    this->addLocomotive(callbacks, 9, standardFunctions, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 335", 90, (unsigned char)winston::Locomotive::Type::Shunting);
+    this->addLocomotive(callbacks, 6, standardFunctions, pos, winston::Locomotive::defaultThrottleSpeedMap, "E 11", 150.f, (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods);
+    this->addLocomotive(callbacks, 8, standardFunctions, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 218", 180.f, (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods);
+    this->addLocomotive(callbacks, 7, functionsGravita, pos, winston::Locomotive::defaultThrottleSpeedMap, "Gravita", 195.f, (unsigned char)winston::Locomotive::Type::Shunting | (unsigned char)winston::Locomotive::Type::Goods);
+    this->addLocomotive(callbacks, 9, standardFunctions, pos, winston::Locomotive::defaultThrottleSpeedMap, "BR 335", 90.f, (unsigned char)winston::Locomotive::Type::Shunting);
 
     auto DR = winston::RailCar::Groups::create();
 
-    this->railCarShed.push_back(winston::RailCar::make("Bauzug lang", winston::RailCar::Groups::ConstructionTrain, 300));
+    this->railCarShed.push_back(winston::RailCar::make("Bauzug lang", winston::RailCar::Groups::ConstructionTrain, 300.f));
     //this->railCarShed.push_back(winston::RailCar::make("Bauzug doppel", winston::RailCar::Groups::ConstructionTrain, 312));
     //this->railCarShed.push_back(winston::RailCar::make("Bauzug Kran", winston::RailCar::Groups::ConstructionTrain, 300));
 
-    this->railCarShed.push_back(winston::RailCar::make("Personenwagen 1", winston::RailCar::Groups::Person | DR, 250));
+    this->railCarShed.push_back(winston::RailCar::make("Personenwagen 1", winston::RailCar::Groups::Person | DR, 250.f));
     //this->railCarShed.push_back(winston::RailCar::make("Personenwagen 2", winston::RailCar::Groups::Person | DR, 250));
-    this->railCarShed.push_back(winston::RailCar::make("Gepaeckwagen", winston::RailCar::Groups::Person | DR | winston::RailCar::Groups::CannotBeSingle, 250));
+    this->railCarShed.push_back(winston::RailCar::make("Gepaeckwagen", winston::RailCar::Groups::Person | DR | winston::RailCar::Groups::CannotBeSingle, 250.f));
 
     //this->railCarShed.push_back(winston::RailCar::make("Uaai 819", winston::RailCar::Groups::Heavy, 355));
 
-    this->railCarShed.push_back(winston::RailCar::make("Tankwagen lang", winston::RailCar::Groups::Goods, 100));
+    this->railCarShed.push_back(winston::RailCar::make("Tankwagen lang", winston::RailCar::Groups::Goods, 100.f));
     //this->railCarShed.push_back(winston::RailCar::make("Tankwagen Shell", winston::RailCar::Groups::Goods, 355));
 
-    this->railCarShed.push_back(winston::RailCar::make("Kiara", winston::RailCar::Groups::Goods, 114));
-    this->railCarShed.push_back(winston::RailCar::make("Alter Gueterwagen", winston::RailCar::Groups::Goods, 114));
+    this->railCarShed.push_back(winston::RailCar::make("Kiara", winston::RailCar::Groups::Goods, 114.f));
+    this->railCarShed.push_back(winston::RailCar::make("Alter Gueterwagen", winston::RailCar::Groups::Goods, 114.f));
 
-    this->railCarShed.push_back(winston::RailCar::make("Schiebehaubenwagen", winston::RailCar::Groups::Goods, 146));
-    this->railCarShed.push_back(winston::RailCar::make("Offener Wagen", winston::RailCar::Groups::Goods, 160));
+    this->railCarShed.push_back(winston::RailCar::make("Schiebehaubenwagen", winston::RailCar::Groups::Goods, 146.f));
+    this->railCarShed.push_back(winston::RailCar::make("Offener Wagen", winston::RailCar::Groups::Goods, 160.f));
 
     //this->railCarShed.push_back(winston::RailCar::make("Schwarzer Wagen", winston::RailCar::Groups::Goods, 102));
     //this->railCarShed.push_back(winston::RailCar::make("Brauner Wagen", winston::RailCar::Groups::Goods, 98));

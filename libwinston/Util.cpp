@@ -151,6 +151,11 @@ namespace winston
 #endif
 #endif
 
+	const std::string build(const float first)
+	{
+		return std::to_string(first);
+	}
+
 	const std::string build(const winston::Result first)
 	{
 		switch (first)

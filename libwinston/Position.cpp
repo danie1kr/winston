@@ -20,12 +20,12 @@ namespace winston
 
 	const std::string Position::trackName() const
 	{
-		return this->_track->name();
+		return this->_track ? this->_track->name() : "nullptr";
 	}
 
 	const unsigned int Position::trackIndex() const
 	{
-		return this->_track->index;
+		return this->_track ? this->_track->index : 0;
 	}
 
 	Track::Const Position::track() const

@@ -20,7 +20,7 @@ namespace winstontests
         LoDi::Shared loDi;
         winston::DetectorDevice::Shared loDiCommander;
 
-        std::vector<winston::Locomotive::Shared> locoShed;
+        winston::LocomotiveShed locoShed;
 
         class TestSignalController : public winston::SignalController
         {
@@ -188,13 +188,7 @@ namespace winstontests
             callbacks.locoFromAddress =
                 [&](const winston::Address address) -> winston::Locomotive::Shared
                 {
-                    if (auto it = std::find_if(locoShed.begin(), locoShed.end(), [address](winston::Locomotive::Shared& loco) -> bool
-                        {
-                            return loco->address() == address;
-                        }); it != std::end(locoShed))
-                            return *it;
-                    else
-                        return nullptr;
+                    return locoShed.get(address);
                 };
 
             this->loDiCommander->init(portSegmentMap, callbacks);
@@ -210,7 +204,7 @@ namespace winstontests
         void createLocos(winston::Locomotive::Callbacks::SignalPassedCallback signalPassed, winston::ThrottleSpeedMap speedMap = { {0, 0.f}, {100, 1000.f}, {255, 2550.f} })
         {
             winston::Locomotive::Functions standardFunctions = { {0, "Light"} };
-            locoShed.push_back(winston::Locomotive::make(locoCallbacks(signalPassed), 3, standardFunctions, winston::Position::nullPosition(), speedMap, "BR 114", 100.f, (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods | (unsigned char)winston::Locomotive::Type::Shunting));
+            locoShed.add(winston::Locomotive::make(locoCallbacks(signalPassed), 3, standardFunctions, winston::Position::nullPosition(), speedMap, "BR 114", 100.f, (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods | (unsigned char)winston::Locomotive::Type::Shunting));
         }
 
         void injectLoco(uint8_t detector, winston::Locomotive::Shared loco, const bool enter)
@@ -258,7 +252,7 @@ namespace winstontests
                     return winston::Result::OK;
                 });
 
-            auto loco = locoShed[0];
+            auto loco = locoShed.shed()[0];
             auto PBF1a = railway->track(Y2024RailwayTracks::PBF1a);
 
             injectLoco(PBF1a->segment(), loco, true);
@@ -288,7 +282,7 @@ namespace winstontests
                     return winston::Result::OK;
                 });
 
-            auto loco = locoShed[0];
+            auto loco = locoShed.shed()[0];
             auto PBF1a = railway->track(Y2024RailwayTracks::PBF1a);
             auto Turnout1 = std::dynamic_pointer_cast<winston::Turnout>(railway->track(Y2024RailwayTracks::Turnout1));
             auto Turnout2 = std::dynamic_pointer_cast<winston::Turnout>(railway->track(Y2024RailwayTracks::Turnout2));
@@ -434,7 +428,7 @@ namespace winstontests
                 },
                 { {0, 0.f}, {100, 10.f}, {255, 25.f} });
 
-            auto loco = locoShed[0];
+            auto loco = locoShed.shed()[0];
             auto PBF1a = railway->track(Y2024RailwayTracks::PBF1a);
             auto B7 = railway->track(Y2024RailwayTracks::B7);
             auto Turnout1 = std::dynamic_pointer_cast<winston::Turnout>(railway->track(Y2024RailwayTracks::Turnout1));
@@ -532,7 +526,7 @@ namespace winstontests
                 },
                 { {0, 0.f}, {100, 100.f}, {255, 255.f} });
 
-            auto loco = locoShed[0];
+            auto loco = locoShed.shed()[0];
             loco->autodrive(true, false, false);
             auto B2 = railway->track(Y2024RailwayTracks::B2);
             auto B3 = railway->track(Y2024RailwayTracks::B3);
@@ -638,7 +632,7 @@ namespace winstontests
                 },
                 { {0, 0.f}, {100, 10.f}, {255, 25.f} });
 
-            auto loco = locoShed[0];
+            auto loco = locoShed.shed()[0];
             loco->autodrive(false, false, true);
             auto PBF1a = railway->track(Y2024RailwayTracks::PBF1a);
             auto B7 = railway->track(Y2024RailwayTracks::B7);

@@ -75,6 +75,7 @@ namespace winston
 	const std::string build(const unsigned short first);
 	const std::string build(const unsigned char first);
 	const std::string build(const char* first);
+	const std::string build(const float first);
 	const std::string build(const Result first);
 #ifdef WINSTON_HAS_CHRONO
 	const std::string build(const TimePoint first);

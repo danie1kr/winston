@@ -156,18 +156,25 @@ namespace winston
 		class StorageInterface : public Shared_Ptr<StorageInterface>
 		{
 		protected:
-			StorageInterface(const size_t maxSize = 0);
-			const size_t maxSize;
+			StorageInterface(const size_t capacity = 0);
 		public:
 			using Shared_Ptr<StorageInterface>::Shared;
 			using Shared_Ptr<StorageInterface>::make;
 			virtual const Result init() = 0;
 			virtual const Result read(const size_t address, std::vector<unsigned char>& content, const size_t length = 1) = 0;
 			virtual const Result read(const size_t address, std::string& content, const size_t length = 1) = 0;
-			virtual const Result write(const size_t address, std::vector<unsigned char>& content, const size_t length = 0) = 0;
-			virtual const Result write(const size_t address, unsigned char content) = 0;
-			virtual const Result write(const size_t address, std::string& content, const size_t length = 0) = 0;
+			virtual const Result read(const size_t address, unsigned char& content) = 0;
+			virtual const Result read(const size_t address, uint32_t& content) = 0;
+			virtual const Result read(const size_t address, uint16_t& content) = 0;
+			virtual const Result read(const size_t address, float& content) = 0;
+			virtual const Result write(const size_t address, const std::vector<unsigned char>& content, const size_t length = 0) = 0;
+			virtual const Result write(const size_t address, const std::string& content, const size_t length = 0) = 0;
+			virtual const Result write(const size_t address, const uint32_t content) = 0;
+			virtual const Result write(const size_t address, const uint16_t content) = 0;
+			virtual const Result write(const size_t address, const float content) = 0;
+			virtual const Result write(const size_t address, const unsigned char content) = 0;
 			virtual const Result sync() = 0;
+			const size_t capacity;
 		};
 
 		class DisplayUX : public Shared_Ptr<DisplayUX>

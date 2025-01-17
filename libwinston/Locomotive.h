@@ -7,6 +7,7 @@
 #include "NextSignals.h"
 #include "Log.h"
 #include "Segment.h"
+#include "HAL.h"
 
 namespace winston
 {
@@ -106,11 +107,16 @@ namespace winston
 		const bool function(const unsigned int id);
 		const Functions& functions();
 		const bool forward();
+		void reverse();
 		const Speed speed();
 		const Throttle throttle();
 		template<bool _force>
 		void drive(const bool forward, const Throttle throttle)
 		{
+			if (forward != this->details.forward)
+			{
+				this->reverse();
+			}
 			this->details.forward = forward;
 			this->details.modelThrottle = throttle;
 			if (_force)
@@ -118,14 +124,15 @@ namespace winston
 		}
 		void speedTrap(const Distance distance = 0);
 		using EachSpeedMapCallback = std::function<void(const Throttle, const Speed)>;
-	 	void eachSpeedMap(EachSpeedMapCallback callback) const;
+		void eachSpeedMap(EachSpeedMapCallback callback) const;
+		void setSpeedMap(ThrottleSpeedMap throttleSpeedMap);
 		//void position(const Position p);
 		const Position& position() const;
 		void stop();
 		const Result update(Position::Transit& transit);
 		const Result update();
 		const Address& address() const;
-		const std::string& name();
+		const std::string& name() const;
 
 		const bool isRailed() const;
 		void railOnto(const Position p, const TimePoint when = hal::now());
@@ -210,7 +217,34 @@ namespace winston
 		SpeedMap speedMap;
 		TimePoint speedTrapStart;
 	};
-	using LocomotiveShed = std::vector<Locomotive::Shared>;
+
+	class LocomotiveShed
+	{
+	public:
+		using TrackFromIndexCallback = std::function<Track::Const(const unsigned int trackIndex)>;
+
+		LocomotiveShed();
+		~LocomotiveShed() = default;
+
+		const Result init(hal::StorageInterface::Shared storage);
+		const Result format();
+		const Result add(Locomotive::Shared loco);
+		Locomotive::Shared get(const Address dccAddress) const;
+		const Result store(const Locomotive::Const loco);
+		const Result load(Locomotive::Shared loco, TrackFromIndexCallback trackFromIndex) const;
+
+		const std::vector<Locomotive::Shared>& shed() const;
+
+#ifndef WINSTON_TEST
+	private:
+#endif
+		const size_t offset(const size_t count) const;
+		const Result checkHeader(uint8_t& locoCount) const;
+		const Result getLocoMemoryAddress(const winston::Locomotive::Const loco, size_t& address) const;
+
+		std::vector<Locomotive::Shared> _shed;
+		hal::StorageInterface::Shared storage;
+	};
 
 	class RailCar : public Shared_Ptr<RailCar>
 	{

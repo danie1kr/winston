@@ -28,7 +28,7 @@ namespace winston
 		Track(const std::string name, const Id index, const Length tracklength);
 		~Track() = default;
 
-		enum class Connection : unsigned int
+		enum class Connection : uint8_t
 		{
 			A, B, C, D, DeadEnd
 		};

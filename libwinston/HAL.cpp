@@ -40,8 +40,8 @@ namespace winston
 			this->buffer.push(data);
 		}
 #endif
-		StorageInterface::StorageInterface(const size_t maxSize)
-			: Shared_Ptr<StorageInterface>(), maxSize(maxSize)
+		StorageInterface::StorageInterface(const size_t capacity)
+			: Shared_Ptr<StorageInterface>(), capacity(capacity)
 		{
 
 		}

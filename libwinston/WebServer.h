@@ -556,10 +556,10 @@ namespace winston
                 auto length = layout.size();
                 if (offset == 0)
                 {
-                    this->storageLayout->write(address + 0, (fullSize >> 0) & 0xFF);
-                    this->storageLayout->write(address + 1, (fullSize >> 8) & 0xFF);
-                    this->storageLayout->write(address + 2, (fullSize >> 16) & 0xFF);
-                    this->storageLayout->write(address + 3, (fullSize >> 24) & 0xFF);
+                    this->storageLayout->write(address + 0, (uint8_t)((fullSize >> 0) & 0xFF));
+                    this->storageLayout->write(address + 1, (uint8_t)((fullSize >> 8) & 0xFF));
+                    this->storageLayout->write(address + 2, (uint8_t)((fullSize >> 16) & 0xFF));
+                    this->storageLayout->write(address + 3, (uint8_t)((fullSize >> 24) & 0xFF));
                     address = 4;
                 }
                 else
@@ -589,10 +589,10 @@ namespace winston
                 auto length = layout.size();
                 if (offset == 0)
                 {
-                    this->storageMicroLayout->write(address + 0, (fullSize >> 0) & 0xFF);
-                    this->storageMicroLayout->write(address + 1, (fullSize >> 8) & 0xFF);
-                    this->storageMicroLayout->write(address + 2, (fullSize >> 16) & 0xFF);
-                    this->storageMicroLayout->write(address + 3, (fullSize >> 24) & 0xFF);
+                    this->storageMicroLayout->write(address + 0, (uint8_t)((fullSize >> 0) & 0xFF));
+                    this->storageMicroLayout->write(address + 1, (uint8_t)((fullSize >> 8) & 0xFF));
+                    this->storageMicroLayout->write(address + 2, (uint8_t)((fullSize >> 16) & 0xFF));
+                    this->storageMicroLayout->write(address + 3, (uint8_t)((fullSize >> 24) & 0xFF));
                     address = 4;
                 }
                 else
@@ -691,7 +691,7 @@ namespace winston
             }
             else if (std::string("\"getLocoShed\"").compare(op) == 0)
             {
-                for (auto& loco : this->locomotiveShed)
+                for (auto& loco : this->locomotiveShed.shed())
                     this->locoSend(*loco);
             }
             else if (std::string("\"doControlLoco\"").compare(op) == 0)

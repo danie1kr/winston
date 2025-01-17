@@ -276,14 +276,14 @@ namespace winstontests
             Assert::IsTrue(railway->init() == winston::Result::OK);
             auto PBF3a = railway->track(Y2021RailwayTracks::PBF3a);
             auto B4 = railway->track(Y2021RailwayTracks::B4);
-            auto pos = winston::Position(PBF3a, winston::Track::Connection::B, 50.f);
+            auto pos = winston::Position(PBF3a, winston::Track::Connection::A, PBF3a->length() - 50.f);
             auto target = winston::Position(B4, winston::Track::Connection::A, 50.f);
 
             winston::ThrottleSpeedMap map{ {0, 0.f}, {100, 1000.f}, {255, 2550.f} };
             winston::Locomotive::Functions functions = {};
             auto loco = winston::Locomotive::make(locoCallbacks(), 0, functions, pos, map, "testloco1", 90.f, 0);
             auto throttle = 100;
-            loco->drive<true>(false, throttle);
+            loco->drive<true>(true, throttle);
             loco->railOnto(pos);
             winston::hal::delay(100);   // ==> distance = 100mm
             winston::Duration timeOnTour = std::chrono::milliseconds(100);

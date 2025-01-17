@@ -105,7 +105,7 @@ namespace winston
 		{
 			// is there a loco behind this signal?
 			// loco behind signal == loco.nextSignals.contains(signal)
-			for (auto loco : this->locomotiveShed)
+			for (auto loco : this->locomotiveShed.shed())
 			{
 				if (requireLocoNextSignalUpdate)
 					loco->updateNextSignals();
@@ -123,7 +123,7 @@ namespace winston
 #ifdef WINSTON_DETECTOR_SIGNALING
 		// update loco next signals once
 		this->order(Command::make([this](const TimePoint& created) -> const winston::State {
-			for (auto loco : this->locomotiveShed)
+			for (auto loco : this->locomotiveShed.shed())
 				loco->updateNextSignals();
 			return State::Finished;
 			}, __PRETTY_FUNCTION__));

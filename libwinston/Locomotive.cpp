@@ -7,10 +7,10 @@
 namespace winston
 {
 	const ThrottleSpeedMap Locomotive::defaultThrottleSpeedMap = { {0, 0.f},{255, 50.f} };
-	Locomotive::Locomotive(const Callbacks callbacks, const Address address, const Functions functionTable, const Position start, const ThrottleSpeedMap throttleSpeedMap, const std::string name, const Length length, const Types types) 
+	Locomotive::Locomotive(const Callbacks callbacks, const Address address, const Functions functionTable, const Position start, const ThrottleSpeedMap throttleSpeedMap, const std::string name, const Length length, const Types types)
 		: callbacks(callbacks)
 		, details{ address, functionTable, start, hal::now(), hal::now(), name, length, false, true, false, 0, 0, 0, types, {}, { false, false, false }, false, 0, nullptr, false }
-		, expected { Position::nullPosition(), hal::now(), false }
+		, expected{ Position::nullPosition(), hal::now(), false }
 		, speedMap(throttleSpeedMap)
 		, speedTrapStart(hal::now())
 	{
@@ -49,6 +49,16 @@ namespace winston
 		return this->details.forward;
 	}
 
+	void Locomotive::reverse()
+	{
+#pragma message("does this work? No test yet")
+#pragma message("only accept reverse if speed = 0")
+		this->details.forward = !this->details.forward;
+		this->details.position.useOtherRef();
+		this->details.nextSignals.reverse();
+		this->updateExpected();
+	}
+
 	const Speed Locomotive::speed()
 	{
 		return this->speedMap.speed(this->details.throttle);
@@ -67,7 +77,7 @@ namespace winston
 			this->details.speedTrapping = true;
 			this->details.distanceSinceSpeedTrapped = 0;
 		}
-		else if(this->details.autodrive.updateSpeedMap)
+		else if (this->details.autodrive.updateSpeedMap)
 		{
 			auto time = inMilliseconds(hal::now() - this->speedTrapStart);
 			// x mm in y us = x/y mm/us <=> 1000x/y mm/s
@@ -78,6 +88,11 @@ namespace winston
 	void Locomotive::eachSpeedMap(EachSpeedMapCallback callback) const
 	{
 		this->speedMap.each(callback);
+	}
+
+	void Locomotive::setSpeedMap(ThrottleSpeedMap throttleSpeedMap)
+	{
+		this->speedMap = throttleSpeedMap;
 	}
 
 	void Locomotive::stop()
@@ -338,10 +353,10 @@ namespace winston
 				// 255..0 in 2s <=> on linear curve
 
 				if (diff > 0)
-					this->details.modelThrottle += (diff / 255.f) * timeDiff / 4000.f;
+					this->details.modelThrottle += (Throttle)((diff / 255.f) * timeDiff / 4000.f);
 				else
-					this->details.modelThrottle += (diff / 255.f) * timeDiff / 2000.f;
-				this->details.modelThrottle = clamp<float>(0.f, 255.f, this->details.modelThrottle);
+					this->details.modelThrottle += (Throttle)((diff / 255.f) * timeDiff / 2000.f);
+				this->details.modelThrottle = (Throttle)clamp<float>(0.f, 255.f, this->details.modelThrottle);
 				this->callbacks.drive(this->address(), (unsigned char)this->details.modelThrottle, this->details.forward);
 			}
 			this->details.lastSpeedUpdate = now;
@@ -391,7 +406,7 @@ namespace winston
 		return this->details.address;
 	}
 
-	const std::string& Locomotive::name()
+	const std::string& Locomotive::name() const
 	{
 		return this->details.name;
 	}
@@ -488,6 +503,197 @@ namespace winston
 		for (auto const& [throttle, speed] : this->map) {
 			callback(throttle, speed);
 		}
+	}
+
+	LocomotiveShed::LocomotiveShed()
+	{
+
+	}
+
+	const Result LocomotiveShed::init(hal::StorageInterface::Shared storage)
+	{
+		this->storage = storage;
+		return Result::OK;
+	}
+
+	const Result LocomotiveShed::format()
+	{
+		size_t address = 0;
+		this->storage->write(address++, (uint8_t)WINSTON_STORAGE_LOCOSHED_VERSION);
+		this->storage->write(address++, (uint8_t)0);
+		return Result::OK;
+	}
+
+	const Result LocomotiveShed::add(Locomotive::Shared loco)
+	{
+		this->_shed.push_back(loco);
+		return Result::OK;
+	}
+
+	Locomotive::Shared LocomotiveShed::get(const Address dccAddress) const
+	{
+		if (auto it = std::find_if(this->_shed.begin(), this->_shed.end(), [&dccAddress](auto& loco)
+			{
+				return loco->address() == dccAddress;
+			}); it != this->_shed.end())
+			return *it;
+
+		return nullptr;
+	}
+
+	const std::vector<Locomotive::Shared>& LocomotiveShed::shed() const
+	{
+		return this->_shed;
+	}
+
+	const Result LocomotiveShed::store(const Locomotive::Const loco)
+	{
+		/*
+	2 address
+	last position
+		4 track
+		1 reference connection
+		4 distance
+	1 speed map count
+	speed map
+		1 throttle
+		4 speed
+		*/
+		if (!this->storage)
+			return Result::NotInitialized;
+
+		size_t address = 0;
+		if (auto result = this->getLocoMemoryAddress(loco, address); result != winston::Result::OK)
+			return result;
+
+		// update locoCound if we are a new loco entry
+		{
+			uint8_t locoCount = 0;
+			this->storage->read(1, locoCount);
+
+			if (address == this->offset(locoCount))
+			{
+				this->storage->write(1, ++locoCount);
+			}
+		}
+
+		this->storage->write(address, loco->address()); address += sizeof(decltype(loco->address()));
+		const auto pos = loco->position();
+		unsigned int trackIndex = pos.trackIndex();
+		uint8_t connection = (uint8_t)pos.connection();
+		float distance = pos.distance();
+		this->storage->write(address, trackIndex); address += sizeof(decltype(trackIndex));
+		this->storage->write(address, connection); address += sizeof(decltype(connection));
+		this->storage->write(address, distance); address += sizeof(decltype(distance));
+
+		uint8_t speedMapCount = 0;
+		const uint32_t speedMapCountAddress = (uint32_t)address;
+		address += sizeof(decltype(speedMapCount));
+		loco->eachSpeedMap([&](const winston::Throttle throttle, const winston::Speed speed) {
+			this->storage->write(address, throttle); address += sizeof(decltype(throttle));
+			this->storage->write(address, speed); address += sizeof(decltype(speed));
+			++speedMapCount;
+			});
+		this->storage->write(speedMapCountAddress, speedMapCount);
+		this->storage->sync();
+
+		return winston::Result::OK;
+	}
+
+	const Result LocomotiveShed::load(Locomotive::Shared loco, TrackFromIndexCallback trackFromIndex) const
+	{
+		if (!this->storage)
+			return Result::NotInitialized;
+
+		size_t address = 0;
+		if (auto result = this->getLocoMemoryAddress(loco, address); result != winston::Result::OK)
+			return result;
+
+		uint16_t locoAddress = 0;
+		auto result = this->storage->read(address, locoAddress); address += sizeof(decltype(locoAddress));
+
+		unsigned int trackIndex;
+		uint8_t connection;
+		float distance;
+		this->storage->read(address, trackIndex); address += sizeof(decltype(trackIndex));
+		this->storage->read(address, connection); address += sizeof(decltype(connection));
+		this->storage->read(address, distance); address += sizeof(decltype(distance));
+
+		auto track = trackFromIndex(trackIndex);
+		winston::Position pos(track, (Track::Connection)connection, distance);
+		loco->railOnto(pos);
+
+		uint8_t speedMapCount = 0;
+		this->storage->read(address, speedMapCount); address += sizeof(decltype(speedMapCount));
+
+		winston::ThrottleSpeedMap throttleSpeedMap;
+		for (size_t i = 0; i < speedMapCount; ++i)
+		{
+			winston::Throttle throttle;
+			winston::Speed speed;
+			this->storage->read(address, throttle); address += sizeof(decltype(throttle));
+			this->storage->read(address, speed); address += sizeof(decltype(speed));
+
+			throttleSpeedMap.emplace(throttle, speed);
+		}
+		loco->setSpeedMap(throttleSpeedMap);
+
+		return winston::Result::OK;
+	}
+
+	const Result LocomotiveShed::checkHeader(uint8_t& locoCount) const
+	{
+		locoCount = 0;
+		if (!this->storage)
+			return Result::NotInitialized;
+
+		uint8_t version = WINSTON_STORAGE_LOCOSHED_VERSION;
+		size_t address = 0;
+		auto result = this->storage->read(address++, version);
+		if (result != winston::Result::OK || version != WINSTON_STORAGE_LOCOSHED_VERSION)
+			return winston::Result::ValidationFailed;
+
+		locoCount = 0;
+		result = this->storage->read(address++, locoCount);
+		if (result != winston::Result::OK)
+			return winston::Result::ValidationFailed;
+
+		return winston::Result::OK;
+	}
+
+	const Result LocomotiveShed::getLocoMemoryAddress(const winston::Locomotive::Const loco, size_t& address) const
+	{
+		if (!this->storage)
+			return Result::NotInitialized;
+
+		uint8_t locoCount;
+		auto result = this->checkHeader(locoCount);
+		if (result != winston::Result::OK)
+			return result;
+
+		size_t size = 0;
+
+		for (size_t i = 0; i < locoCount; ++i)
+		{
+			address = this->offset(i);
+			uint16_t locoAddress = 0;
+			result = this->storage->read(address, locoAddress);
+
+			if (locoAddress == loco->address())
+				return winston::Result::OK;
+		}
+
+		// address of new loco
+		address = this->offset(locoCount);
+		if (address + WINSTON_STORAGE_LOCOSHED_STRIDE >= this->storage->capacity)
+			return winston::Result::OutOfMemory;
+
+		return winston::Result::OK;
+	}
+
+	const size_t LocomotiveShed::offset(const size_t count) const
+	{
+		return 2 + count * WINSTON_STORAGE_LOCOSHED_STRIDE;
 	}
 
 	RailCar::Groups::Group RailCar::Groups::groupCounter = RailCar::Groups::_NextGroupCounterValue;

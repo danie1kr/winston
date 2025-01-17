@@ -119,9 +119,11 @@ private:
     //static constexpr auto axis = init_axis(std::make_integer_sequence<unsigned, num_points>{});
     static constexpr auto TLC5947_LED_map = cie1931(std::make_integer_sequence<unsigned short, TLC5947_LED_Steps>{});
     */
+
     /* Storage */
     Storage::Shared storageLayout;
     Storage::Shared storageMicroLayout;
+    Storage::Shared storageLocoShed;
 
     /* Occupancy Detector */
     winston::Result detectorUpdate(winston::Detector::Shared detector, winston::Locomotive &loco);

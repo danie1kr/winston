@@ -28,6 +28,7 @@ namespace winston
 		void put(NextSignal::Const next, const bool forward, const Signal::Pass pass);
 		const NextSignal::Const get(const bool forward, const Signal::Pass pass) const;
 		const bool contains(const Signal::Const signal) const;
+		void reverse();
 	private:
 		static constexpr size_t index(const bool forward, const Signal::Pass pass);
 		std::array<NextSignal::Const, 4> nextSignals;

@@ -163,6 +163,7 @@
     <ClCompile Include="winston-tests-blocks.cpp" />
     <ClCompile Include="winston-tests-detector.cpp" />
     <ClCompile Include="winston-tests-driving-math.cpp" />
+    <ClCompile Include="winston-tests-locoshed.cpp" />
     <ClCompile Include="winston-tests-mini.cpp" />
     <ClCompile Include="winston-tests-nextsignals.cpp" />
     <ClCompile Include="winston-tests-signal.cpp" />

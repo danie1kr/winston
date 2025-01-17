@@ -16,7 +16,7 @@ namespace winstontests
         }
         std::shared_ptr<Y2024Railway> railway;
 
-        std::vector<winston::Locomotive::Shared> locoShed;
+        winston::LocomotiveShed locoShed;
 
         class TestSignalController : public winston::SignalController
         {
@@ -150,7 +150,7 @@ namespace winstontests
         {
             winston::Locomotive::Functions standardFunctions = { {0, "Light"} };
             winston::ThrottleSpeedMap speedMap{ {0, 0.f}, {100, 1000.f}, {255, 2550.f} };
-            locoShed.push_back(winston::Locomotive::make(locoCallbacks(signalPassed), 3, standardFunctions, winston::Position::nullPosition(), speedMap, "BR 114", 100.f, (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods | (unsigned char)winston::Locomotive::Type::Shunting));
+            locoShed.add(winston::Locomotive::make(locoCallbacks(signalPassed), 3, standardFunctions, winston::Position::nullPosition(), speedMap, "BR 114", 100.f, (unsigned char)winston::Locomotive::Type::Passenger | (unsigned char)winston::Locomotive::Type::Goods | (unsigned char)winston::Locomotive::Type::Shunting));
         }
 
     public:
@@ -232,7 +232,7 @@ namespace winstontests
                     return winston::Result::OK;
                 });
 
-            auto loco = locoShed[0];
+            auto loco = locoShed.shed()[0];
             auto PBF1a = railway->track(Y2024RailwayTracks::PBF1a);
             auto Turnout1 = std::dynamic_pointer_cast<winston::Turnout>(railway->track(Y2024RailwayTracks::Turnout1));
             auto Turnout2 = std::dynamic_pointer_cast<winston::Turnout>(railway->track(Y2024RailwayTracks::Turnout2));

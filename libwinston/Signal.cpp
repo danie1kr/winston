@@ -210,6 +210,17 @@ namespace winston
 			return true;
 		return false;
 	}
+
+	void NextSignals::reverse()
+	{
+		auto fac = this->nextSignals[index(true, Signal::Pass::Facing)];
+		this->nextSignals[index(true, Signal::Pass::Facing)] = this->nextSignals[index(false, Signal::Pass::Facing)];
+		this->nextSignals[index(false, Signal::Pass::Facing)] = fac;
+
+		auto bks = this->nextSignals[index(true, Signal::Pass::Backside)];
+		this->nextSignals[index(true, Signal::Pass::Backside)] = this->nextSignals[index(false, Signal::Pass::Backside)];
+		this->nextSignals[index(false, Signal::Pass::Backside)] = bks;
+	}
 		
 	size_t constexpr NextSignals::index(const bool forward, const Signal::Pass pass)
 	{

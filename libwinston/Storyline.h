@@ -161,10 +161,10 @@ namespace winston
 		const State execute(const Storyline::Shared storyline, const Task::List& context);
 		const std::string text() const;
 
-		const Locomotive::Shared locomotive() const;
+		const Locomotive::Const locomotive() const;
 	private:
 		const LocomotiveShed& locoShed;
-		Locomotive::Shared _locomotive;
+		Locomotive::Const _locomotive;
 	};
 
 	class TaskRandomSection : public Storyline::Task, public Shared_Ptr<TaskRandomSection>

@@ -174,7 +174,7 @@ namespace winston
 							if (this->details.position.track()->length() - this->details.position.distance() < signal->distance())
 							{
 								// we passed signal, it was facing us and we entered its protectorate
-								this->callbacks.signalPassed(currentTrack, leavingConnection, Signal::Pass::Facing);
+								this->callbacks.signalPassed(this->const_from_this(), currentTrack, leavingConnection, Signal::Pass::Facing);
 							}
 						}
 
@@ -183,7 +183,7 @@ namespace winston
 							if (signal->distance() < remainingDistanceOnNewTrack)
 							{
 								// we passed signal, we saw the back side and we left its protectorate
-								this->callbacks.signalPassed(expectedTrack, this->expected.position.connection(), Signal::Pass::Backside);
+								this->callbacks.signalPassed(this->const_from_this(), expectedTrack, this->expected.position.connection(), Signal::Pass::Backside);
 							}
 						}
 
@@ -261,7 +261,6 @@ namespace winston
 			{
 				this->expected.when = hal::now() + toSeconds(60 * 60 * 24);
 			}
-
 		}
 	}
 
@@ -313,7 +312,9 @@ namespace winston
 			{
 				const auto distance = (Distance)((this->details.forward ? 1 : -1) * this->speedMap.speed(this->details.throttle) * inMilliseconds(timeOnTour)) / 1000;
 				this->details.distanceSinceSpeedTrapped += distance;
-				transit = this->details.position.drive(distance, this->callbacks.signalPassed);
+
+				using namespace std::placeholders;
+				transit = this->details.position.drive(distance, std::bind(this->callbacks.signalPassed, this->const_from_this(), _1, _2, _3));
 			}
 			this->details.lastPositionUpdate = now;
 			this->details.positionUpdateRequired = false;
@@ -460,7 +461,7 @@ namespace winston
 	const Speed Locomotive::SpeedMap::speed(const Throttle throttle) const
 	{
 		auto lookup = this->map.find(throttle);
-		if (lookup == this->map.end())
+		if (lookup == this->map.end() && this->map.size() > 1)
 		{
 			auto lower = this->map.lower_bound(throttle);
 			auto upper = this->map.upper_bound(throttle);
@@ -513,11 +514,18 @@ namespace winston
 	const Result LocomotiveShed::init(hal::StorageInterface::Shared storage)
 	{
 		this->storage = storage;
+
+		uint8_t locoCount;
+		auto result = this->checkHeader(locoCount);
+		if (result != winston::Result::OK)
+			this->format();
+
 		return Result::OK;
 	}
 
 	const Result LocomotiveShed::format()
 	{
+		logger.warn("Formatting LocomotiveShed storage");
 		size_t address = 0;
 		this->storage->write(address++, (uint8_t)WINSTON_STORAGE_LOCOSHED_VERSION);
 		this->storage->write(address++, (uint8_t)0);

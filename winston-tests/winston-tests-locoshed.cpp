@@ -153,7 +153,7 @@ namespace winstontests
             auto msi = MemoryStorageInterface::make(16 * 1024);
             msi->init();
             locoShed.init(msi);
-            createLocos([](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result
+            createLocos([](const winston::Locomotive::Const loco, const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result
                 {
                     return winston::Result::OK;
                 });
@@ -166,13 +166,8 @@ namespace winstontests
             loco0->drive<true>(true, 10);
             Assert::IsTrue(loco0->speed() == 10.f);
 
-            uint8_t count = 15;
+            uint8_t count = 0;
             auto result = locoShed.checkHeader(count);
-            Assert::IsTrue(result == winston::Result::ValidationFailed && count == 0);
-
-            locoShed.format();
-            count = 0;
-            result = locoShed.checkHeader(count);
             Assert::IsTrue(result == winston::Result::OK && count == 0);
 
             size_t address = 0;

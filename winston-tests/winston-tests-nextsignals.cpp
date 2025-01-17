@@ -224,7 +224,7 @@ namespace winstontests
                 });
 
             std::queue<winston::Signal::Shared> passedSignals;
-            createLocos([&passedSignals, &signalTower](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result
+            createLocos([&passedSignals, &signalTower](const winston::Locomotive::Const loco, const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result
                 {
                     auto signal = track->signalGuarding(connection);
                     passedSignals.push(signal);

@@ -76,11 +76,17 @@ namespace winston
 				return Result::NotImplemented;
 			};
 
-			using SignalPassedCallback = Position::SignalPassedCallback;
-			SignalPassedCallback signalPassed = [](const winston::Track::Const track, const winston::Track::Connection connection, const Signal::Pass pass) -> const Result {
+			using SignalPassedCallback = std::function<const Result(const Locomotive::Const loco, const Track::Const track, const Track::Connection connection, const Signal::Pass pass)>;
+			SignalPassedCallback signalPassed = [](const Locomotive::Const loco, const Track::Const track, const Track::Connection connection, const Signal::Pass pass) -> const Result {
 				logger.warn("Locomotive::SignalPassedCallback used but not implemented");
 				return Result::NotImplemented;
 			};
+
+			using LocoStopped = std::function<void(const Locomotive::Const)>;
+			LocoStopped stopped = [](const Locomotive::Const) {
+				logger.warn("Locomotive::LocoStopped used but not implemented");
+				return Result::NotImplemented;
+				};
 		};
 
 		enum class Type : unsigned char
@@ -227,7 +233,6 @@ namespace winston
 		~LocomotiveShed() = default;
 
 		const Result init(hal::StorageInterface::Shared storage);
-		const Result format();
 		const Result add(Locomotive::Shared loco);
 		Locomotive::Shared get(const Address dccAddress) const;
 		const Result store(const Locomotive::Const loco);
@@ -238,6 +243,7 @@ namespace winston
 #ifndef WINSTON_TEST
 	private:
 #endif
+		const Result format();
 		const size_t offset(const size_t count) const;
 		const Result checkHeader(uint8_t& locoCount) const;
 		const Result getLocoMemoryAddress(const winston::Locomotive::Const loco, size_t& address) const;

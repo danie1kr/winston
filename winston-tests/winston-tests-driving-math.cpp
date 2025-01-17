@@ -54,7 +54,7 @@ namespace winstontests
                 return winston::Result::OK;
             };
 
-            callbacks.signalPassed = [](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result
+            callbacks.signalPassed = [](const winston::Locomotive::Const loco, const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result
             {
                 return winston::Result::OK;
             };

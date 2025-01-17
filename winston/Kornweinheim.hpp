@@ -76,7 +76,7 @@ winston::DigitalCentralStation::Callbacks Kornweinheim::z21Callbacks()
     // default Callbacks already apply
     winston::DigitalCentralStation::Callbacks callbacks;
 
-    callbacks.locomotiveUpdateCallback = [=](winston::Locomotive& loco, bool busy, bool  forward, unsigned char  speed, uint32_t functions)
+    callbacks.locomotiveUpdateCallback = [=](winston::Locomotive& loco, bool busy, bool forward, unsigned char speed, uint32_t functions)
     {
         loco.update(busy, forward, speed, functions);
 
@@ -133,11 +133,17 @@ winston::Locomotive::Callbacks Kornweinheim::locoCallbacks()
         return winston::Result::OK;
     };
 
-    callbacks.signalPassed = [=](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result
+    callbacks.signalPassed = [=](const winston::Locomotive::Const loco, const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result
     {
-        winston::logger.err("fill out callback for signal passed");
+        winston::logger.info(loco->name(), " passed ", track->name(), " ", connection);
+        auto signal = track->signalGuarding(connection);
+        signalTower->setSignalsForLocoPassing(track, connection, pass);
         return winston::Result::OK;
     };
+
+    callbacks.stopped = [=](auto loco) {
+        this->locomotiveShed.store(loco);
+        };
 
     return callbacks;
 }

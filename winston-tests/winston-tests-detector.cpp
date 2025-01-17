@@ -247,7 +247,7 @@ namespace winstontests
             Assert::IsTrue(railway->init() == winston::Result::OK);
             setupDetectors();
             Assert::IsTrue(loDiCommander->isReady());
-            createLocos([](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result
+            createLocos([](const winston::Locomotive::Const loco, const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result
                 {
                     return winston::Result::OK;
                 });
@@ -274,7 +274,7 @@ namespace winstontests
             Assert::IsTrue(loDiCommander->isReady());
 
             std::queue<winston::Signal::Shared> passedSignals;
-            createLocos([&passedSignals, &signalTower](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result
+            createLocos([&passedSignals, &signalTower](const winston::Locomotive::Const loco, const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result
                 {
                     auto signal = track->signalGuarding(connection);
                     passedSignals.push(signal);
@@ -420,7 +420,7 @@ namespace winstontests
             setupDetectors();
             Assert::IsTrue(loDiCommander->isReady());
 
-            createLocos([&signalTower](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result
+            createLocos([&signalTower](const winston::Locomotive::Const loco, const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result
                 {
                     auto signal = track->signalGuarding(connection);
                     signalTower->setSignalsForLocoPassing(track, connection, pass);
@@ -518,7 +518,7 @@ namespace winstontests
             setupDetectors();
             Assert::IsTrue(loDiCommander->isReady());
 
-            createLocos([&signalTower](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result
+            createLocos([&signalTower](const winston::Locomotive::Const loco, const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result
                 {
                     auto signal = track->signalGuarding(connection);
                     signalTower->setSignalsForLocoPassing(track, connection, pass);
@@ -624,7 +624,7 @@ namespace winstontests
             setupDetectors();
             Assert::IsTrue(loDiCommander->isReady());
 
-            createLocos([&signalTower](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result
+            createLocos([&signalTower](const winston::Locomotive::Const loco, const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result
                 {
                     auto signal = track->signalGuarding(connection);
                     signalTower->setSignalsForLocoPassing(track, connection, pass);

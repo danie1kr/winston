@@ -246,6 +246,8 @@ const winston::Result Z21::setLocoDrive(uint16_t address,
                                        bool  forward,
                                        uint8_t  speedRange,
                                        uint8_t  speed) {
+    
+#ifndef WINSTON_REALWORLD
     Z21Packet packet;
     packet.setXPacket(Z21TX_LAN_X::SET_LOCO_DRIVE,
                       Z21TX_DB0::SET_LOCO_DRIVE | (speedRange & 0xF),
@@ -253,6 +255,10 @@ const winston::Result Z21::setLocoDrive(uint16_t address,
                       Z21Packet::LSBLocoAddress(address),
                       ((forward ? 0x80 : 0x00) | (speed & 0x7F)));
     return this->send(packet);
+#else
+    winston::logger.warn("Not allowing Z21::setLocoDrive for ", address, " with speed ", speed);
+    return winston::Result::NotImplemented;
+#endif
 }
 
 const winston::Result Z21::setLocoFunction(uint16_t address,

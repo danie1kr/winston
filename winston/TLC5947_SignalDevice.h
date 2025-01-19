@@ -11,7 +11,7 @@ public:
 	inline 
 #endif
 	static const unsigned int SPI_Clock = 1000000;
-	#pragma message("TLC5947 Chaining: For more than 3 devices, use a very low clock (<10khz) or spi buffer/repeaters like 74lvc245 or TXU0304")
+	#pragma message("TLC5947 Chaining: For multiple devices, use ring connection for clock (at least) or spi buffer/repeaters like 74lvc245 or TXU0304")
 	// see https://forums.adafruit.com/viewtopic.php?t=58367&start=15
 
 	TLC5947(const winston::Id id, const size_t ports, typename winston::SendDevice<unsigned char>::Shared device, typename winston::GPIODigitalPinOutputDevice::Shared pinOff);

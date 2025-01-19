@@ -642,9 +642,11 @@ namespace winston
 		{
 			auto loco = Locomotive::make(callbacks, address, functions, start, speedMap, name, length, types);
 			this->locomotiveShed.add(loco);
+			loco->autodrive(false, false, true);
 			this->locomotiveShed.load(loco, [&](unsigned int trackIndex) {
 				return this->railway->track(trackIndex);
 				});
+			
 		}
 
 		Result loadLocomotives()

@@ -150,11 +150,13 @@ public:
 	const winston::Result read(const size_t address, unsigned char& content);
 	const winston::Result read(const size_t address, uint32_t& content);
 	const winston::Result read(const size_t address, uint16_t& content);
+	const winston::Result read(const size_t address, float &content);
 	const winston::Result write(const size_t address, const std::vector<unsigned char>& content, const size_t length = 0);
 	const winston::Result write(const size_t address, const std::string& content, const size_t length = 0);
 	const winston::Result write(const size_t address, const unsigned char content);
 	const winston::Result write(const size_t address, const uint32_t content);
 	const winston::Result write(const size_t address, const uint16_t content);
+	const winston::Result write(const size_t address, const float content);
 	const winston::Result sync();
 
 	using Shared_Ptr<StorageWin>::Shared;

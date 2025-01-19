@@ -2,6 +2,7 @@
 
 #include "Track.h"
 #include "WinstonTypes.h"
+#include "Log.h"
 #include <unordered_map>
 
 namespace winston {
@@ -16,7 +17,7 @@ namespace winston {
 		using IdentifyerType = _Identifier;
 
 		BaseSegment(const IdentifyerType id, const TrackSet tracks)
-			: id{ id }, _tracks(tracks), entriesSet(this->buildEntriesSet())
+			: id{ id }, _tracks(tracks), entriesSet(this->buildEntriesSet()), length(this->calculateLength())
 		{
 		}
 
@@ -68,6 +69,23 @@ namespace winston {
 			return this->_tracks;
 		}
 
+		const bool from(const BaseSegment<typename _Identifier> &other, SegmentEntry &entry) const
+		{
+			for (auto const &[track, connection] : this->entriesSet)
+			{
+				for (auto const& [trackOther, connectionOther] : other.entriesSet)
+				{
+#pragma message("optimize with better track functions")
+					if (track->whereConnects(trackOther) == connection && trackOther->whereConnects(track) == connectionOther)
+					{
+						entry = std::make_pair(track, connection);
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
 		const IdentifyerType id;
 	protected:
 		const TrackSet _tracks;
@@ -104,8 +122,43 @@ namespace winston {
 		}
 #undef CHECK_ENTRY_AND_ADD
 
+	private:
+		const Length calculateLength() const
+		{
+			Length l = 0.f;
+			for (auto& track : this->_tracks)
+			{
+				switch (track->type())
+				{
+				case Track::Type::Bumper:
+				case Track::Type::Rail:
+				{
+					l += track->length();
+					break;
+				}
+				case Track::Type::Turnout:
+				case Track::Type::DoubleSlipTurnout:
+					return 0.f;
+				default:
+				{
+					logger.err("Track type not supported in BaseSegment::calculateLength");
+					return 0.f;
+				}
+				}
+			}
+			return l;
+		}
+
 	public:
 		const SegmentEntrySet entriesSet;
+		const Length length;
+		
+
+		const bool fixedLength() const
+		{
+			return this->length != 0.f;
+		}
+
 	};
 
 	class Segment : public BaseSegment<Id>, public Shared_Ptr<Segment>

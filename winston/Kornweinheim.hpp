@@ -417,40 +417,40 @@ void Kornweinheim::createSignals(winston::SignalController& signalController, RA
 
 #ifdef WINSTON_KLEINWEINHEIM
     // Pbf
-    signalController.attach<winston::SignalKS>(railway->track(Tracks::PBF1), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    signalController.attach<winston::SignalKS>(railway->track(Tracks::PBF1), winston::Track::Connection::B, 5U, signalUpdateCallback);
+    signalController.attach<winston::SignalKS>(railway->track(Tracks::PBF1), winston::Track::Connection::A, 24.f, signalUpdateCallback);
+    signalController.attach<winston::SignalKS>(railway->track(Tracks::PBF1), winston::Track::Connection::B, 0.f, signalUpdateCallback);
 
-    signalController.attach<winston::SignalKS>(railway->track(Tracks::PBF2), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    signalController.attach<winston::SignalKS>(railway->track(Tracks::PBF2), winston::Track::Connection::B, 5U, signalUpdateCallback);
+    signalController.attach<winston::SignalKS>(railway->track(Tracks::PBF2), winston::Track::Connection::A, 64.f, signalUpdateCallback);
+    signalController.attach<winston::SignalKS>(railway->track(Tracks::PBF2), winston::Track::Connection::B, 60.f, signalUpdateCallback);
 
-    signalController.attach<winston::SignalH>(railway->track(Tracks::PBF1a), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    signalController.attach<winston::SignalH>(railway->track(Tracks::PBF1a), winston::Track::Connection::A, 32.f, signalUpdateCallback);
 
     // N + LS
-    signalController.attach<winston::SignalH>(railway->track(Tracks::N1), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    signalController.attach<winston::SignalH>(railway->track(Tracks::N2), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    signalController.attach<winston::SignalH>(railway->track(Tracks::N3), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    signalController.attach<winston::SignalH>(railway->track(Tracks::N4), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    signalController.attach<winston::SignalH>(railway->track(Tracks::N5), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    signalController.attach<winston::SignalH>(railway->track(Tracks::LS1), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    signalController.attach<winston::SignalH>(railway->track(Tracks::LS2), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    signalController.attach<winston::SignalH>(railway->track(Tracks::N1), winston::Track::Connection::A, 24.f, signalUpdateCallback);
+    signalController.attach<winston::SignalH>(railway->track(Tracks::N2), winston::Track::Connection::A, 24.f, signalUpdateCallback);
+    signalController.attach<winston::SignalH>(railway->track(Tracks::N3), winston::Track::Connection::A, 64.f, signalUpdateCallback);
+    signalController.attach<winston::SignalH>(railway->track(Tracks::N4), winston::Track::Connection::A, 0.f, signalUpdateCallback);
+    signalController.attach<winston::SignalH>(railway->track(Tracks::N5), winston::Track::Connection::A, 24.f, signalUpdateCallback);
+    signalController.attach<winston::SignalH>(railway->track(Tracks::LS1), winston::Track::Connection::A, 55.f, signalUpdateCallback);
+    signalController.attach<winston::SignalH>(railway->track(Tracks::LS2), winston::Track::Connection::A, 55.f, signalUpdateCallback);
 
     // Track
-    signalController.attach<winston::SignalH>(railway->track(Tracks::B1), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    signalController.attach<winston::SignalKS>(railway->track(Tracks::B1), winston::Track::Connection::B, 5U, signalUpdateCallback);
-    signalController.attach<winston::SignalKS>(railway->track(Tracks::B2), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    signalController.attach<winston::SignalKS>(railway->track(Tracks::B2), winston::Track::Connection::B, 5U, signalUpdateCallback);
-    signalController.attach<winston::SignalKS>(railway->track(Tracks::B3), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    signalController.attach<winston::SignalKS>(railway->track(Tracks::B3), winston::Track::Connection::B, 5U, signalUpdateCallback);
-    signalController.attach<winston::SignalKS>(railway->track(Tracks::B4), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    signalController.attach<winston::SignalKS>(railway->track(Tracks::B4), winston::Track::Connection::B, 5U, signalUpdateCallback);
-    signalController.attach<winston::SignalKS>(railway->track(Tracks::B6), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    signalController.attach<winston::SignalKS>(railway->track(Tracks::B6), winston::Track::Connection::B, 5U, signalUpdateCallback);
-    signalController.attach<winston::SignalKS>(railway->track(Tracks::B7), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    signalController.attach<winston::SignalH>(railway->track(Tracks::B7), winston::Track::Connection::B, 5U, signalUpdateCallback);
+    signalController.attach<winston::SignalH>(railway->track(Tracks::B1), winston::Track::Connection::A, winston::library::track::Roco::R2, signalUpdateCallback);
+    signalController.attach<winston::SignalKS>(railway->track(Tracks::B1), winston::Track::Connection::B, winston::library::track::Roco::R2 / 2.f, signalUpdateCallback);
+    signalController.attach<winston::SignalKS>(railway->track(Tracks::B2), winston::Track::Connection::A, winston::library::track::Roco::R2 / 2.f, signalUpdateCallback);
+    signalController.attach<winston::SignalKS>(railway->track(Tracks::B2), winston::Track::Connection::B, winston::library::track::Roco::R2 / 2.f, signalUpdateCallback);
+    signalController.attach<winston::SignalKS>(railway->track(Tracks::B3), winston::Track::Connection::A, 24, signalUpdateCallback);
+    signalController.attach<winston::SignalKS>(railway->track(Tracks::B3), winston::Track::Connection::B, 24, signalUpdateCallback);
+    signalController.attach<winston::SignalKS>(railway->track(Tracks::B4), winston::Track::Connection::A, 24, signalUpdateCallback);
+    signalController.attach<winston::SignalKS>(railway->track(Tracks::B4), winston::Track::Connection::B, 24, signalUpdateCallback);
+    signalController.attach<winston::SignalKS>(railway->track(Tracks::B6), winston::Track::Connection::A, 0, signalUpdateCallback);
+    signalController.attach<winston::SignalKS>(railway->track(Tracks::B6), winston::Track::Connection::B, winston::library::track::Roco::R2 / 2.f, signalUpdateCallback);
+    signalController.attach<winston::SignalKS>(railway->track(Tracks::B7), winston::Track::Connection::A, winston::library::track::Roco::R2 / 2.f, signalUpdateCallback);
+    signalController.attach<winston::SignalH>(railway->track(Tracks::B7), winston::Track::Connection::B, winston::library::track::Roco::R2, signalUpdateCallback);
 
     // leaving inner tracks
-    signalController.attach<winston::SignalKS>(railway->track(Tracks::Z1), winston::Track::Connection::A, 5U, signalUpdateCallback);
-    signalController.attach<winston::SignalH>(railway->track(Tracks::Z3), winston::Track::Connection::A, 5U, signalUpdateCallback);
+    signalController.attach<winston::SignalKS>(railway->track(Tracks::Z1), winston::Track::Connection::A, winston::library::track::Roco::R2 / 2, signalUpdateCallback);
+    signalController.attach<winston::SignalH>(railway->track(Tracks::Z3), winston::Track::Connection::A, 35.f, signalUpdateCallback);
 
     // track end bumper signals
     signalController.attach<winston::SignalAlwaysHalt>(railway->track(Tracks::N1), winston::Track::Connection::DeadEnd, 5U, signalUpdateAlwaysHalt);
@@ -650,6 +650,23 @@ void Kornweinheim::systemLoop()
 #endif
         this->webUI.step();
 #endif
+    }
+
+    {
+        static auto lastPosUpdatePrint = winston::hal::now();
+        for (auto& loco : this->locomotiveShed.shed())
+        {
+            if (loco->isRailed())
+            {
+                loco->update();
+                auto pos = loco->position();
+                if (winston::hal::now() > lastPosUpdatePrint + toMilliseconds(743))
+                {
+                    winston::logger.info("loco ", loco->name(), " on ", pos.trackName(), "-", pos.connection(), "+", pos.distance());
+                    lastPosUpdatePrint = winston::hal::now();
+                }
+            }
+        }
     }
 }
 

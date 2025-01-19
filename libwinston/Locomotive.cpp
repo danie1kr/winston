@@ -4,6 +4,18 @@
 #include "HAL.h"
 #include "SignalTower.h"
 
+/*
+* BR218
+Throttle	Speed
+0	0.000000 mm/s
+23	94.945419 mm/s
+33	188.490250 mm/s
+37	9.036855 mm/s
+38	238.369415 mm/s
+45	329.617828 mm/s
+255	50.000000 mm/s
+*/
+
 namespace winston
 {
 	const ThrottleSpeedMap Locomotive::defaultThrottleSpeedMap = { {0, 0.f},{255, 50.f} };
@@ -71,17 +83,20 @@ namespace winston
 
 	void Locomotive::speedTrap(const Distance distance)
 	{
-		if (distance == 0)
+		if (distance == 0.f)// && !this->details.speedTrapping)
 		{
 			this->speedTrapStart = hal::now();
 			this->details.speedTrapping = true;
 			this->details.distanceSinceSpeedTrapped = 0;
 		}
-		else if (this->details.autodrive.updateSpeedMap)
+		else if (distance != 0.f && this->details.autodrive.updateSpeedMap)
 		{
 			auto time = inMilliseconds(hal::now() - this->speedTrapStart);
 			// x mm in y us = x/y mm/us <=> 1000x/y mm/s
-			this->speedMap.learn(this->throttle(), (const Speed)((1000.f * std::abs(distance)) / time));
+			auto speed = (const Speed)((1000.f * std::abs(distance)) / time);
+			this->speedMap.learn(this->throttle(), speed);
+			logger.info("Loco ", this->name(), " (", this->address(), ") speedtrapped for ", distance, "mm with ", speed, "mm/s");
+			this->speedTrap(0.f);
 		}
 	}
 
@@ -132,6 +147,18 @@ namespace winston
 
 	void Locomotive::entered(Segment::Shared segment, const TimePoint when)
 	{
+		if (auto ls = this->details.lastEnteredSegment; ls && ls->fixedLength())
+		{
+			SegmentEntry entry;
+			if (segment->from(*ls, entry))
+			{
+				Position entryPos(entry.first, entry.second, 0.f);
+				this->details.position = entryPos;
+				this->details.lastPositionUpdate = hal::now();
+
+				//we might have passed some signals!
+			}
+		}
 		if (this->position().valid())
 		{
 			auto currentTrack = this->position().track();
@@ -142,6 +169,8 @@ namespace winston
 			else
 			{
 				// known for long
+				if (this->details.lastEnteredSegment && this->details.lastEnteredSegment->fixedLength())
+					this->speedTrap(this->details.lastEnteredSegment->length);
 				auto expectedTrack = this->expected.position.track();
 				if (this->expected.precise && expectedTrack)
 				{
@@ -193,11 +222,20 @@ namespace winston
 						this->updateExpected();
 
 						// initialize speed trap
-						this->speedTrap();
+						//this->speedTrap();
 					}
 					else
 					{
 						; // we are not expected here!
+						/*
+						auto newPos = Position(expectedTrack, this->expected.position.connection(), remainingDistanceOnNewTrack);
+
+						this->details.position = newPos;
+						this->details.lastPositionUpdate = when;
+						this->updateExpected();
+						// initialize speed trap
+						this->speedTrap();
+						*/
 					}
 				}
 				else // second step after initial appearance
@@ -205,7 +243,7 @@ namespace winston
 					this->updateExpected();
 
 					// initialize speed trap
-					this->speedTrap();
+					//this->speedTrap();
 				}
 			}
 		}
@@ -217,15 +255,16 @@ namespace winston
 			this->expected.precise = false;
 		}
 		this->details.lastEnteredSegment = segment;
+		this->speedTrap(0.f);
 	}
 
 	void Locomotive::left(Segment::Shared segment, const TimePoint when)
 	{
 		// ok, cu soon
-		if (this->details.speedTrapping)
+		/*if (this->details.speedTrapping)
 		{
 			this->speedTrap(this->details.distanceSinceSpeedTrapped);
-		}
+		}*/
 	}
 
 	void Locomotive::updateExpected(const bool fullUpdate)
@@ -629,7 +668,9 @@ namespace winston
 
 		auto track = trackFromIndex(trackIndex);
 		winston::Position pos(track, (Track::Connection)connection, distance);
-		loco->railOnto(pos);
+
+		if(pos.track())
+			loco->railOnto(pos);
 
 		uint8_t speedMapCount = 0;
 		this->storage->read(address, speedMapCount); address += sizeof(decltype(speedMapCount));
@@ -644,7 +685,8 @@ namespace winston
 
 			throttleSpeedMap.emplace(throttle, speed);
 		}
-		loco->setSpeedMap(throttleSpeedMap);
+		if(speedMapCount != 0)
+			loco->setSpeedMap(throttleSpeedMap);
 
 		return winston::Result::OK;
 	}

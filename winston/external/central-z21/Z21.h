@@ -55,7 +55,7 @@ private:
     winston::TimePoint lastMsgSent;
     const std::chrono::seconds keepAliveTimeout = std::chrono::seconds(24);
 
-    const unsigned int broadcastFlags = Z21_Broadcast::STATUS_LOCO_TURNOUT;// | Z21_Broadcast::ALL_LOCO_INFO;
+    const unsigned int broadcastFlags = Z21_Broadcast::STATUS_LOCO_TURNOUT | Z21_Broadcast::ALL_LOCO_INFO;
 
 protected:
     void processXPacket(uint8_t *packet);

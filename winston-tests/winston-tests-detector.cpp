@@ -549,7 +549,7 @@ namespace winstontests
                 { {0, 0.f}, {100, 100.f}, {255, 255.f} });
 
             auto loco = locoShed.shed()[0];
-            loco->autodrive(true, false, false);
+            loco->autodrive(true, false, false, false);
             auto B2 = railway->track(Y2024RailwayTracks::B2);
             auto B3 = railway->track(Y2024RailwayTracks::B3);
             auto Turnout1 = std::dynamic_pointer_cast<winston::Turnout>(railway->track(Y2024RailwayTracks::Turnout1));
@@ -663,7 +663,7 @@ namespace winstontests
                 { {0, 0.f}, {100, 10.f}, {255, 25.f} });
 
             auto loco = locoShed.shed()[0];
-            loco->autodrive(false, false, true);
+            loco->autodrive(false, false, true, false);
             auto PBF1a = railway->track(Y2024RailwayTracks::PBF1a);
             auto B7 = railway->track(Y2024RailwayTracks::B7);
             auto Turnout1 = std::dynamic_pointer_cast<winston::Turnout>(railway->track(Y2024RailwayTracks::Turnout1));

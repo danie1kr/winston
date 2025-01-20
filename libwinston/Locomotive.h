@@ -157,7 +157,7 @@ namespace winston
 		const bool isNextSignal(const Signal::Const signal) const;
 		void updateNextSignals();
 
-		void autodrive(const bool halt, const bool drive, const bool updateSpeedMap);
+		void autodrive(const bool halt, const bool drive, const bool updateSpeedMap, const bool disappearTimeout);
 	private:
 
 		const Position& moved(Duration& timeOnTour, Position::Transit& transit);
@@ -190,7 +190,7 @@ namespace winston
 			Address address{ 0 };
 			const Functions functionTable;
 			Position position;
-			TimePoint lastPositionUpdate, lastSpeedUpdate;
+			TimePoint lastPositionUpdate, lastSpeedUpdate, lastEnteredTime;
 			std::string name{ "" };
 			const Length length{ 0 };
 			bool busy{ false };
@@ -207,6 +207,7 @@ namespace winston
 				bool halt;
 				bool drive;
 				bool updateSpeedMap;
+				bool disappearTimeout;
 			} autodrive;
 			bool speedTrapping{ false };
 			Distance distanceSinceSpeedTrapped{ 0 };

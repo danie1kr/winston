@@ -21,7 +21,7 @@ namespace winston
 	const ThrottleSpeedMap Locomotive::defaultThrottleSpeedMap = { {0, 0.f},{255, 50.f} };
 	Locomotive::Locomotive(const Callbacks callbacks, const Address address, const Functions functionTable, const Position start, const ThrottleSpeedMap throttleSpeedMap, const std::string name, const Length length, const Types types)
 		: callbacks(callbacks)
-		, details{ address, functionTable, start, hal::now(), hal::now(), name, length, false, true, false, false, 0, 0, 0, types, {}, { false, false, false }, false, 0, nullptr, false }
+		, details{ address, functionTable, start, hal::now(), hal::now(), hal::now(), name, length, false, true, false, false, 0, 0, 0, types, {}, { false, false, false, false }, false, 0, nullptr, false }
 		, expected{ Position::nullPosition(), hal::now(), false }
 		, speedMap(throttleSpeedMap)
 		, speedTrapStart(hal::now())
@@ -133,6 +133,9 @@ namespace winston
 	void Locomotive::railOff()
 	{
 		this->details.railed = false;
+		this->details.position = Position(nullptr, Track::Connection::A, 0.f);
+		this->details.speedTrapping = false;
+		this->details.trackable = false;
 	}
 
 	const NextSignal::Const Locomotive::nextSignal(const Signal::Pass pass, const bool forward) const
@@ -233,11 +236,13 @@ namespace winston
 				
 				// restart speedtrap
 				speedTrap();
+				//this->updateExpected();
 				this->details.trackable = true;
 			}
 			else
 			{
 				// we are lost, so restart
+				logger.err("Loco", this->name(), " is lost on segment", segment->id);
 				this->railOnto(Position(*segment->tracks().begin(), Track::Connection::A, 0), when);
 				this->details.trackable = false;
 			}
@@ -248,6 +253,7 @@ namespace winston
 			this->railOnto(Position(*segment->tracks().begin(), Track::Connection::A, 0), when);
 			this->details.trackable = false;
 		}
+		this->details.lastEnteredTime = hal::now();
 		this->details.lastEnteredSegment = segment;
 
 		/*
@@ -366,7 +372,6 @@ namespace winston
 	void Locomotive::left(Segment::Shared segment, const TimePoint when)
 	{
 		// ok, cu soon
-		this->details.trackable = false;
 		/*if (this->details.speedTrapping)
 		{
 			this->speedTrap(this->details.distanceSinceSpeedTrapped);
@@ -375,7 +380,6 @@ namespace winston
 	/*
 	void Locomotive::updateExpected(const bool fullUpdate)
 	{
-
 		auto track = this->position().track();
 		if (fullUpdate)
 		{
@@ -407,8 +411,8 @@ namespace winston
 				this->expected.when = hal::now() + toSeconds(60 * 60 * 24);
 			}
 		}
-	}*/
-
+	}
+	*/
 	void Locomotive::updateSpeed(const Throttle throttle, Position::Transit &transit)
 	{
 		Duration timeOnTour;
@@ -466,11 +470,12 @@ namespace winston
 		return this->position();
 	}
 
-	void Locomotive::autodrive(const bool halt, const bool drive, const bool updateSpeedMap)
+	void Locomotive::autodrive(const bool halt, const bool drive, const bool updateSpeedMap, const bool disappearTimeout)
 	{
 		this->details.autodrive.halt = halt;
 		this->details.autodrive.drive = drive;
 		this->details.autodrive.updateSpeedMap = updateSpeedMap;
+		this->details.autodrive.disappearTimeout = disappearTimeout;
 	}
 
 	const Result Locomotive::update()
@@ -485,6 +490,13 @@ namespace winston
 			return Result::NotFound;
 
 		auto now = hal::now();
+
+		if (this->details.autodrive.disappearTimeout && now > this->details.lastEnteredTime + toMilliseconds(5000))
+		{
+			this->railOff();
+			return Result::NotFound;
+		}
+
 		Duration speedUpdateRate = now - this->details.lastSpeedUpdate;
 		const auto timeDiff = inMilliseconds(speedUpdateRate);
 		if (timeDiff > WINSTON_LOCO_SPEED_TRACK_RATE)

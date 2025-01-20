@@ -235,7 +235,7 @@ namespace winstontests
             // ==> 320 / 8 ==> 40mm/s
 
             loco->drive<true>(true, 100);
-            loco->autodrive(false, false, true);
+            loco->autodrive(false, false, true, false);
             loco->speedTrap(0);
             winston::hal::delay((unsigned int)(delay / div));
             loco->speedTrap(distance / div);

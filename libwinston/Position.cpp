@@ -18,6 +18,11 @@ namespace winston
 
 	}
 
+	const bool Position::operator==(Position const& other) const
+	{
+		return this->track() == other.track() && this->connection() == other.connection() && this->distance() == other.distance();
+	}
+
 	const std::string Position::trackName() const
 	{
 		return this->_track ? this->_track->name() : "nullptr";
@@ -88,7 +93,7 @@ namespace winston
 		this->reference = this->_track->otherConnection(this->reference);
 	}
 
-	Position::Transit Position::drive(const Distance distance, SignalPassedCallback signalPassed)
+	const Position::Transit Position::drive(const Distance distance, const bool allowCrossSegment, SignalPassedCallback signalPassed)
 	{
 		if (distance < 0)
 			this->useOtherRef();
@@ -123,9 +128,19 @@ namespace winston
 					return Transit::TraversalError;
 				}
 
+				// don't go any further
+				if (!allowCrossSegment && current->segment() != onto->segment())
+				{
+					this->dist = current->length();
+					this->_track = current;
+					this->reference = connection;
+					return Transit::SegmentBorder;
+				}
+
 				connection = onto->whereConnects(current);
 				if (!onto->canTraverse(connection))
 					return Transit::TraversalError;
+
 				current = onto;
 			}
 			this->_track = current;

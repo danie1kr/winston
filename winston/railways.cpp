@@ -1341,7 +1341,7 @@ Y2024Railway::Segment::Shared Y2024Railway::define(const Segments segment)
         SEGMENT(2, { LS2 });
         SEGMENT(3, { LS1 });
         SEGMENT(4, { B7, Turnout1 });
-        SEGMENT(5, { B2, Turnout4, B3, Turnout5, B5 });
+        SEGMENT(5, { B2, Turnout4, B3, Turnout6, B5 });
         SEGMENT(6, { Z1, DoubleSlipTurnout8_9, Z2, Z3, Z4, Z5, Z6, Turnout10, Turnout11, Turnout12});
         SEGMENT(7, { PBF1, Turnout2 });
         SEGMENT(8, { PBF2 });

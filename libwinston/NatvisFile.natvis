@@ -27,7 +27,7 @@
   </Type>
 
   <Type Name="winston::Locomotive">
-    <DisplayString>{details.name} ({details.address})</DisplayString>
+    <DisplayString>{details.name} ({details.address}) on {details.position}</DisplayString>
   </Type>
 
 </AutoVisualizer>

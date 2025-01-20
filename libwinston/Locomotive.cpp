@@ -21,7 +21,7 @@ namespace winston
 	const ThrottleSpeedMap Locomotive::defaultThrottleSpeedMap = { {0, 0.f},{255, 50.f} };
 	Locomotive::Locomotive(const Callbacks callbacks, const Address address, const Functions functionTable, const Position start, const ThrottleSpeedMap throttleSpeedMap, const std::string name, const Length length, const Types types)
 		: callbacks(callbacks)
-		, details{ address, functionTable, start, hal::now(), hal::now(), name, length, false, true, false, 0, 0, 0, types, {}, { false, false, false }, false, 0, nullptr, false }
+		, details{ address, functionTable, start, hal::now(), hal::now(), name, length, false, true, false, false, 0, 0, 0, types, {}, { false, false, false }, false, 0, nullptr, false }
 		, expected{ Position::nullPosition(), hal::now(), false }
 		, speedMap(throttleSpeedMap)
 		, speedTrapStart(hal::now())
@@ -68,7 +68,7 @@ namespace winston
 		this->details.forward = !this->details.forward;
 		this->details.position.useOtherRef();
 		this->details.nextSignals.reverse();
-		this->updateExpected();
+		//this->updateExpected();
 	}
 
 	const Speed Locomotive::speed()
@@ -147,6 +147,110 @@ namespace winston
 
 	void Locomotive::entered(Segment::Shared segment, const TimePoint when)
 	{
+		/*
+			1. initial appearance
+				railOnto
+					isTrackable false
+			2. loco was on a segment before
+				this->details.lastEnteredSegment != null
+				if(isTrackable)
+					if(this->details.lastEnteredSegment.isFixedLength)
+						speedTrap(this->details.lastEnteredSegment.length)
+
+					// we think the loco is still on the old segment, so catch up signals if any
+					if(this->position().track == this->details.lastEnteredSegment)
+						if(signal = track.signalFacing(position.reference)
+							...
+
+					// restart speedtrap
+					speedTrap();
+					isTrackable = true;
+
+			this->details.lastEnteredSegment
+
+
+		*/
+		const auto lastSegment = this->details.lastEnteredSegment;
+		if (segment == lastSegment)
+		{
+			// we appeared where we are already... so?!
+			;
+		}
+		else if (lastSegment != nullptr)
+		{
+			if (this->details.trackable && lastSegment->fixedLength())
+				this->speedTrap(lastSegment->length);
+
+			bool foundNextSectionEntry = false;
+			Track::Const entryTrack;
+			Track::Connection entryConnection;
+			if (this->details.trackable)
+			{
+				auto current = this->position().track();
+				auto connection = this->position().connection();
+				auto onto = current;
+
+				if (current->traverse(connection, onto, false))
+				{
+					connection = onto->whereConnects(current);
+					if (current->segment() != onto->segment())
+					{
+						entryTrack = onto;
+						entryConnection = connection;
+						foundNextSectionEntry = true;
+					}
+				}
+			}
+
+			SegmentEntry entry;
+			if (!foundNextSectionEntry && segment->from(*lastSegment, entry))
+			{
+				entryTrack = entry.first;
+				entryConnection = entry.second;
+				foundNextSectionEntry = true;
+			}
+
+			if(foundNextSectionEntry)
+			{
+				Position entryPos(entryTrack, entryConnection, 0.f);
+
+				if (this->details.trackable)
+				{
+					const auto leavingTrack = entryTrack->on(entryConnection);
+					const auto leavingConnection = leavingTrack->whereConnects(entryTrack);
+
+					if (auto signal = leavingTrack->signalGuarding(leavingConnection))
+					{
+						if (this->details.position.track()->length() - this->details.position.distance() < signal->distance())
+						{
+							// we passed signal, it was facing us and we entered its protectorate
+							this->callbacks.signalPassed(this->const_from_this(), leavingTrack, leavingConnection, Signal::Pass::Facing);
+						}
+					}
+				}
+				this->details.position = entryPos;
+				this->details.lastPositionUpdate = hal::now();
+				
+				// restart speedtrap
+				speedTrap();
+				this->details.trackable = true;
+			}
+			else
+			{
+				// we are lost, so restart
+				this->railOnto(Position(*segment->tracks().begin(), Track::Connection::A, 0), when);
+				this->details.trackable = false;
+			}
+		}
+		else // initial appearance
+		{
+			// put onto any rail of the segment for now
+			this->railOnto(Position(*segment->tracks().begin(), Track::Connection::A, 0), when);
+			this->details.trackable = false;
+		}
+		this->details.lastEnteredSegment = segment;
+
+		/*
 		if (auto ls = this->details.lastEnteredSegment; ls && ls->fixedLength())
 		{
 			SegmentEntry entry;
@@ -156,7 +260,7 @@ namespace winston
 				this->details.position = entryPos;
 				this->details.lastPositionUpdate = hal::now();
 
-				//we might have passed some signals!
+				we might have passed some signals!
 			}
 		}
 		if (this->position().valid())
@@ -235,7 +339,7 @@ namespace winston
 						this->updateExpected();
 						// initialize speed trap
 						this->speedTrap();
-						*/
+						*
 					}
 				}
 				else // second step after initial appearance
@@ -256,17 +360,19 @@ namespace winston
 		}
 		this->details.lastEnteredSegment = segment;
 		this->speedTrap(0.f);
+		*/
 	}
 
 	void Locomotive::left(Segment::Shared segment, const TimePoint when)
 	{
 		// ok, cu soon
+		this->details.trackable = false;
 		/*if (this->details.speedTrapping)
 		{
 			this->speedTrap(this->details.distanceSinceSpeedTrapped);
 		}*/
 	}
-
+	/*
 	void Locomotive::updateExpected(const bool fullUpdate)
 	{
 
@@ -301,12 +407,11 @@ namespace winston
 				this->expected.when = hal::now() + toSeconds(60 * 60 * 24);
 			}
 		}
-	}
+	}*/
 
-	void Locomotive::updateSpeed(const Throttle throttle)
+	void Locomotive::updateSpeed(const Throttle throttle, Position::Transit &transit)
 	{
 		Duration timeOnTour;
-		Position::Transit transit;
 		this->details.positionUpdateRequired = true;
 		this->moved(timeOnTour, transit);
 		this->details.throttle = this->details.modelThrottle = throttle;
@@ -353,7 +458,7 @@ namespace winston
 				this->details.distanceSinceSpeedTrapped += distance;
 
 				using namespace std::placeholders;
-				transit = this->details.position.drive(distance, std::bind(this->callbacks.signalPassed, this->const_from_this(), _1, _2, _3));
+				transit = this->details.position.drive(distance, false, std::bind(this->callbacks.signalPassed, this->const_from_this(), _1, _2, _3));
 			}
 			this->details.lastPositionUpdate = now;
 			this->details.positionUpdateRequired = false;
@@ -427,7 +532,10 @@ namespace winston
 						else*/ if (decelerationToNextSignal > minBreaking)
 						{
 							const auto targetSpeedToHalt = this->speed() - (decelerationToNextSignal * timeDiff / 1000.f);
-							this->updateSpeed(this->speedMap.throttle(targetSpeedToHalt));
+							Position::Transit updateSpeedTransit;
+							this->updateSpeed(this->speedMap.throttle(targetSpeedToHalt), updateSpeedTransit);
+							if (updateSpeedTransit != Position::Transit::Stay)
+								transit = updateSpeedTransit;
 						}
 					}
 			}

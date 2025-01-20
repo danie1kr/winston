@@ -13,7 +13,8 @@ namespace winston
 			Stay = 0,
 			CrossTrack = 1,
 			CrossSection = 2,
-			TraversalError = 3
+			TraversalError = 3,
+			SegmentBorder = 4
 		};
 		
 		using SignalPassedCallback = std::function<const Result(const winston::Track::Const track, const winston::Track::Connection connection, const Signal::Pass pass)>;
@@ -35,12 +36,15 @@ namespace winston
 
 		Position(Track::Const track, const Track::Connection reference, const Distance distance);
 		~Position() = default;
+
+		const bool operator==(Position const& other) const;
+
 		const std::string trackName() const;
 		const unsigned int trackIndex() const;
 		const Track::Connection connection() const;
 		const Distance distance() const;
 		const Distance minus(const Position& other) const;
-		Transit drive(const Distance distance, SignalPassedCallback signalPassed);
+		const Transit drive(const Distance distance, const bool allowCrossSegment, SignalPassedCallback signalPassed);
 		const bool nextSignal(PositionedSignal &positionedSignal) const;
 		static void collectSignalsInRange(const Distance start, const Distance end, const Track::Const track, const Track::Connection reference, SignalPassedCallback signalPassed);
 

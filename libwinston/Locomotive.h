@@ -163,9 +163,9 @@ namespace winston
 		const Position& moved(Duration& timeOnTour, Position::Transit& transit);
 		static const float acceleration(const Throttle throttle);
 
-		void updateSpeed(const Throttle throttle);
+		void updateSpeed(const Throttle throttle, Position::Transit& transit);
 
-		void updateExpected(const bool fullUpdate = true);
+		//void updateExpected(const bool fullUpdate = true);
 #ifdef WINSTON_TEST
 	public:
 #endif
@@ -196,6 +196,7 @@ namespace winston
 			bool busy{ false };
 			bool forward{ true };
 			bool railed{ false };
+			bool trackable{ false };
 			Throttle throttle{ 0 };
 			Throttle modelThrottle{ 0 };
 			uint32_t functions{ 0 };

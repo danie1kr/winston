@@ -92,7 +92,7 @@ namespace winstontests
             auto start_PBF1a_deadEnd = winston::Position(PBF1a, winston::Track::Connection::DeadEnd, 0);
             auto end = winston::Position(PBF1a, winston::Track::Connection::DeadEnd, 0);
             const winston::Distance distance = 50;
-            auto transit = end.drive(distance, [](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result{ return winston::Result::OK; });
+            auto transit = end.drive(distance, false, [](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result{ return winston::Result::OK; });
             Assert::IsTrue(transit == winston::Position::Transit::Stay);
             // end is +distance away from start (at dead end)
             Assert::IsTrue(start_PBF1a_deadEnd.minus(end) == distance);
@@ -112,7 +112,7 @@ namespace winstontests
             auto end = winston::Position(PBF3a, winston::Track::Connection::B, 80);
             auto end_B4_A = winston::Position(B4, winston::Track::Connection::A, 20);
             const winston::Distance distance = 100;
-            auto transit = end.drive(-distance, [](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result { return winston::Result::OK; });
+            auto transit = end.drive(-distance, false, [](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result { return winston::Result::OK; });
             Assert::IsTrue(transit == winston::Position::Transit::CrossTrack);
             Assert::AreEqual(end_B4_A.trackName(), end.trackName());
             const auto travelled = start_PBF3a_B.minus(end);
@@ -131,7 +131,7 @@ namespace winstontests
             auto end = winston::Position(PBF3a, winston::Track::Connection::A, 80);
             auto end_B4_A = winston::Position(B4, winston::Track::Connection::A, 20);
             const winston::Distance distance = 100 + PBF3a->length() - 80;
-            auto transit = end.drive(distance, [](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result { return winston::Result::OK; });
+            auto transit = end.drive(distance, false, [](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result { return winston::Result::OK; });
             Assert::IsTrue(transit == winston::Position::Transit::CrossTrack);
             Assert::AreEqual(end_B4_A.trackName(), end.trackName());
             const auto travelled = start_PBF3a_B.minus(end);
@@ -153,7 +153,7 @@ namespace winstontests
             auto expect = winston::Position(B5, winston::Track::Connection::B, 80);
 
             auto distance = (50.f + Turnout12->length() + 80.f);
-            auto transit = end.drive(-distance, [](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result { return winston::Result::OK; });
+            auto transit = end.drive(-distance, false, [](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result { return winston::Result::OK; });
 
             Assert::IsTrue(transit == winston::Position::Transit::CrossTrack);
             Assert::AreEqual(expect.trackName(), end.trackName());
@@ -176,7 +176,7 @@ namespace winstontests
             auto expect = winston::Position(B5, winston::Track::Connection::B, 80);
 
             auto distance = (50 + Turnout12->length() + 80);
-            auto transit = end.drive(-distance, [](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result { return winston::Result::OK; });
+            auto transit = end.drive(-distance, false, [](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result { return winston::Result::OK; });
 
             Assert::IsTrue(transit == winston::Position::Transit::TraversalError);
         }
@@ -209,7 +209,7 @@ namespace winstontests
             auto distance = (PBF3->length() + Turnout6->length() + PBF3a->length() + B4->length() + Turnout10->length() + Turnout11->length() + B5->length() + Turnout12->length() + B6->length() + Turnout2->length() + Turnout3->length() + 10);
             auto expect = winston::Position(PBF3, winston::Track::Connection::A, 60);
 
-            auto transit = pos.drive(distance, [](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result { return winston::Result::OK; });
+            auto transit = pos.drive(distance, false, [](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result { return winston::Result::OK; });
             Assert::IsTrue(transit == winston::Position::Transit::CrossTrack);
             Assert::AreEqual(expect.trackName(), pos.trackName());
             Assert::IsTrue(pos.connection() == expect.connection());
@@ -419,7 +419,7 @@ namespace winstontests
                 auto expect = winston::Position(l0, winston::Track::Connection::DeadEnd, 60);
 
                 std::vector<winston::Signal::Shared> passedSignals;
-                auto transit = pos.drive(distance, [&](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result {
+                auto transit = pos.drive(distance, false, [&](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result {
                     auto signal = track->signalGuarding(connection);
                     passedSignals.push_back(signal);
                     return winston::Result::OK;
@@ -439,7 +439,7 @@ namespace winstontests
                 auto expect = winston::Position(l1, winston::Track::Connection::B, 50);
 
                 std::vector<winston::Signal::Shared> passedSignals;
-                auto transit = pos.drive(distance, [&](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result {
+                auto transit = pos.drive(distance, false, [&](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result {
                     auto signal = track->signalGuarding(connection);
                     passedSignals.push_back(signal);
                     return winston::Result::OK;
@@ -469,7 +469,7 @@ namespace winstontests
                 auto expect = winston::Position(l6, winston::Track::Connection::B, 50);
 
                 std::vector<winston::Signal::Shared> passedSignals;
-                auto transit = pos.drive(distance, [&](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result {
+                auto transit = pos.drive(distance, false, [&](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result {
                     auto signal = track->signalGuarding(connection);
                     passedSignals.push_back(signal);
                     return winston::Result::OK;

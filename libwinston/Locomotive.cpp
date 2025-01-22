@@ -424,6 +424,10 @@ namespace winston
 		Duration timeOnTour;
 		this->details.positionUpdateRequired = true;
 		this->moved(timeOnTour, transit);
+
+		if (throttle != this->details.throttle && throttle == 0)
+			this->callbacks.stopped(this->const_from_this());
+
 		this->details.throttle = this->details.modelThrottle = throttle;
 		this->callbacks.drive(this->address(), (unsigned char)this->details.modelThrottle, this->details.forward);
 		this->details.lastSpeedUpdate = hal::now();
@@ -453,6 +457,9 @@ namespace winston
 
 	void Locomotive::update(const bool busy, const bool forward, const Throttle throttle, const uint32_t functions)
 	{
+		if(throttle != this->details.throttle && throttle == 0)
+			this->callbacks.stopped(this->const_from_this());
+
 		this->details.busy = busy;
 		this->details.forward = forward;
 		this->details.throttle = throttle;

@@ -134,6 +134,7 @@ namespace winston
 		void setSpeedMap(ThrottleSpeedMap throttleSpeedMap);
 		//void position(const Position p);
 		const Position& position() const;
+		const Segment::IdentifyerType segment() const;
 		void stop();
 		const Result update(Position::Transit& transit);
 		const Result update();
@@ -158,6 +159,8 @@ namespace winston
 		void updateNextSignals();
 
 		void autodrive(const bool halt, const bool drive, const bool updateSpeedMap, const bool disappearTimeout);
+
+		void invalidateSpeedTrap();
 	private:
 
 		const Position& moved(Duration& timeOnTour, Position::Transit& transit);

@@ -108,24 +108,32 @@ namespace winstontests
                 });
         };
 
-        static winston::Railway::Callbacks railwayCallbacks()
+        winston::Railway::Callbacks railwayCallbacks()
         {
             winston::Railway::Callbacks callbacks;
 
             callbacks.turnoutUpdateCallback = [=](winston::Turnout& turnout, const winston::Turnout::Direction direction) -> const winston::State
                 {
+                    // check if there is a locomotive on this segment. If so, invalidate its speed trap as we will have issues calculating the correct length since entry
+                    for (auto& loco : locoShed.shed())
+                        if (loco->segment() == turnout.segment())
+                            loco->invalidateSpeedTrap();
                     return winston::State::Finished;
                 };
 
             return callbacks;
         }
 
-        static winston::Railway::Callbacks railwayCallbacksWithSignals(winston::SignalTower::Shared signalTower)
+        winston::Railway::Callbacks railwayCallbacksWithSignals(winston::SignalTower::Shared signalTower)
         {
             winston::Railway::Callbacks callbacks;
 
             callbacks.turnoutUpdateCallback = signalTower->injectTurnoutSignalHandling([=](winston::Turnout& turnout, const winston::Turnout::Direction direction) -> const winston::State
                 {
+                    // check if there is a locomotive on this segment. If so, invalidate its speed trap as we will have issues calculating the correct length since entry
+                    for (auto& loco : locoShed.shed())
+                        if (loco->segment() == turnout.segment())
+                            loco->invalidateSpeedTrap();
                     return winston::State::Finished;
                 });
 
@@ -647,8 +655,8 @@ namespace winstontests
             auto signalTower = winston::SignalTower::make(locoShed);
             railway = Y2024Railway::make(railwayCallbacksWithSignals(signalTower));
             Assert::IsTrue(railway->init() == winston::Result::OK);
-            createSignals(testSignalController, railway, [](winston::Track& track, winston::Track::Connection connection, const winston::Signal::Aspects aspects) -> const winston::State
-                {
+            createSignals(testSignalController, railway, [=](winston::Track& track, winston::Track::Connection connection, const winston::Signal::Aspects aspects) -> const winston::State
+                {        
                     return winston::State::Finished;
                 });
             setupDetectors();
@@ -695,74 +703,128 @@ namespace winstontests
 
             auto throttle = 100;
             loco->drive<true>(true, throttle);
-
-            auto B6 = railway->track(Y2024RailwayTracks::B6);
-            auto PBF2 = railway->track(Y2024RailwayTracks::PBF2);
-            injectLoco(B6->segment(), loco, true);
-            detectorLoops();
-            loco->railOnto(winston::Position(B6, winston::Track::Connection::A, 50));
-
-            size_t expectedTrackListIndex = 0;
-            std::array<winston::Track::Const, 6> expectedTrackList = { 
-                railway->track(Y2024RailwayTracks::B7),
-                railway->track(Y2024RailwayTracks::Turnout1),
-                railway->track(Y2024RailwayTracks::PBF2),
-                railway->track(Y2024RailwayTracks::Turnout3),
-                railway->track(Y2024RailwayTracks::B1)
-            };
-
-            bool back = false;
-            while (!back)
             {
-                winston::Position::Transit transit = winston::Position::Transit::Stay;
-                // drive until we hit the end of the segment which should not let us pass
-                while (transit == winston::Position::Transit::Stay)
-                {
-                    winston::hal::delay(100);
-                    const auto currentPos = loco->position();
-                    loco->update(transit);
-                }
-                Assert::IsTrue(transit != winston::Position::Transit::TraversalError);
-                Assert::IsTrue(expectedTrackListIndex < expectedTrackList.size());
-                if (transit == winston::Position::Transit::SegmentBorder)
-                {
-                    // find the next track and inject loco there, so it pops up at dist=0
-                    auto nextTrack = loco->position().track()->on(loco->position().track()->otherConnection(loco->position().connection()));
-                    Assert::IsTrue(nextTrack == expectedTrackList[expectedTrackListIndex]);
-                    injectLoco(nextTrack->segment(), loco, true);
-                    // goodbye the old segment
-                    injectLoco(loco->position().track()->segment(), loco, false);
-                    detectorLoops();
-                }
-                // now on the new one
-                Assert::IsTrue(loco->position().track() == expectedTrackList[expectedTrackListIndex]);
-                if (expectedTrackListIndex > 1)
-                {
-                    Assert::IsTrue(loco->details.speedTrapping);
-                }
-                /*
-                auto oldLocoTrack = loco->position().track();
-                winston::Position::Transit transit = winston::Position::Transit::Stay;
-                while (transit == winston::Position::Transit::Stay)
-                {
-                    loco->update(transit);
-                    winston::hal::delay(100);
-                }
-                Assert::IsTrue(transit != winston::Position::Transit::TraversalError);
-                auto locoTrack = loco->position().track();
-                Assert::IsTrue(expectedTrackListIndex < expectedTrackList.size());
-                Assert::IsTrue(locoTrack == expectedTrackList[expectedTrackListIndex++]);
-                injectLoco(locoTrack->segment(), loco, true);
-                detectorLoops();
-                if (expectedTrackListIndex > 1)
-                {
-                    Assert::IsTrue(loco->details.speedTrapping);
-                }
-                injectLoco(oldLocoTrack->segment(), loco, false);
-                detectorLoops();*/
 
-                expectedTrackListIndex++;
-                back = loco->position().track() == PBF2 && loco->position().distance() < 50;
+                auto B6 = railway->track(Y2024RailwayTracks::B6);
+                auto PBF2 = railway->track(Y2024RailwayTracks::PBF2);
+                injectLoco(B6->segment(), loco, true);
+                detectorLoops();
+                loco->railOnto(winston::Position(B6, winston::Track::Connection::A, 50));
+
+                size_t expectedTrackListIndex = 0;
+                std::array<winston::Track::Const, 6> expectedTrackList = {
+                    railway->track(Y2024RailwayTracks::B7),
+                    railway->track(Y2024RailwayTracks::Turnout1),
+                    railway->track(Y2024RailwayTracks::PBF2),
+                    railway->track(Y2024RailwayTracks::Turnout3),
+                    railway->track(Y2024RailwayTracks::B1)
+                };
+
+                bool back = false;
+                while (!back)
+                {
+                    winston::Position::Transit transit = winston::Position::Transit::Stay;
+                    // drive until we hit the end of the segment which should not let us pass
+                    while (transit == winston::Position::Transit::Stay)
+                    {
+                        winston::hal::delay(100);
+                        const auto currentPos = loco->position();
+                        loco->update(transit);
+                    }
+                    Assert::IsTrue(transit != winston::Position::Transit::TraversalError);
+                    Assert::IsTrue(expectedTrackListIndex < expectedTrackList.size());
+                    if (transit == winston::Position::Transit::SegmentBorder)
+                    {
+                        // find the next track and inject loco there, so it pops up at dist=0
+                        auto nextTrack = loco->position().track()->on(loco->position().track()->otherConnection(loco->position().connection()));
+                        Assert::IsTrue(nextTrack == expectedTrackList[expectedTrackListIndex]);
+                        injectLoco(nextTrack->segment(), loco, true);
+                        // goodbye the old segment
+                        injectLoco(loco->position().track()->segment(), loco, false);
+                        detectorLoops();
+                    }
+                    // now on the new one
+                    Assert::IsTrue(loco->position().track() == expectedTrackList[expectedTrackListIndex]);
+                    if (expectedTrackListIndex > 1)
+                    {
+                        Assert::IsTrue(loco->details.speedTrapping);
+                    }
+
+                    expectedTrackListIndex++;
+                    back = loco->position().track() == PBF2 && loco->position().distance() < 50;
+                }
+            }
+
+            {
+                Turnout1->finalizeChangeTo(winston::Turnout::Direction::A_C);
+                signalTower->setSignalsFor(*Turnout1);
+
+                for (int i = 0; i < 6; ++i)
+                    signalTower->loop();
+
+                auto PBF1a = railway->track(Y2024RailwayTracks::PBF1a);
+                auto PBF1 = railway->track(Y2024RailwayTracks::PBF1);
+                injectLoco(PBF1a->segment(), loco, true);
+                detectorLoops();
+                loco->railOnto(winston::Position(PBF1a, winston::Track::Connection::DeadEnd, 50));
+
+                size_t expectedTrackListIndex = 0;
+                std::array<winston::Track::Const, 4> expectedTrackList = {
+                    railway->track(Y2024RailwayTracks::Turnout2),
+                    railway->track(Y2024RailwayTracks::PBF1),
+                    railway->track(Y2024RailwayTracks::Turnout1),
+                    railway->track(Y2024RailwayTracks::B7)
+                };
+
+                bool done = false;
+                while (!done)
+                {
+                    winston::Position::Transit transit = winston::Position::Transit::Stay;
+                    bool switched = false;
+                    // drive until we hit the end of the segment which should not let us pass
+                    while (transit == winston::Position::Transit::Stay)
+                    {
+                        winston::hal::delay(100);
+                        const auto currentPos = loco->position();
+
+                        if(switched && currentPos.track() == PBF1)
+                        {
+                            Assert::IsFalse(loco->details.speedTrapping);
+                        }
+                        else if (!switched && currentPos.track() == PBF1 && currentPos.distance() > 100)
+                        {
+							Turnout2->finalizeChangeTo(winston::Turnout::Direction::A_C);
+                            signalTower->setSignalsFor(*Turnout2);
+                            for (int i = 0; i < 5; ++i)
+                                signalTower->loop();
+
+                            switched = true;
+                        }
+
+                        loco->update(transit);
+                    }
+                    Assert::IsTrue(transit != winston::Position::Transit::TraversalError);
+                    Assert::IsTrue(expectedTrackListIndex < expectedTrackList.size());
+                    if (transit == winston::Position::Transit::SegmentBorder)
+                    {
+                        // find the next track and inject loco there, so it pops up at dist=0
+                        auto nextTrack = loco->position().track()->on(loco->position().track()->otherConnection(loco->position().connection()));
+                        Assert::IsTrue(nextTrack == expectedTrackList[expectedTrackListIndex]);
+                        injectLoco(nextTrack->segment(), loco, true);
+                        // goodbye the old segment
+                        injectLoco(loco->position().track()->segment(), loco, false);
+                        detectorLoops();
+                    }
+                    // now on the new one
+                    Assert::IsTrue(loco->position().track() == expectedTrackList[expectedTrackListIndex]);
+                    if (expectedTrackListIndex > 1)
+                    {
+                        Assert::IsTrue(loco->details.speedTrapping);
+                    }
+
+                    expectedTrackListIndex++;
+                    done = loco->position().track() == B7;
+                }
             }
         }
     };

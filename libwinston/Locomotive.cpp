@@ -89,7 +89,7 @@ namespace winston
 			this->details.speedTrapping = true;
 			this->details.distanceSinceSpeedTrapped = 0;
 		}
-		else if (distance != 0.f && this->details.autodrive.updateSpeedMap)
+		else if (distance != 0.f && this->details.speedTrapping && this->details.autodrive.updateSpeedMap && this->throttle() > 0)
 		{
 			auto time = inMilliseconds(hal::now() - this->speedTrapStart);
 			// x mm in y us = x/y mm/us <=> 1000x/y mm/s
@@ -134,8 +134,9 @@ namespace winston
 	{
 		this->details.railed = false;
 		this->details.position = Position(nullptr, Track::Connection::A, 0.f);
-		this->details.speedTrapping = false;
+		this->invalidateSpeedTrap();
 		this->details.trackable = false;
+		this->details.throttle = this->details.modelThrottle = 0;
 	}
 
 	const NextSignal::Const Locomotive::nextSignal(const Signal::Pass pass, const bool forward) const
@@ -181,8 +182,13 @@ namespace winston
 		}
 		else if (lastSegment != nullptr)
 		{
-			if (this->details.trackable && lastSegment->fixedLength())
-				this->speedTrap(lastSegment->length);
+			if (this->details.trackable)
+			{
+				if (lastSegment->fixedLength())
+					this->speedTrap(lastSegment->length);
+				else
+					this->speedTrap(this->details.distanceSinceSpeedTrapped);
+			}
 
 			bool foundNextSectionEntry = false;
 			Track::Const entryTrack;
@@ -224,7 +230,7 @@ namespace winston
 
 					if (auto signal = leavingTrack->signalGuarding(leavingConnection))
 					{
-						if (this->details.position.track()->length() - this->details.position.distance() < signal->distance())
+						if (this->details.position.track()->length() - this->details.position.distance() <= signal->distance())
 						{
 							// we passed signal, it was facing us and we entered its protectorate
 							this->callbacks.signalPassed(this->const_from_this(), leavingTrack, leavingConnection, Signal::Pass::Facing);
@@ -423,6 +429,11 @@ namespace winston
 		this->details.lastSpeedUpdate = hal::now();
 	}
 
+	void Locomotive::invalidateSpeedTrap()
+	{
+		this->details.speedTrapping = false;
+	}
+
 	void Locomotive::updateNextSignals()
 	{
 		if(this->position().track())
@@ -462,7 +473,10 @@ namespace winston
 				this->details.distanceSinceSpeedTrapped += distance;
 
 				using namespace std::placeholders;
+			//	auto currentTrack = this->position().track();
 				transit = this->details.position.drive(distance, false, std::bind(this->callbacks.signalPassed, this->const_from_this(), _1, _2, _3));
+			//	if(transit == Position::Transit::CrossSection || transit == Position::Transit::CrossTrack || transit == Position::Transit::SegmentBorder)
+			//		this->details.distanceSinceSpeedTrapped += currentTrack->length();
 			}
 			this->details.lastPositionUpdate = now;
 			this->details.positionUpdateRequired = false;
@@ -490,12 +504,12 @@ namespace winston
 			return Result::NotFound;
 
 		auto now = hal::now();
-
-		if (this->details.autodrive.disappearTimeout && now > this->details.lastEnteredTime + toMilliseconds(5000))
+		/*
+		if (this->details.autodrive.disappearTimeout && now > this->details.lastEnteredTime + toMilliseconds(12000))
 		{
 			this->railOff();
 			return Result::NotFound;
-		}
+		}*/
 
 		Duration speedUpdateRate = now - this->details.lastSpeedUpdate;
 		const auto timeDiff = inMilliseconds(speedUpdateRate);
@@ -505,7 +519,7 @@ namespace winston
 
 			if (diff != 0)
 			{
-				this->details.speedTrapping = false;
+				this->invalidateSpeedTrap();
 				// 0..255 in 4s <=> on linear curve
 				// 255..0 in 2s <=> on linear curve
 
@@ -559,6 +573,14 @@ namespace winston
 	const Position& Locomotive::position() const
 	{
 		return this->details.position;
+	}
+
+	const Segment::IdentifyerType Locomotive::segment() const
+	{
+		if (this->position().valid())
+			return this->position().track()->segment();
+		else
+			return 0;
 	}
 
 	const Address& Locomotive::address() const

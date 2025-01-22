@@ -156,6 +156,11 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
     {    
         // tell the signal box to update the signals
         this->signalTower->setSignalsFor(turnout);
+
+        // check if there is a locomotive on this segment. If so, invalidate its speed trap as we will have issues calculating the correct length since entry
+        for (auto& loco : this->locomotiveShed.shed())
+            if (loco->segment() == turnout.segment())
+                loco->invalidateSpeedTrap();
         
         // stop here if we are still initializing and learn the initial states of the turnouts
         if (!this->isReady())
@@ -656,7 +661,7 @@ void Kornweinheim::systemLoop()
         static auto lastPosUpdatePrint = winston::hal::now();
         for (auto& loco : this->locomotiveShed.shed())
         {
-            if (loco->isRailed())
+            if (loco->isRailed() && loco->address() == 8)
             {
                 loco->update();
                 auto pos = loco->position();

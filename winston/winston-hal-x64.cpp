@@ -605,10 +605,11 @@ const winston::Result StorageWin::read(const size_t address, float& content)
         winston::logger.err("storage too small");
         return winston::Result::OutOfBounds;
     }
-    uint32_t f = (uint32_t)((uint32_t)this->mmap[address + 0] << 0)
-        | (uint32_t)((uint32_t)this->mmap[address + 1] << 8)
-        | (uint32_t)((uint32_t)this->mmap[address + 2] << 16)
-        | (uint32_t)((uint32_t)this->mmap[address + 3] << 24);
+    uint8_t f0 = this->mmap[address + 0];
+    uint8_t f1 = this->mmap[address + 1];
+    uint8_t f2 = this->mmap[address + 2];
+    uint8_t f3 = this->mmap[address + 3];
+	uint32_t f = ((uint32_t)f0 << 0) | ((uint32_t)f1<<8) | ((uint32_t)f2<<16) | ((uint32_t)f3<<24);
 
     memcpy_s(&content, sizeof(content), &f, sizeof(f));
 
@@ -638,10 +639,10 @@ const winston::Result StorageWin::write(const size_t address, uint32_t content)
         winston::logger.err("storage too small");
         return winston::Result::OutOfBounds;
     }
-    this->write(address + 0, (content >> 0) & 0xFF);
-    this->write(address + 1, (content >> 8) & 0xFF);
-    this->write(address + 2, (content >> 16) & 0xFF);
-    this->write(address + 3, (content >> 24) & 0xFF);
+    this->write(address + 0, (uint8_t)((content >> 0) & 0xFF));
+    this->write(address + 1, (uint8_t)((content >> 8) & 0xFF));
+    this->write(address + 2, (uint8_t)((content >> 16) & 0xFF));
+    this->write(address + 3, (uint8_t)((content >> 24) & 0xFF));
 
     return winston::Result::OK;
 }
@@ -655,8 +656,8 @@ const winston::Result StorageWin::write(const size_t address, uint16_t content)
         winston::logger.err("storage too small");
         return winston::Result::OutOfBounds;
     }
-    this->write(address + 0, (unsigned char)((content >> 0) & 0xFF));
-    this->write(address + 1, (unsigned char)((content >> 8) & 0xFF));
+    this->write(address + 0, (uint8_t)((content >> 0) & 0xFF));
+    this->write(address + 1, (uint8_t)((content >> 8) & 0xFF));
 
     return winston::Result::OK;
 }
@@ -674,10 +675,10 @@ const winston::Result StorageWin::write(const size_t address, float content)
     uint32_t f;
     memcpy_s(&f, sizeof(f), &content, sizeof(content));
 
-    this->write(address + 0, (f >> 0) & 0xFF);
-    this->write(address + 1, (f >> 8) & 0xFF);
-    this->write(address + 2, (f >> 16) & 0xFF);
-    this->write(address + 3, (f >> 24) & 0xFF);
+    this->write(address + 0, (uint8_t)(((f >> 0) & 0xFF)));
+    this->write(address + 1, (uint8_t)(((f >> 8) & 0xFF)));
+    this->write(address + 2, (uint8_t)(((f >> 16) & 0xFF)));
+    this->write(address + 3, (uint8_t)(((f >> 24) & 0xFF)));
 
     return winston::Result::OK;
 }

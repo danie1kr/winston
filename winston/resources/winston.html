@@ -688,9 +688,17 @@
 
         function locoPositions(data) {
             _.each(data, loco => {
-                let locoNode = cy.$("node.locomotive[address=\"" + loco.address + "\"]");
-
+                updateLocoPosition(loco.address, { track: loco.track, connection: loco.connection, distance: loco.distance})
             });
+        }
+
+        function updateLocoPosition(address, position) {
+            let locoNode = cy.$("node.locomotive[address=\"" + loco.address + "\"]");
+
+            const track = _.find(railway, track => track.name === position.track);
+            const length = track.length;
+
+
         }
 
         function error(data) {

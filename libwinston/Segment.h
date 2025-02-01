@@ -17,7 +17,7 @@ namespace winston {
 		using IdentifyerType = _Identifier;
 
 		BaseSegment(const IdentifyerType id, const TrackSet tracks)
-			: id{ id }, _tracks(tracks), entriesSet(this->buildEntriesSet()), length(this->calculateLength())
+			: id{ id }, _tracks(tracks), entriesSet(this->buildEntriesSet()), _length(this->calculateLength())
 		{
 		}
 
@@ -151,13 +151,31 @@ namespace winston {
 
 	public:
 		const SegmentEntrySet entriesSet;
-		const Length length;
-		
-
-		const bool fixedLength() const
+	
+		const Length length(const Track::Const track, const Track::Connection entered) const
 		{
-			return this->length != 0.f;
+			if (this->_length)
+				return this->_length;
+			else
+			{
+				Length len = 0;
+				auto current = track;
+				auto connection = entered;
+				while (current->segment() == this->id)
+				{
+					len += current->length();
+					auto onto = current;
+					if (!current->traverse(connection, onto, false))
+						return 0.f;
+					connection = onto->whereConnects(current);
+					current = onto;
+				}
+
+				return len;
+			}
 		}
+	private:
+		const Length _length;
 
 	};
 

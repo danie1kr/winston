@@ -215,6 +215,8 @@ namespace winston
 			bool speedTrapping{ false };
 			Distance distanceSinceSpeedTrapped{ 0 };
 			Segment::Shared lastEnteredSegment{ nullptr };
+			Track::Const lastEnteredTrack{ nullptr };
+			Track::Connection lastEnteredConnection{ Track::Connection::DeadEnd };
 			bool positionUpdateRequired{ false };
 		} details;
 

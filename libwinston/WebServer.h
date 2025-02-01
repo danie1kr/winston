@@ -226,10 +226,32 @@ namespace winston
                 func["id"] = function.id;
                 func["name"] = function.name;
             }
+            auto pos = data["position"].to<JsonObject>();
+			pos["track"] = loco.position().trackName();
+			pos["connection"] = winston::Track::ConnectionToString(loco.position().connection());
+			pos["distance"] = loco.position().distance();
 			std::string json("");
 			serializeJson(obj, json);
 			this->webServer.broadcast(json);
 		}
+
+        void locoPositionsSend()
+        {
+            JsonDocument obj;
+            obj["op"] = "locoPositions";
+            auto data = obj["data"].to<JsonArray>();
+			for (auto const& loco : this->locomotiveShed.shed())
+            {
+                auto locoData = data.add<JsonObject>();
+                locoData["address"] = loco.address();
+                locoData["track"] = loco.position().trackName();
+                locoData["connection"] = winston::Track::ConnectionToString(loco.position().connection());
+                locoData["distance"] = loco.position().distance();
+            }
+            std::string json("");
+            serializeJson(obj, json);
+            this->webServer.broadcast(json);
+        }
 
 		void locoSend(winston::Address address)
 		{

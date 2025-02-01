@@ -18,10 +18,10 @@ Throttle	Speed
 
 namespace winston
 {
-	const ThrottleSpeedMap Locomotive::defaultThrottleSpeedMap = { {0, 0.f},{255, 50.f} };
+	const ThrottleSpeedMap Locomotive::defaultThrottleSpeedMap = { {0, 0.f} };
 	Locomotive::Locomotive(const Callbacks callbacks, const Address address, const Functions functionTable, const Position start, const ThrottleSpeedMap throttleSpeedMap, const std::string name, const Length length, const Types types)
 		: callbacks(callbacks)
-		, details{ address, functionTable, start, hal::now(), hal::now(), hal::now(), name, length, false, true, false, false, 0, 0, 0, types, {}, { false, false, false, false }, false, 0, nullptr, false }
+		, details{ address, functionTable, start, hal::now(), hal::now(), hal::now(), name, length, false, true, false, false, 0, 0, 0, types, {}, { false, false, false, false }, false, 0, nullptr, nullptr, Track::Connection::DeadEnd, false }
 		, expected{ Position::nullPosition(), hal::now(), false }
 		, speedMap(throttleSpeedMap)
 		, speedTrapStart(hal::now())
@@ -184,10 +184,11 @@ namespace winston
 		{
 			if (this->details.trackable)
 			{
-				if (lastSegment->fixedLength())
-					this->speedTrap(lastSegment->length);
-				else
-					this->speedTrap(this->details.distanceSinceSpeedTrapped);
+				this->speedTrap(lastSegment->length(this->details.lastEnteredTrack, this->details.lastEnteredConnection));
+//				if (lastSegment->fixedLength())
+	//				this->speedTrap(lastSegment->length());
+		//		else // calculate length of lastSegment
+			//		this->speedTrap(this->details.distanceSinceSpeedTrapped);
 			}
 
 			bool foundNextSectionEntry = false;
@@ -260,7 +261,13 @@ namespace winston
 			this->details.trackable = false;
 		}
 		this->details.lastEnteredTime = hal::now();
+		if (this->details.lastEnteredSegment)
+		{
+			this->details.lastEnteredTrack = this->details.position.track();
+			this->details.lastEnteredConnection = this->details.position.connection();
+		}
 		this->details.lastEnteredSegment = segment;
+
 
 		/*
 		if (auto ls = this->details.lastEnteredSegment; ls && ls->fixedLength())
@@ -477,7 +484,7 @@ namespace winston
 			if (this->details.throttle != 0)
 			{
 				const auto distance = (Distance)((this->details.forward ? 1 : -1) * this->speedMap.speed(this->details.throttle) * inMilliseconds(timeOnTour)) / 1000;
-				this->details.distanceSinceSpeedTrapped += distance;
+			//	this->details.distanceSinceSpeedTrapped += distance;
 
 				using namespace std::placeholders;
 			//	auto currentTrack = this->position().track();
@@ -663,6 +670,8 @@ namespace winston
 			// linear
 			return lerp<Speed>(lower->second, upper->second, frac);
 		}
+		else if(this->map.size() == 1)
+			return this->map.begin()->second;
 		else
 			return lookup->second;
 	}

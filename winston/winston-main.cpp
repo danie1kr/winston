@@ -45,10 +45,13 @@ const size_t secondsPerPrint = WINSTON_STATISTICS_SECONDS_PER_PRINT;
 void winston_loop()
 {
 #ifdef WINSTON_WITH_QNETHERNET
+    TEENSY_CRASHLOG_BREADCRUMB(1, 0x1);
     Ethernet.loop();
 #endif
+    TEENSY_CRASHLOG_BREADCRUMB(1, 0x2);
     if (modelRailWayConfiguration.loop() == winston::Result::Idle)
         winston::hal::delay(FRAME_SLEEP);
+    TEENSY_CRASHLOG_BREADCRUMB(1, 0x3);
 #ifdef WINSTON_STATISTICS
     if (winston::hal::now().time_since_epoch() > nextSWJPrint)
     {        

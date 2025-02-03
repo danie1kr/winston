@@ -243,10 +243,10 @@ namespace winston
 			for (auto const& loco : this->locomotiveShed.shed())
             {
                 auto locoData = data.add<JsonObject>();
-                locoData["address"] = loco.address();
-                locoData["track"] = loco.position().trackName();
-                locoData["connection"] = winston::Track::ConnectionToString(loco.position().connection());
-                locoData["distance"] = loco.position().distance();
+                locoData["address"] = loco->address();
+                locoData["track"] = loco->position().trackName();
+                locoData["connection"] = winston::Track::ConnectionToString(loco->position().connection());
+                locoData["distance"] = loco->position().distance();
             }
             std::string json("");
             serializeJson(obj, json);
@@ -337,6 +337,7 @@ namespace winston
 		// Define a callback to handle incoming messages
 		void on_message(typename _WebServer::Client& client, const std::string& message)
 		{
+            TEENSY_CRASHLOG_BREADCRUMB(3, 0x2);
             JsonDocument msg;
             deserializeJson(msg, message);
             JsonObject obj = msg.as<JsonObject>();
@@ -588,7 +589,7 @@ namespace winston
                 {
                     address = 4 + offset;
                 }
-                this->storageLayout->write(address, layout);
+                this->storageLayout->writeString(address, layout);
 
                 this->storageLayout->sync();
 
@@ -621,7 +622,7 @@ namespace winston
                 {
                     address = 4 + offset;
                 }
-                this->storageMicroLayout->write(address, layout);
+                this->storageMicroLayout->writeString(address, layout);
 
                 this->storageMicroLayout->sync();
 
@@ -639,7 +640,7 @@ namespace winston
             {
                 size_t address = 0;
                 std::vector<unsigned char> data;
-                auto result = this->storageLayout->read(address, data, 4);
+                auto result = this->storageLayout->readVector(address, data, 4);
                 if (result != winston::Result::OK)
                 {
                     winston::logger.err(winston::build("getRailwayLayout could not read layout file."));
@@ -656,7 +657,7 @@ namespace winston
                 {
                     size_t sent = remaining > sizePerMessage ? sizePerMessage : remaining;
                     std::string layout;
-                    this->storageLayout->read(address + offset, layout, sent);
+                    this->storageLayout->readString(address + offset, layout, sent);
 
                     JsonDocument obj;
                     obj["op"] = "layout";
@@ -677,7 +678,7 @@ namespace winston
             {
                 size_t address = 0;
                 std::vector<unsigned char> data;
-                auto result = this->storageMicroLayout->read(address, data, 4);
+                auto result = this->storageMicroLayout->readVector(address, data, 4);
                 if (result != winston::Result::OK)
                 {
                     winston::logger.err(winston::build("getRailwayMicroLayout could not read layout file."));
@@ -694,7 +695,7 @@ namespace winston
                 {
                     size_t sent = remaining > sizePerMessage ? sizePerMessage : remaining;
                     std::string layout;
-                    this->storageMicroLayout->read(address + offset, layout, sent);
+                    this->storageMicroLayout->readString(address + offset, layout, sent);
 
                     JsonDocument obj;
                     obj["op"] = "microLayout";

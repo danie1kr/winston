@@ -135,7 +135,7 @@ winston::Locomotive::Callbacks Kornweinheim::locoCallbacks()
 
     callbacks.signalPassed = [=](const winston::Locomotive::Const loco, const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result
     {
-        winston::logger.info(loco->name(), " passed ", track->name(), " ", connection);
+        //winston::logger.info(loco->name(), " passed ", track->name(), " ", connection);
         auto signal = track->signalGuarding(connection);
         signalTower->setSignalsForLocoPassing(track, connection, pass);
         return winston::Result::OK;
@@ -327,8 +327,10 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
 // setup our model railway system
 void Kornweinheim::systemSetup() {
     // the user defined railway and its address translator
+    TEENSY_CRASHLOG_BREADCRUMB(2, 0x101);
     this->railway = RAILWAY_CLASS::make(railwayCallbacks());
 
+    TEENSY_CRASHLOG_BREADCRUMB(2, 0x102);
     // z21
     this->z21Socket = UDPSocket::make(z21IP, z21Port);
 
@@ -337,6 +339,7 @@ void Kornweinheim::systemSetup() {
     // the internal signal box
     this->signalTower = winston::SignalTower::make(this->locomotiveShed);
 
+    TEENSY_CRASHLOG_BREADCRUMB(2, 0x103);
     // the system specific digital central station
     auto at = std::static_pointer_cast<winston::DigitalCentralStation::TurnoutAddressTranslator>(addressTranslator);
     auto udp = std::static_pointer_cast<winston::hal::Socket>(this->z21Socket);
@@ -349,6 +352,7 @@ void Kornweinheim::systemSetup() {
 #endif
 
     // signals
+    TEENSY_CRASHLOG_BREADCRUMB(2, 0x104);
 #ifdef WINSTON_PLATFORM_TEENSY
     this->signalInterfaceDevices.push_back(SignalInterfaceDevice::make(33, TLC5947::SPI_Clock));
     this->signalInterfaceDevices.push_back(SignalInterfaceDevice::make(34, TLC5947::SPI_Clock));
@@ -371,6 +375,7 @@ void Kornweinheim::systemSetup() {
     }
     */
 
+    TEENSY_CRASHLOG_BREADCRUMB(2, 0x105);
     unsigned int signalDeviceId = 0;
     for (const auto& device : this->signalInterfaceDevices)
     {
@@ -382,9 +387,11 @@ void Kornweinheim::systemSetup() {
     // two chains, second having TLC5947
     this->signalDevices.push_back(TLC5947::make(signalDeviceId++, 1 * 24, this->signalInterfaceDevices[1], TLC5947Off));
 
+    TEENSY_CRASHLOG_BREADCRUMB(2, 0x106);
     this->signalController = winston::SignalController::make(0, this->signalDevices);
 
     // storage
+    TEENSY_CRASHLOG_BREADCRUMB(2, 0x107);
     this->storageLayout = Storage::make(std::string(this->name()).append(".").append("winston.storage"), 256 * 1024);
     if (this->storageLayout->init() != winston::Result::OK)
         winston::logger.err("Kornweinheim.init: Storage Layout Init failed");
@@ -395,6 +402,7 @@ void Kornweinheim::systemSetup() {
     if (this->storageLocoShed->init() != winston::Result::OK)
         winston::logger.err("Kornweinheim.init: Storage LocoShed failed");
 
+    TEENSY_CRASHLOG_BREADCRUMB(2, 0x108);
     this->populateSheds();
 
     // detectors
@@ -404,8 +412,11 @@ void Kornweinheim::systemSetup() {
     this->serial = SerialDeviceWin::make();
     this->serial->init(5);
 #endif
+    TEENSY_CRASHLOG_BREADCRUMB(2, 0x109);
     this->routesInProgress.clear();
 
+
+    TEENSY_CRASHLOG_BREADCRUMB(2, 0x110);
     this->setupWebServer(this->storageLayout, this->storageMicroLayout, this->addressTranslator, 8080);
 
     winston::logger.setCallback([this](const winston::Logger::Entry& entry) {
@@ -649,6 +660,7 @@ void Kornweinheim::setupSignals()
 void Kornweinheim::systemLoop()
 {
     {
+        TEENSY_CRASHLOG_BREADCRUMB(5, 0x1);
 #ifdef WINSTON_WITH_WEBSOCKET
 #ifdef WINSTON_STATISTICS
         winston::StopwatchJournal::Event tracer(this->stopWatchJournal, "webServer");
@@ -658,6 +670,7 @@ void Kornweinheim::systemLoop()
     }
 
     {
+        TEENSY_CRASHLOG_BREADCRUMB(5, 0x2);
         static auto lastPosUpdatePrint = winston::hal::now();
         for (auto& loco : this->locomotiveShed.shed())
         {
@@ -667,7 +680,7 @@ void Kornweinheim::systemLoop()
                 auto pos = loco->position();
                 if (winston::hal::now() > lastPosUpdatePrint + toMilliseconds(743))
                 {
-                    winston::logger.info("loco ", loco->name(), " on ", pos.trackName(), "-", pos.connection(), "+", pos.distance());
+                    //winston::logger.info("loco ", loco->name(), " on ", pos.trackName(), "-", pos.connection(), "+", pos.distance());
                     lastPosUpdatePrint = winston::hal::now();
                 }
             }
@@ -772,7 +785,7 @@ const winston::Result Kornweinheim::setupDetectors()
     callbacks.change = 
         [](const std::string detectorName, const winston::Locomotive::Shared loco, const bool forward, winston::Segment::Shared segment, const winston::Detector::Change change, const winston::TimePoint when) -> const winston::Result
         { 
-            winston::logger.info(loco->name(), change == winston::Detector::Change::Entered ? " entered " : " left ", segment->id);
+            //winston::logger.info(loco->name(), change == winston::Detector::Change::Entered ? " entered " : " left ", segment->id);
             if (change == winston::Detector::Change::Entered)
                 loco->entered(segment, when);
             else
@@ -782,7 +795,7 @@ const winston::Result Kornweinheim::setupDetectors()
     callbacks.occupied = 
         [](const std::string detectorName, winston::Segment::Shared segment, const winston::Detector::Change change, const winston::TimePoint when) -> const winston::Result
         { 
-            winston::logger.info("something ", change == winston::Detector::Change::Entered ? " entered " : " left ", segment->id);
+            //winston::logger.info("something ", change == winston::Detector::Change::Entered ? " entered " : " left ", segment->id);
             return winston::Result::OK;
         };
     callbacks.locoFromAddress = 

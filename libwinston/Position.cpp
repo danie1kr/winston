@@ -124,7 +124,7 @@ namespace winston
 				Track::Const onto;
 				if (!current->traverse(connection, onto, false))
 				{
-					logger.err(build("cannot traverse during Position::drive: ", current->name(), " leaving on ", Track::ConnectionToString(connection)));
+					//logger.err(build("cannot traverse during Position::drive: ", current->name(), " leaving on ", Track::ConnectionToString(connection)));
 					return Transit::TraversalError;
 				}
 

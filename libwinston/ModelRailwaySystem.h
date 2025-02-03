@@ -43,9 +43,11 @@ namespace winston
 	public:
 
 		void setup() {
+			TEENSY_CRASHLOG_BREADCRUMB(2, 0x1);
 			logger.info("System: Setup");
 			this->systemSetup();
 
+			TEENSY_CRASHLOG_BREADCRUMB(2, 0x2);
 			logger.info("System: Railway Init");
 			this->railway->init();/*
 
@@ -59,14 +61,17 @@ namespace winston
 					}, __PRETTY_FUNCTION__));
 			}*/
 
+			TEENSY_CRASHLOG_BREADCRUMB(2, 0x3);
 			logger.info("System: Signal Setup");
 			this->setupSignals();
 			this->setupNextSignals();
 
+			TEENSY_CRASHLOG_BREADCRUMB(2, 0x4);
 			logger.info("System: Detector Setup");
 			if(this->setupDetectors() != Result::OK)
 				logger.err("Could not set up Detectors.");
 
+			TEENSY_CRASHLOG_BREADCRUMB(2, 0x5);
 			logger.info("System: Railway Final Validation");
 			this->railway->validateFinal();
 #ifdef WINSTON_REALWORLD
@@ -97,8 +102,10 @@ namespace winston
 					return winston::State::Finished;
 				}, __PRETTY_FUNCTION__));
 
+			TEENSY_CRASHLOG_BREADCRUMB(2, 0x6);
 			this->systemSetupComplete();
 			logger.info("System: Setup complete");
+			TEENSY_CRASHLOG_BREADCRUMB(2, 0x7);
 			this->_status = Status::Ready;
 		};
 
@@ -329,8 +336,8 @@ namespace winston
 			const std::string path_confirmation_yes("/confirm_yes");
 			const std::string path_confirmation_maybe("/confirm_maybe");
 			const std::string path_confirmation_no("/confirm_no");
+			TEENSY_CRASHLOG_BREADCRUMB(3, 0x1);
 
-#ifndef WINSTON_PLATFORM_TEENSY
 			if (resource.compare(path_signals) == 0)
 			{
 				connection.status(200);
@@ -458,6 +465,7 @@ namespace winston
 			}*/
 			else
 				return Result::NotFound;
+#if 1
 #else
 			connection.status(200);
 			connection.header("content-type"_s, "text/html; charset=UTF-8"_s);
@@ -529,12 +537,14 @@ namespace winston
 		const Result loop()
 		{
 			{
+				TEENSY_CRASHLOG_BREADCRUMB(4, 0x1);
 #ifdef WINSTON_STATISTICS
 				StopwatchJournal::Event tracer(this->stopWatchJournal, "digitalCentralStation loop");
 #endif
 				this->digitalCentralStation->loop();
 			}
 			{
+				TEENSY_CRASHLOG_BREADCRUMB(4, 0x2);
 #ifdef WINSTON_LOCO_TRACKING
 #ifdef WINSTON_STATISTICS
 				StopwatchJournal::Event tracer(this->stopWatchJournal, "loco tracking");
@@ -544,6 +554,7 @@ namespace winston
 #endif
 			}
 			{
+				TEENSY_CRASHLOG_BREADCRUMB(4, 0x3);
 #ifdef WINSTON_LOCO_TRACKING
 #ifdef WINSTON_STATISTICS
 				StopwatchJournal::Event tracer(this->stopWatchJournal, "loco tracking");
@@ -552,6 +563,7 @@ namespace winston
 #endif
 			}
 			{
+				TEENSY_CRASHLOG_BREADCRUMB(4, 0x4);
 #ifdef WINSTON_STATISTICS
 				StopwatchJournal::Event tracer(this->stopWatchJournal, "detector network device");
 #endif
@@ -559,12 +571,14 @@ namespace winston
 					this->detectorDevice->loop();
 			}
 			{
+				TEENSY_CRASHLOG_BREADCRUMB(4, 0x5);
 #ifdef WINSTON_STATISTICS
 				winston::StopwatchJournal::Event tracer(this->stopWatchJournal, "local loop");
 #endif
 				this->systemLoop();
 			}
 			{
+				TEENSY_CRASHLOG_BREADCRUMB(4, 0x6);
 #ifdef WINSTON_STATISTICS
 				winston::StopwatchJournal::Event tracer(this->stopWatchJournal, "local status report");
 #endif
@@ -581,6 +595,7 @@ namespace winston
 				}
 			}
 			{
+				TEENSY_CRASHLOG_BREADCRUMB(4, 0x7);
 #ifdef WINSTON_STATISTICS
 				winston::StopwatchJournal::Event tracer(this->stopWatchJournal, "signalTower");
 #endif

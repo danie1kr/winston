@@ -520,7 +520,7 @@ const winston::Result StorageWin::init()
     return winston::Result::OK;
 }
 
-const winston::Result StorageWin::read(const size_t address, std::vector<unsigned char>& content, const size_t length)
+const winston::Result StorageWin::readVector(const size_t address, std::vector<unsigned char>& content, const size_t length)
 {
     const size_t count = length == 0 ? this->mmap.size() : min(this->mmap.size(), length);
     if (!this->mmap.is_open())
@@ -533,7 +533,7 @@ const winston::Result StorageWin::read(const size_t address, std::vector<unsigne
     return winston::Result::OK;
 }
 
-const winston::Result StorageWin::read(const size_t address, std::string& content, const size_t length)
+const winston::Result StorageWin::readString(const size_t address, std::string& content, const size_t length)
 {
     const size_t count = length == 0 ? this->mmap.size() : min(this->mmap.size(), length);
     if (!this->mmap.is_open())
@@ -561,61 +561,6 @@ const winston::Result StorageWin::read(const size_t address, unsigned char& cont
     return winston::Result::OK;
 }
 
-const winston::Result StorageWin::read(const size_t address, uint32_t& content)
-{
-    if (!this->mmap.is_open())
-        return winston::Result::NotInitialized;
-
-    if (this->mmap.size() < address + 4)
-    {
-        winston::logger.err("storage too small");
-        return winston::Result::OutOfBounds;
-    }
-    content = (uint32_t)((uint32_t)this->mmap[address + 0] << 0)
-        | (uint32_t)((uint32_t)this->mmap[address + 1] << 8)
-        | (uint32_t)((uint32_t)this->mmap[address + 2] << 16)
-        | (uint32_t)((uint32_t)this->mmap[address + 3] << 24);
-
-    return winston::Result::OK;
-}
-
-const winston::Result StorageWin::read(const size_t address, uint16_t& content)
-{
-    if (!this->mmap.is_open())
-        return winston::Result::NotInitialized;
-
-    if (this->mmap.size() < address + 4)
-    {
-        winston::logger.err("storage too small");
-        return winston::Result::OutOfBounds;
-    }
-    content = (uint16_t)((uint16_t)this->mmap[address + 0] << 0)
-        | (uint16_t)((uint16_t)this->mmap[address + 1] << 8);
-
-    return winston::Result::OK;
-}
-
-const winston::Result StorageWin::read(const size_t address, float& content)
-{
-    if (!this->mmap.is_open())
-        return winston::Result::NotInitialized;
-
-    if (this->mmap.size() < address + 4)
-    {
-        winston::logger.err("storage too small");
-        return winston::Result::OutOfBounds;
-    }
-    uint8_t f0 = this->mmap[address + 0];
-    uint8_t f1 = this->mmap[address + 1];
-    uint8_t f2 = this->mmap[address + 2];
-    uint8_t f3 = this->mmap[address + 3];
-	uint32_t f = ((uint32_t)f0 << 0) | ((uint32_t)f1<<8) | ((uint32_t)f2<<16) | ((uint32_t)f3<<24);
-
-    memcpy_s(&content, sizeof(content), &f, sizeof(f));
-
-    return winston::Result::OK;
-}
-
 const winston::Result StorageWin::write(const size_t address, unsigned char content)
 {
     if (!this->mmap.is_open())
@@ -630,60 +575,7 @@ const winston::Result StorageWin::write(const size_t address, unsigned char cont
     return winston::Result::OK;
 }
 
-const winston::Result StorageWin::write(const size_t address, uint32_t content)
-{
-    if (!this->mmap.is_open())
-        return winston::Result::NotInitialized;
-    if (this->mmap.size() < address + 4)
-    {
-        winston::logger.err("storage too small");
-        return winston::Result::OutOfBounds;
-    }
-    this->write(address + 0, (uint8_t)((content >> 0) & 0xFF));
-    this->write(address + 1, (uint8_t)((content >> 8) & 0xFF));
-    this->write(address + 2, (uint8_t)((content >> 16) & 0xFF));
-    this->write(address + 3, (uint8_t)((content >> 24) & 0xFF));
-
-    return winston::Result::OK;
-}
-
-const winston::Result StorageWin::write(const size_t address, uint16_t content)
-{
-    if (!this->mmap.is_open())
-        return winston::Result::NotInitialized;
-    if (this->mmap.size() < address + 2)
-    {
-        winston::logger.err("storage too small");
-        return winston::Result::OutOfBounds;
-    }
-    this->write(address + 0, (uint8_t)((content >> 0) & 0xFF));
-    this->write(address + 1, (uint8_t)((content >> 8) & 0xFF));
-
-    return winston::Result::OK;
-}
-
-const winston::Result StorageWin::write(const size_t address, float content)
-{
-    if (!this->mmap.is_open())
-        return winston::Result::NotInitialized;
-    if (this->mmap.size() < address + 2)
-    {
-        winston::logger.err("storage too small");
-        return winston::Result::OutOfBounds;
-    }
-
-    uint32_t f;
-    memcpy_s(&f, sizeof(f), &content, sizeof(content));
-
-    this->write(address + 0, (uint8_t)(((f >> 0) & 0xFF)));
-    this->write(address + 1, (uint8_t)(((f >> 8) & 0xFF)));
-    this->write(address + 2, (uint8_t)(((f >> 16) & 0xFF)));
-    this->write(address + 3, (uint8_t)(((f >> 24) & 0xFF)));
-
-    return winston::Result::OK;
-}
-
-const winston::Result StorageWin::write(const size_t address, const std::vector<unsigned char>& content, const size_t length)
+const winston::Result StorageWin::writeVector(const size_t address, const std::vector<unsigned char>& content, const size_t length)
 {
     const size_t count = length == 0 ? content.size() : min(content.size(), length);
     if (!this->mmap.is_open())
@@ -699,7 +591,7 @@ const winston::Result StorageWin::write(const size_t address, const std::vector<
     return winston::Result::OK;
 }
 
-const winston::Result StorageWin::write(const size_t address, const std::string& content, const size_t length)
+const winston::Result StorageWin::writeString(const size_t address, const std::string& content, const size_t length)
 {
     const size_t count = length == 0 ? content.size() : min(content.size(), length);
     if (!this->mmap.is_open())

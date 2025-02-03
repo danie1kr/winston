@@ -195,6 +195,18 @@ namespace winston
 		return res;
 	}
 
+	const Result memcpy_s(void* dest, const size_t destSize, const void* src, const size_t srcSize)
+	{
+#ifdef WINSTON_PLATFORM_TEENSY
+		if (destSize < srcSize)
+			return Result::InternalError;
+		memcpy(dest, src, srcSize);
+#else
+		::memcpy_s(dest, destSize, src, srcSize);
+#endif
+		return Result::OK;
+	}
+
 	StopwatchJournal::Event::Event(StopwatchJournal& swj, const std::string name)
 		: swj(swj), name(name), start(hal::now())
 	{

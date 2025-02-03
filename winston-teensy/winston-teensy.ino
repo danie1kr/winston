@@ -24,6 +24,9 @@ use a board.txt with:
 debugger: hardware
 default optimization
 menu -> teensy option 3 "optimize" -> debug
+
+if Crashlog:
+    C:\Users\daniel\AppData\Local\Arduino15\packages\arduino\tools\arm-none-eabi-gcc\7-2017q4\bin\arm-none-eabi-addr2line.exe -e .\winston-teensy.ino.elf 0x4170
 */
 
 // the setup function runs once when you press reset or power the board

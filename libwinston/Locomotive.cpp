@@ -95,7 +95,7 @@ namespace winston
 			// x mm in y us = x/y mm/us <=> 1000x/y mm/s
 			auto speed = (const Speed)((1000.f * std::abs(distance)) / time);
 			this->speedMap.learn(this->throttle(), speed);
-			logger.info("Loco ", this->name(), " (", this->address(), ") speedtrapped for ", distance, "mm with ", speed, "mm/s");
+			//logger.info("Loco ", this->name(), " (", this->address(), ") speedtrapped for ", distance, "mm with ", speed, "mm/s");
 			this->speedTrap(0.f);
 		}
 	}
@@ -782,21 +782,21 @@ namespace winston
 			}
 		}
 
-		this->storage->write(address, loco->address()); address += sizeof(decltype(loco->address()));
+		this->storage->writeUint16(address, loco->address()); address += sizeof(decltype(loco->address()));
 		const auto pos = loco->position();
-		unsigned int trackIndex = pos.trackIndex();
+		uint32_t trackIndex = pos.trackIndex();
 		uint8_t connection = (uint8_t)pos.connection();
 		float distance = pos.distance();
-		this->storage->write(address, trackIndex); address += sizeof(decltype(trackIndex));
+		this->storage->writeUint32(address, trackIndex); address += sizeof(decltype(trackIndex));
 		this->storage->write(address, connection); address += sizeof(decltype(connection));
-		this->storage->write(address, distance); address += sizeof(decltype(distance));
+		this->storage->writeFloat(address, distance); address += sizeof(decltype(distance));
 
 		uint8_t speedMapCount = 0;
 		const uint32_t speedMapCountAddress = (uint32_t)address;
 		address += sizeof(decltype(speedMapCount));
 		loco->eachSpeedMap([&](const winston::Throttle throttle, const winston::Speed speed) {
 			this->storage->write(address, throttle); address += sizeof(decltype(throttle));
-			this->storage->write(address, speed); address += sizeof(decltype(speed));
+			this->storage->writeFloat(address, speed); address += sizeof(decltype(speed));
 			++speedMapCount;
 			});
 		this->storage->write(speedMapCountAddress, speedMapCount);
@@ -815,14 +815,14 @@ namespace winston
 			return result;
 
 		uint16_t locoAddress = 0;
-		auto result = this->storage->read(address, locoAddress); address += sizeof(decltype(locoAddress));
+		auto result = this->storage->readUint16(address, locoAddress); address += sizeof(decltype(locoAddress));
 
-		unsigned int trackIndex;
+		uint32_t trackIndex;
 		uint8_t connection;
 		float distance;
-		this->storage->read(address, trackIndex); address += sizeof(decltype(trackIndex));
+		this->storage->readUint32(address, trackIndex); address += sizeof(decltype(trackIndex));
 		this->storage->read(address, connection); address += sizeof(decltype(connection));
-		this->storage->read(address, distance); address += sizeof(decltype(distance));
+		this->storage->readFloat(address, distance); address += sizeof(decltype(distance));
 
 		auto track = trackFromIndex(trackIndex);
 		winston::Position pos(track, (Track::Connection)connection, distance);
@@ -839,7 +839,7 @@ namespace winston
 			winston::Throttle throttle;
 			winston::Speed speed;
 			this->storage->read(address, throttle); address += sizeof(decltype(throttle));
-			this->storage->read(address, speed); address += sizeof(decltype(speed));
+			this->storage->readFloat(address, speed); address += sizeof(decltype(speed));
 
 			throttleSpeedMap.emplace(throttle, speed);
 		}
@@ -885,7 +885,7 @@ namespace winston
 		{
 			address = this->offset(i);
 			uint16_t locoAddress = 0;
-			result = this->storage->read(address, locoAddress);
+			result = this->storage->readUint16(address, locoAddress);
 
 			if (locoAddress == loco->address())
 				return winston::Result::OK;

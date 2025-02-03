@@ -131,6 +131,9 @@ namespace winston
 		std::advance(start, dis(randomEngine));
 		return *start;
 	}
+
+	const Result memcpy_s(void* dest, const size_t destSize, const void* src, const size_t srcSize);
+
 	/*
 	// from https://gist.github.com/cbsmith/5538174
 	template <typename RandomGenerator = std::default_random_engine>

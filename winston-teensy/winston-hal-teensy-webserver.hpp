@@ -43,6 +43,7 @@ public:
         bool header(const std::string& key, const std::string& value);
         bool body(const std::string& content);
         bool body(const unsigned char* content, size_t length, size_t chunked);
+        void submit();
 #ifdef WINSTON_TEENSY_FLASHSTRING
         bool header(const __FlashStringHelper* key, const __FlashStringHelper* value);
         bool body(const __FlashStringHelper* content);
@@ -134,7 +135,7 @@ bool WebServerTeensy::HTTPConnectionTeensy::body(const unsigned char* content, s
     if (!(this->guard & (unsigned char)HTTPConnectionTeensy::State::BODY))
     {
         this->connection.write("\r\n");
-        Serial.print("\r\n");
+        //Serial.print("\r\n");
     }
 
     if (chunked > 0)
@@ -151,6 +152,11 @@ bool WebServerTeensy::HTTPConnectionTeensy::body(const unsigned char* content, s
     this->guard |= (unsigned char)HTTPConnectionTeensy::State::BODY;
     return true;
 }
+
+void WebServerTeensy::HTTPConnectionTeensy::submit()
+{
+}
+
 #ifdef WINSTON_TEENSY_FLASHSTRING
 bool WebServerTeensy::HTTPConnectionTeensy::header(const __FlashStringHelper* key, const __FlashStringHelper* value)
 {
@@ -306,7 +312,7 @@ void WebServerTeensy::step()
             //auto client = this->getClient(id);
             connection.onMessage([=](WebsocketsClient& client, WebsocketsMessage message)
                 {
-                    Serial.print(message.c_str());
+                    //Serial.print(message.c_str());
                     const auto msg = std::string(message.data().c_str());
                     this->onMessage(client, msg);
                 });

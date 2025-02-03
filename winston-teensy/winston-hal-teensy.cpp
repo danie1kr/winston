@@ -18,277 +18,10 @@ const char* operator "" _s(const char* in, size_t len)
 #include "../libwinston/HAL.h"
 #include "../libwinston/Util.h"
 
-#undef WINSTON_WITH_WEBSOCKET
-
 #ifdef WINSTON_WITH_TEENSYDEBUG
 #include "TeensyDebug/TeensyDebug.h"
 #endif
 
-#ifdef WINSTON_WITH_WEBSOCKET
-
-WebServerTeensy::HTTPConnectionTeensy::HTTPConnectionTeensy(HTTPClient& connection)
-    : connection(connection), guard((unsigned char)HTTPConnectionTeensy::State::NEW), bufferPopulated(0)
-{
-
-}
-
-bool WebServerTeensy::HTTPConnectionTeensy::status(const unsigned int HTTPStatus)
-{
-    if (this->guard & (unsigned char)HTTPConnectionTeensy::State::STATUS)
-        return false;
-    std::string line(winston::build("HTTP/1.1 ", HTTPStatus, " OK\r\n"));
-    this->connection.write(line.c_str());
-    Serial.print(line.c_str());
-    this->guard |= (unsigned char)HTTPConnectionTeensy::State::STATUS;
-    return true;
-}
-
-bool WebServerTeensy::HTTPConnectionTeensy::header(const std::string& key, const std::string& value)
-{
-    if (!(this->guard & (unsigned char)HTTPConnectionTeensy::State::STATUS) || (this->guard & (unsigned char)HTTPConnectionTeensy::State::BODY))
-        return false;
-    std::string line(winston::build(key, ": ", value, "\r\n"));
-    this->connection.write(line.c_str());
-    Serial.print(line.c_str());
-    this->guard |= (unsigned char)HTTPConnectionTeensy::State::HEADER;
-    return true;
-}
-
-bool WebServerTeensy::HTTPConnectionTeensy::body(const std::string& content)
-{
-    if (!(this->guard & (unsigned char)HTTPConnectionTeensy::State::HEADER))
-        return false;
-    if (!(this->guard & (unsigned char)HTTPConnectionTeensy::State::BODY))
-    {
-        this->connection.write("\r\n");
-        Serial.print("\r\n");
-    }
-    this->connection.write(content.c_str());
-    Serial.print(content.c_str());
-    this->guard |= (unsigned char)HTTPConnectionTeensy::State::BODY;
-    return true;
-}
-
-#ifdef WINSTON_TEENSY_FLASHSTRING
-bool WebServerTeensy::HTTPConnectionTeensy::header(const __FlashStringHelper* key, const __FlashStringHelper* value)
-{
-    if (!(this->guard & (unsigned char)HTTPConnectionTeensy::State::STATUS) || (this->guard & (unsigned char)HTTPConnectionTeensy::State::BODY))
-        return false;
-
-    auto target = [=](uint8_t c) { 
-        Serial.write(c);
-        return connection.write(c); 
-    };
-
-    winston::hal::stream(key, target);
-    this->connection.write(": ");
-    Serial.write(": ");
-    winston::hal::stream(value, target);
-    this->connection.write("\r\n");
-    Serial.write("\r\n");
-
-    this->guard |= (unsigned char)HTTPConnectionTeensy::State::HEADER;
-    return true;
-}
-bool WebServerTeensy::HTTPConnectionTeensy::body(const __FlashStringHelper* content)
-{
-    if (!(this->guard & (unsigned char)HTTPConnectionTeensy::State::HEADER))
-        return false;
-    if (!(this->guard & (unsigned char)HTTPConnectionTeensy::State::BODY))
-    {
-        this->connection.write("\r\n");
-        Serial.print("\r\n");
-    }
-    //*
-    auto target = [=](uint8_t c) {
-        Serial.write(c);
-        return connection.write(c);
-    };
-    winston::hal::stream(content, target);
-    /*/
-
-    auto target = [=](uint8_t c) {
-        buffer[bufferPopulated++] = c;
-        if (bufferPopulated == 512)
-        {
-            connection.write(buffer, bufferPopulated);
-            Serial.write(buffer, bufferPopulated);
-            bufferPopulated = 0;
-        }
-        return 1;
-    };
-    winston::hal::stream(content, target);
-    if (bufferPopulated > 0)
-    {
-        connection.write(buffer, bufferPopulated);
-        Serial.write(buffer, bufferPopulated);
-    }
-    */
-
-    this->guard |= (unsigned char)HTTPConnectionTeensy::State::BODY;
-    return true;
-}
-#endif
-
-WebServerTeensy::WebServerTeensy() : winston::WebServer<Client>()
-{
-}
-
-void WebServerTeensy::init(OnHTTP onHTTP, OnMessage onMessage, unsigned int port)
-{
-    if (!winston::runtimeNetwork())
-        return;
-
-    this->onHTTP = onHTTP;
-    this->onMessage = onMessage;
-    this->it = this->connections.begin();
-    this->server.listen(port + 1);
-    this->httpServer.begin(port);
-}
-
-void WebServerTeensy::send(Client& connection, const std::string& data)
-{
-    connection.send(data.c_str());
-}
-
-void WebServerTeensy::step()
-{
-    if (!winston::runtimeNetwork())
-        return;
-
-    if (auto httpClient = this->httpServer.available())
-    {
-        // An http request ends with a blank line.
-        bool currentLineIsBlank = true;
-        bool firstLine = true;
-        std::string line(""), resource("");
-
-        while (httpClient.connected()) {
-            if (httpClient.available()) {
-                char c = httpClient.read();
-
-                if (firstLine)
-                {
-                    line += c;
-                }
-
-                if (c == '\n' && currentLineIsBlank) {
-                    // If we've gotten to the end of the line (received a newline
-                    // character) and the line is blank, the http request has ended,
-                    // so we can send a reply.
-                    HTTPConnectionTeensy connection(httpClient);
-                    this->onHTTP(connection, resource);
-                    break;
-                }
-                else if (c == '\n') {
-                    // Starting a new line.
-                    if (firstLine)
-                    {
-                        firstLine = false;
-
-                        std::string method("");
-                        size_t i = 0;
-                        for (; i < line.length() && line[i] != ' '; ++i)
-                            method += line[i];
-                        if (method.compare("GET"))
-                            break;
-                        ++i;
-
-                        for (; i < line.length() && line[i] != ' '; ++i)
-                            resource += line[i];
-                        line.erase();
-                    }
-                    currentLineIsBlank = true;
-                }
-                else if (c != '\r') {
-                    // Read a character on the current line.
-                    currentLineIsBlank = false;
-                }
-            }
-        }
-        httpClient.stop();
-    }
-    if (server.poll())
-    {
-        // check for new client
-        Client connection = server.accept();
-        if (connection.available())
-        {
-            this->newConnection(connection);
-            connection.onMessage([=, &connection](WebsocketsMessage message)
-                {
-                    const auto msg = std::string(message.data().c_str());
-                    this->onMessage(connection, msg);
-                });
-
-            connection.onEvent([=](WebsocketsEvent event, String data)
-                {
-                    if (event == WebsocketsEvent::ConnectionClosed)
-                    {
-                        this->disconnect(connection);
-                    }
-                });
-        }
-
-
-    }
-    if (this->connections.size() == 0)
-        return;
-    this->advanceConnectionIterator();
-    auto& client = this->it->second;
-    client.poll();
-}
-
-WebServerTeensy::Client WebServerTeensy::getClient(unsigned int clientId)
-{
-    return this->connections[clientId];
-}
-
-unsigned int WebServerTeensy::getClientId(Client client)
-{
-    return 0;
-}
-
-void WebServerTeensy::advanceConnectionIterator()
-{
-    ++this->it;
-    if (this->it == this->connections.end())
-        this->it = this->connections.begin();
-}
-
-void WebServerTeensy::newConnection(Client client)
-{
-    unsigned int id = this->newClientId();
-    this->connections.insert({ id, client });
-    if (this->it == this->connections.end())
-        this->it = this->connections.begin();
-}
-
-void WebServerTeensy::disconnect(Client client)
-{
-    for (auto deleterator = this->connections.begin(); deleterator != this->connections.end();)
-    {
-        auto& client = deleterator->second;
-        if (!client.available())
-        {
-            this->connections.erase(++deleterator);
-            if (this->it == deleterator)
-                this->advanceConnectionIterator();
-        }
-        else
-            ++deleterator;
-    }
-}
-
-void WebServerTeensy::shutdown()
-{
-}
-
-size_t WebServerTeensy::maxMessageSize()
-{
-    return 2048;
-}
-#endif
 /*
 static const std::string constWinstonStoragePath = "winston.storage";
 static std::string winstonStoragePath = constWinstonStoragePath;
@@ -465,7 +198,7 @@ const winston::Result StorageArduino::init()
     {
         Serial.println("file does not exist, creating");
         auto file = SD.open(this->filename.c_str(), FILE_WRITE);
-        for (size_t i = 0; i < maxSize; ++i)
+        for (size_t i = 0; i < capacity; ++i)
             file.write('0');
         file.flush();
         file.close();
@@ -484,7 +217,7 @@ const winston::Result StorageArduino::init()
     return winston::Result::OK;
 }
 
-const winston::Result StorageArduino::read(const size_t address, std::vector<unsigned char>& content, const size_t length)
+const winston::Result StorageArduino::readVector(const size_t address, std::vector<unsigned char>& content, const size_t length)
 {
 #ifdef WINSTON_WITH_SDFAT
     if (!this->file)
@@ -502,7 +235,7 @@ const winston::Result StorageArduino::read(const size_t address, std::vector<uns
     return winston::Result::OK;
 }
 
-const winston::Result StorageArduino::read(const size_t address, std::string& content, const size_t length)
+const winston::Result StorageArduino::readString(const size_t address, std::string& content, const size_t length)
 {
 #ifdef WINSTON_WITH_SDFAT
     if (!this->file)
@@ -560,7 +293,7 @@ const winston::Result StorageArduino::write(const size_t address, unsigned char 
     return winston::Result::OK;
 }
 
-const winston::Result StorageArduino::write(const size_t address, std::vector<unsigned char>& content, const size_t length)
+const winston::Result StorageArduino::writeVector(const size_t address, const std::vector<unsigned char>& content, const size_t length)
 {
 #ifdef WINSTON_WITH_SDFAT
     if (!this->file)
@@ -577,7 +310,7 @@ const winston::Result StorageArduino::write(const size_t address, std::vector<un
     return winston::Result::OK;
 }
 
-const winston::Result StorageArduino::write(const size_t address, std::string& content, const size_t length)
+const winston::Result StorageArduino::writeString(const size_t address, const std::string& content, const size_t length)
 {
 #ifdef WINSTON_WITH_SDFAT
     if (!this->file)
@@ -635,6 +368,7 @@ namespace winston
             text("Winston Teensy Init Hello");
 
             SPI.begin();
+            text("Winston Teensy SPI done");
 
 #ifdef WINSTON_WITH_SDFAT
             if (!SD.begin(BUILTIN_SDCARD)) {
@@ -642,6 +376,7 @@ namespace winston
             }
             else
                 winston::runtimeEnablePersistence();
+            text("Winston Teensy SD done");
             SD.sdfs.chdir();
 
             if (winston::runtimePersistence() && CrashReport)
@@ -670,6 +405,7 @@ namespace winston
             else
  #endif
                 winston::runtimeEnableNetwork();
+            text("Winston Teensy Ethernet done");
 
             logRuntimeStatus();
         }

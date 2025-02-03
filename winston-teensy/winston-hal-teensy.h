@@ -151,12 +151,12 @@ public:
 	StorageArduino(const std::string filename, const size_t maxSize = 0);
 
 	const winston::Result init();
-	const winston::Result read(const size_t address, std::vector<unsigned char>& content, const size_t length = 1);
-	const winston::Result read(const size_t address, std::string& content, const size_t length = 1);
+	const winston::Result readVector(const size_t address, std::vector<unsigned char>& content, const size_t length = 1);
+	const winston::Result readString(const size_t address, std::string& content, const size_t length = 1);
 	const winston::Result read(const size_t address, unsigned char& content);
-	const winston::Result write(const size_t address, unsigned char content);
-	const winston::Result write(const size_t address, std::vector<unsigned char>& content, const size_t length = 0);
-	const winston::Result write(const size_t address, std::string& content, const size_t length = 0);
+	const winston::Result writeVector(const size_t address, const std::vector<unsigned char>& content, const size_t length = 0);
+	const winston::Result writeString(const size_t address, const std::string& content, const size_t length = 0);
+	const winston::Result write(const size_t address, const unsigned char content);
 	const winston::Result sync();
 
 	using Shared_Ptr<StorageArduino>::Shared;
@@ -180,59 +180,3 @@ public:
 	using winston::Shared_Ptr<DisplayArduino>::make;
 };
 using Display = DisplayArduino;*/
-
-/*
-#ifdef WINSTON_WITH_WEBSOCKET
-class WebServerTeensy : public winston::WebServer<WebsocketsClient>
-{
-public:
-	using Client = WebsocketsClient; 
-    using HTTPClient = EthernetClient;
-
-    class HTTPConnectionTeensy : public winston::WebServer<WebsocketsClient>::HTTPConnection
-    {
-    public:
-        HTTPConnectionTeensy(HTTPClient& connection);
-        bool status(const unsigned int HTTPStatus);
-        bool header(const std::string& key, const std::string& value);
-        bool body(const std::string& content);
-        bool header(const __FlashStringHelper* key, const __FlashStringHelper* value);
-        bool body(const __FlashStringHelper* content);
-    private:
-        HTTPClient& connection;
-        unsigned char guard;
-        
-        enum class State : unsigned char
-        {
-            NEW = 0,
-            STATUS = 0b1,
-            HEADER = 0b10,
-            BODY = 0b100
-        };
-
-        size_t bufferPopulated;
-        unsigned char buffer[512];
-    };
-    using HTTPConnection = HTTPConnectionTeensy;
-    using OnHTTP = std::function<void(HTTPConnection& client, const std::string& resource)>;
-
-	WebServerTeensy();
-	virtual ~WebServerTeensy() = default;
-	virtual void init(OnHTTP onHTTP, OnMessage onMessage, unsigned int port);
-	virtual void send(Client& connection, const std::string& data);
-	virtual void step();
-	virtual void shutdown();
-	virtual Client getClient(unsigned int clientId);
-	virtual unsigned int getClientId(Client client);
-	virtual void newConnection(Client client);
-	virtual void disconnect(Client client);
-	virtual size_t maxMessageSize();
-private:
-	void advanceConnectionIterator();
-	Connections::iterator it;
-	WebsocketsServer server;
-    EthernetServer httpServer;
-    OnHTTP onHTTP;
-};
-using WebServer = WebServerTeensy;
-#endif*/

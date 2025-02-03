@@ -33,11 +33,11 @@ namespace winstontests
                 this->memory.resize(this->capacity, 0);
                 return winston::Result::OK;
             }
-            const winston::Result read(const size_t address, std::vector<unsigned char>& content, const size_t length = 1)
+            const winston::Result readVector(const size_t address, std::vector<unsigned char>& content, const size_t length = 1)
             {
                 return winston::Result::NotImplemented;
             }
-            const winston::Result read(const size_t address, std::string& content, const size_t length = 1)
+            const winston::Result readString(const size_t address, std::string& content, const size_t length = 1)
             {
                 return winston::Result::NotImplemented;
             };
@@ -46,67 +46,14 @@ namespace winstontests
                 content = this->memory[address];
                 return winston::Result::OK;
             }
-            const winston::Result read(const size_t address, uint32_t& content)
-            {
-                content = (uint32_t)(((uint32_t)this->memory[address + 0]) << 0)
-                    | (uint32_t)(((uint32_t)this->memory[address + 1]) << 8)
-                    | (uint32_t)(((uint32_t)this->memory[address + 2]) << 16)
-                    | (uint32_t)(((uint32_t)this->memory[address + 3]) << 24);
-                return winston::Result::OK;
-            }
-            const winston::Result read(const size_t address, uint16_t& content)
-            {
-                content = (uint16_t)(((uint16_t)this->memory[address + 0]) << 0)
-                    | (uint16_t)(((uint16_t)this->memory[address + 1]) << 8);
-                return winston::Result::OK;
-            }
-            const winston::Result read(const size_t address, float& content)
-            {
-                uint32_t f;
-                f = (uint32_t)(((uint32_t)this->memory[address + 0]) << 0)
-                    | (uint32_t)(((uint32_t)this->memory[address + 1]) << 8)
-                    | (uint32_t)(((uint32_t)this->memory[address + 2]) << 16)
-                    | (uint32_t)(((uint32_t)this->memory[address + 3]) << 24);
-
-                memcpy_s(&content, sizeof(content), &f, sizeof(f));
-
-                return winston::Result::OK;
-            }
-            const winston::Result write(const size_t address, const std::vector<unsigned char>& content, const size_t length = 0)
+            const winston::Result writeVector(const size_t address, const std::vector<unsigned char>& content, const size_t length = 0)
             {
                 return winston::Result::NotImplemented;
             }
-            const winston::Result write(const size_t address, const std::string& content, const size_t length = 0)
+            const winston::Result writeString(const size_t address, const std::string& content, const size_t length = 0)
             {
                 return winston::Result::NotImplemented;
             }
-            const winston::Result write(const size_t address, const uint32_t content)
-            {
-                this->memory[address + 0] = (uint8_t)(content >> 0);
-                this->memory[address + 1] = (uint8_t)(content >> 8);
-                this->memory[address + 2] = (uint8_t)(content >> 16);
-                this->memory[address + 3] = (uint8_t)(content >> 24);
-                return winston::Result::OK;
-            }
-            const winston::Result write(const size_t address, const uint16_t content)
-            {
-                this->memory[address + 0] = (uint8_t)(content >> 0);
-                this->memory[address + 1] = (uint8_t)(content >> 8);
-                return winston::Result::OK;
-            }
-            const winston::Result write(const size_t address, const float content)
-            {
-                uint32_t f;
-                memcpy_s(&f, sizeof(f), &content, sizeof(content));
-
-                this->memory[address + 0] = (uint8_t)(f >> 0);
-                this->memory[address + 1] = (uint8_t)(f >> 8);
-                this->memory[address + 2] = (uint8_t)(f >> 16);
-                this->memory[address + 3] = (uint8_t)(f >> 24);
-
-                return winston::Result::OK;
-            }
-
             const winston::Result write(const size_t address, const unsigned char content)
             {
                 memory[address] = content;

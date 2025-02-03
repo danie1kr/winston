@@ -69,7 +69,7 @@ namespace winston {
 			return this->_tracks;
 		}
 
-		const bool from(const BaseSegment<typename _Identifier> &other, SegmentEntry &entry) const
+		const bool from(const BaseSegment<_Identifier> &other, SegmentEntry &entry) const
 		{
 			for (auto const &[track, connection] : this->entriesSet)
 			{

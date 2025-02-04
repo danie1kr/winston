@@ -20,7 +20,7 @@
 	{ \
 		if (__wsex_condition) { \
 			__wsex_code; \
-		} \
+		} else break; \
 		++__wsex_it; \
 	} \
 	if (__wsex_it >= __wsex_iterations) \

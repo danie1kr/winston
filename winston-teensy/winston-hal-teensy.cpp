@@ -361,7 +361,11 @@ namespace winston
             debug.begin(SerialUSB1);
 #endif
 
-            Serial.begin(115200);/*
+            Serial.begin(115200);
+            if (Serial)
+                winston::runtimeEnableSerial();
+            
+            /*
             while (!Serial) { //}&& millis() < 2000) {
                 // Wait for Serial to initialize
             }*/
@@ -451,7 +455,8 @@ namespace winston
 
         void text(const std::string& text)
         {
-            Serial.println(text.c_str());
+            if(winston::runtimeSerial())
+                Serial.println(text.c_str());
         }
         
         void error(const std::string& error)

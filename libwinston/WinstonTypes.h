@@ -277,7 +277,7 @@ namespace winston
 
 
 #define DEFINE_RUNTIME_LAMBDA(what) \
-	bool runtime##what(); \
+	const bool runtime##what(); \
 	void runtimeEnable##what();
 
 	DEFINE_RUNTIME_LAMBDA(Serial);

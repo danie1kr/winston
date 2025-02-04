@@ -6,7 +6,7 @@
 namespace winston
 {
 #define RUNTIME_LAMBDAS(what) \
-	bool runtime##what() { return runtimeHardwareState.enabled(RuntimeHardwareState::Type::what); }; \
+	const bool runtime##what() { return runtimeHardwareState.enabled(RuntimeHardwareState::Type::what); }; \
 	void runtimeEnable##what () { runtimeHardwareState.enable(RuntimeHardwareState::Type::what); };
 	RUNTIME_LAMBDAS(Serial);
 	RUNTIME_LAMBDAS(SPI);

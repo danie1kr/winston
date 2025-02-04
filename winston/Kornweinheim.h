@@ -132,9 +132,4 @@ private:
 #elif defined(WINSTON_PLATFORM_WIN_x64)
     SerialDeviceWin::Shared serial;
 #endif
-
-#ifdef WINSTON_LOCO_TRACKING
-    void webSocket_sendLocosPosition();
-    winston::TimePoint lastWebsocketLocoTrackingUpdate;
-#endif
 };

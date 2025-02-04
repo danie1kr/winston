@@ -12,6 +12,7 @@
 #include <variant>
 #include "Signal.h"
 #include "WinstonTypes.h"
+#include "Log.h"
 
 namespace winston
 {
@@ -79,7 +80,8 @@ namespace winston
 			std::unordered_set<Track::Const> visited;
 			bool successful = true;
 			bool checkForward = includingFirst;
-			while (true)
+			//while (true)
+			WHILE_SAFE(true, 
 			{
 				if (checkForward && _signalHandling == TraversalSignalHandling::ForwardDirection)
 				{// the signal faces us
@@ -137,7 +139,8 @@ namespace winston
 					if (callback(onto, connection) != Result::OK)
 						return TraversalResult::CancelledByCallback;
 				current = onto;
-			}
+			});
+			return TraversalResult::Looped;
 		}
 
 		static TraversalResult traverse(Track::Const& start, Track::Connection& connection)

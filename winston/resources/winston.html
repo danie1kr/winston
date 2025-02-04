@@ -118,6 +118,10 @@
             font-size: 0.8em;
         }
 
+        .locomotiveLabel {
+            font-size: 0.8em;
+        }        
+
         .microButton {
             padding: 0 0;
         }
@@ -640,10 +644,9 @@
                 M.FormSelect.init(document.querySelectorAll('select'));
             }
 
-            let locoNode = cy.$("node.locomotive[address=\"" + address + "\"]");
+            let locoNode = cytoscapeGetLoco(address);
             if (locoNode === undefined || locoNode === 0) {
-                locoNode = { group: 'nodes', data: { address: address }, classes: "locomotive" };
-                cy.add(locoNode);
+                cytoscapeCreateLoco({address: address, name: data.name});
             }
             $element.find(".speed").val(data.forward ? data.speed : -data.speed);
             $element.find(".speedValue").html(data.value);
@@ -693,12 +696,125 @@
         }
 
         function updateLocoPosition(address, position) {
-            let locoNode = cy.$("node.locomotive[address=\"" + loco.address + "\"]");
+
+            if (position.track === "nullptr")
+                return;
+
+            let locoNode = cytoscapeGetLoco(address);
+            if (locoNode.length == 0) {
+                cytoscapeCreateLoco({ address: address, name: address});
+                locoNode = cytoscapeGetLoco(address);
+            }
 
             const track = _.find(railway, track => track.name === position.track);
-            const length = track.length;
+            let length;
+            let isTurnout = false;
+            let allowedConnections = [];
+            if (track.length) // rail or bumper
+            {
+                length = track.length;
+            }
+            else // turnouts
+            {
+                isTurnout = true;
+                switch (track.direction) {
+                    case TurnoutState_A_B:
+                    case DoubleSlipTurnoutState_A_B:
+                        {
+                            length = track.lengths.a_b;
+                            allowedConnections = ["a", "b"];
+                            break;
+                        }
+                    case TurnoutState_A_C:
+                    case DoubleSlipTurnoutState_A_C:
+                        {
+                            length = track.lengths.a_c;
+                            allowedConnections = ["a", "c"];
+                            break;
+                        }
+                    case DoubleSlipTurnoutState_B_D:
+                        {
+                            length = track.lengths.b_d;
+                            allowedConnections = ["b", "d"];
+                            break;
+                        }
+                    case DoubleSlipTurnoutState_C_D:
+                        {
+                            length = track.lengths.c_d;
+                            allowedConnections = ["c", "b"];
+                            break;
+                        }
+                    case TurnoutState_Changing:
+                    case DoubleSlipTurnoutState_Changing:
+                        return;
+                }
+            }
+            const actualPercentage = position.distance / length;
 
+            const trackStart = cy.$("edge.track.start[connection=\"" + position.connection + "\"][track=\"" + position.track + "\"]");
+            const trackStartNode = trackStart.connectedNodes("node.connector");
 
+            let graphLength = 0;
+            let current = trackStartNode;
+            let visited = [current];
+            let found = [{ node: current, lengthToHere: graphLength }];
+            let search = true;
+
+            // traverse all edges and nodes which belong to the current path
+            while (search) {
+                let edges = current.connectedEdges("edge[track=\"" + position.track + "\"], edge.start");
+
+                if (isTurnout) {
+                    edges = edges.filter(edge => {
+                        return _.includes(allowedConnections, edge.data("connection"));
+                    });
+                }
+
+                const nodes = edges.connectedNodes("node[track=\"" + position.track + "\"], node.connector");
+                let newNodes = nodes.filter(node => {
+                    if (_.includes(visited, node))
+                        return false;
+                    else if (node == current)
+                        return false;
+                    else
+                        return true;
+                });
+                // break if we have no more node to visit
+                if (newNodes.empty()) {
+                    search = false;
+                    break;
+                }
+
+                const node = newNodes[0];
+                let from = current.position();
+                let to = node.position();
+                let trackLength = Math.sqrt(Math.pow(from.x - to.x, 2) + Math.pow(from.y - to.y, 2));
+                graphLength += trackLength;
+
+                found.push({ node: node, lengthToHere: graphLength });
+
+                current = node;
+                visited.push(current);
+            }
+
+            let distance = actualPercentage * graphLength;
+            let fromNode, toNode;
+            for (let i = 1; i < found.length; ++i) {
+                fromNode = found[i - 1];
+                toNode = found[i];
+
+                if (fromNode.lengthToHere <= distance && toNode.lengthToHere >= distance)
+                    break;
+            }
+            const from = fromNode.node.position();
+            const to = toNode.node.position();
+            const dir = { x: to.x - from.x, y: to.y - from.y };
+            const dirLength = Math.sqrt(dir.x * dir.x + dir.y * dir.y);
+            if (dirLength > 0)// && dirLength <= distance - fromNode.lengthToHere)
+            {
+                const factor = (distance - fromNode.lengthToHere) / dirLength;
+                locoNode.position({ x: from.x + dir.x * factor, y: from.y + dir.y * factor });
+            }
         }
 
         function error(data) {
@@ -753,6 +869,9 @@
             }
 
             $(".winston-turnout[winston-turnout-track=\"" + track + "\"]>.direction").html(turnoutDirectionLabelFromDirection(direction));
+            const trackElement = _.find(railway, t => t.name === track);
+            if (trackElement)
+                trackElement.direction = direction;
         }
 
         function doubleSlipTurnoutUpdate(turnout) {
@@ -803,6 +922,9 @@
             }
 
             $(".winston-turnout[winston-turnout-track=\"" + track + "\"]>.direction").html(doubleSlipDirectionLabelFromDirection(direction));
+            const trackElement = _.find(railway, t => t.name === track);
+            if (trackElement)
+                trackElement.direction = direction;
         }
 
         function turnoutToggle(event) {
@@ -1355,6 +1477,16 @@
                     }
                 },
                 {
+                    query: ".locomotive",
+                    valign: "center",
+                    halign: "center",
+                    valignBox: "center",
+                    halignBox: "center",
+                    tpl: function (data) {
+                        return '<p class="locomotiveLabel">' + (data.address ? data.address : (data.displayName ? data.displayName : data.name)) + '</p>';
+                    }
+                },
+                {
                     query: '.signal',
                     valign: "center",
                     halign: "center",
@@ -1629,6 +1761,14 @@
             return cy;
         }
 
+        function cytoscapeCreateLoco(loco) {
+            cy.add({ group: "nodes", data: { id: loco.address, address: loco.address, name: loco.name }, classes: "locomotive" });
+        }
+
+        function cytoscapeGetLoco(address) {
+            return cy.$("node.locomotive[address=" + address + "]");
+        }
+
         function cytoscapeUpdateSignals(cy, signals) {
             let nodes = [];
             let edges = [];
@@ -1754,8 +1894,8 @@
                         position: nodePosition,
                         classes: "trackSplitNode"
                     },
-                    { group: 'edges', data: { id: nodes[0].id() + "-" + id, track: nodes[0].data("track"), source: nodes[0].id(), target: id }, classes: "track" },
-                    { group: 'edges', data: { id: id + "-" + nodes[1].id(), track: nodes[1].data("track"), source: id, target: nodes[1].id() }, classes: "track" }
+                    { group: 'edges', data: { id: nodes[0].id() + "-" + id, track: nodes[0].data("track"), source: nodes[0].id(), target: id, connection: edge.data("connection") }, classes: "track" },
+                    { group: 'edges', data: { id: id + "-" + nodes[1].id(), track: nodes[1].data("track"), source: id, target: nodes[1].id(), connection: edge.data("connection") }, classes: "track" }
                 ]);
                 edge.remove();
             });
@@ -1892,8 +2032,8 @@
                         let to = otherTrackName + "_" + otherConnectionName;
                         let id = from + "-" + to;
                         nodes.push({ group: 'nodes', data: { id: id }, classes: "connector" });
-                        edges.push({ group: 'edges', data: { source: from, target: id, track: that }, classes: "track" });
-                        edges.push({ group: 'edges', data: { source: to, target: id, track: otherTrackName }, classes: "track" });
+                        edges.push({ group: 'edges', data: { source: from, target: id, track: that, connection: connectionName }, classes: "track start" });
+                        edges.push({ group: 'edges', data: { source: to, target: id, track: otherTrackName, connection: otherConnectionName }, classes: "track start" });
                     }
                 }
 

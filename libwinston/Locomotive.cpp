@@ -95,7 +95,7 @@ namespace winston
 			// x mm in y us = x/y mm/us <=> 1000x/y mm/s
 			auto speed = (const Speed)((1000.f * std::abs(distance)) / time);
 			this->speedMap.learn(this->throttle(), speed);
-			//logger.info("Loco ", this->name(), " (", this->address(), ") speedtrapped for ", distance, "mm with ", speed, "mm/s");
+			logger.info("Loco ", this->name(), " (", this->address(), ") speedtrapped for ", distance, "mm with ", speed, "mm/s");
 			this->speedTrap(0.f);
 		}
 	}
@@ -514,6 +514,10 @@ namespace winston
 
 	const Result Locomotive::update(Position::Transit& transit)
 	{
+#ifdef WINSTON_DETECTOR_ADDRESS
+		if (this->address() != WINSTON_DETECTOR_ADDRESS)
+			return Result::OK;
+#endif
 		if (!this->isRailed())
 			return Result::NotFound;
 
@@ -771,7 +775,7 @@ namespace winston
 		if (auto result = this->getLocoMemoryAddress(loco, address); result != winston::Result::OK)
 			return result;
 
-		// update locoCound if we are a new loco entry
+		// update locoCount if we are a new loco entry
 		{
 			uint8_t locoCount = 0;
 			this->storage->read(1, locoCount);
@@ -827,8 +831,16 @@ namespace winston
 		auto track = trackFromIndex(trackIndex);
 		winston::Position pos(track, (Track::Connection)connection, distance);
 
-		if(pos.track())
-			loco->railOnto(pos);
+
+#ifdef WINSTON_DETECTOR_ADDRESS
+		if (locoAddress == WINSTON_DETECTOR_ADDRESS)
+		{
+#endif
+			if (pos.track())
+				loco->railOnto(pos);
+#ifdef WINSTON_DETECTOR_ADDRESS
+		}
+#endif
 
 		uint8_t speedMapCount = 0;
 		this->storage->read(address, speedMapCount); address += sizeof(decltype(speedMapCount));

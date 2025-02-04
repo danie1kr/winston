@@ -59,6 +59,13 @@ namespace winston
 
 		void log(std::string text, typename Entry::Level level = Entry::Level::Info, const TimePoint timestamp = winston::hal::now())
 		{
+			static bool recursive = false;
+			if (recursive)
+			{
+				recursive = false;
+				return;
+			}
+			recursive = true;
 			if (this->_log.size() > _WINSTON_LOG_SIZE)
 				this->_log.pop_front();
 			this->_log.emplace_back(timestamp, level, text);
@@ -67,6 +74,7 @@ namespace winston
 			hal::text(entryText);
 			if (this->callback)
 				this->callback(entry);
+			recursive = false;
 		}
 
 		template <typename ...Params>

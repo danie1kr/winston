@@ -161,8 +161,8 @@ void WebServerWSPP::send(Client& connection, const std::string &data)
     }
     catch (std::exception e)
     {
-        winston::logger.err("WebServerWSPP::send exception, umlaut in payload? ", data);
-        connection.reset();
+       // winston::logger.err("WebServerWSPP::send exception, umlaut in payload? ", data);
+       // connection.reset();
     }
 }
 
@@ -746,9 +746,11 @@ const winston::Result WebSocketClientWin::connect(const winston::URI& uri)
     }
     this->client.connect(this->connection);
 
-    while (!this->connected())
+    //while (!this->connected())
+    WHILE_SAFE(!this->connected(),
+    {
         this->client.poll_one();
-
+    });
     return winston::Result::OK;
 }
 

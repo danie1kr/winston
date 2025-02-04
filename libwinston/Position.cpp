@@ -110,21 +110,22 @@ namespace winston
 		{
 			auto connection = this->reference;
 			auto current = this->_track;
-			while (true)
+			//while (true)
+			WHILE_SAFE(true, 
 			{
 				auto onThisTrack = std::min(this->dist, current->length());
 				this->collectSignalsInRange(distOnThisTrack, onThisTrack, current, connection, signalPassed);
 
 				if (this->dist < current->length())
 					break;
-				
+
 				this->dist -= current->length();
 				distOnThisTrack = 0;
 
 				Track::Const onto;
 				if (!current->traverse(connection, onto, false))
 				{
-					//logger.err(build("cannot traverse during Position::drive: ", current->name(), " leaving on ", Track::ConnectionToString(connection)));
+					logger.err(build("cannot traverse during Position::drive: ", current->name(), " leaving on ", Track::ConnectionToString(connection)));
 					return Transit::TraversalError;
 				}
 
@@ -142,7 +143,7 @@ namespace winston
 					return Transit::TraversalError;
 
 				current = onto;
-			}
+			});
 			this->_track = current;
 			this->reference = connection;
 			return this->_track->section() == section ? Transit::CrossTrack : Transit::CrossSection;

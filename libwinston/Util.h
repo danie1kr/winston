@@ -13,6 +13,24 @@
 #include "WinstonTypes.h"
 #include "WinstonConfig.h"
 
+#define WHILE_SAFE_Ex(__wsex_iterations, __wsex_condition, __wsex_code) \
+{ const size_t __wsex_line = __LINE__; \
+	size_t __wsex_it = 0; \
+	while (__wsex_it < __wsex_iterations) \
+	{ \
+		if (__wsex_condition) { \
+			__wsex_code; \
+		} \
+		++__wsex_it; \
+	} \
+	if (__wsex_it >= __wsex_iterations) \
+	{ \
+		winston::logger.err("there seems to be an infinite loop in: ", __FILE__, " at #", __wsex_line);  \
+	} \
+}
+
+#define WHILE_SAFE(condition, code) { WHILE_SAFE_Ex(1000, condition, code); }
+
 namespace winston
 {
 	extern std::random_device randomDevice;

@@ -544,7 +544,8 @@ namespace winston
 			auto currentTrack = track;
 			auto connection = entered;
 
-			while (current == initial)
+			//while ()
+			WHILE_SAFE(current == initial,
 			{
 				Signal::Shared signal;
 				const auto tr = Track::traverse<Track::TraversalSignalHandling::Ignore>(currentTrack, connection, signal,
@@ -560,7 +561,7 @@ namespace winston
 					track = currentTrack;
 					return current;
 				}
-			}
+			});
 			return current;
 		}
 
@@ -637,7 +638,8 @@ namespace winston
 			auto currentTrack = track;
 			auto connection = entered;
 
-			while (current == initial)
+			//while (current == initial)
+			WHILE_SAFE(current == initial,
 			{
 				Signal::Shared signal;
 				const auto tr = Track::traverse<Track::TraversalSignalHandling::Ignore>(currentTrack, connection, signal, 
@@ -653,7 +655,7 @@ namespace winston
 					track = currentTrack;
 					return current;
 				}
-			}
+			});
 			return current;
 		}
 

@@ -23,8 +23,6 @@ using namespace websockets2_generic;
 #endif
 #endif
 
-
-
 // move to https://github.com/khoih-prog/AsyncWebServer_Teensy41 ?
 // #include <AsyncWebServer_Teensy41.h>
 

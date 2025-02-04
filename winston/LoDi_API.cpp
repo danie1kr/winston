@@ -45,9 +45,13 @@ const winston::Result LoDi::PacketParser::loop()
 	// did we loose connection?
 	const auto connected = this->socket->isConnected();
 
-	if (!connected && this->_connected != connected)
-		winston::logger.err("Connection to LoDi Commander lost");
-	
+	if (this->_connected != connected)
+	{
+		if (!connected)
+			winston::logger.err("Connection to LoDi Commander lost");
+		else
+			winston::logger.info("Connection to LoDi Commander established");
+	}
 	this->_connected = connected;
 
 	return winston::Result::OK;

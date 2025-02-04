@@ -544,13 +544,22 @@ namespace winston
 				this->digitalCentralStation->loop();
 			}
 			{
+				TEENSY_CRASHLOG_BREADCRUMB(4, 0x4);
+#ifdef WINSTON_STATISTICS
+				StopwatchJournal::Event tracer(this->stopWatchJournal, "detector network device");
+#endif
+				if (this->detectorDevice)
+					this->detectorDevice->loop();
+			}
+			/* {
+			* // doen in kornweinheim.loop
 				TEENSY_CRASHLOG_BREADCRUMB(4, 0x2);
 #ifdef WINSTON_LOCO_TRACKING
 #ifdef WINSTON_STATISTICS
 				StopwatchJournal::Event tracer(this->stopWatchJournal, "loco tracking");
 #endif
-				for (auto& loco : this->locomotiveShed)
-					loco.update();
+				for (auto& loco : this->locomotiveShed.shed())
+					loco->update();
 #endif
 			}
 			{
@@ -561,15 +570,7 @@ namespace winston
 #endif
 				this->webSocket_sendLocosPosition();
 #endif
-			}
-			{
-				TEENSY_CRASHLOG_BREADCRUMB(4, 0x4);
-#ifdef WINSTON_STATISTICS
-				StopwatchJournal::Event tracer(this->stopWatchJournal, "detector network device");
-#endif
-				if(this->detectorDevice)
-					this->detectorDevice->loop();
-			}
+			}*/
 			{
 				TEENSY_CRASHLOG_BREADCRUMB(4, 0x5);
 #ifdef WINSTON_STATISTICS
@@ -723,6 +724,7 @@ namespace winston
 		}
 
 		TimePoint lastTurnoutToggleRequest{ winston::hal::now() };
+		TimePoint lastLocoStatusRequest{ winston::hal::now() };
 
 		Looper::Shared detectorDevice;
 

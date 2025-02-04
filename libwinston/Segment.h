@@ -161,7 +161,8 @@ namespace winston {
 				Length len = 0;
 				auto current = track;
 				auto connection = entered;
-				while (current->segment() == this->id)
+				//while (current->segment() == this->id)
+				WHILE_SAFE(current->segment() == this->id,
 				{
 					len += current->length();
 					auto onto = current;
@@ -169,7 +170,7 @@ namespace winston {
 						return 0.f;
 					connection = onto->whereConnects(current);
 					current = onto;
-				}
+				});
 
 				return len;
 			}

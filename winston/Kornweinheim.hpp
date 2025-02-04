@@ -42,35 +42,6 @@
 
 */
 
-#ifdef WINSTON_LOCO_TRACKING
-void Kornweinheim::webSocket_sendLocosPosition()
-{
-#ifdef WINSTON_WITH_WEBSOCKET
-    auto now = winston::hal::now();
-    if (inMilliseconds(now - this->lastWebsocketLocoTrackingUpdate) > WINSTON_LOCO_UPDATE_POSITION_WEBSOCKET_RATE)
-    {
-        JsonDocument obj;
-        obj["op"] = "locoPositions";
-        auto data = obj["data"].to<JsonArray>();
-        for (const auto &loco: this->locomotiveShed)
-        {
-            auto l = data.add<JsonObject>();
-            l["address"] = loco.address();
-
-            const auto& pos = loco.position();
-            l["track"] = pos.trackName();
-            l["connection"] = winston::Track::ConnectionToString(pos.connection());
-            l["distance"] = pos.distance();
-        }
-        std::string json("");
-        serializeJson(obj, json);
-        webServer.broadcast(json);
-        this->lastWebsocketLocoTrackingUpdate = now;
-    }
-#endif
-}
-#endif
-
 winston::DigitalCentralStation::Callbacks Kornweinheim::z21Callbacks()
 {
     // default Callbacks already apply
@@ -135,7 +106,7 @@ winston::Locomotive::Callbacks Kornweinheim::locoCallbacks()
 
     callbacks.signalPassed = [=](const winston::Locomotive::Const loco, const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result
     {
-        //winston::logger.info(loco->name(), " passed ", track->name(), " ", connection);
+        winston::logger.info(loco->name(), " passed ", track->name(), " ", connection);
         auto signal = track->signalGuarding(connection);
         signalTower->setSignalsForLocoPassing(track, connection, pass);
         return winston::Result::OK;
@@ -415,7 +386,6 @@ void Kornweinheim::systemSetup() {
     TEENSY_CRASHLOG_BREADCRUMB(2, 0x109);
     this->routesInProgress.clear();
 
-
     TEENSY_CRASHLOG_BREADCRUMB(2, 0x110);
     this->setupWebServer(this->storageLayout, this->storageMicroLayout, this->addressTranslator, 8080);
 
@@ -674,17 +644,46 @@ void Kornweinheim::systemLoop()
         static auto lastPosUpdatePrint = winston::hal::now();
         for (auto& loco : this->locomotiveShed.shed())
         {
-            if (loco->isRailed() && loco->address() == 8)
+            if (loco->isRailed()
+#ifdef WINSTON_DETECTOR_ADDRESS
+                && loco->address() == WINSTON_DETECTOR_ADDRESS
+#endif
+                )
             {
                 loco->update();
                 auto pos = loco->position();
                 if (winston::hal::now() > lastPosUpdatePrint + toMilliseconds(743))
                 {
-                    //winston::logger.info("loco ", loco->name(), " on ", pos.trackName(), "-", pos.connection(), "+", pos.distance());
+                    winston::logger.info("loco ", loco->name(), " on ", pos.trackName(), "-", pos.connection(), "+", pos.distance());
                     lastPosUpdatePrint = winston::hal::now();
                 }
             }
         }
+    }
+
+#ifdef WINSTON_LOCO_STATUS_INTERVAL
+    {
+		TEENSY_CRASHLOG_BREADCRUMB(5, 0x3);
+        if(winston::hal::now() > lastLocoStatusRequest + WINSTON_LOCO_STATUS_INTERVAL)
+        {
+        for (auto& loco : this->locomotiveShed.shed())
+        {
+            if (loco->isRailed())
+            {
+                this->signalTower->order(winston::Command::make([&](const winston::TimePoint& created) -> const winston::State
+                    {
+						this->digitalCentralStation->getLocoInfo(loco->address());
+                        return winston::State::Finished;
+                    }, __PRETTY_FUNCTION__));
+            }
+        }
+        lastLocoStatusRequest = winston::hal::now();
+        }
+    }
+#endif
+    {
+        TEENSY_CRASHLOG_BREADCRUMB(5, 0x4);
+        this->webUI.locoPositionsSend();
     }
 }
 
@@ -785,7 +784,11 @@ const winston::Result Kornweinheim::setupDetectors()
     callbacks.change = 
         [](const std::string detectorName, const winston::Locomotive::Shared loco, const bool forward, winston::Segment::Shared segment, const winston::Detector::Change change, const winston::TimePoint when) -> const winston::Result
         { 
-            //winston::logger.info(loco->name(), change == winston::Detector::Change::Entered ? " entered " : " left ", segment->id);
+#ifdef WINSTON_DETECTOR_ADDRESS
+			if (loco->address() != WINSTON_DETECTOR_ADDRESS)
+				return winston::Result::OK;
+#endif
+            winston::logger.info(loco->name(), change == winston::Detector::Change::Entered ? " entered " : " left ", segment->id);
             if (change == winston::Detector::Change::Entered)
                 loco->entered(segment, when);
             else
@@ -794,8 +797,8 @@ const winston::Result Kornweinheim::setupDetectors()
         };
     callbacks.occupied = 
         [](const std::string detectorName, winston::Segment::Shared segment, const winston::Detector::Change change, const winston::TimePoint when) -> const winston::Result
-        { 
-            //winston::logger.info("something ", change == winston::Detector::Change::Entered ? " entered " : " left ", segment->id);
+        {
+            winston::logger.info("something ", change == winston::Detector::Change::Entered ? " entered " : " left ", segment->id);
             return winston::Result::OK;
         };
     callbacks.locoFromAddress = 
@@ -812,6 +815,9 @@ const winston::Result Kornweinheim::setupDetectors()
         this->loDi->loop();
         winston::hal::delay(50);
     }
+
+    if(!loDiCommander->isReady())
+		winston::logger.warn("LoDi Commander not connected.");
 
     return winston::Result::OK;
 

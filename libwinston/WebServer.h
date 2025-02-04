@@ -169,6 +169,39 @@ namespace winston
             this->webServer.broadcast(json);
         }
     public:
+
+#ifdef WINSTON_LOCO_TRACKING
+    private:
+        winston::TimePoint lastWebsocketLocoTrackingUpdate;
+    public:
+        void sendLocosPositions()
+        {
+#ifdef WINSTON_WITH_WEBSOCKET
+            auto now = winston::hal::now();
+            if (inMilliseconds(now - this->lastWebsocketLocoTrackingUpdate) > WINSTON_LOCO_UPDATE_POSITION_WEBSOCKET_RATE)
+            {
+                JsonDocument obj;
+                obj["op"] = "locoPositions";
+                auto data = obj["data"].to<JsonArray>();
+                for (const auto& loco : this->locomotiveShed.shed())
+                {
+                    auto l = data.add<JsonObject>();
+                    l["address"] = loco->address();
+
+                    const auto& pos = loco->position();
+                    l["track"] = pos.trackName();
+                    l["connection"] = winston::Track::ConnectionToString(pos.connection());
+                    l["distance"] = pos.distance();
+                }
+                std::string json("");
+                serializeJson(obj, json);
+                webServer.broadcast(json);
+                this->lastWebsocketLocoTrackingUpdate = now;
+            }
+#endif
+        }
+#endif
+
         // send a turnout state via websocket
         void turnoutSendState(const std::string turnoutTrackId, const winston::Turnout::Direction dir, const bool locked)
         {
@@ -654,25 +687,26 @@ namespace winston
                 size_t offset = 0;
 
                 while (remaining > 0)
-                {
-                    size_t sent = remaining > sizePerMessage ? sizePerMessage : remaining;
-                    std::string layout;
-                    this->storageLayout->readString(address + offset, layout, sent);
+			//	WHILE_SAFE(remaining > 0, 
+                    {
+                        size_t sent = remaining > sizePerMessage ? sizePerMessage : remaining;
+                        std::string layout;
+                        this->storageLayout->readString(address + offset, layout, sent);
 
-                    JsonDocument obj;
-                    obj["op"] = "layout";
-                    auto data = obj["data"].to<JsonObject>();
-                    data["offset"] = (int)offset;
-                    data["fullSize"] = (int)length;
-                    data["layout"] = layout;
-                    std::string json("");
-                    serializeJson(obj, json);
-                    this->webServer.send(client, json);
+                        JsonDocument obj;
+                        obj["op"] = "layout";
+                        auto data = obj["data"].to<JsonObject>();
+                        data["offset"] = (int)offset;
+                        data["fullSize"] = (int)length;
+                        data["layout"] = layout;
+                        std::string json("");
+                        serializeJson(obj, json);
+                        this->webServer.send(client, json);
 
-                    offset += sent;
-                    remaining -= sent;
-                }
-
+                        offset += sent;
+                        remaining -= sent;
+                        //});
+                    }
             }
             else if (std::string("\"getRailwayMicroLayout\"").compare(op) == 0)
             {
@@ -691,7 +725,8 @@ namespace winston
                 size_t remaining = length;
                 size_t offset = 0;
 
-                while (remaining > 0)
+                //while (remaining > 0)
+                WHILE_SAFE(remaining > 0,
                 {
                     size_t sent = remaining > sizePerMessage ? sizePerMessage : remaining;
                     std::string layout;
@@ -709,7 +744,7 @@ namespace winston
 
                     offset += sent;
                     remaining -= sent;
-                }
+                });
 
             }
             else if (std::string("\"getLocoShed\"").compare(op) == 0)

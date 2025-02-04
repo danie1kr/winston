@@ -391,8 +391,8 @@ Pre-Calculate signals for turnout
 		winston::Track::Const onto = current;
 		std::unordered_set<Track::Const> visited;
 		bool successful = true;
-		while (true)
-		{
+		//while (true)
+		WHILE_SAFE(true, {
 			visited.insert(current);
 			// step onto next track
 			successful = current->traverse(connection, onto, true);
@@ -440,7 +440,7 @@ Pre-Calculate signals for turnout
 			}
 			distance += onto->length();
 			current = onto;
-		}
+		});
 		return false;
 	}
 }

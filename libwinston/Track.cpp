@@ -135,7 +135,8 @@ namespace winston
 		auto con = leavingOnConnection ? connection : this->otherConnection(connection);
 
 		auto current = this->const_from_this();
-		while (current->traverse(con, onto, true))
+		//while ()
+		WHILE_SAFE(current->traverse(con, onto, true), 
 		{
 			con = onto->whereConnects(current);
 			ontoConnection = con;
@@ -147,7 +148,7 @@ namespace winston
 			}
 
 			current = onto;
-		}
+		});
 
 		return false;
 	}
@@ -156,7 +157,8 @@ namespace winston
 	{
 		auto current = this->const_from_this();
 		auto connection = leaving;
-		while (true)
+		//while (true)
+		WHILE_SAFE(true, 
 		{
 			if (const auto provider = current->getNextSignalProvider(connection, pass))
 			{
@@ -190,7 +192,7 @@ namespace winston
 			{
 				return false;
 			}
-		}
+		});
 
 		/*
 		if (const auto signal = std::get_if<Signal::Shared>(&provider->signalOrTurnout))

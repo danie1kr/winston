@@ -73,45 +73,45 @@ namespace winston
 
 		const Result init()
 		{
-			logger.info("System: Railway Init: Tracks");
+			LOG_INFO("System: Railway Init: Tracks");
 			auto result = this->initTracks();
 			if (result != winston::Result::OK)
 			{
-				winston::logger.err("Railway::initTracks failed with ", result);
+				LOG_ERROR("Railway::initTracks failed with ", result);
 				return result;
 			}
-			logger.info("System: Railway Init: Routes");
+			LOG_INFO("System: Railway Init: Routes");
 			result = this->initRoutes();
 			if (result != winston::Result::OK)
 			{
-				winston::logger.err("Railway::initRoutes failed with ", result);
+				LOG_ERROR("Railway::initRoutes failed with ", result);
 				return result;
 			}
-			logger.info("System: Railway Init: Secetions");
+			LOG_INFO("System: Railway Init: Secetions");
 			result = this->initSections();
 			if (result != winston::Result::OK)
 			{
-				winston::logger.err("Railway::initSections failed with ", result);
+				LOG_ERROR("Railway::initSections failed with ", result);
 				return result;
 			}
 #ifdef WINSTON_ENABLE_TURNOUT_GROUPS
-			logger.info("System: Railway Init: Turnout Groups");
+			LOG_INFO("System: Railway Init: Turnout Groups");
 			result = this->initTurnoutGroups();
 			if (result != winston::Result::OK)
 			{
-				winston::logger.err("Railway::initTurnoutGroups failed with ", result);
+				LOG_ERROR("Railway::initTurnoutGroups failed with ", result);
 				return result;
 			}
 #endif
-			logger.info("System: Railway Init: Segments");
+			LOG_INFO("System: Railway Init: Segments");
 			result = this->initSegments();
 			if (result != winston::Result::OK)
 			{
-				winston::logger.err("Railway::initSegments failed with ", result);
+				LOG_ERROR("Railway::initSegments failed with ", result);
 				return result;
 			}
 
-			logger.info("System: Railway Init: Done");
+			LOG_INFO("System: Railway Init: Done");
 			return winston::Result::OK;
 		}
 
@@ -368,13 +368,13 @@ namespace winston
 				auto current = this->routes[i];
 				if (!current)
 				{
-					logger.warn("Route validation, #", enumIntegralToString((int)i), " is null");
+					LOG_WARN("Route validation, #", enumIntegralToString((int)i), " is null");
 					return Result::ValidationFailed;
 				}
 				auto result = current->validate();
 				if (result != Result::OK)
 				{
-					logger.err("Route validation, #", enumIntegralToString((int)i), " faild with ", result);
+					LOG_ERROR("Route validation, #", enumIntegralToString((int)i), " faild with ", result);
 					return Result::ValidationFailed;
 				}
 				passed = result == Result::OK;
@@ -815,7 +815,7 @@ namespace winston
 				for (const auto &g : grouped)
 					groupString += " " + g->name();
 
-				logger.info(turnout.name(), " sharing groups with", groupString);
+				LOG_INFO(turnout.name(), " sharing groups with", groupString);
 
 				});
 

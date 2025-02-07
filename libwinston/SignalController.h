@@ -55,7 +55,7 @@ namespace winston
 
 			if (currentDev > devices.size())
 			{
-				winston::logger.err("Not enough devices for all signals");
+				LOG_ERROR("Not enough devices for all signals");
 				return Result::OutOfBounds;
 			}
 			auto s = Signal<_Signal>::make(devices[currentDev],

@@ -37,7 +37,7 @@ namespace winston
 		struct Connection
 		{
 			std::string connection;
-			std::array<Point, 2> p;
+			std::array<Point, 2> p{ 0,0 };
 		};
 
 		using Connections = std::vector<Connection>;

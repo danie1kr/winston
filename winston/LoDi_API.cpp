@@ -48,9 +48,9 @@ const winston::Result LoDi::PacketParser::loop()
 	if (this->_connected != connected)
 	{
 		if (!connected)
-			winston::logger.err("Connection to LoDi Commander lost");
+			LOG_ERROR("Connection to LoDi Commander lost");
 		else
-			winston::logger.info("Connection to LoDi Commander established");
+			LOG_INFO("Connection to LoDi Commander established");
 	}
 	this->_connected = connected;
 
@@ -106,7 +106,7 @@ const winston::Result LoDi::PacketParser::processPacket(const Payload payload)
 						}
 						else
 						{
-							winston::logger.err("LoDi response callback failed: Type=", winston::hex((unsigned int)type), " Command=", winston::hex((unsigned int)command), " Number=", packetNumber);
+							LOG_ERROR("LoDi response callback failed: Type=", winston::hex((unsigned int)type), " Command=", winston::hex((unsigned int)command), " Number=", packetNumber);
 						}
 					}
 				}
@@ -129,7 +129,7 @@ const winston::Result LoDi::PacketParser::processPacket(const Payload payload)
 
 			if (this->expectedResponse[packetNumber].sentCount > 10)
 			{
-				winston::logger.err("LoDi erasing packet for >10 retries Command=", winston::hex((unsigned int)command), " Number=", packetNumber);
+				LOG_ERROR("LoDi erasing packet for >10 retries Command=", winston::hex((unsigned int)command), " Number=", packetNumber);
 				this->expectedResponse.erase(packetNumber);
 			}
 		}
@@ -140,12 +140,12 @@ const winston::Result LoDi::PacketParser::processPacket(const Payload payload)
 		const auto command = (LoDi::API::Command)payload[1];
 		if (this->expectedResponse.find(packetNumber) != this->expectedResponse.end())
 			this->expectedResponse.erase(packetNumber);
-		winston::logger.err("LoDi NACK for Command = ", winston::hex((unsigned int)command), " Number = ", packetNumber);
+		LOG_ERROR("LoDi NACK for Command = ", winston::hex((unsigned int)command), " Number = ", packetNumber);
 		break;
 	}
 	default:
 	{
-		winston::logger.err("LoDi unknown packet type: ", winston::hex((unsigned int)type));
+		LOG_ERROR("LoDi unknown packet type: ", winston::hex((unsigned int)type));
 		return winston::Result::NotFound;
 	}
 	}
@@ -168,7 +168,7 @@ const winston::Result LoDi::PacketParser::processEvent(const API::Event event, c
 			uint8_t low = payload[idx++];
 			uint8_t status = payload[idx++];
 
-			this->detectorDevice->change((address-1) * 8 + channel, (high << 8) + low, high & 0x80, status == 1 ? winston::Detector::Change::Entered : winston::Detector::Change::Left);
+			this->detectorDevice->change((address-1) * 8 + channel, ((high & 0x7F) << 8) + low, high & 0x80, status == 1 ? winston::Detector::Change::Entered : winston::Detector::Change::Left);
 		}
 		break;
 	}
@@ -196,7 +196,7 @@ const winston::Result LoDi::PacketParser::processEvent(const API::Event event, c
 	}
 	default:
 	{
-		winston::logger.err("LoDi unknown event type: ", winston::hex((unsigned int)event));
+		LOG_ERROR("LoDi unknown event type: ", winston::hex((unsigned int)event));
 		return winston::Result::NotFound;
 	}
 	}
@@ -303,12 +303,12 @@ const winston::Result LoDi::S88Commander::getVersion()
 				this->initializedComponents |= (unsigned int)Initialized::Version;
 				if (payload[0] == 0x0A)
 				{
-					winston::logger.info("LoDi S88 Commander version: ", payload[1], ".", payload[2], ".", payload[3]);
+					LOG_INFO("LoDi S88 Commander version: ", payload[1], ".", payload[2], ".", payload[3]);
 					return winston::Result::OK;
 				}
 				else
 				{
-					winston::logger.err("LoDi expected Device type 0x0A but got: ", winston::hex(payload[0]));
+					LOG_ERROR("LoDi expected Device type 0x0A but got: ", winston::hex(payload[0]));
 					return winston::Result::ExternalHardwareFailed;
 				}
 			}
@@ -327,7 +327,7 @@ const winston::Result LoDi::S88Commander::deviceConfigGet()
 			if (payload.size() == 17)
 			{
 				this->initializedComponents |= (unsigned int)Initialized::DeviceConfig;
-				winston::logger.info("LoDi S88 Commander Device Config Bus0: ", payload[0], ", Bus1: ", payload[1]);
+				LOG_INFO("LoDi S88 Commander Device Config Bus0: ", payload[0], ", Bus1: ", payload[1]);
 
 				return winston::Result::OK;
 			}
@@ -376,7 +376,7 @@ const winston::Result LoDi::S88Commander::s88EventsActivate(const bool activate)
 		{
 			// no payload expected
 			this->initializedComponents |= (unsigned int)Initialized::EventsActive;
-			winston::logger.info("LoDi S88 Commander Events active");
+			LOG_INFO("LoDi S88 Commander Events active");
 			return payload.size() == 0 ? winston::Result::OK : winston::Result::InvalidParameter;
 		}
 	);
@@ -445,9 +445,26 @@ winston::hal::DebugSocket::Shared LoDi::createLoDiDebugSocket()
 			}
 			else
 			{
-				winston::logger.info("DebugSocket: unanswered type: ", winston::hex((unsigned char)type), " and command: ", winston::hex((unsigned char)command));
+				LOG_ERROR("DebugSocket: unanswered type: ", winston::hex((unsigned char)type), " and command: ", winston::hex((unsigned char)command));
 			}
 			return winston::Result::OK;
 		});
+}
+
+winston::hal::DebugSocket::Packet LoDi::railcomEvent(const winston::Id segment, const winston::Address address, const winston::Detector::Change change)
+{
+	winston::hal::DebugSocket::Packet packet;
+	packet.push_back(0);     // size
+	packet.push_back(9);     // size
+	packet.push_back((unsigned char)LoDi::API::PacketType::EVT);  // EVT
+	packet.push_back((unsigned char)LoDi::API::Event::S88LokAddrEvent);  // S88LokAddrEvent
+	packet.push_back(0);     // Packet number
+	packet.push_back(1);     // loco count
+	packet.push_back(segment / 8 + 1);     // address
+	packet.push_back(segment % 8);     // channel
+	packet.push_back((address >> 8) | 0x80);     // loco address high + forward
+	packet.push_back(address & 0xFF);     // loco address low
+	packet.push_back(change == winston::Detector::Change::Entered ? 1 : 0);     // status
+	return packet;
 }
 #endif

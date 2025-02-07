@@ -29,6 +29,10 @@ namespace winston
 	class ModelRailwaySystem : public DigitalCentralStation::LocoAddressTranslator
 	{
 	public:
+#ifdef WINSTON_WITH_WEBSOCKET
+		using Web = winston::WebUI<_WebServer, _Railway>;
+#endif
+
 		ModelRailwaySystem()
 			: _status{ Status::Initializing }
 			, lastStatusReport { hal::now() }
@@ -44,11 +48,11 @@ namespace winston
 
 		void setup() {
 			TEENSY_CRASHLOG_BREADCRUMB(2, 0x1);
-			logger.info("System: Setup");
+			LOG_INFO("System: Setup");
 			this->systemSetup();
 
 			TEENSY_CRASHLOG_BREADCRUMB(2, 0x2);
-			logger.info("System: Railway Init");
+			LOG_INFO("System: Railway Init");
 			this->railway->init();/*
 
 			for(const auto &loco : this->locomotiveShed ) {
@@ -62,17 +66,17 @@ namespace winston
 			}*/
 
 			TEENSY_CRASHLOG_BREADCRUMB(2, 0x3);
-			logger.info("System: Signal Setup");
+			LOG_INFO("System: Signal Setup");
 			this->setupSignals();
 			this->setupNextSignals();
 
 			TEENSY_CRASHLOG_BREADCRUMB(2, 0x4);
-			logger.info("System: Detector Setup");
+			LOG_INFO("System: Detector Setup");
 			if(this->setupDetectors() != Result::OK)
-				logger.err("Could not set up Detectors.");
+				LOG_ERROR("Could not set up Detectors.");
 
 			TEENSY_CRASHLOG_BREADCRUMB(2, 0x5);
-			logger.info("System: Railway Final Validation");
+			LOG_INFO("System: Railway Final Validation");
 			this->railway->validateFinal();
 #ifdef WINSTON_REALWORLD
 			this->signalTower->order(winston::Command::make([this](const TimePoint& created) -> const winston::State
@@ -81,11 +85,11 @@ namespace winston
 					{
 						if (!this->digitalCentralStation->connected())
 						{
-							logger.err("Connecting to DigitalCentralStation.");
+							LOG_INFO("Connecting to DigitalCentralStation.");
 							this->digitalCentralStation->connect();
 						}
 						//else
-						//	logger.err("Connection to DigitalCentralStation lost.");
+						//	LOG_ERROR("Connection to DigitalCentralStation lost.");
 
 						this->lastDCSConnectedCheck = winston::hal::now();
 					}
@@ -93,23 +97,27 @@ namespace winston
 		}, __PRETTY_FUNCTION__));
 			;
 #else
-			logger.warn("not connecting to digitalCentralStation as WINSTON_REALWORLD is not defined");
+			LOG_WARN("not connecting to digitalCentralStation as WINSTON_REALWORLD is not defined");
 #endif
 			
 			this->signalTower->order(winston::Command::make([](const TimePoint &created) -> const winston::State
 				{
-					logger.log("Init tasks complete");
+					LOG_INFO("Init tasks complete");
 					return winston::State::Finished;
 				}, __PRETTY_FUNCTION__));
 
 			TEENSY_CRASHLOG_BREADCRUMB(2, 0x6);
 			this->systemSetupComplete();
-			logger.info("System: Setup complete");
+			LOG_INFO("System: Setup complete");
 			TEENSY_CRASHLOG_BREADCRUMB(2, 0x7);
 			this->_status = Status::Ready;
 		};
-
-		void setupWebServer(winston::hal::StorageInterface::Shared storageLayout, winston::hal::StorageInterface::Shared storageMicroLayout, typename _Railway::AddressTranslator::Shared addressTranslator, const unsigned int port)
+#ifdef WINSTON_HAL_USE_WEBSERVER
+		void setupWebServer(winston::hal::StorageInterface::Shared storageLayout, winston::hal::StorageInterface::Shared storageMicroLayout, typename _Railway::AddressTranslator::Shared addressTranslator, const unsigned int port
+#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
+			, typename winston::WebUI<_WebServer, _Railway>::DetectorInjectionCallback detectorInjectionCallback
+#endif
+		)
 		{
 			this->webUI.init(this->railway, this->locomotiveShed, storageLayout, storageMicroLayout, addressTranslator, this->digitalCentralStation, port,
 				[=](typename _WebServer::HTTPConnection& client, const winston::HTTPMethod method, const std::string& resource) -> winston::Result {
@@ -141,9 +149,12 @@ namespace winston
 
 				return this->orderRouteSet(route, set);
 				}
+#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
+				, detectorInjectionCallback
+#endif
 				);
 		}
-
+#endif
 		static const std::string name()
 		{
 			return _Railway::name();
@@ -324,7 +335,7 @@ namespace winston
 		};
 
 #ifdef WINSTON_WITH_WEBSOCKET
-		WebUI<_WebServer, _Railway> webUI;
+		Web webUI;
 
 		// Define a callback to handle incoming messages
 
@@ -340,6 +351,7 @@ namespace winston
 
 			if (resource.compare(path_signals) == 0)
 			{
+				TEENSY_CRASHLOG_BREADCRUMB(3, 0x100);
 				connection.status(200);
 				connection.header("content-type"_s, "text/html; charset=UTF-8"_s);
 				connection.header("Connection"_s, "close"_s);
@@ -368,6 +380,7 @@ namespace winston
 			}
 			else if (resource.compare(path_locos) == 0)
 			{
+				TEENSY_CRASHLOG_BREADCRUMB(3, 0x101);
 				connection.status(200);
 				connection.header("content-type"_s, "text/html; charset=UTF-8"_s);
 				connection.header("Connection"_s, "close"_s);
@@ -399,7 +412,7 @@ namespace winston
 					{
 						if (winston::hal::now() - created > std::chrono::seconds(5 * interval))
 						{
-							winston::logger.info("Signal-Test: Resume");
+							LOG_INFO("Signal-Test: Resume");
 							for (auto& s : this->signals)
 							{
 								s->overwrite((const unsigned int)0);
@@ -409,7 +422,7 @@ namespace winston
 						}
 						else if (winston::hal::now() - created > std::chrono::seconds(4 * interval))
 						{
-							winston::logger.info("Signal-Test: ExpectGo");
+							LOG_INFO("Signal-Test: ExpectGo");
 							for (auto& s : this->signals)
 							{
 								s->overwrite((const unsigned int)winston::Signal::Aspect::ExpectGo);
@@ -419,7 +432,7 @@ namespace winston
 						}
 						else if (winston::hal::now() - created > std::chrono::seconds(3 * interval))
 						{
-							winston::logger.info("Signal-Test: ExpectHalt");
+							LOG_INFO("Signal-Test: ExpectHalt");
 							for (auto& s : this->signals)
 							{
 								s->overwrite((const unsigned int)winston::Signal::Aspect::ExpectHalt);
@@ -429,7 +442,7 @@ namespace winston
 						}
 						else if (winston::hal::now() - created > std::chrono::seconds(2 * interval))
 						{
-							winston::logger.info("Signal-Test: Halt");
+							LOG_INFO("Signal-Test: Halt");
 							for (auto& s : this->signals)
 							{
 								s->overwrite((const unsigned int)winston::Signal::Aspect::Halt);
@@ -439,7 +452,7 @@ namespace winston
 						}
 						else if (winston::hal::now() - created > std::chrono::seconds(interval))
 						{
-							winston::logger.info("Signal-Test: Go");
+							LOG_INFO("Signal-Test: Go");
 							for (auto& s : this->signals)
 							{
 								s->overwrite((const unsigned int)winston::Signal::Aspect::Go);
@@ -449,7 +462,7 @@ namespace winston
 						}
 						else
 						{
-							winston::logger.info("Signal-Test: Off");
+							LOG_INFO("Signal-Test: Off");
 							for (auto& s : this->signals)
 							{
 								s->overwrite((const unsigned int)winston::Signal::Aspect::Off);
@@ -589,9 +602,9 @@ namespace winston
 					const bool detectorConnected = this->detectorDevice->connected();
 					const bool dcsConnected = this->digitalCentralStation->connected();
 					if (!detectorConnected)
-						logger.err("Detector Device not connected");
+						LOG_ERROR("Detector Device not connected");
 					if (!dcsConnected)
-						logger.err("Digital Central Station not connected");
+						LOG_ERROR("Digital Central Station not connected");
 					this->lastStatusReport = now;
 				}
 			}
@@ -602,6 +615,7 @@ namespace winston
 #endif
 				return this->signalTower->loop();
 			}
+			TEENSY_CRASHLOG_BREADCRUMB(4, 0x0);
 		};
 		using Railway = _Railway;
 		using Tracks = typename Railway::Tracks;
@@ -725,6 +739,7 @@ namespace winston
 
 		TimePoint lastTurnoutToggleRequest{ winston::hal::now() };
 		TimePoint lastLocoStatusRequest{ winston::hal::now() };
+		TimePoint lastLocoWebUIPositionUpdate{ winston::hal::now() };
 
 		Looper::Shared detectorDevice;
 

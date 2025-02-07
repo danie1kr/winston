@@ -362,7 +362,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
 
         struct BrightnessData
         {
-            lv_obj_t* label;
+            lv_obj_t* label{ nullptr };
             ValueCallbackUX<unsigned char> callback;
         };
         BrightnessData* brightnessData = new BrightnessData();

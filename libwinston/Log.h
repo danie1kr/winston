@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../libwinston/WinstonConfig.h"
 #include "../libwinston/HAL.h"
 #include "../libwinston/Util.h"
 #include <deque>
@@ -7,6 +8,18 @@
 
 #ifndef WINSTON_LOG_SIZE
 #define WINSTON_LOG_SIZE 256
+#endif
+
+#ifdef WINSTON_WITH_LOG
+#define LOG_ERROR(...) winston::logger.err(__VA_ARGS__)
+#define LOG_WARN(...) winston::logger.warn(__VA_ARGS__)
+#define LOG_INFO(...) winston::logger.info(__VA_ARGS__)
+#define LOG(...) winston::logger.log(__VA_ARGS__)
+#else
+#define LOG_ERROR(...) (void)0
+#define LOG_WARN(...) (void)0
+#define LOG_INFO(...) (void)0
+#define LOG(...) (void)0
 #endif
 
 namespace winston

@@ -1279,12 +1279,14 @@
                 .show();
         }
 
-        function sendInjectDetector(locoAddress, id) {
+        function sendInjectDetector(inject) {
             if (!allowWinstonSubmit())
                 return;
-            send("emu_dcs_inject_detector", { loco: locoAddress, id: id });
+            //send("emu_dcs_inject_detector", { loco: locoAddress, id: id });
+            send("toggleDetectorInject", { inject: inject });
         }
 
+        /*
         function detectorClick(event) {
 
             if ($("#detectorDebug").prop("checked")) {
@@ -1297,7 +1299,7 @@
                 // infoDebugDetector
                 // show connection info
             }
-        }
+        }*/
 
         /* cytoscape */
         function cytoscapeCreate() {
@@ -1526,9 +1528,10 @@
             cy.on('click', '.signal', function (event) {
                 signalClick(event);
             });
+            /*
             cy.on('click', 'node.detector', function (event) {
                 detectorClick(event);
-            });
+            });*/
             cy.on('unselect', '.track, .trackNode, .track, .signal, .detector', function () {
                 cy.elements().removeClass("reachable");
                 cy.elements().removeClass("routeEnd");
@@ -2165,11 +2168,14 @@
                 putStateIntoURL();
             });
             $("#detectorDebug").on('change', (event) => {
+                /*
                 if ($(event.target).prop("checked"))
                     cy.$(".detector").style("display", "element");
                 else
                     cy.$(".detector").style("display", "none");
                 putStateIntoURL();
+                */
+                sendInjectDetector($(event.target).prop("checked"));
             });
 
             $("#reconnect").on('click', function () {

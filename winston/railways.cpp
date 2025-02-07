@@ -808,7 +808,7 @@ winston::Route::Shared Y2021Railway::define(const Routes route)
             PATH_TURNOUT(Turnout1, A_B)
         ))
     default:
-        winston::logger.warn("undefined route: ", route._to_string());
+        LOG_WARN("undefined route: ", route._to_string());
         break;
     }
     
@@ -894,7 +894,7 @@ Y2021Railway::Section::Shared Y2021Railway::define(const Y2021Railway::Sections 
         SECTION(PBF2, PLATFORM, { PBF2, Turnout7, T7_To_T8 });
         SECTION(PBF3, PLATFORM, { Turnout2, Turnout3, PBF3, Turnout6, PBF3a });
     default:
-        winston::logger.warn("undefined section: ", section._to_string());
+        LOG_WARN("undefined section: ", section._to_string());
         break;
 }
     return nullptr;
@@ -1214,7 +1214,7 @@ winston::Route::Shared Y2024Railway::define(const Routes route)
                 PATH_TURNOUT(Turnout2, A_B)
             ))
     default:
-        winston::logger.warn("undefined route: ", route._to_string());
+        LOG_WARN("undefined route: ", route._to_string());
         break;
     }
 
@@ -1288,7 +1288,7 @@ Y2024Railway::Section::Shared Y2024Railway::define(const Y2024Railway::Sections 
         SECTION(PBF1, PLATFORM, { PBF1, Turnout2 });
         SECTION(PBF2, PLATFORM, { PBF2 });
     default:
-        winston::logger.warn("undefined section: ", section._to_string());
+        LOG_WARN("undefined section: ", section._to_string());
         break;
     }
     return nullptr;
@@ -1353,7 +1353,7 @@ Y2024Railway::Segment::Shared Y2024Railway::define(const Segments segment)
         SEGMENT(14, { Turnout5, B4 });
         SEGMENT(15, { N5 });
     default:
-        winston::logger.warn("undefined segment: ", segment);
+        LOG_WARN("undefined segment: ", segment);
         break;
     }
     return nullptr;

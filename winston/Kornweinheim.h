@@ -132,4 +132,11 @@ private:
 #elif defined(WINSTON_PLATFORM_WIN_x64)
     SerialDeviceWin::Shared serial;
 #endif
+
+#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
+    winston::TimePoint lastDetectorInject{ winston::hal::now() };
+    bool enableDetectorInject{ false };
+    const winston::Result debugInjectorLoop();
+    const winston::Result debugInjectorToggle(const bool inject);
+#endif
 };

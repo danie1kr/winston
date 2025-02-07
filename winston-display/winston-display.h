@@ -50,7 +50,7 @@ using ValueGetterUX = std::function<const T()>;
 template<typename T>
 struct ValueCallbackUXTriggerData
 {
-	T value;
+	T value{ 0 };
 	ValueCallbackUX<T> callback;
 };
 struct CallbackUXTriggerData

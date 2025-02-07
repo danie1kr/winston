@@ -43,12 +43,12 @@ namespace winston
 
         void error(const std::string& error)
         {
-            logger.err(error);
+            LOG_ERROR(error);
         }
 
         void fatal(const std::string reason)
         {
-            logger.log(reason, Logger::Entry::Level::Fatal);
+            LOG(reason, Logger::Entry::Level::Fatal);
             throw std::exception(reason.c_str());
             exit(-1);
         }
@@ -161,7 +161,7 @@ void WebServerWSPP::send(Client& connection, const std::string &data)
     }
     catch (std::exception e)
     {
-       // winston::logger.err("WebServerWSPP::send exception, umlaut in payload? ", data);
+       // LOG_ERROR("WebServerWSPP::send exception, umlaut in payload? ", data);
        // connection.reset();
     }
 }
@@ -321,7 +321,7 @@ const winston::Result UDPSocketWinSock::recv(std::vector<unsigned char>& data)
 */
 #ifdef WINSTON_HAL_USE_SERIAL
 SerialDeviceWin::SerialDeviceWin()
-    : winston::hal::SerialDevice(), winston::Shared_Ptr<SerialDeviceWin>()
+	: winston::hal::SerialDevice(), winston::Shared_Ptr<SerialDeviceWin>(), serialHandle(INVALID_HANDLE_VALUE), timeouts()
 {
 
 }
@@ -553,7 +553,7 @@ const winston::Result StorageWin::read(const size_t address, unsigned char& cont
 
     if (this->mmap.size() < address + 1)
     {
-        winston::logger.err("storage too small");
+        LOG_ERROR("storage too small");
         return winston::Result::OutOfBounds;
     }
     content = this->mmap[address];
@@ -567,7 +567,7 @@ const winston::Result StorageWin::write(const size_t address, unsigned char cont
         return winston::Result::NotInitialized;
     if (this->mmap.size() < address + 1)
     {
-        winston::logger.err("storage too small");
+        LOG_ERROR("storage too small");
         return winston::Result::OutOfBounds;
     }
     this->mmap[address] = content;
@@ -582,7 +582,7 @@ const winston::Result StorageWin::writeVector(const size_t address, const std::v
         return winston::Result::NotInitialized;
     if (this->mmap.size() < address + count)
     {
-        winston::logger.err("storage too small");
+        LOG_ERROR("storage too small");
         return winston::Result::OutOfBounds;
     }
     for (size_t i = 0; i < count; ++i)
@@ -598,7 +598,7 @@ const winston::Result StorageWin::writeString(const size_t address, const std::s
         return winston::Result::NotInitialized;
     if (this->mmap.size() < address + count)
     {
-        winston::logger.err("storage too small");
+        LOG_ERROR("storage too small");
         return winston::Result::OutOfBounds;
     }
     for (size_t i = 0; i < count; ++i)

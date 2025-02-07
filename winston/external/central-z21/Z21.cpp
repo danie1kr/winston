@@ -19,24 +19,24 @@
 
 #include <memory>
 
-#define NOT_IMPLEMENTED(func) winston::logger.warn(winston::build("Z21: ", func, " not implemented"));
+#define NOT_IMPLEMENTED(func) LOG_WARN(winston::build("Z21: ", func, " not implemented"));
 
 Z21::Z21(winston::hal::Socket::Shared& socket, winston::DigitalCentralStation::TurnoutAddressTranslator::Shared& addressTranslator, LocoAddressTranslator& locoAddressTranslator, winston::SignalTower::Shared& signalTower, winston::DigitalCentralStation::Callbacks callbacks)
     : winston::DigitalCentralStation(addressTranslator, locoAddressTranslator, signalTower, callbacks), lastMsgSent{}, socket(socket)
 {
     this->onBroadcastFlags = [](uint32_t flags) { NOT_IMPLEMENTED("onBroadcastFlags"); };
 
-    this->onBCStopped = []() { winston::logger.info("Z21: Notstop"); };
+    this->onBCStopped = []() { LOG_INFO("Z21: Notstop"); };
     this->onStatusChanged = [](uint8_t status) { 
-        winston::logger.info("Z21: Status");
-        winston::logger.info("     emergency stop: ", (status & Z21_Status::EMERGENCY_STOP) ? "true" : "false");
-        winston::logger.info("     track voltage: ", (status & Z21_Status::TRACK_VOLTAGE_OFF) ? "off" : "enabled");
+        LOG_INFO("Z21: Status");
+        LOG_INFO("     emergency stop: ", (status & Z21_Status::EMERGENCY_STOP) ? "true" : "false");
+        LOG_INFO("     track voltage: ", (status & Z21_Status::TRACK_VOLTAGE_OFF) ? "off" : "enabled");
         if(status& Z21_Status::SHORT_CIRCUIT)
-            winston::logger.warn("     short circuit: ", (status & Z21_Status::SHORT_CIRCUIT) ? "detected" : "false");
+            LOG_WARN("     short circuit: ", (status & Z21_Status::SHORT_CIRCUIT) ? "detected" : "false");
         else
-            winston::logger.info("     short circuit: ", (status & Z21_Status::SHORT_CIRCUIT) ? "detected" : "false");
+            LOG_INFO("     short circuit: ", (status & Z21_Status::SHORT_CIRCUIT) ? "detected" : "false");
 
-        winston::logger.info("     programming mode: ", (status & Z21_Status::PROGRAMMING_MODE_ACTIVE) ? "active" : "off");
+        LOG_INFO("     programming mode: ", (status & Z21_Status::PROGRAMMING_MODE_ACTIVE) ? "active" : "off");
     };
     this->onSystemStateDataChanged = [this](uint16_t mainCurrent,              // mA
         uint16_t progCurrent,              // mA
@@ -47,18 +47,18 @@ Z21::Z21(winston::hal::Socket::Shared& socket, winston::DigitalCentralStation::T
         uint8_t  status,                   // See: const in class Z21_Status
         uint8_t  statisEX) { 
             this->onStatusChanged(status);
-            winston::logger.info("     main track current: ", mainCurrent, "mA");
-            winston::logger.info("     programming track current: ", progCurrent, "mA");
-            winston::logger.info("     main track current filtered: ", mainCurrentFiltered, "mA");
-            winston::logger.info("     temperature: ", temperature, "°C");
-            winston::logger.info("     voltage supply: ", voltageSupply, "mV");
-            winston::logger.info("     voltage track: ", voltageVCC, "mV");
-            winston::logger.warn("     high temperature: ", (status & Z21_Status_EX::HIGH_TEMPERATURE) ? "true" : "false");
-            winston::logger.warn("     power lost: ", (status & Z21_Status_EX::POWER_LOST) ? "true" : "false");
-            winston::logger.warn("     short circuit internal: ", (status & Z21_Status_EX::SHORT_CIRCUIT_EXTERNAL) ? "true" : "false");
-            winston::logger.warn("     short circuit external: ", (status & Z21_Status_EX::SHORT_CIRCUIT_INTERNAL) ? "true" : "false");
+            LOG_INFO("     main track current: ", mainCurrent, "mA");
+            LOG_INFO("     programming track current: ", progCurrent, "mA");
+            LOG_INFO("     main track current filtered: ", mainCurrentFiltered, "mA");
+            LOG_INFO("     temperature: ", temperature, "°C");
+            LOG_INFO("     voltage supply: ", voltageSupply, "mV");
+            LOG_INFO("     voltage track: ", voltageVCC, "mV");
+            LOG_WARN("     high temperature: ", (status & Z21_Status_EX::HIGH_TEMPERATURE) ? "true" : "false");
+            LOG_WARN("     power lost: ", (status & Z21_Status_EX::POWER_LOST) ? "true" : "false");
+            LOG_WARN("     short circuit internal: ", (status & Z21_Status_EX::SHORT_CIRCUIT_EXTERNAL) ? "true" : "false");
+            LOG_WARN("     short circuit external: ", (status & Z21_Status_EX::SHORT_CIRCUIT_INTERNAL) ? "true" : "false");
     };
-    this->onUnknownCommand = []() { winston::logger.warn("Z21: onUnknownCommand"); };
+    this->onUnknownCommand = []() { LOG_WARN("Z21: onUnknownCommand"); };
     this->onLocoMode = [](uint16_t address, uint8_t decoderMode) { NOT_IMPLEMENTED("onLocoMode"); };
     this->onAccessoryMode = [](uint16_t address, uint8_t decoderMode) { NOT_IMPLEMENTED("onAccessoryMode"); };
 
@@ -113,7 +113,9 @@ const winston::Result Z21::connectedInternal()
 const winston::Result Z21::send(Z21Packet& packet)
 {
     this->lastMsgSent = winston::hal::now();
-    winston::Result result = this->socket->send(packet.data);
+    std::vector<unsigned char> data;
+	data.assign(packet.data.begin(), packet.data.begin() + packet.length);
+    winston::Result result = this->socket->send(data);
     return result;
 }
 
@@ -256,7 +258,7 @@ const winston::Result Z21::setLocoDrive(uint16_t address,
                       ((forward ? 0x80 : 0x00) | (speed & 0x7F)));
     return this->send(packet);
 #else
-    winston::logger.warn("Not allowing Z21::setLocoDrive for ", address, " with speed ", speed);
+    LOG_WARN("Not allowing Z21::setLocoDrive for ", address, " with speed ", speed);
     return winston::Result::NotImplemented;
 #endif
 }
@@ -594,11 +596,11 @@ void Z21::processXPacket(uint8_t* data) {
                         {
                             auto direction = accessoryState == Z21_Accessory_State::P1 ? winston::Turnout::Direction::A_B : winston::Turnout::Direction::A_C;
                             this->turnoutUpdate(*turnout, direction);
-                            winston::logger.log(winston::build("Z21: Turnout ", address, " in state ", winston::Turnout::DirectionToString(direction)));
+                            LOG_INFO(winston::build("Z21: Turnout ", address, " in state ", winston::Turnout::DirectionToString(direction)));
                         }
                         else
                         {
-                            winston::logger.err(winston::build("Z21: Turnout ", address, " in illegal state ", accessoryState));
+                            LOG_ERROR(winston::build("Z21: Turnout ", address, " in illegal state ", accessoryState));
                         }
                     }
                     else if (track->type() == winston::Track::Type::DoubleSlipTurnout)
@@ -615,7 +617,7 @@ void Z21::processXPacket(uint8_t* data) {
                                 turnout->setAccessoryState(state, firstAddress, false, false);
                                 auto direction = turnout->fromAccessoryState();
                                 this->doubleSlipUpdate(*turnout, direction);
-                                winston::logger.log(winston::build("Z21: Turnout ", address, " in state ", winston::DoubleSlipTurnout::DirectionToString(direction)));
+                                LOG_INFO(winston::build("Z21: Turnout ", address, " in state ", winston::DoubleSlipTurnout::DirectionToString(direction)));
                             }
                             else
                             {
@@ -624,7 +626,7 @@ void Z21::processXPacket(uint8_t* data) {
                         }
                         else
                         {
-                            winston::logger.err(winston::build("Z21: Turnout ", address, " in illegal state ", accessoryState));
+                            LOG_ERROR(winston::build("Z21: Turnout ", address, " in illegal state ", accessoryState));
                         }
                     }
                 }

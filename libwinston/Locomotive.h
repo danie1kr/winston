@@ -66,25 +66,25 @@ namespace winston
 		{
 			using DriveCallback = std::function<const Result(const Address address, const unsigned char speed, const bool forward)>;
 			DriveCallback drive = [](const Address address, const unsigned char speed, const bool forward) -> const Result {
-				logger.warn("Locomotive::DriveCallback used but not implemented");
+				LOG_WARN("Locomotive::DriveCallback used but not implemented");
 				return Result::NotImplemented;
 			};
 
 			using FunctionsCallback = std::function<const Result(const Address address, const uint32_t functions)>;
 			FunctionsCallback functions = [](const Address address, const uint32_t functions) -> const Result {
-				logger.warn("Locomotive::FunctionsCallback used but not implemented");
+				LOG_WARN("Locomotive::FunctionsCallback used but not implemented");
 				return Result::NotImplemented;
 			};
 
 			using SignalPassedCallback = std::function<const Result(const Locomotive::Const loco, const Track::Const track, const Track::Connection connection, const Signal::Pass pass)>;
 			SignalPassedCallback signalPassed = [](const Locomotive::Const loco, const Track::Const track, const Track::Connection connection, const Signal::Pass pass) -> const Result {
-				logger.warn("Locomotive::SignalPassedCallback used but not implemented");
+				LOG_WARN("Locomotive::SignalPassedCallback used but not implemented");
 				return Result::NotImplemented;
 			};
 
 			using LocoStopped = std::function<void(const Locomotive::Const)>;
 			LocoStopped stopped = [](const Locomotive::Const) {
-				logger.warn("Locomotive::LocoStopped used but not implemented");
+				LOG_WARN("Locomotive::LocoStopped used but not implemented");
 				return Result::NotImplemented;
 				};
 		};

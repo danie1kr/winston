@@ -25,7 +25,7 @@
 	} \
 	if (__wsex_it >= __wsex_iterations) \
 	{ \
-		winston::logger.err("there seems to be an infinite loop in: ", __FILE__, " at #", __wsex_line);  \
+		LOG_ERROR("there seems to be an infinite loop in: ", __FILE__, " at #", __wsex_line);  \
 	} \
 }
 

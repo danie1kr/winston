@@ -153,7 +153,7 @@ const winston::Result Arduino_SPIDevice::send(const std::vector<DataType> data)
     winston::logger.info(spi);
 #endif
 
-    const unsigned int spiDelay = 1;
+    const unsigned int spiDelay = 5;
     digitalWriteFast(this->chipSelect, LOW);
     delay(spiDelay);
     SPI.beginTransaction(this->spiSettings);

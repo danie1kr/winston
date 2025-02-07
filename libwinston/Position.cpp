@@ -95,6 +95,7 @@ namespace winston
 
 	const Position::Transit Position::drive(const Distance distance, const bool allowCrossSegment, SignalPassedCallback signalPassed)
 	{
+		TEENSY_CRASHLOG_BREADCRUMB(6, 0x20410);
 		if (distance < 0)
 			this->useOtherRef();
 
@@ -103,16 +104,19 @@ namespace winston
 		auto section = this->_track->section();
 		if (this->dist >= 0 && this->dist <= this->_track->length())
 		{
+			TEENSY_CRASHLOG_BREADCRUMB(6, 0x20411);
 			this->collectSignalsInRange(distOnThisTrack, this->dist, this->_track, this->reference, signalPassed);
 			return Transit::Stay;
 		}
 		else
 		{
+			TEENSY_CRASHLOG_BREADCRUMB(6, 0x20412);
 			auto connection = this->reference;
 			auto current = this->_track;
 			//while (true)
 			WHILE_SAFE(true, 
 			{
+		        TEENSY_CRASHLOG_BREADCRUMB(6, 0x20413);
 				auto onThisTrack = std::min(this->dist, current->length());
 				this->collectSignalsInRange(distOnThisTrack, onThisTrack, current, connection, signalPassed);
 
@@ -122,13 +126,15 @@ namespace winston
 				this->dist -= current->length();
 				distOnThisTrack = 0;
 
+				TEENSY_CRASHLOG_BREADCRUMB(6, 0x20414);
 				Track::Const onto;
 				if (!current->traverse(connection, onto, false))
 				{
-					logger.err(build("cannot traverse during Position::drive: ", current->name(), " leaving on ", Track::ConnectionToString(connection)));
+					LOG_ERROR(build("cannot traverse during Position::drive: ", current->name(), " leaving on ", Track::ConnectionToString(connection)));
 					return Transit::TraversalError;
 				}
 
+				TEENSY_CRASHLOG_BREADCRUMB(6, 0x20415);
 				// don't go any further
 				if (!allowCrossSegment && current->segment() != onto->segment())
 				{
@@ -138,12 +144,16 @@ namespace winston
 					return Transit::SegmentBorder;
 				}
 
+				TEENSY_CRASHLOG_BREADCRUMB(6, 0x20416);
 				connection = onto->whereConnects(current);
+				TEENSY_CRASHLOG_BREADCRUMB(6, 0x20417);
 				if (!onto->canTraverse(connection))
 					return Transit::TraversalError;
 
 				current = onto;
+				TEENSY_CRASHLOG_BREADCRUMB(6, 0x20418);
 			});
+			TEENSY_CRASHLOG_BREADCRUMB(6, 0x20419);
 			this->_track = current;
 			this->reference = connection;
 			return this->_track->section() == section ? Transit::CrossTrack : Transit::CrossSection;

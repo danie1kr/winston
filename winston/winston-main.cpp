@@ -44,6 +44,9 @@ const size_t secondsPerPrint = WINSTON_STATISTICS_SECONDS_PER_PRINT;
 #endif
 void winston_loop()
 {
+	for (size_t crumb = 0; crumb < 6; ++crumb)
+        TEENSY_CRASHLOG_BREADCRUMB(crumb, 0x0);
+
 #ifdef WINSTON_WITH_QNETHERNET
     TEENSY_CRASHLOG_BREADCRUMB(1, 0x1);
     Ethernet.loop();
@@ -57,11 +60,11 @@ void winston_loop()
     {        
         nextSWJPrint = winston::hal::now().time_since_epoch() + toSeconds(secondsPerPrint);
 
-        winston::logger.info(kwh.statistics(5));
+        LOG_INFO(kwh.statistics(5));
 #ifdef WINSTON_STATISTICS_DETAILLED
-        winston::logger.info(kwh.statisticsSignalTower(5));
+        LOG_INFO(kwh.statisticsSignalTower(5));
 #endif
-        winston::logger.info(winston::build("LooPS: ", loopsPerSecond / secondsPerPrint));
+        LOG_INFO(winston::build("LooPS: ", loopsPerSecond / secondsPerPrint));
         loopsPerSecond = 0;
     }
     ++loopsPerSecond;

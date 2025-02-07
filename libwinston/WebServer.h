@@ -99,6 +99,9 @@ namespace winston
         using TurnoutToggleCallback = std::function<Result(const std::string id)>;
         using RouteSetCallback = std::function<Result(const int id, const bool set)>;
         using LocoControlCallback = std::function<Result()>;
+#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
+        using DetectorInjectionCallback = std::function<const Result(const bool)>;
+#endif
     private:
         TurnoutToggleCallback turnoutToggle;
         LocoControlCallback locoControl;
@@ -111,6 +114,10 @@ namespace winston
         DigitalCentralStation::Shared digitalCentralStation;
 
         Storyline::Shared activeStoryline = nullptr;
+
+#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
+        DetectorInjectionCallback detectorInjectionCallback;
+#endif
 	public:
 
         WebUI()
@@ -123,7 +130,11 @@ namespace winston
             this->webServer.step();
         }
 
-		Result init(typename _Railway::Shared railway, LocomotiveShed locomotiveShed, winston::hal::StorageInterface::Shared storageLayout, winston::hal::StorageInterface::Shared storageMicroLayout, typename _Railway::AddressTranslator::Shared addressTranslator, DigitalCentralStation::Shared digitalCentralStation, const unsigned int port, typename _WebServer::OnHTTP onHTTP, TurnoutToggleCallback turnoutToggle, RouteSetCallback routeSet)
+		Result init(typename _Railway::Shared railway, LocomotiveShed locomotiveShed, winston::hal::StorageInterface::Shared storageLayout, winston::hal::StorageInterface::Shared storageMicroLayout, typename _Railway::AddressTranslator::Shared addressTranslator, DigitalCentralStation::Shared digitalCentralStation, const unsigned int port, typename _WebServer::OnHTTP onHTTP, TurnoutToggleCallback turnoutToggle, RouteSetCallback routeSet
+#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
+            , DetectorInjectionCallback detectorInjectionCallback
+#endif
+        )
 		{
             this->railway = railway;
             this->locomotiveShed = locomotiveShed;
@@ -133,7 +144,9 @@ namespace winston
             this->storageMicroLayout = storageMicroLayout;
             this->addressTranslator = addressTranslator;
             this->digitalCentralStation = digitalCentralStation;
-
+#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
+            this->detectorInjectionCallback = detectorInjectionCallback;
+#endif
 			// webServer
 			this->webServer.init(
 				[=](typename _WebServer::HTTPConnection& client, const winston::HTTPMethod method, const std::string& resource) -> Result {
@@ -381,11 +394,13 @@ namespace winston
 
             if (std::string("\"doTurnoutToggle\"").compare(op) == 0)
             {
+                TEENSY_CRASHLOG_BREADCRUMB(3, 0x201);
                 const std::string id = data["id"];
                 this->turnoutToggle(id);
             }
             else if (std::string("\"getTurnoutState\"").compare(op) == 0)
             {
+                TEENSY_CRASHLOG_BREADCRUMB(3, 0x202);
                 const std::string id = data["id"];
                 auto track = railway->track(id);
                 if (track->type() == Track::Type::Turnout)
@@ -401,12 +416,14 @@ namespace winston
             }
             else if (std::string("\"doRouteSet\"").compare(op) == 0)
             {
+                TEENSY_CRASHLOG_BREADCRUMB(3, 0x203);
                 const int id = data["id"];
                 const bool set = data["set"];
                 this->routeSet(id, set);
             }
             else if (std::string("\"getRouteState\"").compare(op) == 0)
             {
+                TEENSY_CRASHLOG_BREADCRUMB(3, 0x204);
                 const int id = data["id"];
                 if (this->railway->supportRoutes())
                 {
@@ -416,6 +433,7 @@ namespace winston
             }
             else if (std::string("\"getSignalState\"").compare(op) == 0)
             {
+                TEENSY_CRASHLOG_BREADCRUMB(3, 0x205);
                 std::string id = data["parentTrack"];
                 std::string guarding = data["guarding"];
 
@@ -426,6 +444,7 @@ namespace winston
             }
             else if (std::string("\"getRailway\"").compare(op) == 0)
             {
+                TEENSY_CRASHLOG_BREADCRUMB(3, 0x206);
                 JsonDocument railwayContent;
                 auto tracks = railwayContent["tracks"].to<JsonArray>();
                 auto signals = railwayContent["signals"].to<JsonArray>();
@@ -605,6 +624,7 @@ namespace winston
             }
             else if (std::string("\"storeRailwayLayout\"").compare(op) == 0)
             {
+                TEENSY_CRASHLOG_BREADCRUMB(3, 0x207);
                 std::string layout = data["layout"];
                 size_t offset = (size_t)((unsigned int)data["offset"]);
                 size_t fullSize = (size_t)((unsigned int)data["fullSize"]);
@@ -638,6 +658,7 @@ namespace winston
             }
             else if (std::string("\"storeRailwayMicroLayout\"").compare(op) == 0)
             {
+                TEENSY_CRASHLOG_BREADCRUMB(3, 0x208);
                 std::string layout = data["layout"];
                 size_t offset = (size_t)((unsigned int)data["offset"]);
                 size_t fullSize = (size_t)((unsigned int)data["fullSize"]);
@@ -671,12 +692,13 @@ namespace winston
             }
             else if (std::string("\"getRailwayLayout\"").compare(op) == 0)
             {
+                TEENSY_CRASHLOG_BREADCRUMB(3, 0x209);
                 size_t address = 0;
                 std::vector<unsigned char> data;
                 auto result = this->storageLayout->readVector(address, data, 4);
                 if (result != winston::Result::OK)
                 {
-                    winston::logger.err(winston::build("getRailwayLayout could not read layout file."));
+                    LOG_ERROR(winston::build("getRailwayLayout could not read layout file."));
                     return;
                 }
                 size_t length = (data[0] << 0) | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
@@ -686,8 +708,8 @@ namespace winston
                 size_t remaining = length;
                 size_t offset = 0;
 
-                while (remaining > 0)
-			//	WHILE_SAFE(remaining > 0, 
+            //    while (remaining > 0)
+				WHILE_SAFE(remaining > 0, 
                     {
                         size_t sent = remaining > sizePerMessage ? sizePerMessage : remaining;
                         std::string layout;
@@ -705,17 +727,17 @@ namespace winston
 
                         offset += sent;
                         remaining -= sent;
-                        //});
-                    }
+                    });
             }
             else if (std::string("\"getRailwayMicroLayout\"").compare(op) == 0)
             {
+                TEENSY_CRASHLOG_BREADCRUMB(3, 0x210);
                 size_t address = 0;
                 std::vector<unsigned char> data;
                 auto result = this->storageMicroLayout->readVector(address, data, 4);
                 if (result != winston::Result::OK)
                 {
-                    winston::logger.err(winston::build("getRailwayMicroLayout could not read layout file."));
+                    LOG_ERROR(winston::build("getRailwayMicroLayout could not read layout file."));
                     return;
                 }
                 size_t length = (data[0] << 0) | (data[1] << 8) | (data[2] << 16) | (data[3] << 24);
@@ -749,11 +771,13 @@ namespace winston
             }
             else if (std::string("\"getLocoShed\"").compare(op) == 0)
             {
+                TEENSY_CRASHLOG_BREADCRUMB(3, 0x211);
                 for (auto& loco : this->locomotiveShed.shed())
                     this->locoSend(*loco);
             }
             else if (std::string("\"doControlLoco\"").compare(op) == 0)
             {
+                TEENSY_CRASHLOG_BREADCRUMB(3, 0x212);
                 /*
                 {
                     address
@@ -819,9 +843,9 @@ namespace winston
                 }*/
             }
 #ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
-            else if (std::string("\"emu_dcs_inject_detector\"").compare(op) == 0)
+         /*   else if (std::string("\"emu_dcs_inject_detector\"").compare(op) == 0)
             {
-            /*    unsigned int id = data["id"];
+                unsigned int id = data["id"];
                 winston::Address address = data["address"];
 
                 auto loco = this->locoFromAddress(address);
@@ -829,16 +853,23 @@ namespace winston
                 //if (loco)
                 //    this->detectorUpdate(this->nf[id], *loco);
                 //else
-                //    winston::logger.err(winston::build("error: locomotive ", address, " not in shed"));
+                //    LOG_ERROR(winston::build("error: locomotive ", address, " not in shed"));
                 
                 unsigned int section = (unsigned int)data["section"].toInt();
                 unsigned int loco = (unsigned int)data["loco"].toInt();
                 // this->stationDebugInjector->injectSectionUpdate(section, loco);
-                */
-            }
+                
+            }*/
+			else if (std::string("\"toggleDetectorInject\"").compare(op) == 0)
+			{
+				TEENSY_CRASHLOG_BREADCRUMB(3, 0x213);
+				bool inject = data["inject"];
+				this->detectorInjectionCallback(inject);
+			}
 #endif
             else if (std::string("\"getStorylineText\"").compare(op) == 0)
             {
+                TEENSY_CRASHLOG_BREADCRUMB(3, 0x214);
                 if (this->activeStoryline)
                 {
                     this->sendStorylineText(this->activeStoryline);
@@ -846,6 +877,7 @@ namespace winston
             }
             else if (std::string("\"storylineReply\"").compare(op) == 0)
             {
+                TEENSY_CRASHLOG_BREADCRUMB(3, 0x215);
                 std::string reply = data["reply"];
                 if (this->activeStoryline)
                     // TODO: might go wrong
@@ -853,15 +885,18 @@ namespace winston
             }
             else if (std::string("\"toggleDCSstop\"").compare(op) == 0)
             {
+                TEENSY_CRASHLOG_BREADCRUMB(3, 0x216);
                 this->digitalCentralStation->requestEmergencyStop(!this->digitalCentralStation->isEmergencyStop());
             }
             else if (std::string("\"getLogs\"").compare(op) == 0)
             {
+                TEENSY_CRASHLOG_BREADCRUMB(3, 0x217);
                 for (const auto& entry : winston::logger.entries())
                     this->log(entry);
             }
             else if (std::string("\"getStatus\"").compare(op) == 0)
             {
+                TEENSY_CRASHLOG_BREADCRUMB(3, 0x218);
                 this->statusSend();
             }
             else
@@ -869,6 +904,7 @@ namespace winston
                 winston::hal::text("Received unknown message: ");
                 winston::hal::text(message);
             }
+            TEENSY_CRASHLOG_BREADCRUMB(3, 0x0);
 		}
 		
 		void writeAttachedSignal(JsonArray& signals, winston::Track::Shared track, const winston::Track::Connection connection)

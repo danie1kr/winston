@@ -12,7 +12,7 @@
 
 #define WINSTON_WEBSOCKETS_WebSockets2_Generic
 //#define WINSTON_WEBSOCKETS_ArduinoWebsockets
-#ifdef WINSTON_WITH_WEBSOCKET
+//#ifdef WINSTON_WITH_WEBSOCKET
 #ifdef WINSTON_WEBSOCKETS_ArduinoWebsockets
 #include <ArduinoWebsockets.h>
 using namespace websockets;
@@ -21,12 +21,11 @@ using namespace websockets;
 #include <WebSockets2_Generic.h>
 using namespace websockets2_generic;
 #endif
-#endif
+//#endif
 
 // move to https://github.com/khoih-prog/AsyncWebServer_Teensy41 ?
 // #include <AsyncWebServer_Teensy41.h>
 
-#ifdef WINSTON_WITH_WEBSOCKET
 class WebServerTeensy : public winston::WebServer<WebsocketsClient>
 {
 public:
@@ -58,8 +57,8 @@ public:
             BODY = 0b100
         };
 
-        size_t bufferPopulated;
-        unsigned char buffer[512];
+    //    size_t bufferPopulated;
+   //     unsigned char buffer[512];
     };
     using HTTPConnection = HTTPConnectionTeensy;
     using OnHTTP = std::function<winston::Result(HTTPConnection& client, const winston::HTTPMethod method, const std::string& resource)>;
@@ -83,12 +82,9 @@ private:
     OnHTTP onHTTP;
 };
 using WebServer = WebServerTeensy;
-#endif
-
-#ifdef WINSTON_WITH_WEBSOCKET
 
 WebServerTeensy::HTTPConnectionTeensy::HTTPConnectionTeensy(HTTPClient& connection)
-    : connection(connection), guard((unsigned char)HTTPConnectionTeensy::State::NEW), bufferPopulated(0)
+    : connection(connection), guard((unsigned char)HTTPConnectionTeensy::State::NEW)//, bufferPopulated(0)
 {
 
 }
@@ -418,4 +414,3 @@ const size_t WebServerTeensy::maxMessageSize()
 {
     return WINSTON_WEBSOCKET_MAXSIZE;
 }
-#endif

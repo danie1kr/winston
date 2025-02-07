@@ -95,7 +95,7 @@ namespace winston
 			// x mm in y us = x/y mm/us <=> 1000x/y mm/s
 			auto speed = (const Speed)((1000.f * std::abs(distance)) / time);
 			this->speedMap.learn(this->throttle(), speed);
-			logger.info("Loco ", this->name(), " (", this->address(), ") speedtrapped for ", distance, "mm with ", speed, "mm/s");
+			LOG_INFO("Loco ", this->name(), " (", this->address(), ") speedtrapped for ", distance, "mm with ", speed, "mm/s");
 			this->speedTrap(0.f);
 		}
 	}
@@ -178,7 +178,7 @@ namespace winston
 		if (segment == lastSegment)
 		{
 			// we appeared where we are already... so?!
-			;
+			int a = 0;
 		}
 		else if (lastSegment != nullptr)
 		{
@@ -198,17 +198,67 @@ namespace winston
 			{
 				auto current = this->position().track();
 				auto connection = this->position().connection();
+				auto distance = this->position().distance();
 				auto onto = current;
 
-				if (current->traverse(connection, onto, false))
+				// the signal guarding our reference connection
+				if (auto signal = current->signalGuarding(connection))
 				{
-					connection = onto->whereConnects(current);
-					if (current->segment() != onto->segment())
+					if (signal->distance() <= this->details.position.distance())
 					{
-						entryTrack = onto;
-						entryConnection = connection;
-						foundNextSectionEntry = true;
+						// we passed signal, it was facing us and we entered its protectorate
+						this->callbacks.signalPassed(this->const_from_this(), current, connection, Signal::Pass::Backside);
 					}
+				}
+
+				// the signal in front of us
+				const auto leavingConnection = current->otherConnection(connection);
+				if (auto signal = current->signalGuarding(leavingConnection))
+				{
+					if (current->length() - this->details.position.distance() <= signal->distance())
+					{
+						// we passed signal, it was facing us and we entered its protectorate
+						this->callbacks.signalPassed(this->const_from_this(), current, leavingConnection, Signal::Pass::Facing);
+					}
+				}
+
+				// should not take long to go over all remaining tracks in the segment
+				const size_t steps = 8;
+				for (size_t i = 0; i < steps; ++i)
+				{
+					if (current->traverse(connection, onto, false))
+					{
+						connection = onto->whereConnects(current);
+						if (current->segment() != onto->segment())
+						{
+							entryTrack = onto;
+							entryConnection = connection;
+							foundNextSectionEntry = true;
+							break;
+						}
+						else
+						{
+							current = onto;
+							// pass all signals on that track
+							// the signal guarding our reference connection
+							if (auto signal = current->signalGuarding(connection))
+							{
+								// we passed signal, it was facing us and we entered its protectorate
+								this->callbacks.signalPassed(this->const_from_this(), current, connection, Signal::Pass::Backside);
+							}
+
+							// the signal in front of us
+							const auto leavingConnection = current->otherConnection(connection);
+							if (auto signal = current->signalGuarding(leavingConnection))
+							{
+								// we passed signal, it was facing us and we entered its protectorate
+								this->callbacks.signalPassed(this->const_from_this(), current, leavingConnection, Signal::Pass::Facing);
+							}
+						}
+					}
+					else
+						// we are lost
+						break;
 				}
 			}
 
@@ -223,7 +273,7 @@ namespace winston
 			if(foundNextSectionEntry)
 			{
 				Position entryPos(entryTrack, entryConnection, 0.f);
-
+				/*
 				if (this->details.trackable)
 				{
 					const auto leavingTrack = entryTrack->on(entryConnection);
@@ -237,7 +287,7 @@ namespace winston
 							this->callbacks.signalPassed(this->const_from_this(), leavingTrack, leavingConnection, Signal::Pass::Facing);
 						}
 					}
-				}
+				}*/
 				this->details.position = entryPos;
 				this->details.lastPositionUpdate = hal::now();
 				
@@ -249,7 +299,7 @@ namespace winston
 			else
 			{
 				// we are lost, so restart
-				logger.err("Loco", this->name(), " is lost on segment", segment->id);
+				LOG_ERROR("Loco", this->name(), " is lost on segment", segment->id, " current position: ", this->details.position.trackName(), "-", this->details.position.connection(), "+", this->details.position.distance());
 				this->railOnto(Position(*segment->tracks().begin(), Track::Connection::A, 0), when);
 				this->details.trackable = false;
 			}
@@ -479,6 +529,7 @@ namespace winston
 		auto now = hal::now();
 		timeOnTour = now - this->details.lastPositionUpdate;
 		transit = Position::Transit::Stay;
+		TEENSY_CRASHLOG_BREADCRUMB(6, 0x2040);
 		if (inMilliseconds(timeOnTour) > WINSTON_LOCO_POSITION_TRACK_RATE || this->details.positionUpdateRequired)
 		{
 			if (this->details.throttle != 0)
@@ -488,6 +539,7 @@ namespace winston
 
 				using namespace std::placeholders;
 			//	auto currentTrack = this->position().track();
+				TEENSY_CRASHLOG_BREADCRUMB(6, 0x2041);
 				transit = this->details.position.drive(distance, false, std::bind(this->callbacks.signalPassed, this->const_from_this(), _1, _2, _3));
 			//	if(transit == Position::Transit::CrossSection || transit == Position::Transit::CrossTrack || transit == Position::Transit::SegmentBorder)
 			//		this->details.distanceSinceSpeedTrapped += currentTrack->length();
@@ -495,6 +547,7 @@ namespace winston
 			this->details.lastPositionUpdate = now;
 			this->details.positionUpdateRequired = false;
 		}
+		TEENSY_CRASHLOG_BREADCRUMB(6, 0x2042);
 		return this->position();
 	}
 
@@ -514,6 +567,7 @@ namespace winston
 
 	const Result Locomotive::update(Position::Transit& transit)
 	{
+		TEENSY_CRASHLOG_BREADCRUMB(6, 0x200);
 #ifdef WINSTON_DETECTOR_ADDRESS
 		if (this->address() != WINSTON_DETECTOR_ADDRESS)
 			return Result::OK;
@@ -521,6 +575,7 @@ namespace winston
 		if (!this->isRailed())
 			return Result::NotFound;
 
+		TEENSY_CRASHLOG_BREADCRUMB(6, 0x201);
 		auto now = hal::now();
 		/*
 		if (this->details.autodrive.disappearTimeout && now > this->details.lastEnteredTime + toMilliseconds(12000))
@@ -529,6 +584,7 @@ namespace winston
 			return Result::NotFound;
 		}*/
 
+		TEENSY_CRASHLOG_BREADCRUMB(6, 0x202);
 		Duration speedUpdateRate = now - this->details.lastSpeedUpdate;
 		const auto timeDiff = inMilliseconds(speedUpdateRate);
 		if (timeDiff > WINSTON_LOCO_SPEED_TRACK_RATE)
@@ -537,6 +593,7 @@ namespace winston
 
 			if (diff != 0)
 			{
+				TEENSY_CRASHLOG_BREADCRUMB(6, 0x203);
 				this->invalidateSpeedTrap();
 				// 0..255 in 4s <=> on linear curve
 				// 255..0 in 2s <=> on linear curve
@@ -546,14 +603,18 @@ namespace winston
 				else
 					this->details.modelThrottle += (Throttle)((diff / 255.f) * timeDiff / 2000.f);
 				this->details.modelThrottle = (Throttle)clamp<float>(0.f, 255.f, this->details.modelThrottle);
-				this->callbacks.drive(this->address(), (unsigned char)this->details.modelThrottle, this->details.forward);
+				TEENSY_CRASHLOG_BREADCRUMB(6, 0x204);
+				//this->callbacks.drive(this->address(), (unsigned char)this->details.modelThrottle, this->details.forward);
 			}
 			this->details.lastSpeedUpdate = now;
 		}
 		// don't care about the updated duration
+		TEENSY_CRASHLOG_BREADCRUMB(6, 0x204);
 		this->moved(speedUpdateRate, transit);
+		TEENSY_CRASHLOG_BREADCRUMB(6, 0x205);
 		this->updateNextSignals();
 
+		TEENSY_CRASHLOG_BREADCRUMB(6, 0x207);
 		if (this->details.autodrive.halt)
 		{
 			// distance to next signal, forward, facing us
@@ -584,6 +645,7 @@ namespace winston
 					}
 			}
 		}
+		TEENSY_CRASHLOG_BREADCRUMB(6, 0x299);
 
 		return Result::OK;
 	}
@@ -726,7 +788,7 @@ namespace winston
 
 	const Result LocomotiveShed::format()
 	{
-		logger.warn("Formatting LocomotiveShed storage");
+		LOG_WARN("Formatting LocomotiveShed storage");
 		size_t address = 0;
 		this->storage->write(address++, (uint8_t)WINSTON_STORAGE_LOCOSHED_VERSION);
 		this->storage->write(address++, (uint8_t)0);
@@ -890,8 +952,6 @@ namespace winston
 		auto result = this->checkHeader(locoCount);
 		if (result != winston::Result::OK)
 			return result;
-
-		size_t size = 0;
 
 		for (size_t i = 0; i < locoCount; ++i)
 		{

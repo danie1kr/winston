@@ -98,10 +98,10 @@ private:
 		struct PacketAndCallback
 		{
 			Payload data;
-			API::Command command;
+			API::Command command{ 0 };
 			PacketCallback callback;
-			winston::TimePoint sentAt;
-			unsigned int sentCount;
+			winston::TimePoint sentAt{ winston::hal::now()};
+			unsigned int sentCount{ 0 };
 		};
 		using ExpectedResponses = std::map<uint8_t, PacketAndCallback>;
 		ExpectedResponses expectedResponse;
@@ -182,6 +182,7 @@ private:
 	S88Commander::Shared createS88Commander();
 #ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
 	static winston::hal::DebugSocket::Shared createLoDiDebugSocket();
+	static winston::hal::DebugSocket::Packet railcomEvent(const winston::Id segment, const winston::Address loco, const winston::Detector::Change change);
 #endif
 private:
 	PacketParser packetParser;

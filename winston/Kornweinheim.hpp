@@ -106,7 +106,7 @@ winston::Locomotive::Callbacks Kornweinheim::locoCallbacks()
 
     callbacks.signalPassed = [=](const winston::Locomotive::Const loco, const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result
     {
-        winston::logger.info(loco->name(), " passed ", track->name(), " ", connection);
+        LOG_INFO(loco->name(), " passed ", track->name(), " ", connection);
         auto signal = track->signalGuarding(connection);
         signalTower->setSignalsForLocoPassing(track, connection, pass);
         return winston::Result::OK;
@@ -198,7 +198,7 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
         }
 #endif
 
-        winston::logger.info("Turnout ", turnout.name(), " set to direction ", winston::Turnout::DirectionToString(direction));
+        LOG_INFO("Turnout ", turnout.name(), " set to direction ", winston::Turnout::DirectionToString(direction));
 
         return winston::State::Finished;
     };
@@ -236,7 +236,7 @@ winston::Railway::Callbacks Kornweinheim::railwayCallbacks()
             }
         }
 
-        winston::logger.info("Turnout ", turnout.name(), " set to direction ", winston::DoubleSlipTurnout::DirectionToString(direction));
+        LOG_INFO("Turnout ", turnout.name(), " set to direction ", winston::DoubleSlipTurnout::DirectionToString(direction));
 
         return winston::State::Finished;
     };
@@ -365,13 +365,13 @@ void Kornweinheim::systemSetup() {
     TEENSY_CRASHLOG_BREADCRUMB(2, 0x107);
     this->storageLayout = Storage::make(std::string(this->name()).append(".").append("winston.storage"), 256 * 1024);
     if (this->storageLayout->init() != winston::Result::OK)
-        winston::logger.err("Kornweinheim.init: Storage Layout Init failed");
+        LOG_ERROR("Kornweinheim.init: Storage Layout Init failed");
     this->storageMicroLayout = Storage::make(std::string(this->name()).append(".").append("winston.micro.storage"), 256 * 1024);
     if (this->storageMicroLayout->init() != winston::Result::OK)
-        winston::logger.err("Kornweinheim.init: Storage Micro Layout Init failed");
+        LOG_ERROR("Kornweinheim.init: Storage Micro Layout Init failed");
     this->storageLocoShed = Storage::make("winston.locoshed.storage", 32 * 1024); // 1.5k per loco
     if (this->storageLocoShed->init() != winston::Result::OK)
-        winston::logger.err("Kornweinheim.init: Storage LocoShed failed");
+        LOG_ERROR("Kornweinheim.init: Storage LocoShed failed");
 
     TEENSY_CRASHLOG_BREADCRUMB(2, 0x108);
     this->populateSheds();
@@ -387,11 +387,17 @@ void Kornweinheim::systemSetup() {
     this->routesInProgress.clear();
 
     TEENSY_CRASHLOG_BREADCRUMB(2, 0x110);
-    this->setupWebServer(this->storageLayout, this->storageMicroLayout, this->addressTranslator, 8080);
+#ifdef WINSTON_HAL_USE_WEBSERVER
+    this->setupWebServer(this->storageLayout, this->storageMicroLayout, this->addressTranslator, 8080
+#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
+		,[&] (const bool inject) -> const winston::Result { return this->debugInjectorToggle(inject); }
+#endif
+    );
 
     winston::logger.setCallback([this](const winston::Logger::Entry& entry) {
         this->webUI.log(entry);
     });
+#endif
 };
 
 void Kornweinheim::createSignals(winston::SignalController& signalController, RAILWAY_CLASS::Shared railway, winston::Railway::Callbacks::SignalUpdateCallback signalUpdateCallback)
@@ -514,7 +520,7 @@ void Kornweinheim::setupSignals()
 
         // update physical light
         this->signalController->update(*track.signalGuarding(connection));
-        winston::logger.info("Signal at ", track.name(), "|", winston::Track::ConnectionToString(connection), " set to ", winston::Signal::buildAspects(aspects));
+        LOG_INFO("Signal at ", track.name(), "|", winston::Track::ConnectionToString(connection), " set to ", winston::Signal::buildAspects(aspects));
 
         return winston::State::Finished;
     };
@@ -650,13 +656,19 @@ void Kornweinheim::systemLoop()
 #endif
                 )
             {
+                TEENSY_CRASHLOG_BREADCRUMB(5, 0x200);
                 loco->update();
-                auto pos = loco->position();
-                if (winston::hal::now() > lastPosUpdatePrint + toMilliseconds(743))
-                {
-                    winston::logger.info("loco ", loco->name(), " on ", pos.trackName(), "-", pos.connection(), "+", pos.distance());
+#ifndef WINSTON_PLATFORM_TEENSY
+                if (winston::hal::now() > lastPosUpdatePrint + toMilliseconds(133))
+                 {
+                    TEENSY_CRASHLOG_BREADCRUMB(5, 0x201);
+                    auto pos = loco->position();
+                    TEENSY_CRASHLOG_BREADCRUMB(5, 0x202);
+                    LOG_INFO("loco ", loco->name(), " on ", pos.trackName(), "-", pos.connection(), "+", pos.distance());
                     lastPosUpdatePrint = winston::hal::now();
+                    TEENSY_CRASHLOG_BREADCRUMB(5, 0x203);
                 }
+#endif
             }
         }
     }
@@ -666,25 +678,45 @@ void Kornweinheim::systemLoop()
 		TEENSY_CRASHLOG_BREADCRUMB(5, 0x3);
         if(winston::hal::now() > lastLocoStatusRequest + WINSTON_LOCO_STATUS_INTERVAL)
         {
-        for (auto& loco : this->locomotiveShed.shed())
-        {
-            if (loco->isRailed())
+            for (auto& loco : this->locomotiveShed.shed())
             {
-                this->signalTower->order(winston::Command::make([&](const winston::TimePoint& created) -> const winston::State
-                    {
-						this->digitalCentralStation->getLocoInfo(loco->address());
-                        return winston::State::Finished;
-                    }, __PRETTY_FUNCTION__));
+                if (loco->isRailed())
+                {
+                    this->signalTower->order(winston::Command::make([&](const winston::TimePoint& created) -> const winston::State
+                        {
+						    this->digitalCentralStation->getLocoInfo(loco->address());
+                            return winston::State::Finished;
+                        }, __PRETTY_FUNCTION__));
+                }
             }
-        }
-        lastLocoStatusRequest = winston::hal::now();
+            lastLocoStatusRequest = winston::hal::now();
         }
     }
 #endif
+#ifndef WINSTON_PLATFORM_TEENSY
+#ifdef WINSTON_LOCO_POSITION_WEBUI_INTERVAL
     {
-        TEENSY_CRASHLOG_BREADCRUMB(5, 0x4);
-        this->webUI.locoPositionsSend();
+#ifndef WINSTON_REALWORLD
+        if (enableDetectorInject) {
+#endif
+            if (winston::hal::now() > lastLocoWebUIPositionUpdate + WINSTON_LOCO_POSITION_WEBUI_INTERVAL)
+            {
+                TEENSY_CRASHLOG_BREADCRUMB(5, 0x4);
+                this->webUI.locoPositionsSend();
+                lastLocoWebUIPositionUpdate = winston::hal::now();
+            }
+#ifndef WINSTON_REALWORLD
+        }
+#endif
     }
+#endif
+#endif
+
+#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
+    {
+        debugInjectorLoop();
+    }
+#endif
 }
 
 winston::Result Kornweinheim::detectorUpdate(winston::Detector::Shared detector, winston::Locomotive& loco)
@@ -788,7 +820,7 @@ const winston::Result Kornweinheim::setupDetectors()
 			if (loco->address() != WINSTON_DETECTOR_ADDRESS)
 				return winston::Result::OK;
 #endif
-            winston::logger.info(loco->name(), change == winston::Detector::Change::Entered ? " entered " : " left ", segment->id);
+            LOG_INFO(loco->name(), change == winston::Detector::Change::Entered ? " entered " : " left ", segment->id);
             if (change == winston::Detector::Change::Entered)
                 loco->entered(segment, when);
             else
@@ -798,7 +830,7 @@ const winston::Result Kornweinheim::setupDetectors()
     callbacks.occupied = 
         [](const std::string detectorName, winston::Segment::Shared segment, const winston::Detector::Change change, const winston::TimePoint when) -> const winston::Result
         {
-            winston::logger.info("something ", change == winston::Detector::Change::Entered ? " entered " : " left ", segment->id);
+            LOG_INFO("something ", change == winston::Detector::Change::Entered ? " entered " : " left ", segment->id);
             return winston::Result::OK;
         };
     callbacks.locoFromAddress = 
@@ -817,11 +849,66 @@ const winston::Result Kornweinheim::setupDetectors()
     }
 
     if(!loDiCommander->isReady())
-		winston::logger.warn("LoDi Commander not connected.");
+		LOG_ERROR("LoDi Commander not connected.");
 
     return winston::Result::OK;
-
 }
+
+#ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
+const winston::Result Kornweinheim::debugInjectorToggle(const bool inject)
+{
+	this->enableDetectorInject = inject;
+    auto loco = this->locoFromAddress(8);
+    if (this->enableDetectorInject)
+    {
+		const auto position = winston::Position(this->railway->track(Tracks::PBF2), winston::Track::Connection::A, 100);
+        this->orderTurnoutToggle(static_cast<winston::Turnout&>(*this->railway->track(Tracks::Turnout1)), winston::Turnout::Direction::A_B);
+        this->orderTurnoutToggle(static_cast<winston::Turnout&>(*this->railway->track(Tracks::Turnout2)), winston::Turnout::Direction::A_B);
+        this->orderTurnoutToggle(static_cast<winston::Turnout&>(*this->railway->track(Tracks::Turnout4)), winston::Turnout::Direction::A_B);
+        this->orderTurnoutToggle(static_cast<winston::Turnout&>(*this->railway->track(Tracks::Turnout6)), winston::Turnout::Direction::A_B);
+        this->orderTurnoutToggle(static_cast<winston::Turnout&>(*this->railway->track(Tracks::Turnout7)), winston::Turnout::Direction::A_B);
+        loco->railOnto(position);
+        loco->update(true, true, 30, 0);
+    }
+    else
+    {
+        loco->railOff();
+    }
+
+    return winston::Result::OK;
+}
+
+const winston::Result Kornweinheim::debugInjectorLoop()
+{
+    if (this->enableDetectorInject && winston::hal::now() > lastDetectorInject + WINSTON_RAILWAY_DEBUG_INJECTOR_DELAY)
+    {
+        auto socket = std::dynamic_pointer_cast<winston::hal::DebugSocket>(this->loDiSocket);
+
+        auto loco = this->locoFromAddress(8);
+        auto position = loco->position();
+
+        const auto previousSegment = position.track()->segment();
+
+        const auto distance = loco->speed() * WINSTON_RAILWAY_DEBUG_INJECTOR_DELAY / 1000ms;
+        const auto transit = position.drive(distance, true, [](const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result { return winston::Result::OK; });
+        const auto segment = position.track()->segment();
+
+		if (transit == winston::Position::Transit::CrossTrack && previousSegment != position.track()->segment())
+		{
+            {
+                const auto packet = LoDi::railcomEvent(segment, loco->address(), winston::Detector::Change::Entered);
+                socket->addRecvPacket(packet);
+            } 
+            {
+                const auto packet = LoDi::railcomEvent(previousSegment, loco->address(), winston::Detector::Change::Left);
+                socket->addRecvPacket(packet);
+            }
+		}
+        lastDetectorInject = winston::hal::now();
+    }
+    return winston::Result::OK;
+}
+#endif
 
 void Kornweinheim::systemSetupComplete()
 {
@@ -933,7 +1020,9 @@ void Kornweinheim::inventStorylines()
         tasks.push_back(winston::TaskRandomLoco::make(this->locomotiveShed));
         tasks.push_back(winston::TaskRandomSection::make(this->railway->sectionList()));
         tasks.push_back(winston::TaskCallback::make([&](const winston::Storyline::Shared storyline, const winston::Storyline::Task::List& context) -> const winston::State {
+#ifdef WINSTON_WITH_WEBSOCKET
             this->webUI.sendStorylineText(storyline);
+#endif
             return winston::State::Finished;
             }));
         tasks.push_back(winston::TaskReply::make([](const winston::Storyline::Reply::Answer answer) -> const winston::State {
@@ -979,8 +1068,9 @@ void Kornweinheim::inventStorylines()
         });
     this->storylines.push_back(randomScenario);
     this->activeStory = randomScenario;
+#ifdef WINSTON_WITH_WEBSOCKET
     this->webUI.setStoryLine(this->activeStory);
-
+#endif
     this->signalTower->order(winston::Command::make([&](const winston::TimePoint& created) -> const winston::State
         {
             this->activeStory->execute();

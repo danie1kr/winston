@@ -26,7 +26,7 @@ winston::Track::Shared TimeSaverRailway::AddressTranslator::turnout(const winsto
     case 4: track = Tracks::T5; break;
     case 5: track = Tracks::T6; break;
     default:
-        winston::logger.warn(std::string("track ") + std::string(track._to_string()) + std::string(" not in switch"));
+        LOG_WARN(std::string("track ") + std::string(track._to_string()) + std::string(" not in switch"));
     }
     return railway->track(track);
 }
@@ -42,7 +42,7 @@ const winston::Address TimeSaverRailway::AddressTranslator::address(winston::Tra
     case Tracks::T5: return 4; break;
     case Tracks::T6: return 5; break;
     default:
-        winston::logger.warn(std::string("track ") + track->name()+ std::string(" not in switch"));
+        LOG_WARN(std::string("track ") + track->name()+ std::string(" not in switch"));
     }
     return 0;
 }
@@ -319,7 +319,7 @@ winston::Route::Shared TimeSaverRailway::define(const Routes route)
                 PATH_TURNOUT(T4, A_B)
             ))
     default:
-        winston::logger.warn("unsupported route: ", route._to_string());
+        LOG_WARN("unsupported route: ", route._to_string());
         break;
     }
 
@@ -334,13 +334,13 @@ const winston::Result TimeSaverRailway::init()
     auto result = this->initRails();
     if (result != winston::Result::OK)
     {
-        winston::logger.err("TimeSaverRailway initRails failed with ", result);
+        LOG_ERROR("TimeSaverRailway initRails failed with ", result);
         return result;
     }
     result = this->initRoutes();
     if (result != winston::Result::OK)
     {
-        winston::logger.err("TimeSaverRailway initRoutes failed with ", result);
+        LOG_ERROR("TimeSaverRailway initRoutes failed with ", result);
         return result;
     }
 

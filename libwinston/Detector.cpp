@@ -44,7 +44,7 @@ namespace winston
 
 			if (!loco)
 			{
-				winston::logger.warn("DetectorDevice::change for unkown loco: ", locoAddress);
+				LOG_WARN("DetectorDevice::change for unkown loco: ", locoAddress);
 				return Result::NotFound;
 			}
 				
@@ -52,7 +52,7 @@ namespace winston
 		}
 		else
 		{
-			winston::logger.err("DetectorDevice::change on unkown port: ", port);
+			LOG_ERROR("DetectorDevice::change on unkown port: ", port);
 			return Result::NotFound;
 		}
 	}
@@ -66,7 +66,7 @@ namespace winston
 		}
 		else
 		{
-			winston::logger.err("DetectorDevice::change on unkown port: ", port);
+			LOG_ERROR("DetectorDevice::change on unkown port: ", port);
 			return Result::NotFound;
 		}
 	}

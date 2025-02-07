@@ -159,7 +159,7 @@ winston::Railway::Callbacks TimeSaver::railwayCallbacks()
             }
         }
 
-        winston::logger.info("Turnout ", turnout->name(), " set to direction ", winston::Turnout::DirectionToString(direction));
+        LOG_INFO("Turnout ", turnout->name(), " set to direction ", winston::Turnout::DirectionToString(direction));
 
         return winston::State::Finished;
     };
@@ -185,7 +185,7 @@ winston::Railway::Callbacks TimeSaver::railwayCallbacks()
             }
         }
 
-        winston::logger.info("Turnout ", turnout->name(), " set to direction ", winston::DoubleSlipTurnout::DirectionToString(direction));
+        LOG_INFO("Turnout ", turnout->name(), " set to direction ", winston::DoubleSlipTurnout::DirectionToString(direction));
 
         return winston::State::Finished;
     };
@@ -285,7 +285,7 @@ void TimeSaver::systemSetup() {
     // storage
     this->storageLayout = Storage::make(std::string(this->name()).append(".").append("winston.storage"), 256 * 1024);
     if (this->storageLayout->init() != winston::Result::OK)
-        winston::logger.err("TimeSaver.init: Storage Layout Init failed");
+        LOG_ERROR("TimeSaver.init: Storage Layout Init failed");
 
     // detectors
 #ifdef WINSTON_PLATFORM_TEENSY
@@ -315,7 +315,7 @@ void TimeSaver::setupSignals()
 
         // update physical light
         this->signalDevice->update(track->signalGuarding(connection));
-        winston::logger.info("Signal at ", track->name(), "|", winston::Track::ConnectionToString(connection), " set to ", aspects);
+        LOG_INFO("Signal at ", track->name(), "|", winston::Track::ConnectionToString(connection), " set to ", aspects);
 
         return winston::State::Finished;
     };

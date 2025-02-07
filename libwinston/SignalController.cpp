@@ -40,7 +40,7 @@ namespace winston
 		}
 		else
 		{
-			winston::logger.err("unknown device for signal");
+			LOG_ERROR("unknown device for signal");
 			return Result::InvalidParameter;
 		}
 	}

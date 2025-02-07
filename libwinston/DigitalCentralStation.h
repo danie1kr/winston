@@ -51,22 +51,22 @@ namespace winston
 
 			using SystemInfoCallback = std::function<void(const size_t id, const std::string name, const std::string content)>;
 			SystemInfoCallback systemInfoCallback = [=](const size_t id, const std::string name, const std::string content) {
-				winston::logger.log(winston::build("Z21: ", name, ": ", content));
+				LOG_INFO(winston::build("Z21: ", name, ": ", content));
 			};
 
 			using TrackPowerStatusCallback = std::function<void(const bool powerOn)>;
 			TrackPowerStatusCallback trackPowerStatusCallback = [=](const bool powerOn) {
-				winston::logger.log(std::string("Z21: Power is ") + std::string(powerOn ? "on" : "off"));
+				LOG_INFO(std::string("Z21: Power is ") + std::string(powerOn ? "on" : "off"));
 			};
 
 			using ProgrammingTrackStatusCallback = std::function<void(const bool programmingOn)>;
 			ProgrammingTrackStatusCallback programmingTrackStatusCallback = [=](const bool programmingOn) {
-				winston::logger.log(std::string("Z21: Programming is ") + std::string(programmingOn ? "on" : "off"));
+				LOG_INFO(std::string("Z21: Programming is ") + std::string(programmingOn ? "on" : "off"));
 			};
 
 			using ShortCircuitDetectedCallback = std::function<void()>;
 			ShortCircuitDetectedCallback shortCircuitDetectedCallback = [=]() {
-				winston::logger.log("Z21: Short circuit detected!");
+				LOG_INFO("Z21: Short circuit detected!");
 			};
 
 			using ConnectedCallback = std::function<void()>;

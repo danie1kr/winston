@@ -52,7 +52,7 @@ namespace winston {
 		this->_start = firstTrack->whereConnects(secondTrack);
 		if (firstTrack->signalGuarding(this->start()) == nullptr)
 		{
-			logger.warn("Route validation failed: No signal on start of " + this->name);
+			LOG_WARN("Route validation failed: No signal on start of " + this->name);
 			return Result::ValidationFailed;
 		}
 
@@ -62,7 +62,7 @@ namespace winston {
 		this->_end = lastTrack->otherConnection(lastTrack->whereConnects(secondToLastTrack));
 		if (lastTrack->signalGuarding(this->end()) == nullptr)
 		{
-			logger.warn("Route validation failed: No signal on end of " + this->name);
+			LOG_WARN("Route validation failed: No signal on end of " + this->name);
 			return Result::ValidationFailed;
 		}
 
@@ -82,7 +82,7 @@ namespace winston {
 			connection = current->track()->whereConnects(next->track());
 			if (connection == winston::Track::Connection::DeadEnd)
 			{
-				logger.err("Route validation failed");
+				LOG_ERROR("Route validation failed");
 				return Result::ValidationFailed;
 			}
 
@@ -115,7 +115,7 @@ namespace winston {
 					if (!((connection == winston::Track::Connection::A && nextConnection == winston::Track::Connection::B) ||
 						(connection == winston::Track::Connection::B && nextConnection == winston::Track::Connection::A)))
 					{
-						logger.err("Route validation failed");
+						LOG_ERROR("Route validation failed");
 						return Result::ValidationFailed;
 					}
 					break;
@@ -123,13 +123,13 @@ namespace winston {
 					if (!((connection == winston::Track::Connection::A && nextConnection == winston::Track::Connection::C) ||
 						(connection == winston::Track::Connection::C && nextConnection == winston::Track::Connection::A)))
 					{
-						logger.err("Route validation failed");
+						LOG_ERROR("Route validation failed");
 						return Result::ValidationFailed;
 					}
 					break;
 				default:
 				case winston::Turnout::Direction::Changing:
-					logger.err("Route validation failed");
+					LOG_ERROR("Route validation failed");
 					return Result::ValidationFailed;
 				}
 			}
@@ -144,7 +144,7 @@ namespace winston {
 					if (!((connection == winston::Track::Connection::A && nextConnection == winston::Track::Connection::B) ||
 						(connection == winston::Track::Connection::B && nextConnection == winston::Track::Connection::A)))
 					{
-						logger.err("Route validation failed");
+						LOG_ERROR("Route validation failed");
 						return Result::ValidationFailed;
 					}
 					break;
@@ -152,7 +152,7 @@ namespace winston {
 					if (!((connection == winston::Track::Connection::A && nextConnection == winston::Track::Connection::C) ||
 						(connection == winston::Track::Connection::C && nextConnection == winston::Track::Connection::A)))
 					{
-						logger.err("Route validation failed");
+						LOG_ERROR("Route validation failed");
 						return Result::ValidationFailed;
 					}
 					break;
@@ -160,7 +160,7 @@ namespace winston {
 					if (!((connection == winston::Track::Connection::C && nextConnection == winston::Track::Connection::D) ||
 						(connection == winston::Track::Connection::D && nextConnection == winston::Track::Connection::C)))
 					{
-						logger.err("Route validation failed");
+						LOG_ERROR("Route validation failed");
 						return Result::ValidationFailed;
 					}
 					break;
@@ -168,13 +168,13 @@ namespace winston {
 					if (!((connection == winston::Track::Connection::B && nextConnection == winston::Track::Connection::D) ||
 						(connection == winston::Track::Connection::D && nextConnection == winston::Track::Connection::B)))
 					{
-						logger.err("Route validation failed");
+						LOG_ERROR("Route validation failed");
 						return Result::ValidationFailed;
 					}
 					break;
 				default:
 				case winston::DoubleSlipTurnout::Direction::Changing:
-					logger.err("Route validation failed");
+					LOG_ERROR("Route validation failed");
 					return Result::ValidationFailed;
 				}
 			}

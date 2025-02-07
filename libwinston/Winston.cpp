@@ -42,8 +42,8 @@ namespace winston
 
 	void logRuntimeStatus()
 	{
-#define RHS_Print(what) logger.info(#what ": o", runtime##what() ? "n" : "ff");
-		logger.info("Winston Runtime Status");
+#define RHS_Print(what) LOG_INFO(#what ": o", runtime##what() ? "n" : "ff");
+		LOG_INFO("Winston Runtime Status");
 		RHS_Print(Persistence);
 		RHS_Print(Network);
 		RHS_Print(SPI);

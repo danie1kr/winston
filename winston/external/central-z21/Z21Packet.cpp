@@ -12,7 +12,7 @@
 #include "Z21.h"
 #include "Z21Const.h"
 
-Z21Packet::Z21Packet() : data(Z21Packet::MAX_PACKET_SIZE)
+Z21Packet::Z21Packet() : data(Z21Packet::MAX_PACKET_SIZE), length{ 0 }
 {
 }
 

@@ -141,7 +141,7 @@ namespace winston {
 					return 0.f;
 				default:
 				{
-					logger.err("Track type not supported in BaseSegment::calculateLength");
+					LOG_ERROR("Track type not supported in BaseSegment::calculateLength");
 					return 0.f;
 				}
 				}

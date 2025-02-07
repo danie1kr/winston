@@ -39,7 +39,7 @@ void Cinema::init()
     this->jpegBuffer = (uint8_t*)malloc(sizeof(uint8_t) * this->largestJPEGFileSize);
     if (!this->jpegBuffer)
     {
-        winston::logger.err("Cinema.cpp: JPEG alloc error");
+        LOG_ERROR("Cinema.cpp: JPEG alloc error");
         while (true);
     }
 #endif
@@ -52,7 +52,7 @@ void Cinema::collectMovies()
     auto jsonFile = this->sd.open(path.c_str());
     if (jsonFile)
     {
-        winston::logger.info("Using movies.json");
+        LOG_INFO("Using movies.json");
         size_t jsonFileSize = jsonFile.size();
         unsigned char* jsonBuffer = (unsigned char*)malloc(jsonFileSize + 1);
         if (jsonBuffer)
@@ -70,12 +70,12 @@ void Cinema::collectMovies()
                 auto frames = movie["frameCount"].as<unsigned int>();
                 if (frames > 0)
                 {
-                    winston::logger.info("Dir: ", path.c_str(), "Frames: ", frames);
+                    LOG_INFO("Dir: ", path.c_str(), "Frames: ", frames);
                     movies.emplace_back(path, frames);
                 }
             }
             jsonFile.close();
-            winston::logger.info("Maximum size: ", this->largestJPEGFileSize);
+            LOG_INFO("Maximum size: ", this->largestJPEGFileSize);
             free(jsonBuffer);
         }
     }
@@ -83,7 +83,7 @@ void Cinema::collectMovies()
     {
         auto moviesDir = this->sd.open("/movies");
 
-        winston::logger.info("Manual frame counting");
+        LOG_INFO("Manual frame counting");
         auto file = moviesDir.openNextFile();
         while (file)
         {
@@ -101,7 +101,7 @@ void Cinema::collectMovies()
                         largestJPEGFileSize = frameFile.size();
                     ++frames;
                 }
-                winston::logger.info("Dir: ", path.c_str(), " Frames: ", frames, " Maximum size: ", largestJPEGFileSize);
+                LOG_INFO("Dir: ", path.c_str(), " Frames: ", frames, " Maximum size: ", largestJPEGFileSize);
                 movies.emplace_back(path, frames);
             }
             file = moviesDir.openNextFile();
@@ -111,7 +111,7 @@ void Cinema::collectMovies()
     this->jpegBuffer = (uint8_t*)malloc(sizeof(uint8_t) * this->largestJPEGFileSize);
     if (!this->jpegBuffer)
     {
-        winston::logger.err("Cinema.cpp: JPEG alloc error");
+        LOG_ERROR("Cinema.cpp: JPEG alloc error");
         while (true);
 }*/
 #else
@@ -141,7 +141,7 @@ void Cinema::packMovie(Movie & movie, const std::string targetFileName, const si
 {
     if (sd.exists(targetFileName.c_str()))
     {
-        winston::logger.info("Cinema::packMovie: deleting ", targetFileName.c_str());
+        LOG_INFO("Cinema::packMovie: deleting ", targetFileName.c_str());
         sd.remove(targetFileName.c_str());
     }
 
@@ -149,10 +149,10 @@ void Cinema::packMovie(Movie & movie, const std::string targetFileName, const si
     File target = sd.open(targetFileName.c_str(), O_RDWR | O_CREAT);
 
     //this->display()->setCursor(0, 20);
-    winston::logger.info("Cinema::packMovie: working on ", targetFileName.c_str());
+    LOG_INFO("Cinema::packMovie: working on ", targetFileName.c_str());
 
     //lcd.setCursor(0, 32);
-    winston::logger.info("Cinema::packMovie: Getting sizes");
+    LOG_INFO("Cinema::packMovie: Getting sizes");
     uint32_t largestFrameOfMovie = 0;
     for (currentFrame = movieFrameStart; currentFrame < movie.frames; ++currentFrame)
     {
@@ -166,7 +166,7 @@ void Cinema::packMovie(Movie & movie, const std::string targetFileName, const si
             f.close();
         }
     }
-    winston::logger.info("largest file: %dkb\n", largestFrameOfMovie);
+    LOG_INFO("largest file: %dkb\n", largestFrameOfMovie);
     //Serial.printf("largest file: %dkb\n", largestFrameOfMovie);
     //lcd.setCursor(0, 44);
     //lcd.print("Packing");
@@ -195,7 +195,7 @@ void Cinema::packMovie(Movie & movie, const std::string targetFileName, const si
                 read += toRead;
                 if (toRead > left)
                 {
-                    winston::logger.err("Cinema::packMovie: issue with toRead left when packing a movie");
+                    LOG_ERROR("Cinema::packMovie: issue with toRead left when packing a movie");
                 }
                 left -= toRead;
             }
@@ -206,9 +206,9 @@ void Cinema::packMovie(Movie & movie, const std::string targetFileName, const si
         //lcd.print(jpegFileName.c_str());
     }
     free(buffer);
-    winston::logger.info("File ", targetFileName.c_str(), " size on disk ", target.size(), " content ", overallSize);
+    LOG_INFO("File ", targetFileName.c_str(), " size on disk ", target.size(), " content ", overallSize);
     target.close();
-    winston::logger.info("done");
+    LOG_INFO("done");
 }
 
 void Cinema::checkAndpackMovies()
@@ -229,7 +229,7 @@ void Cinema::initPackedMovie(const std::string path)
     this->fileMoviePack = sd.open(path.c_str());
     if (!fileMoviePack)
     {
-        winston::logger.err("Cinema::initPackedMovie: cannot open packfile");
+        LOG_ERROR("Cinema::initPackedMovie: cannot open packfile");
         return;
     }
 
@@ -241,11 +241,11 @@ void Cinema::initPackedMovie(const std::string path)
         this->largestJPEGFileSize = largestFrameOfMovie;
         if (this->jpegBuffer)
             free(this->jpegBuffer);
-        winston::logger.info("Cinema::initPackedMovie: realloc ", largestJPEGFileSize, " for jpeg buffer");
+        LOG_INFO("Cinema::initPackedMovie: realloc ", largestJPEGFileSize, " for jpeg buffer");
 
         jpegBuffer = (uint8_t*)malloc(sizeof(uint8_t) * largestJPEGFileSize);
         if (!jpegBuffer)
-            winston::logger.err("Cinema::initPackedMovie: cannot alloc memory for movie frame JPEG :(");
+            LOG_ERROR("Cinema::initPackedMovie: cannot alloc memory for movie frame JPEG :(");
     }
 }
 

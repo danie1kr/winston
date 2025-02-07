@@ -99,13 +99,13 @@ void winston_setup()
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
         uxUpdateWifiLED(false);
         uxUpdateWifiIP("not connected");
-        winston::logger.info("WiFi disconnect");
+        LOG_ERROR("WiFi disconnect");
         }, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
 
     WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info) {
         uxUpdateWifiLED(true);
         uxUpdateWifiIP(WiFi.localIP().toString().c_str());
-        winston::logger.info("WiFi connected", WiFi.localIP().toString().c_str());
+        LOG_INFO("WiFi connected", WiFi.localIP().toString().c_str());
         }, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP);
 
     WiFi.onEvent([](WiFiEvent_t event) {
@@ -475,7 +475,7 @@ void cinema_loop()
         ++consecutiveCinemaTouches;
         if (consecutiveCinemaTouches > 24)
         {
-            winston::logger.info("touch on", x, ", ", y);
+            LOG_INFO("touch on", x, ", ", y);
             currentScreen = Screen::Menu;
             showUX(currentScreen);
         }

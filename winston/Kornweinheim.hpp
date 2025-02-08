@@ -107,6 +107,12 @@ winston::Locomotive::Callbacks Kornweinheim::locoCallbacks()
     callbacks.signalPassed = [=](const winston::Locomotive::Const loco, const winston::Track::Const track, const winston::Track::Connection connection, const winston::Signal::Pass pass) -> const winston::Result
     {
         LOG_INFO(loco->name(), " passed ", track->name(), " ", connection);
+
+		if (track->index == Tracks::B6 && connection == winston::Track::Connection::B)
+		{
+			LOG_WARN("Loco ", loco->name(), " passed B6|B");
+		}
+
         auto signal = track->signalGuarding(connection);
         signalTower->setSignalsForLocoPassing(track, connection, pass);
         return winston::Result::OK;

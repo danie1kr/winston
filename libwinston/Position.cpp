@@ -114,45 +114,46 @@ namespace winston
 			auto connection = this->reference;
 			auto current = this->_track;
 			//while (true)
-			WHILE_SAFE(true, 
 			{
-		        TEENSY_CRASHLOG_BREADCRUMB(6, 0x20413);
-				auto onThisTrack = std::min(this->dist, current->length());
-				this->collectSignalsInRange(distOnThisTrack, onThisTrack, current, connection, signalPassed);
-
-				if (this->dist < current->length())
-					break;
-
-				this->dist -= current->length();
-				distOnThisTrack = 0;
-
-				TEENSY_CRASHLOG_BREADCRUMB(6, 0x20414);
-				Track::Const onto;
-				if (!current->traverse(connection, onto, false))
 				{
-					LOG_ERROR(build("cannot traverse during Position::drive: ", current->name(), " leaving on ", Track::ConnectionToString(connection)));
-					return Transit::TraversalError;
-				}
+					const size_t __wsex_line = 155; size_t __wsex_it = 0; 
+					while (__wsex_it < 1000) 
+					{
+						if (true) 
+						{
+							auto onThisTrack = std::min(this->dist, current->length());
+							this->collectSignalsInRange(distOnThisTrack, onThisTrack, current, connection, signalPassed);
+							if (this->dist < current->length())
+								break;
+							this->dist -= current->length();
+							distOnThisTrack = 0;
+							Track::Const onto;
+							if (!current->traverse(connection, onto, false)) {
+								winston::logger.err(build("cannot traverse during Position::drive: ", current->name(), " leaving on ", Track::ConnectionToString(connection)));
+								return Transit::TraversalError;
+							};
+							if (!allowCrossSegment && current->segment() != onto->segment()) {
+								this->dist = current->length();
+								this->_track = current;
+								this->reference = connection;
+								return Transit::SegmentBorder;
+							};
 
-				TEENSY_CRASHLOG_BREADCRUMB(6, 0x20415);
-				// don't go any further
-				if (!allowCrossSegment && current->segment() != onto->segment())
-				{
-					this->dist = current->length();
-					this->_track = current;
-					this->reference = connection;
-					return Transit::SegmentBorder;
-				}
+							connection = onto->whereConnects(current);
+							if (!onto->canTraverse(connection))
+								return Transit::TraversalError;
 
-				TEENSY_CRASHLOG_BREADCRUMB(6, 0x20416);
-				connection = onto->whereConnects(current);
-				TEENSY_CRASHLOG_BREADCRUMB(6, 0x20417);
-				if (!onto->canTraverse(connection))
-					return Transit::TraversalError;
-
-				current = onto;
-				TEENSY_CRASHLOG_BREADCRUMB(6, 0x20418);
-			});
+							current = onto;
+						}
+						else 
+							break; 
+						++__wsex_it;
+					} 
+					if (__wsex_it >= 1000) {
+						winston::logger.err("there seems to be an infinite loop in: ", "D:\\proj\\dev\\uc\\winston\\winston\\libwinston\\Position.cpp", " at #", __wsex_line);
+					}
+				};
+			};
 			TEENSY_CRASHLOG_BREADCRUMB(6, 0x20419);
 			this->_track = current;
 			this->reference = connection;

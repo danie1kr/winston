@@ -475,6 +475,7 @@ namespace winston
 				connection.header("content-type"_s, "text/html; charset=UTF-8"_s);
 				connection.header("Connection"_s, "close"_s);
 				connection.body(winston::build("<html><head>winston signal test</head><body>signal test for 5x ", interval, "s </body></html>"_s));
+				connection.submit();
 			}*/
 			else
 				return Result::NotFound;
@@ -484,6 +485,8 @@ namespace winston
 			connection.header("content-type"_s, "text/html; charset=UTF-8"_s);
 			connection.header("Connection"_s, "close"_s);
 			std::string body = "<html><head>winston</head><body>no content</body></html>";
+			connection.body(body);
+			connection.submit();
 #endif
 			return Result::OK;
 		}

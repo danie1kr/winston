@@ -204,7 +204,7 @@ namespace winston
 				// the signal guarding our reference connection
 				if (auto signal = current->signalGuarding(connection))
 				{
-					if (signal->distance() <= this->details.position.distance())
+					if (signal->distance() >= this->details.position.distance())
 					{
 						// we passed signal, it was facing us and we entered its protectorate
 						this->callbacks.signalPassed(this->const_from_this(), current, connection, Signal::Pass::Backside);
@@ -215,7 +215,7 @@ namespace winston
 				const auto leavingConnection = current->otherConnection(connection);
 				if (auto signal = current->signalGuarding(leavingConnection))
 				{
-					if (current->length() - this->details.position.distance() <= signal->distance())
+					if (current->length() - this->details.position.distance() >= signal->distance())
 					{
 						// we passed signal, it was facing us and we entered its protectorate
 						this->callbacks.signalPassed(this->const_from_this(), current, leavingConnection, Signal::Pass::Facing);

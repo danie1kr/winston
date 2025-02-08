@@ -77,6 +77,7 @@
 #define WINSTON_WITH_LOG
 #else
 #define WINSTON_WEBSOCKET_MAXSIZE 1 << 9
+#define WINSTON_WITH_LOG
 #endif
 
 #ifndef WINSTON_REALWORLD

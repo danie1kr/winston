@@ -357,6 +357,7 @@ namespace winston
                 connection.header("content-type"_s, "text/html; charset=UTF-8"_s);
                 connection.header("Connection"_s, "close"_s);
                 connection.body("<html>winston</html>\r\n"_s);
+                connection.submit();
             }
             else if (resource.compare(path_log) == 0)
             {
@@ -373,6 +374,7 @@ namespace winston
                 }
 
                 connection.body("</table></body></html>\r\n"_s);
+				connection.submit();
             }
             else
                 return Result::NotFound;

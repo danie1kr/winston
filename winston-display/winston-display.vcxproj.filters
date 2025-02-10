@@ -1760,11 +1760,11 @@
     <ClInclude Include="external\lvgl\src\others\vg_lite_tvg\vg_lite.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lv_conf.h">
-      <Filter>external</Filter>
-    </ClInclude>
     <ClInclude Include="winston-secrets.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lv_conf.h">
+      <Filter>external</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

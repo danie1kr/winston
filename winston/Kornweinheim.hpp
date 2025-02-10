@@ -78,6 +78,9 @@ winston::DigitalCentralStation::Callbacks Kornweinheim::z21Callbacks()
         
         return false;
     };
+	callbacks.systemStatusCallback = [=](const bool shortCircuit, const uint16_t temperature, const uint16_t trackAmp, const uint16_t trackVoltage) {
+		statusDisplay.digitalStationStatus(shortCircuit, temperature, trackAmp, trackVoltage);
+		};
 
     return callbacks;
 }
@@ -399,8 +402,9 @@ void Kornweinheim::systemSetup() {
 		,[&] (const bool inject) -> const winston::Result { return this->debugInjectorToggle(inject); }
 #endif
     );
-
+    \
     winston::logger.setCallback([this](const winston::Logger::Entry& entry) {
+		statusDisplay.log(entry);
         this->webUI.log(entry);
     });
 #endif
@@ -721,6 +725,12 @@ void Kornweinheim::systemLoop()
 #ifdef WINSTON_RAILWAY_DEBUG_INJECTOR
     {
         debugInjectorLoop();
+    }
+#endif
+
+#if defined(WINSTON_PLATFORM_WIN_x64) && defined(WINSTON_WITH_STATUSDISPLAY)
+    {
+        statusDisplay.tick();
     }
 #endif
 }

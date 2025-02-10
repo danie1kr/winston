@@ -225,7 +225,7 @@ class DisplayUXWin : public winston::hal::DisplayUX, public winston::Shared_Ptr<
 public:
 	DisplayUXWin(const unsigned int width, const unsigned int height);
 	virtual ~DisplayUXWin() = default;
-	virtual const winston::Result init();
+	virtual const winston::Result init(const std::string title = "");
 	virtual const winston::Result setCursor(unsigned int x, unsigned int y);
 	virtual const bool getTouch(unsigned int& x, unsigned int& y);
 	virtual const winston::Result draw(unsigned int x, unsigned int y, unsigned int w, unsigned int h, void* data);
@@ -282,4 +282,23 @@ namespace winston::hal
 		sleepyTime = 0;
 	}
 }
+#endif
+
+#ifdef WINSTON_WITH_STATUSDISPLAY
+#include "..\libwinston\StatusDisplay.h"
+#include "..\winston-display\external\lvgl\lvgl.h"
+class StatusDisplay : public winston::StatusDisplay<20, 8>
+{
+public:
+	StatusDisplay();
+	~StatusDisplay() = default;
+	const winston::Result init();
+	void tick();
+private:
+	const winston::Result update();
+	DisplayUX display;
+	lv_obj_t* labelStatus = nullptr;
+};
+
+extern StatusDisplay statusDisplay;
 #endif

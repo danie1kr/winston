@@ -6,11 +6,6 @@
         "Path": "winston\\winston.vcxproj",
         "Action": "Start",
         "DebugTarget": "Local Windows Debugger"
-      },
-      {
-        "Path": "winston-display\\winston-display.vcxproj",
-        "Action": "Start",
-        "DebugTarget": "Local Windows Debugger"
       }
     ]
   },

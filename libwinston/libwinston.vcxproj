@@ -163,6 +163,7 @@
     <ClInclude Include="Route.h" />
     <ClInclude Include="Segment.h" />
     <ClInclude Include="SignalController.h" />
+    <ClInclude Include="StatusDisplay.h" />
     <ClInclude Include="Storyline.h" />
     <ClInclude Include="Track.h" />
     <ClInclude Include="Railway.h" />

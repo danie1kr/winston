@@ -74,6 +74,10 @@ namespace winston
 				return;
 			};
 
+			using SystemStatusCallback = std::function<void(const bool shortCircuit, const uint16_t temperature, const uint16_t trackAmp, const uint16_t trackVoltage)>;
+			SystemStatusCallback systemStatusCallback = [](const bool shortCircuit, const uint16_t temperature, const uint16_t trackAmp, const uint16_t trackVoltage) {
+				return;
+			};
 			// true: continue processing this address, false skip
 			using SpecialAccessoryProcessingCallback = std::function<const bool(const uint16_t address, const uint8_t state)>;
 			SpecialAccessoryProcessingCallback specialAccessoryProcessingCallback = [](const uint16_t address, const uint8_t state) -> const bool { return false; };

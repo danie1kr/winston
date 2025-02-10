@@ -47,6 +47,7 @@ Z21::Z21(winston::hal::Socket::Shared& socket, winston::DigitalCentralStation::T
         uint8_t  status,                   // See: const in class Z21_Status
         uint8_t  statisEX) { 
             this->onStatusChanged(status);
+            this->callbacks.systemStatusCallback((status & Z21_Status_EX::SHORT_CIRCUIT_EXTERNAL) || (status & Z21_Status_EX::SHORT_CIRCUIT_INTERNAL), temperature, mainCurrent, voltageVCC);
             LOG_INFO("     main track current: ", mainCurrent, "mA");
             LOG_INFO("     programming track current: ", progCurrent, "mA");
             LOG_INFO("     main track current filtered: ", mainCurrentFiltered, "mA");

@@ -114,6 +114,9 @@
     <ClInclude Include="NextSignals.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="StatusDisplay.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Signal.cpp">

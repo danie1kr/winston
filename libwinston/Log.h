@@ -62,9 +62,30 @@ namespace winston
 				return "???";
 			}
 
+			const std::string levelNameShort() const
+			{
+				switch (this->level)
+				{
+				case LogLevel::Info: return "I";
+				case LogLevel::Warning: return "W";
+				case LogLevel::Error : return "E";
+				case LogLevel::Fatal : return "F";
+				default:
+					return "?";
+				}
+			}
+
 			const std::string build() const
 			{
 				return winston::build(this->timestamp, " - [", this->levelName(), "]: ", this->text);
+			}
+
+			const std::string buildShort(const size_t maxLength) const
+			{
+				auto text = winston::build( this->levelNameShort(), " ", this->text);
+				if (text.length() > maxLength)
+					text = text.substr(0, maxLength - 3) + "...";
+				return text;
 			}
 		};
 

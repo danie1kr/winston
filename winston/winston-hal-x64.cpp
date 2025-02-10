@@ -17,6 +17,8 @@
 #include <windows.h>
 #endif
 
+StatusDisplay statusDisplay;
+
 const char* operator "" _s(const char* in, size_t len)
 {
     return in;
@@ -34,6 +36,9 @@ namespace winston
                     runtimeEnableNetwork();
 #endif
             }
+#ifdef WINSTON_WITH_STATUSDISPLAY
+            statusDisplay.init();
+#endif
         }
 
         void text(const std::string& text)
@@ -630,19 +635,19 @@ const int StorageWin::handleError(const std::error_code& error) const
 #endif
 
 #ifdef WINSTON_HAL_USE_DISPLAYUX
-#include <lvgl.h>
-
+#include "..\winston-display\external\lvgl\lvgl.h"
 DisplayUXWin::DisplayUXWin(const unsigned int width, const unsigned int height)
     : winston::hal::DisplayUX(width, height)
 {
 
 }
 
-const winston::Result DisplayUXWin::init()
+const winston::Result DisplayUXWin::init(const std::string title)
 {
     lv_init();
+    std::wstring wTitle(title.begin(), title.end());
     lv_display_t* display = lv_windows_create_display(
-        L"Winston Cinema",
+        wTitle.c_str(),
         this->width,
         this->height,
         100,
@@ -814,3 +819,48 @@ const winston::Result DisplayWin::send(const std::vector<DataType> data)
     return winston::Result::OK;
 }
 */
+
+#ifdef WINSTON_WITH_STATUSDISPLAY
+StatusDisplay::StatusDisplay()
+    : winston::StatusDisplay<20, 8>()
+    , display(200, 160)
+	, labelStatus{ nullptr }
+{
+
+}
+
+const winston::Result StatusDisplay::init()
+{
+	display.init("Winston Status Display");
+
+    if(labelStatus)
+		lv_obj_delete(labelStatus);
+
+	labelStatus = lv_label_create(lv_screen_active());
+    lv_obj_align(labelStatus, LV_ALIGN_CENTER, 0, 0);
+
+    return winston::Result::OK;
+}
+
+void StatusDisplay::tick()
+{
+    this->display.tick();
+}
+
+const winston::Result StatusDisplay::update()
+{
+    std::string text;
+	text.reserve(this->columns * this->rows + this->rows);
+
+    for(size_t r = 0; r < this->rows; ++r)
+        for (size_t c = 0; c < this->columns; ++c)
+        {
+			text.push_back(this->status[r][c]);
+			if (c == this->columns - 1)
+				text.push_back('\n');
+        }
+
+    lv_label_set_text(labelStatus, text.c_str());
+	return winston::Result::OK;
+}
+#endif

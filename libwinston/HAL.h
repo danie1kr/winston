@@ -184,7 +184,7 @@ namespace winston
 		public:
 			using Shared_Ptr<DisplayUX>::Shared;
 			using Shared_Ptr<DisplayUX>::make;
-			virtual const Result init() = 0;
+			virtual const Result init(const std::string title = "") = 0;
 			virtual const Result brightness(unsigned char value) = 0;
 			virtual const Result setCursor(unsigned int x, unsigned int y) = 0;
 			virtual const bool getTouch(unsigned int &x, unsigned int &y) = 0;

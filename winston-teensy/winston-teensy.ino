@@ -57,6 +57,34 @@ if Crashlog:
 
 // the setup function runs once when you press reset or power the board
 void setup() {
+
+    do not compile
+
+    /*
+    * 
+    * watchdog:
+    * #include <WDT_T4.h>
+WDT_T4<WDT1> wdt;
+void setup() {
+  WDT_timings_t config;
+  config.timeout = 4000; // 4 seconds
+  wdt.begin(config);
+}
+void loop() {
+  wdt.feed();
+  // your z21 network code here
+}
+https://github.com/tonton81/WDT_T4/blob/master/examples/watchdog2_demo/watchdog2_demo.ino
+
+log extern "C" char __StackTop, __StackLimit, __heap_start, *__brkval;
+void memoryReport() {
+  Serial.printf("Heap Free: %u, Stack Free: %u\n",
+    (uint32_t)&__StackTop - (uint32_t)(__brkval?__brkval:&__heap_start),
+    (uint32_t)&__StackTop - (uint32_t)&__StackLimit);
+}
+
+    */
+
     winston_setup();
 }
 

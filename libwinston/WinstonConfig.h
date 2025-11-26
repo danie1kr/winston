@@ -76,8 +76,10 @@
 #ifdef WINSTON_PLATFORM_WIN_x64
 #define WINSTON_WEBSOCKET_MAXSIZE 1 << 15
 #define WINSTON_WITH_LOG
+#ifndef WINSTON_TEST
 #ifndef WINSTON_HAL_USE_DISPLAYUX
 #define WINSTON_HAL_USE_DISPLAYUX
+#endif
 #endif
 #else
 #define WINSTON_WEBSOCKET_MAXSIZE 1 << 9
@@ -152,3 +154,9 @@ in case teensy does not start up:
 
 	avoid PROGMEM routines
 */
+
+#ifdef WINSTON_TEST
+#pragma warning("Disabling status display in test mode")
+#undef WINSTON_WITH_STATUSDISPLAY
+#undef WINSTON_HAL_USE_DISPLAYUX
+#endif

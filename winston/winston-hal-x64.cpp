@@ -17,7 +17,9 @@
 #include <windows.h>
 #endif
 
+#ifdef WINSTON_WITH_STATUSDISPLAY
 StatusDisplay statusDisplay;
+#endif
 
 const char* operator "" _s(const char* in, size_t len)
 {

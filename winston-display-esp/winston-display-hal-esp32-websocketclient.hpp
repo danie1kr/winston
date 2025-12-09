@@ -17,7 +17,7 @@ public:
 	const winston::Result init(OnMessage onMessage);
 	const winston::Result connect(const winston::URI& uri);
 	void send(const std::string message);
-	void step();
+	const winston::Result loop();
 	void shutdown();
 	const bool connected();
 	const size_t maxMessageSize();
@@ -78,9 +78,10 @@ void WebSocketClientESP32::send(const std::string message)
 	this->client.send(message.c_str(), message.length());
 }
 
-void WebSocketClientESP32::step()
+const winston::Result WebSocketClientESP32::loop()
 {
 	this->client.poll();
+	return winston::Result::OK;
 }
 
 void WebSocketClientESP32::shutdown()

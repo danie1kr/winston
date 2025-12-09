@@ -36,409 +36,55 @@
     <ClCompile Include="..\winston\winston-hal-x64.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\cache\_lv_cache_lru_rb.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\libs\barcode\code128.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\libs\gif\gifdec.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\libs\lodepng\lodepng.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\lv_anim.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\lv_anim_timeline.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\animimage\lv_animimage.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\arc\lv_arc.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\lv_area.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\lv_array.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\lv_async.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\bar\lv_bar.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\libs\barcode\lv_barcode.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\lv_bidi.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\libs\bin_decoder\lv_bin_decoder.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_binfont_loader.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\libs\bmp\lv_bmp.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\button\lv_button.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\buttonmatrix\lv_buttonmatrix.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\cache\lv_cache.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\cache\lv_cache_entry.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\calendar\lv_calendar.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\calendar\lv_calendar_header_arrow.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\calendar\lv_calendar_header_dropdown.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\canvas\lv_canvas.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\chart\lv_chart.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\checkbox\lv_checkbox.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\osal\lv_cmsis_rtos2.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\lv_color.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\lv_color_op.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\display\lv_display.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\lv_draw.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\lv_draw_arc.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\lv_draw_buf.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\nxp\pxp\lv_draw_buf_pxp.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_buf_vg_lite.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_draw_buf_vglite.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_arc.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_border.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_fill.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_image.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_label.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_line.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_mask_rectangle.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_triangle.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_utils.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\lv_draw_image.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\lv_draw_label.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\lv_draw_line.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\lv_draw_mask.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\nxp\pxp\lv_draw_pxp.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\nxp\pxp\lv_draw_pxp_fill.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\nxp\pxp\lv_draw_pxp_img.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\nxp\pxp\lv_draw_pxp_layer.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\lv_draw_rect.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\sdl\lv_draw_sdl.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_arc.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_to_argb8888.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_to_rgb565.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_to_rgb888.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_border.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_box_shadow.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_fill.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_gradient.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_img.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_letter.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_line.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_mask.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_mask_rect.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_transform.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_triangle.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_vector.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\lv_draw_triangle.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\lv_draw_vector.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite_arc.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite_border.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite_box_shadow.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite_fill.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite_img.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite_label.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite_layer.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite_line.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite_mask_rect.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite_triangle.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite_vector.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_draw_vglite.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_draw_vglite_arc.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_draw_vglite_border.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_draw_vglite_fill.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_draw_vglite_img.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_draw_vglite_label.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_draw_vglite_layer.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_draw_vglite_line.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_draw_vglite_triangle.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\dropdown\lv_dropdown.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\drivers\evdev\lv_evdev.c">
-      <Filter>external\lvgl</Filter>
+    <ClCompile Include="res\lvgl_graphics.c">
+      <Filter>res</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\lv_event.c">
+    <ClCompile Include="external\lvgl\src\indev\lv_indev.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\libs\ffmpeg\lv_ffmpeg.c">
+    <ClCompile Include="external\lvgl\src\indev\lv_indev_gesture.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\others\file_explorer\lv_file_explorer.c">
+    <ClCompile Include="external\lvgl\src\indev\lv_indev_scroll.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
     <ClCompile Include="external\lvgl\src\layouts\flex\lv_flex.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font.c">
+    <ClCompile Include="external\lvgl\src\layouts\grid\lv_grid.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_dejavu_16_persian_hebrew.c">
+    <ClCompile Include="external\lvgl\src\layouts\lv_layout.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_fmt_txt.c">
+    <ClCompile Include="external\lvgl\src\libs\barcode\code128.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_8.c">
+    <ClCompile Include="external\lvgl\src\libs\barcode\lv_barcode.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_10.c">
+    <ClCompile Include="external\lvgl\src\libs\bin_decoder\lv_bin_decoder.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_12.c">
+    <ClCompile Include="external\lvgl\src\libs\bmp\lv_bmp.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_14.c">
+    <ClCompile Include="external\lvgl\src\libs\expat\xmlparse.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_16.c">
+    <ClCompile Include="external\lvgl\src\libs\expat\xmlrole.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_18.c">
+    <ClCompile Include="external\lvgl\src\libs\expat\xmltok.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_20.c">
+    <ClCompile Include="external\lvgl\src\libs\expat\xmltok_impl.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_22.c">
+    <ClCompile Include="external\lvgl\src\libs\expat\xmltok_ns.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_24.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_26.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_28.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_28_compressed.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_30.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_32.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_34.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_36.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_38.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_40.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_42.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_44.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_46.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_48.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_simsun_16_cjk.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_unscii_8.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\font\lv_font_unscii_16.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\others\fragment\lv_fragment.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\others\fragment\lv_fragment_manager.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\osal\lv_freertos.c">
+    <ClCompile Include="external\lvgl\src\libs\ffmpeg\lv_ffmpeg.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
     <ClCompile Include="external\lvgl\src\libs\freetype\lv_freetype.c">
@@ -453,13 +99,31 @@
     <ClCompile Include="external\lvgl\src\libs\freetype\lv_freetype_outline.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\lv_fs.c">
+    <ClCompile Include="external\lvgl\src\libs\freetype\lv_ftsystem.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\frogfs\src\decomp_raw.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\frogfs\src\frogfs.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\fsdrv\lv_fs_arduino_esp_littlefs.cpp">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\fsdrv\lv_fs_arduino_sd.cpp">
       <Filter>external\lvgl</Filter>
     </ClCompile>
     <ClCompile Include="external\lvgl\src\libs\fsdrv\lv_fs_cbfs.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
     <ClCompile Include="external\lvgl\src\libs\fsdrv\lv_fs_fatfs.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\fsdrv\lv_fs_frogfs.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\fsdrv\lv_fs_littlefs.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
     <ClCompile Include="external\lvgl\src\libs\fsdrv\lv_fs_memfs.c">
@@ -471,70 +135,82 @@
     <ClCompile Include="external\lvgl\src\libs\fsdrv\lv_fs_stdio.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\fsdrv\lv_fs_uefi.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
     <ClCompile Include="external\lvgl\src\libs\fsdrv\lv_fs_win32.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\libs\freetype\lv_ftsystem.c">
+    <ClCompile Include="external\lvgl\src\libs\FT800-FT813\EVE_commands.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\FT800-FT813\EVE_supplemental.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\gif\AnimatedGIF\src\gif.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
     <ClCompile Include="external\lvgl\src\libs\gif\lv_gif.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\layouts\grid\lv_grid.c">
+    <ClCompile Include="external\lvgl\src\libs\gltf\gltf_data\lv_gltf_bind.cpp">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\others\gridnav\lv_gridnav.c">
+    <ClCompile Include="external\lvgl\src\libs\gltf\gltf_data\lv_gltf_data.cpp">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\core\lv_group.c">
+    <ClCompile Include="external\lvgl\src\libs\gltf\gltf_data\lv_gltf_data_animations.cpp">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\drivers\display\ili9341\lv_ili9341.c">
+    <ClCompile Include="external\lvgl\src\libs\gltf\gltf_data\lv_gltf_data_cache.cpp">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\image\lv_image.c">
+    <ClCompile Include="external\lvgl\src\libs\gltf\gltf_data\lv_gltf_data_injest.cpp">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\lv_image_buf.c">
+    <ClCompile Include="external\lvgl\src\libs\gltf\gltf_data\lv_gltf_data_mesh.cpp">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\cache\lv_image_cache.c">
+    <ClCompile Include="external\lvgl\src\libs\gltf\gltf_data\lv_gltf_data_node.cpp">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\lv_image_decoder.c">
+    <ClCompile Include="external\lvgl\src\libs\gltf\gltf_data\lv_gltf_data_primitive.cpp">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\imagebutton\lv_imagebutton.c">
+    <ClCompile Include="external\lvgl\src\libs\gltf\gltf_data\lv_gltf_data_shader.cpp">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\others\ime\lv_ime_pinyin.c">
+    <ClCompile Include="external\lvgl\src\libs\gltf\gltf_data\lv_gltf_data_skin.cpp">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\others\imgfont\lv_imgfont.c">
+    <ClCompile Include="external\lvgl\src\libs\gltf\gltf_data\lv_gltf_data_texture.cpp">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\indev\lv_indev.c">
+    <ClCompile Include="external\lvgl\src\libs\gltf\gltf_data\lv_gltf_uniform_locations.cpp">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\indev\lv_indev_scroll.c">
+    <ClCompile Include="external\lvgl\src\libs\gltf\gltf_view\assets\chromatic.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\lv_init.c">
+    <ClCompile Include="external\lvgl\src\libs\gltf\gltf_view\assets\lv_gltf_view_shader.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\keyboard\lv_keyboard.c">
+    <ClCompile Include="external\lvgl\src\libs\gltf\gltf_view\ibl\lv_gltf_ibl_sampler.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\label\lv_label.c">
+    <ClCompile Include="external\lvgl\src\libs\gltf\gltf_view\lv_gltf_view.cpp">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\layouts\lv_layout.c">
+    <ClCompile Include="external\lvgl\src\libs\gltf\gltf_view\lv_gltf_view_render.cpp">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\drivers\display\lcd\lv_lcd_generic_mipi.c">
+    <ClCompile Include="external\lvgl\src\libs\gltf\gltf_view\lv_gltf_view_shader.cpp">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\led\lv_led.c">
+    <ClCompile Include="external\lvgl\src\libs\gltf\math\lv_gltf_math.cpp">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\gstreamer\lv_gstreamer.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
     <ClCompile Include="external\lvgl\src\libs\libjpeg_turbo\lv_libjpeg_turbo.c">
@@ -543,145 +219,19 @@
     <ClCompile Include="external\lvgl\src\libs\libpng\lv_libpng.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\line\lv_line.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\drivers\display\drm\lv_linux_drm.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\drivers\display\fb\lv_linux_fbdev.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\list\lv_list.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\lv_ll.c">
+    <ClCompile Include="external\lvgl\src\libs\lodepng\lodepng.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
     <ClCompile Include="external\lvgl\src\libs\lodepng\lv_lodepng.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\lv_log.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\lv_lru.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\lv_math.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\stdlib\lv_mem.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\stdlib\builtin\lv_mem_core_builtin.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\stdlib\clib\lv_mem_core_clib.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\stdlib\micropython\lv_mem_core_micropython.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\stdlib\rtthread\lv_mem_core_rtthread.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\menu\lv_menu.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\others\monkey\lv_monkey.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\msgbox\lv_msgbox.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\drivers\nuttx\lv_nuttx_cache.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\drivers\nuttx\lv_nuttx_entry.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\drivers\nuttx\lv_nuttx_fbdev.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\drivers\nuttx\lv_nuttx_lcd.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\drivers\nuttx\lv_nuttx_libuv.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\drivers\nuttx\lv_nuttx_profiler.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\drivers\nuttx\lv_nuttx_touchscreen.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\core\lv_obj.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\core\lv_obj_class.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\core\lv_obj_draw.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\core\lv_obj_event.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\core\lv_obj_id_builtin.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\core\lv_obj_pos.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\core\lv_obj_property.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\core\lv_obj_scroll.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\core\lv_obj_style.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\core\lv_obj_style_gen.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\core\lv_obj_tree.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\objx_templ\lv_objx_templ.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\others\observer\lv_observer.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\osal\lv_os_none.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\lv_palette.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\lv_profiler_builtin.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\osal\lv_pthread.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\nxp\pxp\lv_pxp_cfg.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\nxp\pxp\lv_pxp_osa.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\nxp\pxp\lv_pxp_utils.c">
+    <ClCompile Include="external\lvgl\src\libs\lz4\lz4.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
     <ClCompile Include="external\lvgl\src\libs\qrcode\lv_qrcode.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\lv_rb.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\core\lv_refr.c">
+    <ClCompile Include="external\lvgl\src\libs\qrcode\qrcodegen.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
     <ClCompile Include="external\lvgl\src\libs\rle\lv_rle.c">
@@ -690,193 +240,25 @@
     <ClCompile Include="external\lvgl\src\libs\rlottie\lv_rlottie.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\roller\lv_roller.c">
+    <ClCompile Include="external\lvgl\src\libs\svg\lv_svg.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\osal\lv_rtthread.c">
+    <ClCompile Include="external\lvgl\src\libs\svg\lv_svg_decoder.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\scale\lv_scale.c">
+    <ClCompile Include="external\lvgl\src\libs\svg\lv_svg_parser.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\drivers\sdl\lv_sdl_keyboard.c">
+    <ClCompile Include="external\lvgl\src\libs\svg\lv_svg_render.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\drivers\sdl\lv_sdl_mouse.c">
+    <ClCompile Include="external\lvgl\src\libs\svg\lv_svg_token.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="external\lvgl\src\drivers\sdl\lv_sdl_mousewheel.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\drivers\sdl\lv_sdl_window.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\slider\lv_slider.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\others\snapshot\lv_snapshot.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\span\lv_span.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\spinbox\lv_spinbox.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\spinner\lv_spinner.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\stdlib\builtin\lv_sprintf_builtin.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\stdlib\clib\lv_sprintf_clib.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\stdlib\rtthread\lv_sprintf_rtthread.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\drivers\display\st7735\lv_st7735.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\drivers\display\st7789\lv_st7789.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\drivers\display\st7796\lv_st7796.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\stdlib\builtin\lv_string_builtin.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\stdlib\clib\lv_string_clib.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\stdlib\rtthread\lv_string_rtthread.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\lv_style.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\lv_style_gen.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\switch\lv_switch.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\others\sysmon\lv_sysmon.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\table\lv_table.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\tabview\lv_tabview.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\lv_templ.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\lv_text.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\lv_text_ap.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\textarea\lv_textarea.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\drivers\display\tft_espi\lv_tft_espi.cpp">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\themes\lv_theme.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\themes\default\lv_theme_default.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\themes\mono\lv_theme_mono.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\themes\simple\lv_theme_simple.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\tick\lv_tick.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\tileview\lv_tileview.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\lv_timer.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\libs\tiny_ttf\lv_tiny_ttf.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\libs\tjpgd\lv_tjpgd.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\stdlib\builtin\lv_tlsf.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\misc\lv_utils.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_vg_lite_decoder.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_vg_lite_math.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_vg_lite_path.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_vg_lite_utils.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_vglite_buf.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_vglite_matrix.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_vglite_path.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\draw\nxp\vglite\lv_vglite_utils.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\widgets\win\lv_win.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\osal\lv_windows.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\drivers\windows\lv_windows_context.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\drivers\windows\lv_windows_display.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\drivers\windows\lv_windows_input.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\drivers\x11\lv_x11_display.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\drivers\x11\lv_x11_input.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\libs\lz4\lz4.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\libs\qrcode\qrcodegen.c">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\libs\tjpgd\tjpgd.c">
+    <ClCompile Include="external\lvgl\src\libs\thorvg\tvgAccessor.cpp">
       <Filter>external\lvgl</Filter>
     </ClCompile>
     <ClCompile Include="external\lvgl\src\libs\thorvg\tvgAnimation.cpp">
-      <Filter>external\lvgl</Filter>
-    </ClCompile>
-    <ClCompile Include="external\lvgl\src\libs\thorvg\tvgBezier.cpp">
       <Filter>external\lvgl</Filter>
     </ClCompile>
     <ClCompile Include="external\lvgl\src\libs\thorvg\tvgCanvas.cpp">
@@ -891,10 +273,40 @@
     <ClCompile Include="external\lvgl\src\libs\thorvg\tvgFill.cpp">
       <Filter>external\lvgl</Filter>
     </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\thorvg\tvgGlCanvas.cpp">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
     <ClCompile Include="external\lvgl\src\libs\thorvg\tvgInitializer.cpp">
       <Filter>external\lvgl</Filter>
     </ClCompile>
     <ClCompile Include="external\lvgl\src\libs\thorvg\tvgLoader.cpp">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\thorvg\tvgLottieAnimation.cpp">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\thorvg\tvgLottieBuilder.cpp">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\thorvg\tvgLottieExpressions.cpp">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\thorvg\tvgLottieInterpolator.cpp">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\thorvg\tvgLottieLoader.cpp">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\thorvg\tvgLottieModel.cpp">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\thorvg\tvgLottieModifier.cpp">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\thorvg\tvgLottieParser.cpp">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\thorvg\tvgLottieParserHandler.cpp">
       <Filter>external\lvgl</Filter>
     </ClCompile>
     <ClCompile Include="external\lvgl\src\libs\thorvg\tvgMath.cpp">
@@ -954,6 +366,9 @@
     <ClCompile Include="external\lvgl\src\libs\thorvg\tvgSwMemPool.cpp">
       <Filter>external\lvgl</Filter>
     </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\thorvg\tvgSwPostEffect.cpp">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
     <ClCompile Include="external\lvgl\src\libs\thorvg\tvgSwRaster.cpp">
       <Filter>external\lvgl</Filter>
     </ClCompile>
@@ -972,7 +387,241 @@
     <ClCompile Include="external\lvgl\src\libs\thorvg\tvgTaskScheduler.cpp">
       <Filter>external\lvgl</Filter>
     </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\thorvg\tvgText.cpp">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\thorvg\tvgWgCanvas.cpp">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
     <ClCompile Include="external\lvgl\src\libs\thorvg\tvgXmlParser.cpp">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\tiny_ttf\lv_tiny_ttf.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\tjpgd\lv_tjpgd.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\tjpgd\tjpgd.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\vg_lite_driver\lv_vg_lite_hal\lv_vg_lite_hal.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\vg_lite_driver\lv_vg_lite_hal\vg_lite_os.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\vg_lite_driver\VGLite\vg_lite.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\vg_lite_driver\VGLite\vg_lite_image.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\vg_lite_driver\VGLite\vg_lite_matrix.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\vg_lite_driver\VGLite\vg_lite_path.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\vg_lite_driver\VGLite\vg_lite_stroke.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\libs\vg_lite_driver\VGLiteKernel\vg_lite_kernel.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\cache\class\lv_cache_lru_ll.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\cache\class\lv_cache_lru_rb.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\cache\class\lv_cache_sc_da.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\cache\instance\lv_image_cache.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\cache\instance\lv_image_header_cache.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\cache\lv_cache.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\cache\lv_cache_entry.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_anim.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_anim_timeline.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_area.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_array.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_async.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_bidi.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_circle_buf.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_color.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_color_op.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_event.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_fs.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_grad.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_iter.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_ll.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_log.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_lru.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_math.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_matrix.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_palette.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_profiler_builtin.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_profiler_builtin_posix.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_rb.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_style.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_style_gen.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_templ.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_text.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_text_ap.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_timer.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_tree.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\misc\lv_utils.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\osal\lv_cmsis_rtos2.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\osal\lv_freertos.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\osal\lv_linux.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\osal\lv_mqx.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\osal\lv_os.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\osal\lv_os_none.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\osal\lv_pthread.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\osal\lv_rtthread.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\osal\lv_sdl2.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\osal\lv_windows.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\file_explorer\lv_file_explorer.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\font_manager\lv_font_manager.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\font_manager\lv_font_manager_recycle.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\fragment\lv_fragment.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\fragment\lv_fragment_manager.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\gridnav\lv_gridnav.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\ime\lv_ime_pinyin.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\imgfont\lv_imgfont.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\monkey\lv_monkey.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\observer\lv_observer.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\snapshot\lv_snapshot.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\sysmon\lv_sysmon.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\test\lv_test_display.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\test\lv_test_helpers.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\test\lv_test_indev.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\test\lv_test_indev_gesture.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\test\lv_test_screenshot_compare.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\translation\lv_translation.c">
       <Filter>external\lvgl</Filter>
     </ClCompile>
     <ClCompile Include="external\lvgl\src\others\vg_lite_tvg\vg_lite_matrix.c">
@@ -981,8 +630,995 @@
     <ClCompile Include="external\lvgl\src\others\vg_lite_tvg\vg_lite_tvg.cpp">
       <Filter>external\lvgl</Filter>
     </ClCompile>
-    <ClCompile Include="res\lvgl_graphics.c">
-      <Filter>res</Filter>
+    <ClCompile Include="external\lvgl\src\others\xml\lv_xml.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\lv_xml_base_types.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\lv_xml_component.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\lv_xml_load.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\lv_xml_parser.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\lv_xml_style.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\lv_xml_test.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\lv_xml_translation.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\lv_xml_update.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\lv_xml_utils.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\lv_xml_widget.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\parsers\lv_xml_arc_parser.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\parsers\lv_xml_bar_parser.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\parsers\lv_xml_buttonmatrix_parser.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\parsers\lv_xml_button_parser.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\parsers\lv_xml_calendar_parser.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\parsers\lv_xml_canvas_parser.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\parsers\lv_xml_chart_parser.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\parsers\lv_xml_checkbox_parser.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\parsers\lv_xml_dropdown_parser.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\parsers\lv_xml_image_parser.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\parsers\lv_xml_keyboard_parser.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\parsers\lv_xml_label_parser.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\parsers\lv_xml_obj_parser.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\parsers\lv_xml_qrcode_parser.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\parsers\lv_xml_roller_parser.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\parsers\lv_xml_scale_parser.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\parsers\lv_xml_slider_parser.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\parsers\lv_xml_spangroup_parser.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\parsers\lv_xml_spinbox_parser.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\parsers\lv_xml_switch_parser.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\parsers\lv_xml_table_parser.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\parsers\lv_xml_tabview_parser.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\others\xml\parsers\lv_xml_textarea_parser.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\stdlib\builtin\lv_mem_core_builtin.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\stdlib\builtin\lv_sprintf_builtin.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\stdlib\builtin\lv_string_builtin.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\stdlib\builtin\lv_tlsf.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\stdlib\clib\lv_mem_core_clib.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\stdlib\clib\lv_sprintf_clib.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\stdlib\clib\lv_string_clib.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\stdlib\lv_mem.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\stdlib\micropython\lv_mem_core_micropython.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\stdlib\rtthread\lv_mem_core_rtthread.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\stdlib\rtthread\lv_sprintf_rtthread.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\stdlib\rtthread\lv_string_rtthread.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\stdlib\uefi\lv_mem_core_uefi.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\themes\default\lv_theme_default.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\themes\lv_theme.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\themes\mono\lv_theme_mono.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\themes\simple\lv_theme_simple.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\tick\lv_tick.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\3dtexture\lv_3dtexture.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\animimage\lv_animimage.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\arc\lv_arc.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\arclabel\lv_arclabel.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\bar\lv_bar.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\button\lv_button.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\buttonmatrix\lv_buttonmatrix.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\calendar\lv_calendar.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\calendar\lv_calendar_chinese.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\calendar\lv_calendar_header_arrow.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\calendar\lv_calendar_header_dropdown.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\canvas\lv_canvas.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\chart\lv_chart.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\checkbox\lv_checkbox.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\dropdown\lv_dropdown.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\image\lv_image.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\imagebutton\lv_imagebutton.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\keyboard\lv_keyboard.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\label\lv_label.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\led\lv_led.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\line\lv_line.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\list\lv_list.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\lottie\lv_lottie.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\menu\lv_menu.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\msgbox\lv_msgbox.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\objx_templ\lv_objx_templ.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\property\lv_animimage_properties.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\property\lv_dropdown_properties.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\property\lv_image_properties.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\property\lv_keyboard_properties.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\property\lv_label_properties.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\property\lv_obj_properties.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\property\lv_roller_properties.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\property\lv_slider_properties.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\property\lv_style_properties.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\property\lv_textarea_properties.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\roller\lv_roller.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\scale\lv_scale.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\slider\lv_slider.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\span\lv_span.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\spinbox\lv_spinbox.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\spinner\lv_spinner.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\switch\lv_switch.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\table\lv_table.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\tabview\lv_tabview.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\textarea\lv_textarea.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\tileview\lv_tileview.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\widgets\win\lv_win.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\lv_init.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\core\lv_group.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\core\lv_obj.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\core\lv_obj_class.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\core\lv_obj_draw.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\core\lv_obj_event.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\core\lv_obj_id_builtin.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\core\lv_obj_pos.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\core\lv_obj_property.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\core\lv_obj_scroll.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\core\lv_obj_style.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\core\lv_obj_style_gen.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\core\lv_obj_tree.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\core\lv_refr.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\display\lv_display.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\convert\helium\lv_draw_buf_convert_helium.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\convert\lv_draw_buf_convert.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\convert\neon\lv_draw_buf_convert_neon.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\dma2d\lv_draw_dma2d.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\dma2d\lv_draw_dma2d_fill.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\dma2d\lv_draw_dma2d_img.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\espressif\ppa\lv_draw_ppa.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\espressif\ppa\lv_draw_ppa_buf.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\espressif\ppa\lv_draw_ppa_fill.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\espressif\ppa\lv_draw_ppa_img.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\eve\lv_draw_eve.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\eve\lv_draw_eve_arc.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\eve\lv_draw_eve_fill.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\eve\lv_draw_eve_image.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\eve\lv_draw_eve_letter.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\eve\lv_draw_eve_line.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\eve\lv_draw_eve_ram_g.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\eve\lv_draw_eve_triangle.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\eve\lv_eve.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\lv_draw.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\lv_draw_3d.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\lv_draw_arc.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\lv_draw_buf.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\lv_draw_image.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\lv_draw_label.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\lv_draw_line.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\lv_draw_mask.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\lv_draw_rect.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\lv_draw_triangle.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\lv_draw_vector.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\lv_image_decoder.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nema_gfx\lv_draw_nema_gfx.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nema_gfx\lv_draw_nema_gfx_arc.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nema_gfx\lv_draw_nema_gfx_border.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nema_gfx\lv_draw_nema_gfx_fill.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nema_gfx\lv_draw_nema_gfx_img.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nema_gfx\lv_draw_nema_gfx_label.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nema_gfx\lv_draw_nema_gfx_layer.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nema_gfx\lv_draw_nema_gfx_line.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nema_gfx\lv_draw_nema_gfx_stm32_hal.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nema_gfx\lv_draw_nema_gfx_triangle.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nema_gfx\lv_draw_nema_gfx_utils.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nema_gfx\lv_draw_nema_gfx_vector.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nema_gfx\lv_nema_gfx_path.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nxp\g2d\lv_draw_buf_g2d.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nxp\g2d\lv_draw_g2d.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nxp\g2d\lv_draw_g2d_fill.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nxp\g2d\lv_draw_g2d_img.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nxp\g2d\lv_g2d_buf_map.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nxp\g2d\lv_g2d_utils.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nxp\pxp\lv_draw_buf_pxp.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nxp\pxp\lv_draw_pxp.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nxp\pxp\lv_draw_pxp_fill.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nxp\pxp\lv_draw_pxp_img.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nxp\pxp\lv_draw_pxp_layer.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nxp\pxp\lv_pxp_cfg.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nxp\pxp\lv_pxp_osa.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\nxp\pxp\lv_pxp_utils.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\opengles\lv_draw_opengles.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_arc.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_border.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_fill.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_image.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_label.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_line.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_mask_rectangle.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_triangle.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_utils.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sdl\lv_draw_sdl.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_to_al88.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_to_argb8888.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_to_argb8888_premultiplied.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_to_i1.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_to_l8.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_to_rgb565.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_to_rgb565_swapped.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_to_rgb888.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\blend\neon\lv_draw_sw_blend_neon_to_rgb565.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\blend\neon\lv_draw_sw_blend_neon_to_rgb888.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_arc.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_border.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_box_shadow.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_fill.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_grad.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_img.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_letter.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_line.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_mask.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_mask_rect.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_transform.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_triangle.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_utils.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\sw\lv_draw_sw_vector.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_buf_vg_lite.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite_arc.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite_border.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite_box_shadow.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite_fill.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite_img.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite_label.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite_layer.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite_line.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite_mask_rect.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite_triangle.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite_vector.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_vg_lite_decoder.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_vg_lite_grad.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_vg_lite_math.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_vg_lite_path.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_vg_lite_pending.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_vg_lite_stroke.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\draw\vg_lite\lv_vg_lite_utils.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\display\drm\lv_linux_drm.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\display\drm\lv_linux_drm_common.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\display\drm\lv_linux_drm_egl.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\display\fb\lv_linux_fbdev.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\display\ft81x\lv_ft81x.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\display\ili9341\lv_ili9341.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\display\lcd\lv_lcd_generic_mipi.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\display\lovyan_gfx\lv_lovyan_gfx.cpp">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\display\nv3007\lv_nv3007.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\display\nxp_elcdif\lv_nxp_elcdif.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\display\renesas_glcdc\lv_renesas_glcdc.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\display\st7735\lv_st7735.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\display\st7789\lv_st7789.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\display\st7796\lv_st7796.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\display\st_ltdc\lv_st_ltdc.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\display\tft_espi\lv_tft_espi.cpp">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\draw\eve\lv_draw_eve_display.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\evdev\lv_evdev.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\libinput\lv_libinput.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\libinput\lv_xkb.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\nuttx\lv_nuttx_cache.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\nuttx\lv_nuttx_entry.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\nuttx\lv_nuttx_fbdev.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\nuttx\lv_nuttx_image_cache.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\nuttx\lv_nuttx_lcd.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\nuttx\lv_nuttx_libuv.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\nuttx\lv_nuttx_mouse.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\nuttx\lv_nuttx_profiler.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\nuttx\lv_nuttx_touchscreen.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\opengles\assets\lv_opengles_shader.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\opengles\glad\src\egl.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\opengles\glad\src\gles2.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\opengles\lv_opengles_debug.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\opengles\lv_opengles_driver.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\opengles\lv_opengles_egl.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\opengles\lv_opengles_glfw.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\opengles\lv_opengles_texture.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\opengles\opengl_shader\lv_opengl_shader_manager.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\opengles\opengl_shader\lv_opengl_shader_program.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\qnx\lv_qnx.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\sdl\lv_sdl_keyboard.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\sdl\lv_sdl_mouse.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\sdl\lv_sdl_mousewheel.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\sdl\lv_sdl_window.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\uefi\lv_uefi_context.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\uefi\lv_uefi_display.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\uefi\lv_uefi_indev_keyboard.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\uefi\lv_uefi_indev_pointer.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\uefi\lv_uefi_indev_touch.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\uefi\lv_uefi_private.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\wayland\lv_wayland.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\wayland\lv_wayland_smm.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\wayland\lv_wl_cache.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\wayland\lv_wl_dmabuf.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\wayland\lv_wl_keyboard.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\wayland\lv_wl_pointer.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\wayland\lv_wl_pointer_axis.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\wayland\lv_wl_seat.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\wayland\lv_wl_shm.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\wayland\lv_wl_touch.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\wayland\lv_wl_window.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\wayland\lv_wl_window_decorations.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\wayland\lv_wl_xdg_shell.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\windows\lv_windows_context.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\windows\lv_windows_display.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\windows\lv_windows_input.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\x11\lv_x11_display.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\drivers\x11\lv_x11_input.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_binfont_loader.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_dejavu_16_persian_hebrew.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_fmt_txt.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_10.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_12.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_14.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_14_aligned.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_16.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_18.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_20.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_22.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_24.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_26.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_28.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_28_compressed.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_30.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_32.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_34.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_36.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_38.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_40.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_42.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_44.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_46.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_48.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_montserrat_8.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_source_han_sans_sc_14_cjk.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_source_han_sans_sc_16_cjk.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_unscii_16.c">
+      <Filter>external\lvgl</Filter>
+    </ClCompile>
+    <ClCompile Include="external\lvgl\src\font\lv_font_unscii_8.c">
+      <Filter>external\lvgl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -995,304 +1631,19 @@
     <ClInclude Include="..\winston\winston-hal-x64.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\cache\_lv_cache_lru_rb.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\libs\barcode\code128.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\libs\thorvg\config.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\libs\freetype\ftmodule.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\libs\freetype\ftoption.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\libs\gif\gifdec.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\libs\gif\gifdec_mve.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\libs\lodepng\lodepng.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_anim.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_anim_timeline.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\animimage\lv_animimage.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\lv_api_map.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\arc\lv_arc.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_area.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_array.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_assert.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_async.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\bar\lv_bar.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\libs\barcode\lv_barcode.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_bidi.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\libs\bin_decoder\lv_bin_decoder.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\font\lv_binfont_loader.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\sw\blend\arm2d\lv_blend_arm2d.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\sw\blend\arm2d\lv_blend_helium.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\sw\blend\neon\lv_blend_neon.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\libs\bmp\lv_bmp.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\button\lv_button.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\buttonmatrix\lv_buttonmatrix.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\cache\lv_cache.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\cache\lv_cache_entry.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\cache\lv_cache_entry_private.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\cache\lv_cache_private.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\calendar\lv_calendar.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\calendar\lv_calendar_header_arrow.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\calendar\lv_calendar_header_dropdown.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\canvas\lv_canvas.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\chart\lv_chart.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\checkbox\lv_checkbox.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\osal\lv_cmsis_rtos2.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_color.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_color_op.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\lv_conf_internal.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\lv_conf_kconfig.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\display\lv_display.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\display\lv_display_private.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\lv_draw.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\lv_draw_arc.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\lv_draw_buf.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_utils.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\lv_draw_image.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\lv_draw_label.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\lv_draw_line.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\lv_draw_mask.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\nxp\pxp\lv_draw_pxp.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\lv_draw_rect.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\sdl\lv_draw_sdl.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\sw\lv_draw_sw.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\sw\arm2d\lv_draw_sw_arm2d.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_to_argb8888.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_to_rgb565.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_to_rgb888.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\sw\lv_draw_sw_gradient.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\sw\arm2d\lv_draw_sw_helium.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\sw\lv_draw_sw_mask.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\lv_draw_triangle.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\lv_draw_vector.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite_type.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\nxp\vglite\lv_draw_vglite.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\drivers\lv_drivers.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\dropdown\lv_dropdown.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\drivers\evdev\lv_evdev.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_event.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\libs\ffmpeg\lv_ffmpeg.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\others\file_explorer\lv_file_explorer.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\layouts\flex\lv_flex.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\font\lv_font.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\font\lv_font_fmt_txt.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\others\fragment\lv_fragment.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\osal\lv_freertos.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\libs\freetype\lv_freetype.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\libs\freetype\lv_freetype_private.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_fs.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\libs\fsdrv\lv_fsdrv.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\libs\gif\lv_gif.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\core\lv_global.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\layouts\grid\lv_grid.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\others\gridnav\lv_gridnav.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\core\lv_group.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\drivers\display\ili9341\lv_ili9341.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\image\lv_image.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\lv_image_buf.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\cache\lv_image_cache.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\lv_image_decoder.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\imagebutton\lv_imagebutton.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\others\ime\lv_ime_pinyin.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\others\imgfont\lv_imgfont.h">
-      <Filter>external\lvgl</Filter>
+    <ClInclude Include="winston-secrets.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lv_conf.h">
+      <Filter>external</Filter>
     </ClInclude>
     <ClInclude Include="external\lvgl\src\indev\lv_indev.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\indev\lv_indev_gesture.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\indev\lv_indev_gesture_private.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
     <ClInclude Include="external\lvgl\src\indev\lv_indev_private.h">
@@ -1301,22 +1652,169 @@
     <ClInclude Include="external\lvgl\src\indev\lv_indev_scroll.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\lv_init.h">
+    <ClInclude Include="external\lvgl\src\layouts\flex\lv_flex.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\keyboard\lv_keyboard.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\label\lv_label.h">
+    <ClInclude Include="external\lvgl\src\layouts\grid\lv_grid.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
     <ClInclude Include="external\lvgl\src\layouts\lv_layout.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\drivers\display\lcd\lv_lcd_generic_mipi.h">
+    <ClInclude Include="external\lvgl\src\layouts\lv_layout_private.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\led\lv_led.h">
+    <ClInclude Include="external\lvgl\src\libs\barcode\code128.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\barcode\lv_barcode.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\barcode\lv_barcode_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\bin_decoder\lv_bin_decoder.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\bmp\lv_bmp.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\expat\ascii.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\expat\asciitab.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\expat\expat.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\expat\expat_config.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\expat\expat_external.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\expat\iasciitab.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\expat\internal.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\expat\latin1tab.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\expat\nametab.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\expat\siphash.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\expat\utf8tab.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\expat\winconfig.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\expat\xmlrole.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\expat\xmltok.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\expat\xmltok_impl.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\ffmpeg\lv_ffmpeg.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\ffmpeg\lv_ffmpeg_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\freetype\ftmodule.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\freetype\ftoption.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\freetype\lv_freetype.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\freetype\lv_freetype_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\frogfs\include\frogfs\frogfs.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\frogfs\include\frogfs\frogfs_types.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\frogfs\src\frogfs_format.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\frogfs\src\frogfs_priv.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\fsdrv\lv_fsdrv.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\FT800-FT813\EVE.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\FT800-FT813\EVE_commands.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\FT800-FT813\EVE_config.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\FT800-FT813\EVE_suppplemental.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\FT800-FT813\EVE_target.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\gif\AnimatedGIF\src\AnimatedGIF.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\gif\lv_gif.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\gltf\fastgltf\lv_fastgltf.hpp">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\gltf\gltf_data\lv_gltf_bind.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\gltf\gltf_data\lv_gltf_data_internal.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\gltf\gltf_data\lv_gltf_data_internal.hpp">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\gltf\gltf_data\lv_gltf_model.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\gltf\gltf_view\assets\lv_gltf_view_shader.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\gltf\gltf_view\ibl\lv_gltf_ibl_sampler.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\gltf\gltf_view\lv_gltf.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\gltf\gltf_view\lv_gltf_view_internal.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\gltf\math\lv_gltf_math.hpp">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\gltf\stb_image\stb_image.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\gstreamer\lv_gstreamer.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\gstreamer\lv_gstreamer_internal.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
     <ClInclude Include="external\lvgl\src\libs\libjpeg_turbo\lv_libjpeg_turbo.h">
@@ -1325,136 +1823,22 @@
     <ClInclude Include="external\lvgl\src\libs\libpng\lv_libpng.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\line\lv_line.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\drivers\display\drm\lv_linux_drm.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\drivers\display\fb\lv_linux_fbdev.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\list\lv_list.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_ll.h">
+    <ClInclude Include="external\lvgl\src\libs\lodepng\lodepng.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
     <ClInclude Include="external\lvgl\src\libs\lodepng\lv_lodepng.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_log.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_lru.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_math.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\stdlib\lv_mem.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\menu\lv_menu.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\others\monkey\lv_monkey.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\msgbox\lv_msgbox.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\drivers\nuttx\lv_nuttx_cache.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\drivers\nuttx\lv_nuttx_entry.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\drivers\nuttx\lv_nuttx_fbdev.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\drivers\nuttx\lv_nuttx_lcd.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\drivers\nuttx\lv_nuttx_libuv.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\drivers\nuttx\lv_nuttx_profiler.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\drivers\nuttx\lv_nuttx_touchscreen.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\core\lv_obj.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\core\lv_obj_class.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\core\lv_obj_draw.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\core\lv_obj_event.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\core\lv_obj_pos.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\core\lv_obj_property.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\core\lv_obj_scroll.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\core\lv_obj_style.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\core\lv_obj_style_gen.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\core\lv_obj_tree.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\objx_templ\lv_objx_templ.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\others\observer\lv_observer.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\osal\lv_os.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\osal\lv_os_none.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_palette.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_profiler.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_profiler_builtin.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\osal\lv_pthread.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\nxp\pxp\lv_pxp_cfg.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\nxp\pxp\lv_pxp_osa.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\nxp\pxp\lv_pxp_utils.h">
+    <ClInclude Include="external\lvgl\src\libs\lz4\lz4.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
     <ClInclude Include="external\lvgl\src\libs\qrcode\lv_qrcode.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_rb.h">
+    <ClInclude Include="external\lvgl\src\libs\qrcode\lv_qrcode_private.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\core\lv_refr.h">
+    <ClInclude Include="external\lvgl\src\libs\qrcode\qrcodegen.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
     <ClInclude Include="external\lvgl\src\libs\rle\lv_rle.h">
@@ -1463,187 +1847,139 @@
     <ClInclude Include="external\lvgl\src\libs\rlottie\lv_rlottie.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\roller\lv_roller.h">
+    <ClInclude Include="external\lvgl\src\libs\rlottie\lv_rlottie_private.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\osal\lv_rtthread.h">
+    <ClInclude Include="external\lvgl\src\libs\svg\lv_svg.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\scale\lv_scale.h">
+    <ClInclude Include="external\lvgl\src\libs\svg\lv_svg_decoder.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\drivers\sdl\lv_sdl_keyboard.h">
+    <ClInclude Include="external\lvgl\src\libs\svg\lv_svg_parser.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\drivers\sdl\lv_sdl_mouse.h">
+    <ClInclude Include="external\lvgl\src\libs\svg\lv_svg_render.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\drivers\sdl\lv_sdl_mousewheel.h">
+    <ClInclude Include="external\lvgl\src\libs\svg\lv_svg_token.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\drivers\sdl\lv_sdl_window.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\config.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\slider\lv_slider.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\allocators.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\others\snapshot\lv_snapshot.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\cursorstreamwrapper.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\span\lv_span.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\document.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\spinbox\lv_spinbox.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\encodedstream.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\spinner\lv_spinner.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\encodings.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\stdlib\lv_sprintf.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\error\en.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\drivers\display\st7735\lv_st7735.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\error\error.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\drivers\display\st7789\lv_st7789.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\filereadstream.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\drivers\display\st7796\lv_st7796.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\filewritestream.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\stdlib\lv_string.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\fwd.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_style.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\internal\biginteger.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_style_gen.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\internal\clzll.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\switch\lv_switch.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\internal\diyfp.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\font\lv_symbol_def.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\internal\dtoa.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\others\sysmon\lv_sysmon.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\internal\ieee754.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\table\lv_table.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\internal\itoa.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\tabview\lv_tabview.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\internal\meta.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_templ.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\internal\pow10.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_text.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\internal\regex.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_text_ap.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\internal\stack.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\textarea\lv_textarea.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\internal\strfunc.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\drivers\display\tft_espi\lv_tft_espi.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\internal\strtod.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\themes\lv_theme.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\internal\swap.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\themes\default\lv_theme_default.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\istreamwrapper.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\themes\mono\lv_theme_mono.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\memorybuffer.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\themes\simple\lv_theme_simple.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\memorystream.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\tick\lv_tick.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\msinttypes\inttypes.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\tileview\lv_tileview.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\msinttypes\stdint.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_timer.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\ostreamwrapper.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\libs\tiny_ttf\lv_tiny_ttf.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\pointer.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\libs\tjpgd\lv_tjpgd.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\prettywriter.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\stdlib\builtin\lv_tlsf.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\rapidjson.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_types.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\reader.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\misc\lv_utils.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\schema.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\vg_lite\lv_vg_lite_decoder.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\stream.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\vg_lite\lv_vg_lite_math.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\stringbuffer.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\vg_lite\lv_vg_lite_path.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\uri.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\vg_lite\lv_vg_lite_utils.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\nxp\vglite\lv_vglite_buf.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\nxp\vglite\lv_vglite_matrix.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\nxp\vglite\lv_vglite_path.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\draw\nxp\vglite\lv_vglite_utils.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\widgets\win\lv_win.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\osal\lv_windows.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\drivers\windows\lv_windows_context.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\drivers\windows\lv_windows_display.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\drivers\windows\lv_windows_input.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\drivers\x11\lv_x11.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\lvgl.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\lvgl_private.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\libs\lz4\lz4.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\libs\qrcode\qrcodegen.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\libs\tiny_ttf\stb_rect_pack.h">
-      <Filter>external\lvgl</Filter>
-    </ClInclude>
-    <ClInclude Include="external\lvgl\src\libs\tiny_ttf\stb_truetype_htcw.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\rapidjson\writer.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
     <ClInclude Include="external\lvgl\src\libs\thorvg\thorvg.h">
@@ -1652,16 +1988,16 @@
     <ClInclude Include="external\lvgl\src\libs\thorvg\thorvg_capi.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\libs\tjpgd\tjpgd.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\thorvg_lottie.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\libs\tjpgd\tjpgdcnf.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\tvgAnimation.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
     <ClInclude Include="external\lvgl\src\libs\thorvg\tvgArray.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lvgl\src\libs\thorvg\tvgBezier.h">
+    <ClInclude Include="external\lvgl\src\libs\thorvg\tvgBinaryDesc.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
     <ClInclude Include="external\lvgl\src\libs\thorvg\tvgCanvas.h">
@@ -1679,6 +2015,9 @@
     <ClInclude Include="external\lvgl\src\libs\thorvg\tvgFrameModule.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\thorvg\tvgInlist.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
     <ClInclude Include="external\lvgl\src\libs\thorvg\tvgIteratorAccessor.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
@@ -1686,6 +2025,42 @@
       <Filter>external\lvgl</Filter>
     </ClInclude>
     <ClInclude Include="external\lvgl\src\libs\thorvg\tvgLoadModule.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\thorvg\tvgLock.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\thorvg\tvgLottieBuilder.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\thorvg\tvgLottieCommon.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\thorvg\tvgLottieExpressions.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\thorvg\tvgLottieInterpolator.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\thorvg\tvgLottieLoader.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\thorvg\tvgLottieModel.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\thorvg\tvgLottieModifier.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\thorvg\tvgLottieParser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\thorvg\tvgLottieParserHandler.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\thorvg\tvgLottieProperty.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\thorvg\tvgLottieRenderPooler.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
     <ClInclude Include="external\lvgl\src\libs\thorvg\tvgMath.h">
@@ -1754,17 +2129,1304 @@
     <ClInclude Include="external\lvgl\src\libs\thorvg\tvgTaskScheduler.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\thorvg\tvgText.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
     <ClInclude Include="external\lvgl\src\libs\thorvg\tvgXmlParser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\tiny_ttf\lv_tiny_ttf.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\tiny_ttf\stb_rect_pack.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\tiny_ttf\stb_truetype_htcw.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\tjpgd\lv_tjpgd.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\tjpgd\tjpgd.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\tjpgd\tjpgdcnf.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\vg_lite_driver\inc\vg_lite.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\vg_lite_driver\lv_vg_lite_hal\vg_lite_platform.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\vg_lite_driver\VGLite\Series\gc255\0x40A\vg_lite_options.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\vg_lite_driver\VGLite\Series\gc355\0x0_1215\vg_lite_options.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\vg_lite_driver\VGLite\Series\gc355\0x0_1216\vg_lite_options.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\vg_lite_driver\VGLite\Series\gc555\0x423\vg_lite_options.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\vg_lite_driver\VGLite\Series\gc555\0x423_ECO\vg_lite_options.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\vg_lite_driver\VGLite\vg_lite_context.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\vg_lite_driver\VGLite\vg_lite_options.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\vg_lite_driver\VGLiteKernel\vg_lite_debug.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\vg_lite_driver\VGLiteKernel\vg_lite_hal.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\vg_lite_driver\VGLiteKernel\vg_lite_hw.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\vg_lite_driver\VGLiteKernel\vg_lite_kernel.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\vg_lite_driver\VGLiteKernel\vg_lite_option.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\libs\vg_lite_driver\VGLiteKernel\vg_lite_type.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\cache\class\lv_cache_class.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\cache\class\lv_cache_lru_ll.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\cache\class\lv_cache_lru_rb.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\cache\class\lv_cache_sc_da.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\cache\instance\lv_cache_instance.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\cache\instance\lv_image_cache.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\cache\instance\lv_image_header_cache.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\cache\lv_cache.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\cache\lv_cache_entry.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\cache\lv_cache_entry_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\cache\lv_cache_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_anim.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_anim_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_anim_timeline.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_anim_timeline_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_area.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_area_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_array.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_assert.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_async.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_bidi.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_bidi_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_circle_buf.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_color.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_color_op.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_color_op_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_event.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_event_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_fs.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_fs_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_grad.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_iter.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_ll.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_log.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_lru.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_math.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_matrix.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_palette.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_profiler.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_profiler_builtin.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_profiler_builtin_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_rb.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_rb_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_style.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_style_gen.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_style_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_templ.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_text.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_text_ap.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_text_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_timer.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_timer_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_tree.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_types.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\misc\lv_utils.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\osal\lv_cmsis_rtos2.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\osal\lv_freertos.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\osal\lv_linux.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\osal\lv_mqx.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\osal\lv_os.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\osal\lv_os_none.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\osal\lv_os_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\osal\lv_pthread.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\osal\lv_rtthread.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\osal\lv_sdl2.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\osal\lv_windows.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\file_explorer\lv_file_explorer.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\file_explorer\lv_file_explorer_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\font_manager\lv_font_manager.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\font_manager\lv_font_manager_recycle.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\fragment\lv_fragment.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\fragment\lv_fragment_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\gridnav\lv_gridnav.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\ime\lv_ime_pinyin.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\ime\lv_ime_pinyin_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\imgfont\lv_imgfont.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\monkey\lv_monkey.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\monkey\lv_monkey_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\observer\lv_observer.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\observer\lv_observer_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\snapshot\lv_snapshot.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\sysmon\lv_sysmon.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\sysmon\lv_sysmon_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\test\lv_test.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\test\lv_test_display.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\test\lv_test_helpers.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\test\lv_test_indev.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\test\lv_test_indev_gesture.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\test\lv_test_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\test\lv_test_screenshot_compare.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\translation\lv_translation.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\translation\lv_translation_private.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
     <ClInclude Include="external\lvgl\src\others\vg_lite_tvg\vg_lite.h">
       <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="winston-secrets.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="external\lvgl\src\others\xml\lv_xml.h">
+      <Filter>external\lvgl</Filter>
     </ClInclude>
-    <ClInclude Include="external\lv_conf.h">
-      <Filter>external</Filter>
+    <ClInclude Include="external\lvgl\src\others\xml\lv_xml_base_types.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\lv_xml_component.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\lv_xml_component_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\lv_xml_load.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\lv_xml_load_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\lv_xml_parser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\lv_xml_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\lv_xml_style.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\lv_xml_test.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\lv_xml_translation.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\lv_xml_update.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\lv_xml_utils.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\lv_xml_widget.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\parsers\lv_xml_arc_parser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\parsers\lv_xml_bar_parser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\parsers\lv_xml_buttonmatrix_parser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\parsers\lv_xml_button_parser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\parsers\lv_xml_calendar_parser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\parsers\lv_xml_canvas_parser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\parsers\lv_xml_chart_parser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\parsers\lv_xml_checkbox_parser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\parsers\lv_xml_dropdown_parser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\parsers\lv_xml_image_parser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\parsers\lv_xml_keyboard_parser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\parsers\lv_xml_label_parser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\parsers\lv_xml_obj_parser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\parsers\lv_xml_qrcode_parser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\parsers\lv_xml_roller_parser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\parsers\lv_xml_scale_parser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\parsers\lv_xml_slider_parser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\parsers\lv_xml_spangroup_parser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\parsers\lv_xml_spinbox_parser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\parsers\lv_xml_switch_parser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\parsers\lv_xml_table_parser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\parsers\lv_xml_tabview_parser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\others\xml\parsers\lv_xml_textarea_parser.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\stdlib\builtin\lv_tlsf.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\stdlib\builtin\lv_tlsf_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\stdlib\lv_mem.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\stdlib\lv_mem_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\stdlib\lv_sprintf.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\stdlib\lv_string.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\themes\default\lv_theme_default.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\themes\lv_theme.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\themes\lv_theme_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\themes\mono\lv_theme_mono.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\themes\simple\lv_theme_simple.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\tick\lv_tick.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\tick\lv_tick_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\3dtexture\lv_3dtexture.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\3dtexture\lv_3dtexture_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\animimage\lv_animimage.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\animimage\lv_animimage_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\arc\lv_arc.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\arc\lv_arc_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\arclabel\lv_arclabel.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\arclabel\lv_arclabel_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\bar\lv_bar.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\bar\lv_bar_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\button\lv_button.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\button\lv_button_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\buttonmatrix\lv_buttonmatrix.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\buttonmatrix\lv_buttonmatrix_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\calendar\lv_calendar.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\calendar\lv_calendar_chinese.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\calendar\lv_calendar_header_arrow.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\calendar\lv_calendar_header_dropdown.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\calendar\lv_calendar_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\canvas\lv_canvas.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\canvas\lv_canvas_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\chart\lv_chart.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\chart\lv_chart_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\checkbox\lv_checkbox.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\checkbox\lv_checkbox_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\dropdown\lv_dropdown.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\dropdown\lv_dropdown_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\image\lv_image.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\image\lv_image_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\imagebutton\lv_imagebutton.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\imagebutton\lv_imagebutton_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\keyboard\lv_keyboard.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\keyboard\lv_keyboard_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\label\lv_label.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\label\lv_label_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\led\lv_led.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\led\lv_led_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\line\lv_line.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\line\lv_line_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\list\lv_list.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\lottie\lv_lottie.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\lottie\lv_lottie_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\menu\lv_menu.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\menu\lv_menu_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\msgbox\lv_msgbox.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\msgbox\lv_msgbox_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\objx_templ\lv_objx_templ.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\property\lv_obj_property_names.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\property\lv_style_properties.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\roller\lv_roller.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\roller\lv_roller_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\scale\lv_scale.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\scale\lv_scale_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\slider\lv_slider.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\slider\lv_slider_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\span\lv_span.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\span\lv_span_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\spinbox\lv_spinbox.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\spinbox\lv_spinbox_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\spinner\lv_spinner.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\switch\lv_switch.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\switch\lv_switch_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\table\lv_table.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\table\lv_table_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\tabview\lv_tabview.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\tabview\lv_tabview_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\textarea\lv_textarea.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\textarea\lv_textarea_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\tileview\lv_tileview.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\tileview\lv_tileview_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\win\lv_win.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\widgets\win\lv_win_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\lv_api_map_v8.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\lv_api_map_v9_0.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\lv_api_map_v9_1.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\lv_api_map_v9_2.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\lv_api_map_v9_3.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\lv_conf_internal.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\lv_conf_kconfig.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\lv_init.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\lvgl.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\lvgl_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\core\lv_global.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\core\lv_group.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\core\lv_group_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\core\lv_obj.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\core\lv_obj_class.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\core\lv_obj_class_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\core\lv_obj_draw.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\core\lv_obj_draw_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\core\lv_obj_event.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\core\lv_obj_event_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\core\lv_obj_pos.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\core\lv_obj_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\core\lv_obj_property.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\core\lv_obj_scroll.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\core\lv_obj_scroll_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\core\lv_obj_style.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\core\lv_obj_style_gen.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\core\lv_obj_style_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\core\lv_obj_tree.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\core\lv_refr.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\core\lv_refr_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\display\lv_display.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\display\lv_display_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\convert\helium\lv_draw_buf_convert_helium.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\convert\lv_draw_buf_convert.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\convert\neon\lv_draw_buf_convert_neon.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\dma2d\lv_draw_dma2d.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\dma2d\lv_draw_dma2d_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\espressif\ppa\lv_draw_ppa.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\espressif\ppa\lv_draw_ppa_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\eve\lv_draw_eve.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\eve\lv_draw_eve_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\eve\lv_draw_eve_ram_g.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\eve\lv_draw_eve_target.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\eve\lv_eve.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\lv_draw.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\lv_draw_3d.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\lv_draw_arc.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\lv_draw_buf.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\lv_draw_buf_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\lv_draw_image.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\lv_draw_image_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\lv_draw_label.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\lv_draw_label_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\lv_draw_line.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\lv_draw_mask.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\lv_draw_mask_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\lv_draw_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\lv_draw_rect.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\lv_draw_rect_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\lv_draw_triangle.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\lv_draw_triangle_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\lv_draw_vector.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\lv_draw_vector_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\lv_image_decoder.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\lv_image_decoder_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\lv_image_dsc.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\nema_gfx\lv_draw_nema_gfx.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\nema_gfx\lv_draw_nema_gfx_utils.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\nema_gfx\lv_nema_gfx_path.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\nxp\g2d\lv_draw_g2d.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\nxp\g2d\lv_g2d_buf_map.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\nxp\g2d\lv_g2d_utils.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\nxp\pxp\lv_draw_pxp.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\nxp\pxp\lv_pxp_cfg.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\nxp\pxp\lv_pxp_osa.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\nxp\pxp\lv_pxp_utils.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\opengles\lv_draw_opengles.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\renesas\dave2d\lv_draw_dave2d_utils.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\sdl\lv_draw_sdl.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\sw\arm2d\lv_draw_sw_arm2d.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\sw\arm2d\lv_draw_sw_helium.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\sw\blend\arm2d\lv_blend_arm2d.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\sw\blend\helium\lv_blend_helium.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_to_al88.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_to_argb8888.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_to_argb8888_premultiplied.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_to_i1.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_to_l8.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_to_rgb565.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_to_rgb565_swapped.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\sw\blend\lv_draw_sw_blend_to_rgb888.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\sw\blend\neon\lv_blend_neon.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\sw\blend\neon\lv_draw_sw_blend_neon_to_rgb565.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\sw\blend\neon\lv_draw_sw_blend_neon_to_rgb888.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\sw\lv_draw_sw.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\sw\lv_draw_sw_grad.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\sw\lv_draw_sw_mask.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\sw\lv_draw_sw_mask_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\sw\lv_draw_sw_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\sw\lv_draw_sw_utils.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\vg_lite\lv_draw_vg_lite_type.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\vg_lite\lv_vg_lite_decoder.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\vg_lite\lv_vg_lite_grad.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\vg_lite\lv_vg_lite_math.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\vg_lite\lv_vg_lite_path.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\vg_lite\lv_vg_lite_pending.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\vg_lite\lv_vg_lite_stroke.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\draw\vg_lite\lv_vg_lite_utils.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\display\drm\lv_linux_drm.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\display\drm\lv_linux_drm_egl_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\display\fb\lv_linux_fbdev.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\display\ft81x\lv_ft81x.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\display\ft81x\lv_ft81x_defines.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\display\ili9341\lv_ili9341.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\display\lcd\lv_lcd_generic_mipi.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\display\lovyan_gfx\lv_lgfx_user.hpp">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\display\lovyan_gfx\lv_lovyan_gfx.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\display\nv3007\lv_nv3007.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\display\nxp_elcdif\lv_nxp_elcdif.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\display\renesas_glcdc\lv_renesas_glcdc.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\display\st7735\lv_st7735.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\display\st7789\lv_st7789.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\display\st7796\lv_st7796.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\display\st_ltdc\lv_st_ltdc.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\display\tft_espi\lv_tft_espi.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\draw\eve\lv_draw_eve_display.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\draw\eve\lv_draw_eve_display_defines.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\evdev\lv_evdev.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\evdev\lv_evdev_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\libinput\lv_libinput.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\libinput\lv_libinput_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\libinput\lv_xkb.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\libinput\lv_xkb_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\lv_drivers.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\nuttx\lv_nuttx_cache.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\nuttx\lv_nuttx_entry.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\nuttx\lv_nuttx_fbdev.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\nuttx\lv_nuttx_image_cache.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\nuttx\lv_nuttx_lcd.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\nuttx\lv_nuttx_libuv.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\nuttx\lv_nuttx_mouse.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\nuttx\lv_nuttx_profiler.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\nuttx\lv_nuttx_touchscreen.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\opengles\assets\lv_opengles_shader.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\opengles\glad\include\EGL\eglplatform.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\opengles\glad\include\glad\egl.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\opengles\glad\include\glad\gles2.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\opengles\glad\include\KHR\khrplatform.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\opengles\lv_opengles_debug.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\opengles\lv_opengles_driver.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\opengles\lv_opengles_egl.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\opengles\lv_opengles_egl_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\opengles\lv_opengles_glfw.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\opengles\lv_opengles_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\opengles\lv_opengles_texture.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\opengles\lv_opengles_texture_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\opengles\lv_opengles_window.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\opengles\opengl_shader\lv_opengl_shader_internal.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\qnx\lv_qnx.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\sdl\lv_sdl_keyboard.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\sdl\lv_sdl_mouse.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\sdl\lv_sdl_mousewheel.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\sdl\lv_sdl_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\sdl\lv_sdl_window.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\uefi\lv_uefi.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\uefi\lv_uefi_context.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\uefi\lv_uefi_display.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\uefi\lv_uefi_edk2.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\uefi\lv_uefi_gnu_efi.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\uefi\lv_uefi_indev.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\uefi\lv_uefi_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\uefi\lv_uefi_std_wrapper.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\wayland\lv_wayland.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\wayland\lv_wayland_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\wayland\lv_wayland_smm.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\wayland\lv_wl_keyboard.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\wayland\lv_wl_pointer.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\wayland\lv_wl_pointer_axis.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\wayland\lv_wl_touch.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\wayland\lv_wl_window.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\windows\lv_windows_context.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\windows\lv_windows_display.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\windows\lv_windows_input.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\windows\lv_windows_input_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\drivers\x11\lv_x11.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\font\lv_binfont_loader.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\font\lv_font.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\font\lv_font_fmt_txt.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\font\lv_font_fmt_txt_private.h">
+      <Filter>external\lvgl</Filter>
+    </ClInclude>
+    <ClInclude Include="external\lvgl\src\font\lv_symbol_def.h">
+      <Filter>external\lvgl</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

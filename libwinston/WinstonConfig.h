@@ -70,6 +70,9 @@
 
 #ifdef WINSTON_PLATFORM_TEENSY
 #define WINSTON_REALWORLD
+
+// for now:
+#undef WINSTON_WITH_STATUSDISPLAY
 //#undef WINSTON_DETECTOR_SIGNALING
 #endif
 
@@ -156,7 +159,7 @@ in case teensy does not start up:
 */
 
 #ifdef WINSTON_TEST
-#pragma warning("Disabling status display in test mode")
+#pragma message("Disabling status display in test mode")
 #undef WINSTON_WITH_STATUSDISPLAY
 #undef WINSTON_HAL_USE_DISPLAYUX
 #endif

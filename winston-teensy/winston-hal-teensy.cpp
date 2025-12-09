@@ -182,6 +182,7 @@ void Arduino_GPIOOutputPin::Arduino_GPIOOutputPin::set(const State value)
 #endif
 
 #ifdef WINSTON_HAL_USE_STORAGE
+/*
 //SdFat SD;
 StorageArduino::StorageArduino(const std::string filename, const size_t maxSize)
     : StorageInterface(maxSize), filename(filename)
@@ -207,7 +208,11 @@ const winston::Result StorageArduino::init()
         Serial.println("file found");
 
     //SD.sdfs.chdir();
-    this->file = SD/*.sdfs*/.open(this->filename.c_str(), O_RDWR);
+#ifdef WINSTON_PLATFORM_ESP32
+    this->file = SD/*.sdfs*.open(this->filename.c_str(), FILE_WRITE);
+#else
+    this->file = SD/*.sdfs*.open(this->filename.c_str(), O_RDWR);
+#endif
     if (!this->file)
     {
         Serial.println("could not open file!");
@@ -337,7 +342,7 @@ const winston::Result StorageArduino::sync()
     return winston::Result::OK;
 }
 #endif
-
+*/
 #ifdef WINSTON_PLATFORM_TEENSY
 void teensyMAC(uint8_t* mac) { // there are 2 MAC addresses each 48bit 
     const unsigned int m1 = HW_OCOTP_MAC1;

@@ -22,14 +22,14 @@
 #define TOUCH_REG_XH 0x03
 #define TOUCH_REG_YL 0x06
 #define TOUCH_REG_YH 0x05
-extern SdFat SD;
+//extern SdFat SD;
 
 class DisplayUXESP32 : public winston::hal::DisplayUX, public winston::Shared_Ptr<DisplayUXESP32>
 {
 public:
 	DisplayUXESP32(const unsigned int width, const unsigned int height);
 	virtual ~DisplayUXESP32() = default;
-	virtual const winston::Result init();
+	virtual const winston::Result init(const std::string title = "");
 	virtual const winston::Result setCursor(unsigned int x, unsigned int y);
 	virtual const bool getTouch(unsigned int& x, unsigned int& y);
 	virtual const winston::Result draw(unsigned int x, unsigned int y, unsigned int w, unsigned int h, void* data);

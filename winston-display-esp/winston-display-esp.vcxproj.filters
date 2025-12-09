@@ -54,9 +54,6 @@
     <ClCompile Include="..\libwinston\EventLooper.cpp">
       <Filter>libwinston-src</Filter>
     </ClCompile>
-    <ClCompile Include="..\winston-teensy\winston-hal-teensy.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\libwinston\Log.cpp">
       <Filter>libwinston-src</Filter>
     </ClCompile>
@@ -64,6 +61,9 @@
       <Filter>libwinston-src</Filter>
     </ClCompile>
     <ClCompile Include="..\winston-display\res\lvgl_graphics.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\winston-teensy\winston-hal-arduino.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -104,14 +104,14 @@
     <ClInclude Include="winston-display-hal-esp32-websocketclient.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\winston-teensy\winston-hal-teensy.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\libwinston\WinstonTypes.h">
       <Filter>libwinston-src</Filter>
     </ClInclude>
     <ClInclude Include="C:\Users\daniel\Documents\Arduino\libraries\lv_conf.h">
       <Filter>external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\winston-teensy\winston-hal-arduino.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

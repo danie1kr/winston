@@ -92,7 +92,7 @@ DisplayUXESP32::DisplayUXESP32(const unsigned int width, const unsigned int heig
 
 }
 
-const winston::Result DisplayUXESP32::init()
+const winston::Result DisplayUXESP32::init(const std::string title)
 {
     this->lcd.begin(DISPLAY_MAKERFABS_S3);
     this->lcd.setRotation(3);

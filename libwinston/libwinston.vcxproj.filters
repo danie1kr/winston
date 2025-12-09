@@ -105,9 +105,6 @@
     <ClInclude Include="RailwayMicroLayout.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="external\ArduinoJson-v7.0.1.h">
-      <Filter>external</Filter>
-    </ClInclude>
     <ClInclude Include="Segment.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -116,6 +113,9 @@
     </ClInclude>
     <ClInclude Include="StatusDisplay.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="external\ArduinoJson-v7.4.2.hpp">
+      <Filter>external</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

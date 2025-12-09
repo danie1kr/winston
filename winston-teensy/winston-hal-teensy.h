@@ -5,7 +5,7 @@
 #include "../libwinston/HAL.h"
 #include "../libwinston/Log.h"
 
-//#ifdef WINSTON_PLATTFORM_TEENSY
+#ifdef WINSTON_PLATTFORM_TEENSY
 #include "../libwinston/Winston.h"
 #include "../libwinston/Signal.h"
 
@@ -13,7 +13,6 @@
 #define WINSTON_WITH_SDFAT
 
 //#define WINSTON_WITH_QNETHERNET
-
 #ifdef WINSTON_WITH_QNETHERNET
 #define USE_NATIVE_ETHERNET         false
 #define USE_QN_ETHERNET             true
@@ -25,7 +24,7 @@ using namespace qindesign::network;
 #define USE_QN_ETHERNET             false
 #include <NativeEthernet.h>
 #endif
-//#endif
+#endif
 /*
 #define WINSTON_WITH_WEBSOCKET
 #define WEBSOCKETS_USE_ETHERNET     true
@@ -141,7 +140,7 @@ public:
     using winston::Shared_Ptr<Arduino_GPIOOutputPin>::make;
 };
 #endif
-
+/*
 #ifdef WINSTON_HAL_USE_STORAGE
 #include <SD.h>
 //extern SdFat SD;
@@ -169,6 +168,10 @@ private:
 };
 using Storage = StorageArduino;
 #endif
+*/
+
+#include "winston-hal-arduino.h"
+
 /*
 class DisplayArduino : public winston::TaskConfirm::Display, public winston::Shared_Ptr<DisplayArduino>
 {

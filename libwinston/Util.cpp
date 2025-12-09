@@ -4,7 +4,9 @@
 
 #include "Util.h"
 #include "HAL.h"
+#ifndef WINSTON_PLATFORM_ESP32
 #include "Signal.h"
+#endif
 
 namespace winston
 {
@@ -128,6 +130,7 @@ namespace winston
 		return std::string(first);
 	}
 
+#ifndef WINSTON_PLATFORM_ESP32
 	const std::string build(const Signal::Aspect first)
 	{
 		switch (first)
@@ -142,7 +145,6 @@ namespace winston
 		return "unkown Aspect: " + build((int)first);
 	}
 
-#ifndef WINSTON_PLATFORM_ESP32
 #ifdef WINSTON_HAS_CHRONO
 	const std::string build(const winston::TimePoint first)
 	{
@@ -197,7 +199,7 @@ namespace winston
 
 	const Result memcpy_s(void* dest, const size_t destSize, const void* src, const size_t srcSize)
 	{
-#ifdef WINSTON_PLATFORM_TEENSY
+#ifndef WINSTON_PLATFORM_x64
 		if (destSize < srcSize)
 			return Result::InternalError;
 		memcpy(dest, src, srcSize);

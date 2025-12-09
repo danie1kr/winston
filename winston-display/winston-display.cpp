@@ -13,13 +13,14 @@
 pragma error("WINSTON_SECRET not found, see winston-secrets.h.template and create winston-secrets.h from it")
 #endif
 
-#include "../libwinston/external/ArduinoJson-v7.0.1.h"
+#include "../libwinston/external/ArduinoJson-v7.4.2.hpp"
+using namespace ArduinoJson;
 
 #ifdef WINSTON_PLATFORM_WIN_x64
 #include "../winston/winston-hal-x64.h"
 #endif
 #ifdef WINSTON_PLATFORM_ESP32
-#include "../winston-teensy/winston-hal-teensy.h"
+#include "../winston-teensy/winston-hal-arduino.h"
 #include "winston-display-hal-esp32.h"
 #include "winston-display-hal-esp32-websocketclient.hpp"
 #endif
@@ -27,11 +28,11 @@ pragma error("WINSTON_SECRET not found, see winston-secrets.h.template and creat
 Screen currentScreen = Screen::Cinema;
 DisplayUX::Shared display = DisplayUX::make(480, 320);
 
-#ifdef WINSTON_PLATFORM_ESP32
-Cinema cinema(SD, display);
-#else
+//#ifdef WINSTON_PLATFORM_ESP32
+//Cinema cinema(SD, display);
+//#else
 Cinema cinema(display);
-#endif
+//#endif
 
 WebSocketClient webSocketClient;
 winston::RailwayMicroLayout rml;
@@ -467,7 +468,7 @@ void lvgl_loop()
 unsigned int consecutiveCinemaTouches = 0;
 void cinema_loop()
 {
-    cinema.play();
+    const auto delay = cinema.play();
 #ifndef WINSTON_PLATFORM_WIN_x64
     unsigned int x, y;
     if (display->getTouch(x, y))
@@ -482,6 +483,9 @@ void cinema_loop()
     }
     else
         consecutiveCinemaTouches = 0;
+
+    if(delay > 2)
+        winston::hal::delay(delay);
 #endif
 }
 

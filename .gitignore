@@ -2,8 +2,7 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/.vs/winston/v16
-/.vs/winston/v17
+/.vs/
 /libwinston/Debug
 /libwinston/x64
 /libwinston/libwinston.vcxproj.user
@@ -17,6 +16,7 @@
 /winston-teensy/.vs/winston-teensy
 /winston-teensy/Debug Realworld
 /winston-teensy/Release
+/winston-teensy/__vm
 /.vs/winston/FileContentIndex
 /winston-esp-signal/wifi.h
 /winston-esp-signal/Debug
@@ -37,7 +37,4 @@
 /winston-display/x64/Release
 /winston-teensy/obj/ARM/Debug Realworld
 /winston-display/winston-secrets.h
-/.vs/winston/CopilotIndices/17.12.38.29086
-/.vs/winston/CopilotIndices/17.12.53.23981
-/.vs/winston/CopilotIndices/18.0.927.32057
-/.vs/winston/v18
+/winston-display/external/lvgl_

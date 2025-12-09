@@ -6,7 +6,7 @@
 #ifdef WINSTON_PLATFORM_ESP32
 #include <stdint.h>
 #include <SPI.h>
-#include <SdFat.h>
+#include <SD.h>
 #include <JPEGDEC.h>
 
 extern JPEGDEC jpeg;
@@ -16,7 +16,7 @@ class Cinema
 {
 public:
 #ifdef WINSTON_PLATFORM_ESP32
-	Cinema(SdFat& sd, winston::hal::DisplayUX::Shared display);
+	Cinema(/*SdFat& sd,*/ winston::hal::DisplayUX::Shared display);
 #else
 	Cinema(winston::hal::DisplayUX::Shared display);
 #endif
@@ -48,7 +48,8 @@ private:
 
 	winston::hal::DisplayUX::Shared _display;
 #ifdef WINSTON_PLATFORM_ESP32
-	SdFat& sd;
+	//SdFat& sd;
+	SDFS& sd;
 
 	File fileMoviePack;
 	uint8_t* jpegBuffer;

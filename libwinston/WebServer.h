@@ -15,7 +15,7 @@
 #pragma GCC push_options
 //#pragma GCC optimize("Os")
 #endif
-#include "external/ArduinoJson-v7.0.1.h"
+#include "external/ArduinoJson-v7.4.2.hpp"
 #ifdef __GNUC__ 
 #pragma GCC pop_options
 #endif

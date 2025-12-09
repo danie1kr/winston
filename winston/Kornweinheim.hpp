@@ -79,7 +79,9 @@ winston::DigitalCentralStation::Callbacks Kornweinheim::z21Callbacks()
         return false;
     };
 	callbacks.systemStatusCallback = [=](const bool shortCircuit, const uint16_t temperature, const uint16_t trackAmp, const uint16_t trackVoltage) {
+#ifdef WINSTON_WITH_STATUSDISPLAY
 		statusDisplay.digitalStationStatus(shortCircuit, temperature, trackAmp, trackVoltage);
+#endif
 		};
 
     return callbacks;
@@ -404,7 +406,9 @@ void Kornweinheim::systemSetup() {
     );
     \
     winston::logger.setCallback([this](const winston::Logger::Entry& entry) {
+#ifdef WINSTON_WITH_STATUSDISPLAY
 		statusDisplay.log(entry);
+#endif
         this->webUI.log(entry);
     });
 #endif

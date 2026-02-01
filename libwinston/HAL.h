@@ -32,6 +32,8 @@ namespace winston
 
 		extern void init();
 
+		extern void* malloc(const size_t size);
+
 		class Socket : public Shared_Ptr<Socket>
 		{
 		public:
@@ -160,7 +162,7 @@ namespace winston
 		public:
 			using Shared_Ptr<StorageInterface>::Shared;
 			using Shared_Ptr<StorageInterface>::make;
-			virtual const Result init() = 0;
+			virtual const Result init(const bool rebuildIfTooSmall = false) = 0;
 			virtual const Result readVector(const size_t address, std::vector<unsigned char>& content, const size_t length = 1) = 0;
 			virtual const Result readString(const size_t address, std::string& content, const size_t length = 1) = 0;
 			virtual const Result read(const size_t address, unsigned char& content) = 0;

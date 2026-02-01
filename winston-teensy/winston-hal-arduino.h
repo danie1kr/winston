@@ -6,14 +6,15 @@
 #include "../libwinston/Log.h"
 
 #ifdef WINSTON_HAL_USE_STORAGE
-#include <SD.h>
-//extern SdFat SD;
+//#include <SD.h>
+#include <SdFat.h>
+extern SdFat SD;
 class StorageArduino: public winston::hal::StorageInterface, winston::Shared_Ptr<StorageArduino>
 {
 public:
 	StorageArduino(const std::string filename, const size_t maxSize = 0);
 
-	const winston::Result init();
+	const winston::Result init(const bool rebuildIfTooSmall = false);
 	const winston::Result readVector(const size_t address, std::vector<unsigned char>& content, const size_t length = 1);
 	const winston::Result readString(const size_t address, std::string& content, const size_t length = 1);
 	const winston::Result read(const size_t address, unsigned char& content);

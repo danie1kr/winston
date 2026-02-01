@@ -378,7 +378,7 @@ void setupUX(winston::hal::DisplayUX::Shared display,
                 auto value = lv_slider_get_value(slider);
                 BrightnessData* userData = (BrightnessData*)lv_event_get_user_data(e);
                 userData->callback(value);
-                lv_label_set_text_fmt(userData->label, "Backlight (%d)", value);
+                lv_label_set_text_fmt(userData->label, "Backlight (%ld)", value);
             },
             LV_EVENT_VALUE_CHANGED, brightnessData);
 

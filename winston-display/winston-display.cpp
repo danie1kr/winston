@@ -28,11 +28,11 @@ using namespace ArduinoJson;
 Screen currentScreen = Screen::Cinema;
 DisplayUX::Shared display = DisplayUX::make(480, 320);
 
-//#ifdef WINSTON_PLATFORM_ESP32
-//Cinema cinema(SD, display);
-//#else
+#ifdef WINSTON_PLATFORM_ESP32
+Cinema cinema(SD, display);
+#else
 Cinema cinema(display);
-//#endif
+#endif
 
 WebSocketClient webSocketClient;
 winston::RailwayMicroLayout rml;
@@ -203,14 +203,16 @@ void winston_setup()
     winston::hal::init();
     winston::hal::text("Hello from Winston!");
 
-
 #ifdef WINSTON_PLATFORM_WIN_x64
     std::srand((unsigned int)inMilliseconds(winston::hal::now().time_since_epoch()));
 #else
     std::srand(::micros());
 #endif
 
-    display->init();
+    if(display->init() == winston::Result::OK)
+        winston::hal::text("display init complete!");
+    else
+        winston::hal::text("display init error!");
     display->displayLoadingScreen();
     /*
 #ifndef WINSTON_PLATFORM_WIN_x64

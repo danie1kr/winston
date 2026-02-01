@@ -35,17 +35,23 @@ namespace winston
                 digitalWrite(LCD_BLK, HIGH);
 
                 Serial.begin(115200);
-          //          delay(200);
-          //      while (!Serial) { //}&& millis() < 2000) {
-                    // Wait for Serial to initialize
-            //    }
+                while (!Serial && millis() < 2000) {
+                    delay(20);
+                     //Wait for Serial to initialize
+                }
                 text("Winston Display Init Hello");
+                /*
+                if (psramInit() && psramAddToHeap())
+                    text("ESP32 PSRAM found");
+                else*/
+                    text("ESP32 PSRAM not found!");
+
 
                 WiFi.begin(WINSTON_WIFI_SSID, WINSTON_WIFI_PASS);
                 winston::runtimeEnableNetwork();
-
                 SPI.begin(SPI_SCK, SPI_MISO, SPI_MOSI);
                 if (!SD.begin(SD_CONFIG))
+				//if(!SD.begin(SD_CS, SPI, 50000000UL))
                 {
                     Serial.println("Card Mount Failed");
                     SD.initErrorHalt(&Serial);
@@ -81,6 +87,11 @@ namespace winston
         {
             return ::millis();
         }
+
+        void* malloc(const size_t size)
+        {
+            return ::malloc(size);// : heap_caps_malloc(size, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+        }
     }
 }
 
@@ -94,20 +105,34 @@ DisplayUXESP32::DisplayUXESP32(const unsigned int width, const unsigned int heig
 
 const winston::Result DisplayUXESP32::init(const std::string title)
 {
-    this->lcd.begin(DISPLAY_MAKERFABS_S3);
+    winston::hal::text("display::init: lcd begin");
+    int error = this->lcd.begin(DISPLAY_MAKERFABS_S3);
+    if (error)
+        return winston::Result::ExternalHardwareFailed;
     this->lcd.setRotation(3);
 
+    winston::hal::text("display::init: touch begin");
     constexpr int I2C_PIN_SDA = 38;
     constexpr int I2C_PIN_SCL = 39;
-    int error = touch.init(I2C_PIN_SDA, I2C_PIN_SCL);
+    error = touch.init(I2C_PIN_SDA, I2C_PIN_SCL);
     if (error)
         return winston::Result::ExternalHardwareFailed;
 
-    lvBuffer = malloc(lvBufferSize);
+    winston::hal::text("display::init: lv buffer malloc");
+
+    const auto cap = MALLOC_CAP_DEFAULT;
+    winston::logger.info("allocating ", lvBufferSize, " bytes, ", heap_caps_get_largest_free_block(cap), " bytes free");
+    lvBuffer = ::heap_caps_malloc(lvBufferSize, cap);
+        //winston::hal::malloc(lvBufferSize);
     if (!lvBuffer)
         return winston::Result::OutOfMemory;
 
-    lv_init();
+    //lv_deinit();
+
+    winston::hal::text("display::init: lv callbacks");
+    lv_tick_set_cb([]() -> uint32_t {
+        return esp_timer_get_time() / 1000;
+        });
 
 #if LV_USE_LOG != 0
     lv_log_register_print_cb([](lv_log_level_t level, const char* buf) {
@@ -116,18 +141,26 @@ const winston::Result DisplayUXESP32::init(const std::string title)
         });
 #endif
 
+    winston::hal::text("display::init: lv init");
+    lv_init();
+
+    winston::hal::text("display::init: lv create display");
     this->lvDisplay = lv_display_create(this->width, this->height);
+    winston::hal::text("display::init: lv create display: user data");
     lv_display_set_user_data(this->lvDisplay, this);
+    winston::hal::text("display::init: lv create display: flush cb");
     lv_display_set_flush_cb(this->lvDisplay, [](lv_display_t* display, const lv_area_t* area, unsigned char* data) {
         auto displayUX = (DisplayUXESP32*)lv_display_get_user_data(display);
         uint32_t w = lv_area_get_width(area);
         uint32_t h = lv_area_get_height(area);
-        lv_draw_sw_rgb565_swap(data, w * h);
+        //lv_draw_sw_rgb565_swap(data, w * h);
         displayUX->lcd.pushImage(area->x1, area->y1, w, h, (uint16_t*)data);
         lv_display_flush_ready(display);
         });
+    winston::hal::text("display::init: lv create display: set buffers");
     lv_display_set_buffers(this->lvDisplay, this->lvBuffer, nullptr, this->lvBufferSize, LV_DISPLAY_RENDER_MODE_PARTIAL);
 
+    winston::hal::text("display::init: lv create indev");
     this->lvInput = lv_indev_create();
     lv_indev_set_type(this->lvInput, LV_INDEV_TYPE_POINTER);
     lv_indev_set_user_data(this->lvInput, this);
@@ -146,6 +179,7 @@ const winston::Result DisplayUXESP32::init(const std::string title)
         }
     });
 
+    winston::hal::text("display::init: lv init done");
     return winston::Result::OK;
 }
 
@@ -176,20 +210,47 @@ const winston::Result DisplayUXESP32::draw(unsigned int x, unsigned int y, unsig
     return winston::Result::OK;
 }
 
+uint16_t wyhash16_x = 0;
+
+uint32_t hash16(uint32_t input, uint32_t key) {
+    uint32_t hash = input * key;
+    return ((hash >> 16) ^ hash) & 0xFFFF;
+}
+
+uint16_t wyhash16() {
+    wyhash16_x += 0xfc15;
+    return hash16(wyhash16_x, 0x2ab);
+}
+
 void DisplayUXESP32::displayLoadingScreen()
 {
     extern JPEGDEC jpeg;
     jpeg.openFLASH((uint8_t*)cinemaLoadingScreen, sizeof(cinemaLoadingScreen), [](JPEGDRAW * pDraw)
     {
         DisplayUXESP32* display = (DisplayUXESP32*)pDraw->pUser;
-        display->lcd.pushImage(pDraw->x, pDraw->y, pDraw->iWidth, pDraw->iHeight, pDraw->pPixels, DRAW_TO_LCD);
-        return 1;
+    /*    Serial.printf("jpeg.openFlash: %d %d %d %d\n", pDraw->x, pDraw->y, pDraw->iWidth, pDraw->iHeight);
+        if (pDraw->x == 0)
+        {
+    */        display->lcd.pushImage(pDraw->x, pDraw->y, pDraw->iWidth, pDraw->iHeight, pDraw->pPixels, DRAW_TO_LCD);
+    /*    }
+        else
+        {
+            const size_t size = sizeof(uint16_t) * pDraw->iHeight * pDraw->iWidth;
+            uint16_t* pixels = (uint16_t*)::malloc(size);
+            ::memset(pixels, wyhash16(), size);
+            display->lcd.pushImage(pDraw->x, pDraw->y, pDraw->iWidth, pDraw->iHeight, pixels);
+            ::free(pixels);
+        }
+    */    return 1;
+
     });
 
-    jpeg.setPixelType(RGB565_BIG_ENDIAN);
+    //jpeg.setPixelType(RGB565_BIG_ENDIAN);
     jpeg.setUserPointer(this);
     jpeg.decode(0, 0, 0);
     jpeg.close();
+
+    //delay(10000);
 }
 
 const winston::Result DisplayUXESP32::brightness(unsigned char value)

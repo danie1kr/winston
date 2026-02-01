@@ -10,8 +10,8 @@ using namespace ArduinoJson;
 
 JPEGDEC jpeg;
 
-Cinema::Cinema(/*SD &sd,*/ winston::hal::DisplayUX::Shared display)
-	: _display(display), sd(SD), fileMoviePack(), jpegBuffer(nullptr), 
+Cinema::Cinema(SdFat &sd, winston::hal::DisplayUX::Shared display)
+	: _display(display), sd(sd), fileMoviePack(), jpegBuffer(nullptr), 
     largestJPEGFileSize(0), movies(), moviePlaying(false), 
     lastFrameTime(0), currentMovie(0), targetMSperFrame(1000 / 20)
 {
@@ -37,7 +37,7 @@ void Cinema::init()
     this->collectMovies();
     this->checkAndpackMovies();
 
-    this->jpegBuffer = (uint8_t*)malloc(sizeof(uint8_t) * this->largestJPEGFileSize);
+    this->jpegBuffer = (uint8_t*)winston::hal::malloc(sizeof(uint8_t) * this->largestJPEGFileSize);
     if (!this->jpegBuffer)
     {
         LOG_ERROR("Cinema.cpp: JPEG alloc error");
@@ -55,7 +55,7 @@ void Cinema::collectMovies()
     {
         LOG_INFO("Using movies.json");
         size_t jsonFileSize = jsonFile.size();
-        unsigned char* jsonBuffer = (unsigned char*)malloc(jsonFileSize + 1);
+        unsigned char* jsonBuffer = (unsigned char*)winston::hal::malloc(jsonFileSize + 1);
         if (jsonBuffer)
         {
             memset(jsonBuffer, 0, jsonFileSize + 1);
@@ -90,14 +90,14 @@ void Cinema::collectMovies()
         {
             if (file.isDirectory())
             {
-                //char fileName[64];
-                //file.getName(fileName, 64);
-                auto fileName = file.name();
+                char fileName[64];
+                file.getName(fileName, 64);
+                //auto fileName = file.name();
                 std::string path = std::string("/movies/") + std::string(fileName);
                 unsigned int frames = movieFrameStart;
 
                 File frameFile;
-                while (frameFile = file.openNextFile())
+                while ((frameFile = file.openNextFile()))
                 {
                     if (largestJPEGFileSize < frameFile.size())
                         largestJPEGFileSize = frameFile.size();
@@ -110,7 +110,7 @@ void Cinema::collectMovies()
         }
     }
     /*
-    this->jpegBuffer = (uint8_t*)malloc(sizeof(uint8_t) * this->largestJPEGFileSize);
+    this->jpegBuffer = (uint8_t*)winston::hal::malloc(sizeof(uint8_t) * this->largestJPEGFileSize);
     if (!this->jpegBuffer)
     {
         LOG_ERROR("Cinema.cpp: JPEG alloc error");
@@ -148,8 +148,8 @@ void Cinema::packMovie(Movie & movie, const std::string targetFileName, const si
     }
 
     auto currentFrame = movieFrameStart;
-    //File target = sd.open(targetFileName.c_str(), O_RDWR | O_CREAT);
-	auto target = sd.open(targetFileName.c_str(), FILE_WRITE, true);
+    File target = sd.open(targetFileName.c_str(), O_RDWR | O_CREAT);
+	//auto target = sd.open(targetFileName.c_str(), FILE_WRITE, true);
     //this->display()->setCursor(0, 20);
     LOG_INFO("Cinema::packMovie: working on ", targetFileName.c_str());
 
@@ -174,7 +174,7 @@ void Cinema::packMovie(Movie & movie, const std::string targetFileName, const si
     //lcd.print("Packing");
 
     uint32_t bufferSize = chunkSize;
-    uint8_t* buffer = (uint8_t*)malloc(bufferSize);
+    uint8_t* buffer = (uint8_t*)winston::hal::malloc(bufferSize);
 
     target.write((uint8_t*) & largestFrameOfMovie, sizeof(largestFrameOfMovie));
     uint32_t overallSize = sizeof(uint32_t) * (movie.frames + 1);
@@ -245,7 +245,7 @@ void Cinema::initPackedMovie(const std::string path)
             free(this->jpegBuffer);
         LOG_INFO("Cinema::initPackedMovie: realloc ", largestJPEGFileSize, " for jpeg buffer");
 
-        jpegBuffer = (uint8_t*)malloc(sizeof(uint8_t) * largestJPEGFileSize);
+        jpegBuffer = (uint8_t*)winston::hal::malloc(sizeof(uint8_t) * largestJPEGFileSize);
         if (!jpegBuffer)
             LOG_ERROR("Cinema::initPackedMovie: cannot alloc memory for movie frame JPEG :(");
     }
@@ -266,7 +266,7 @@ const bool Cinema::packPlayNextFrame()
                 return 1;
             });
 
-        jpeg.setPixelType(RGB565_BIG_ENDIAN);
+        //jpeg.setPixelType(RGB565_BIG_ENDIAN);
         jpeg.setUserPointer(this);
         jpeg.decode(0, 0, 0);
         jpeg.close();
